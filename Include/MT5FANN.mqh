@@ -97,3 +97,39 @@ int f2M_train_parallel(int anns_count, int& anns[], double& input_vector[], doub
 //   StringToCharArray(path,p);
 //   return f2M_save(ann,p);
 //  }
+class MT5FANN
+ {
+  public:
+   string SymbolsArray[30];
+   bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0);
+  private:
+ //  MT5FANN();
+ }
+ 
+ bool MT5FANN::GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0);
+  {// пара, период, смещение назад (для индикатора полезно)
+   int shft_his=7;
+   int shft_cur=0;
+
+   if(""==smbl) smbl=_Symbol;
+   if(0==tf) tf=_Period;
+   double Close[];
+   ArraySetAsSeries(Close,true); 
+// копируем историю
+   int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   if(maxcount<num_vectors)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+   int i;
+   for(i=1;i<num_vectors;i++)
+     {
+      // вычислим и отнормируем
+      InputVector[i-1]=100*(Close[i]-Close[i+1]);
+     }
+     OutputVector[0]=100*(Close[1]-Close[2]);
+   return(true);
+  }
