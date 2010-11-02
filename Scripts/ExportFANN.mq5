@@ -95,8 +95,9 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,
 int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,int qty,int Pers,int shift)
   {
    int i;
-   double IB[];
+   double IB[],OB[];
    ArrayResize(IB,Pers+2);
+   ArrayResize(OB,Pers+2);
    int FileHandle=0;
    int needcopy=0;
    int copied=0;
@@ -119,7 +120,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
          Print("Баров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,Pers,SymbolsArray[SymbolIdx],_Period,3,shift))
+            if(GetVectors(IB,OB,Pers,SymbolsArray[SymbolIdx],_Period,3,shift))
               {
                i++;
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
@@ -132,13 +133,13 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
                   outstr=outstr+" 0";
                  }
                // data
-               for(int ibj=1;ibj<=Pers;ibj++)
+               for(int ibj=0;ibj<=Pers;ibj++)
                  {
                   outstr=outstr+" "+(string)(IB[ibj]);
                  }
 
                FileWrite(FileHandle,outstr);       // 
-               FileWrite(FileHandle,IB[0]); // 
+               FileWrite(FileHandle,OB[0]); // 
               }
         }
      }
@@ -190,7 +191,7 @@ string fTimeFrameName(int arg)
 //| просто разница                                                   |
 //+------------------------------------------------------------------+
 
-bool GetVectors(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
+bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
@@ -202,17 +203,19 @@ bool GetVectors(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIME
 // копируем историю
    int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
    if(maxcount<num_vectors)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
       return(false);
      }
    int i;
-   for(i=0;i<num_vectors;i++)
+   for(i=1;i<num_vectors;i++)
      {
       // вычислим и отнормируем
-      InputVector[i]=100*(Close[i]-Close[i+1]);
+      InputVector[i-1]=100*(Close[i]-Close[i+1]);
      }
+     OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
 
