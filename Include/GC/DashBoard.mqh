@@ -8,7 +8,7 @@
 
 #include <Object.mqh>
 //#include <ChartObjects\ChartObjectsTxtControls.mqh>
-
+ 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
 #define KEY_UP             38
