@@ -12,6 +12,9 @@
 #property link      ""
 #property version   "1.1"
 //#include <Fractals.mqh>
+
+// Valentin
+
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
