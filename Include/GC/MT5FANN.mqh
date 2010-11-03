@@ -25,4 +25,6 @@
 //   string ErrorDescription(int error_code);
 // #import
 //+------------------------------------------------------------------+
- 
+ class MT5FANN
+ {
+ }
