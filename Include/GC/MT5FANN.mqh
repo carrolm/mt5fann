@@ -85,6 +85,8 @@ private:
    string            Symbols_Array[30];
    int               Max_Symbols;
    int               FileHandle;
+   int               num_in_vectors;
+   int               num_out_vectors;
    string            File_Name;
    CIniFile          MyIniFile;                       // Создаем экземпляр класса
    CArrayString      Strings;                     // Необходим для работы с массивами данных
@@ -92,7 +94,7 @@ private:
 public:
                      CMT5FANN(){}
                     ~CMT5FANN(){DeInit();}
-   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols);
+   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors);
    bool              Init(string FileName);
    void              DeInit();
    bool              GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0);
@@ -106,12 +108,13 @@ void CMT5FANN::DeInit()
 
   }
 //+------------------------------------------------------------------+
-bool  CMT5FANN::Init(string FileName,string &SymbolsArray[],int MaxSymbols)
+bool  CMT5FANN::Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors)
   {
    File_Name=FileName;
    Max_Symbols=ArrayCopy( Symbols_Array,SymbolsArray);
    Max_Symbols=MaxSymbols;
-
+   num_in_vectors=num_invectors;
+   num_out_vectors=num_outvectors;
    MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
 // Пишем 
    bool     resb;
@@ -125,6 +128,11 @@ bool  CMT5FANN::Init(string FileName,string &SymbolsArray[],int MaxSymbols)
       else
         {Print("Error on write string");}
      }
+   if(!MyIniFile.WriteInteger("VectorsSize","Input",num_in_vectors))
+     {File_Name="";Print("Error on write string");return(false);}
+   if(!MyIniFile.WriteInteger("VectorsSize","Output",num_out_vectors))
+     {File_Name="";Print("Error on write string");return(false);}
+
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -141,7 +149,16 @@ bool  CMT5FANN::Init(string FileName)
       for(int i=0; i<Strings.Total(); i++)
         {Symbols_Array[i]=Strings.At(i);Print(Strings.At(i));}
      }
-
+   else
+     {
+      File_Name="";
+      return(false);
+     }
+   if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
+     {File_Name="";Print("Error on read num_in_vectors");return(false);}
+   if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
+     {File_Name="";Print("Error on read num_out_vectors");return(false);}
+  
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -158,9 +175,6 @@ bool CMT5FANN::GetVectors(double &InputVector[],double &OutputVector[],int num_v
    int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
    ArrayInitialize(OutputVector,EMPTY_VALUE);
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
    if(maxcount<num_vectors)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -168,9 +182,6 @@ bool CMT5FANN::GetVectors(double &InputVector[],double &OutputVector[],int num_v
      }
    int i;
    for(i=1;i<num_vectors;i++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       InputVector[i-1]=100*(Close[i]-Close[i+1]);
