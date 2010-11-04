@@ -22,7 +22,7 @@
 #property copyright "Mariusz Woloszyn"
 #property link      ""
 
-#import "Fann2MQL.dll"
+#import "Fann2MQL113.dll"
 int f2M_create_standard(int num_layers, int l1num, int l2num, int l3num, int l4num);
 int f2M_create_from_file(uchar& path[]);
 int f2M_run(int ann, double& input_vector[]);

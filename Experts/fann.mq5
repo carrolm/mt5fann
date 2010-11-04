@@ -77,7 +77,7 @@ void OnDeinit(const int reason)
   {
 //---
 
-   ann_save(ann,"D:\\1.nn");
+   ann_save(ann,"D:\\1.net");
    ann_destroy();
    f2M_parallel_deinit();
 //---
@@ -214,9 +214,9 @@ void ann_prepare_input2(int pos)
    else Print("Операция FileOpen неудачна, ошибка",GetLastError());
   }
 //+------------------------------------------------------------------+
-void ann_train(int ann,double &input_vector[],double &output_vector[])
+void ann_train(int Fann,double &input_vector[],double &output_vector[])
   {
-   if(f2M_train(ann,input_vector,output_vector)==-1)
+   if(f2M_train(Fann,input_vector,output_vector)==-1)
      {
       Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
      }
@@ -245,14 +245,15 @@ double iClose(string symbol,ENUM_TIMEFRAMES period,int index)
    return(result);
   }
 //+------------------------------------------------------------------+
-bool ann_save(int ann,string path)
+bool ann_save(int Fann,string path)
   {
 //int ret=-1;
 //ret=f2M_save(ann,path);
    uchar p[];
    StringToCharArray(path,p);
-   if(f2M_save(ann,p)<0) 
+   if(f2M_save(Fann,p)<0) 
      {
+      Print("save false");
       return(false);
      }
 //   Print("f2M_save("+IntegerToString(ann)+", "+p+") returned: "+IntegerToString(f2M_save(ann,path)));
@@ -340,10 +341,10 @@ bool isNewBar(ENUM_TIMEFRAMES timeFrame)
 
    if(copied>0) // все ок. данные скопированы
      {
-      if(old_Times[i]!=new_Time[0]) // если старое время бара не равно новому
+      if(old_Times[1]!=new_Time[0]) // если старое время бара не равно новому
         {
-         if(old_Times[i]!=0) res=true;    // если это не первый запуск, то истина = новый бар
-         old_Times[i]=new_Time[0];        // запоминаем время бара
+         if(old_Times[1]!=0) res=true;    // если это не первый запуск, то истина = новый бар
+         old_Times[1]=new_Time[0];        // запоминаем время бара
         }
      }
 //----
