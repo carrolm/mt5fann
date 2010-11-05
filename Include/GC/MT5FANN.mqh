@@ -9,9 +9,10 @@
 #property link      ""
 #include <GC\IniFile.mqh>
 //#include <Fann2MQL.mqh>
+//#import "fanndoubleMT.dll"
+//#import
 #import "Fann2MQL114b2.dll"
 
-//int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 ////int f2M_create_from_file(string path);
 ////меняем на
@@ -246,7 +247,8 @@ bool  CMT5FANN::Init(string FileName)
 
 int CMT5FANN::CreateAnn()
   {
-   ann=f2M_create_standard(num_layers,num_in_vectors,num_in_vectors*2,num_in_vectors,num_out_vectors);
+   ann=f2M_create_standard(4,2,4,5,2);
+   //ann=f2M_create_standard(num_layers,num_in_vectors,num_in_vectors*2,num_in_vectors,num_out_vectors);
 //  f2M_set_act_function_hidden(ann,6);
 //  f2M_set_act_function_output(ann,6);
    f2M_randomize_weights(ann,-0.7,0.7);
