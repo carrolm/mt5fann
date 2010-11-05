@@ -75,7 +75,7 @@ void OnStart()
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
    Write_File(SymbolsArray,MaxSymbols,1000,10); //
    return;// работа скрипта завершена
-  }
+  }gfgf
 //+------------------------------------------------------------------+
 int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,int Pers=5)
   {

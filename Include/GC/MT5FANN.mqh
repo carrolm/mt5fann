@@ -9,13 +9,13 @@
 #property link      ""
 #include <GC\IniFile.mqh>
 //#include <Fann2MQL.mqh>
-#import "Fann2MQL113.dll"
+#import "Fann2MQL114b2.dll"
 
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 ////int f2M_create_from_file(string path);
 ////меняем на
-int f2M_create_from_file(uchar& path[]);
+int f2M_create_from_file(char &path[]);
 int f2M_run(int ann,double &input_vector[]);
 int f2M_destroy(int ann);
 int f2M_destroy_all_anns();
@@ -28,7 +28,7 @@ int f2M_train(int ann,double &input_vector[],double &output_vector[]);
 int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
 int f2M_randomize_weights(int ann,double min_weight,double max_weight);
 double f2M_get_MSE(int ann);
-////int f2M_save(int ann,string path);
+//int f2M_save(int ann,string path);
 int f2M_save(int ann,uchar &path[]);
 int f2M_reset_MSE(int ann);
 int f2M_test(int ann,double &input_vector[],double &output_vector[]);
@@ -132,21 +132,21 @@ private:
    int               CreateAnn();
 
 public:
-   int ann_load(string path) 
+   int ann_load(string path)
      {
-      uchar p[];
+      char p[];
       StringToCharArray(path,p);
       return(f2M_create_from_file(p));
      }
    bool ann_save(string path)
      {
-      uchar p[];
-      StringToCharArray(path,p);
-      if(debug)Print(CharArrayToString(p,0,WHOLE_ARRAY,CP_ACP));
+      char p[];
+      StringToCharArray(path,p,0,-1,CP_OEMCP);
+      if(debug)Print(ann,CharArrayToString(p,0,WHOLE_ARRAY,CP_OEMCP));
       if(f2M_save(ann,p)<0)
         {
-            if(debug)Print("ne shmogla");
-   return(false);
+         if(debug)Print("ne shmogla");
+         return(false);
         }
       return(true);
      }
@@ -164,10 +164,10 @@ public:
 //+------------------------------------------------------------------+
 void CMT5FANN::DeInit()
   {
+   ann_save(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+File_Name+".net");
    f2M_destroy(ann);
-   ann_save(File_Name+".net");
 //   f2M_save(ann,File_Name+".net");
-   Print(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+File_Name+".net");
+//   Print(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+File_Name+".net");
   }
 //+------------------------------------------------------------------+
 bool  CMT5FANN::Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers)
@@ -232,7 +232,7 @@ bool  CMT5FANN::Init(string FileName)
      {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
    if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
      {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
-   if(-1==(ann=ann_load(FileName+".net")))
+   if(-1==(ann=ann_load(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+File_Name+".net")))
      {
       File_Name="";
       return(false);
@@ -243,9 +243,7 @@ bool  CMT5FANN::Init(string FileName)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 int CMT5FANN::CreateAnn()
   {
    ann=f2M_create_standard(num_layers,num_in_vectors,num_in_vectors*2,num_in_vectors,num_out_vectors);
@@ -259,9 +257,7 @@ int CMT5FANN::CreateAnn()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 bool CMT5FANN::GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;

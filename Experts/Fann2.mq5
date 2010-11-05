@@ -7,11 +7,10 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 
-//#include <Fann2MQL.mqh>
 #import "Fann2MQL.dll"
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-int f2M_create_from_file(uchar& path[]);
+int f2M_create_from_file(string path);
 int f2M_run(int ann,double &input_vector[]);
 int f2M_destroy(int ann);
 int f2M_destroy_all_anns();
@@ -24,7 +23,7 @@ int f2M_train(int ann,double &input_vector[],double &output_vector[]);
 int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
 int f2M_randomize_weights(int ann,double min_weight,double max_weight);
 double f2M_get_MSE(int ann);
-int f2M_save(int ann,char &path[]);
+int f2M_save(int ann,string path);
 int f2M_reset_MSE(int ann);
 int f2M_test(int ann,double &input_vector[],double &output_vector[]);
 int f2M_set_act_function_layer(int ann,int activation_function,int layer);
@@ -64,10 +63,8 @@ int OnInit()
 //ann_prepare_input2(0);
    f2M_parallel_init();
    ann=CreateAnn();
-   Print("ann=",ann);
-   ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\1.net");
-   //ann_save(ann,"1");
-   TrainNN();
+  ann_save(ann,"1.nn");
+TrainNN();
    get_res();
 //---
    return(0);
@@ -79,7 +76,7 @@ void OnDeinit(const int reason)
   {
 //---
 
-   ann_save(ann,"D:\\1.nn");
+   ann_save(ann,"1.nn");
    ann_destroy();
    f2M_parallel_deinit();
 //---
@@ -129,7 +126,7 @@ int CreateAnn()
 void TrainNN()
   {
 ////for(int i=0; i<input_count; i++)
-   for(int epochs=0; epochs<5; epochs++)
+   for(int epochs=0; epochs<2; epochs++)
      {
       for(int i=input_count; i>1; i--)
         {
@@ -156,11 +153,15 @@ void ann_prepare_input(int pos)
    int inp_vec_size=0;
    for(int i=0; i<ArraySize(slist); i++)
      {
-      datetime time1[1],time2[1];
+      datetime time1[],time2[];
 
       //Print(IntegerToString(ArraySize(slist))); || StringFind(slist[i],"#",0)>0
       if(CopyTime("EURUSD",_Period,pos,1,time1)!=1 || CopyTime(slist[i],_Period,pos,1,time2)!=1) continue;
-      if(time1[0]!=time2[0]) continue;
+      if(time1[0]!=time2[0])
+        {
+         ArrayFree(time1); ArrayFree(time2);
+         continue;
+        }
 
       double res;
       double iClose[];
@@ -190,11 +191,15 @@ void ann_prepare_input2(int pos)
       int inp_vec_size=0;
       for(int i=0; i<ArraySize(slist); i++)
         {
-         datetime time1[1],time2[1];
+         datetime time1[],time2[];
 
          //Print(IntegerToString(ArraySize(slist))); || StringFind(slist[i],"#",0)>0
          if(CopyTime("EURUSD",_Period,pos,1,time1)!=1 || CopyTime(slist[i],_Period,pos,1,time2)!=1) continue;
-         if(time1[0]!=time2[0]) continue;
+         if(time1[0]!=time2[0])
+           {
+            ArrayFree(time1); ArrayFree(time2);
+            continue;
+           }
 
          double res;
          double iClose[];
@@ -216,9 +221,9 @@ void ann_prepare_input2(int pos)
    else Print("ќпераци€ FileOpen неудачна, ошибка",GetLastError());
   }
 //+------------------------------------------------------------------+
-void ann_train(int fann,double &input_vector[],double &output_vector[])
+void ann_train(int nn,double &input_vector[],double &output_vector[])
   {
-   if(f2M_train(fann,input_vector,output_vector)==-1)
+   if(f2M_train(nn,input_vector,output_vector)==-1)
      {
       Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
      }
@@ -247,24 +252,25 @@ double iClose(string symbol,ENUM_TIMEFRAMES period,int index)
    return(result);
   }
 //+------------------------------------------------------------------+
-bool ann_save(int fann,string path)
+/*void ann_save(int ann,string path)
   {
-//int ret=-1;
-//ret=f2M_save(ann,path);
-   uchar p[];
-   StringToCharArray(path,p);
-   if(f2M_save(fann,p)<0) 
-     {
-      Print(path);
-      return(false);
-     }
-//   Print("f2M_save("+IntegerToString(ann)+", "+p+") returned: "+IntegerToString(f2M_save(ann,path)));
-   return(true);
-
+   //int ret=-1;
+   //ret=f2M_save(ann,path);
+   Print("f2M_save("+IntegerToString(ann)+", "+path+") returned: "+IntegerToString(f2M_save(ann,path)));
   }
 //int GetDelim(string Symb)
-/**/
-
+*/
+bool ann_save(int nn, string path) {
+    uchar p[];
+    StringToCharArray(path, p);
+    if (f2M_save(nn, path) < 0) {
+        return (false);
+    }
+    return (true);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 double GetDelim(string Symb)
   {
    double price=SymbolInfoDouble(Symb,SYMBOL_BID);
@@ -311,7 +317,7 @@ bool isNewBar(ENUM_TIMEFRAMES timeFrame)
 //----
    static datetime old_Times[21];// массив дл€ хранени€ старых значений
    bool res=false;               // переменна€ результата анализа  
-   int  i;                       // номер €чейки массива old_Times[]     
+   int  i=0;                       // номер €чейки массива old_Times[]     
    datetime new_Time[1];         // врем€ нового бара
 
    switch(timeFrame)
