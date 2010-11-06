@@ -18,10 +18,16 @@ void OnStart()
    SineX.debug=true;
 
    if(!SineX.Init("sinex")) Print("Init error");
-   if(GetVectors(SineX.InputVector,SineX.OutputVector,SineX.get_num_input(),SineX.get_num_output(),"sinex"))
-      Print(SineX.InputVector[0]," ",SineX.OutputVector[0]);
-      SineX.run();
-      if(SineX.get_output()) Print(SineX.OutputVector[0]);
+   for(int i=0;i<10;i++)
+     {
+      if(GetVectors(SineX.InputVector,SineX.OutputVector,SineX.get_num_input(),SineX.get_num_output(),"sinex",i))
+        {
+         Print(SineX.InputVector[0]," ",SineX.OutputVector[0]);
+         SineX.run();
+         if(SineX.get_output()) Print(SineX.OutputVector[0]);
+        }
+     }
+
 //  Print(mt5fann.train_on_file("sinex.train"));
 //mt5fann.Init("forex");
   }

@@ -56,7 +56,10 @@ bool GetVectors_Sinex(double &InputVector[],double &OutputVector[],int num_input
   {// пара, период, смещение назад (для индикатора полезно)
    ArrayInitialize(InputVector,EMPTY_VALUE);
    ArrayInitialize(OutputVector,EMPTY_VALUE);
-   InputVector[0]=0.050000;OutputVector[0]=0.479426;
+   if(0==shift) {InputVector[0]=0.050000;OutputVector[0]=0.479426;}
+   else if(1==shift) {InputVector[0]=0.150000;OutputVector[0]=0.997495;}
+   else if(2==shift) {InputVector[0]=0.100000;OutputVector[0]=0.841471;}
+   else return(false);
 
    return(true);
   }

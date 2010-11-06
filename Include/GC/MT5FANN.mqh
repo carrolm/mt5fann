@@ -180,8 +180,8 @@ public:
    double            OutputVector[];
    int               ann_load(string path="");
    int               train_on_file(string path,int max_epoch=1000,double desired_error=0.0001);
-   int               get_num_input(){if(-1==ann)return(-1); else return(f2M_get_num_input(ann));};
-   int               get_num_output(){return((-1==ann)?-1:f2M_get_num_output(ann));};
+   int               get_num_input(){return(num_in_vectors);};
+   int               get_num_output(){return(num_out_vectors);};
    int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));};
    bool              get_output();
    bool              ann_save(string path="");
@@ -203,7 +203,7 @@ public:
 bool CMT5FANN::get_output()
   {
    if(-1==ann) return(false);
-   for(int i=0;i<get_output();i++)
+   for(int i=0;i<num_out_vectors;i++)
       OutputVector[i]=f2M_get_output(ann,i);
    return(true);
   }
@@ -225,7 +225,8 @@ bool CMT5FANN::ini_save(string path="")
       if(!resb)
          //{if(debug) Print("Ok write string");}
          //else
-        {if(debug) Print("Error on write string");return(false);}
+        {//if(debug) Print("Error on write string");return(false);
+        }
      }
    if(!MyIniFile.WriteInteger("VectorsSize","Input",num_in_vectors))
      {File_Name="";if(debug) Print("Error on write num_in_vectors");return(false);}
@@ -336,6 +337,8 @@ void CMT5FANN::Init()
   {
    debug=false;
    num_layers=4;
+   num_in_vectors=-1;
+   num_out_vectors=-1;
 // Initialize Intel TBB threads
 //  f2M_parallel_init();
 
@@ -400,6 +403,8 @@ bool  CMT5FANN::Init(string FileName)
       //File_Name="";
       return(false);
      }
+   num_in_vectors=f2M_get_num_input(ann);
+   num_out_vectors=f2M_get_num_output(ann);
    ArrayResize(InputVector,get_num_input());
    ArrayResize(OutputVector,get_num_output());
    MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
@@ -415,12 +420,12 @@ bool  CMT5FANN::Init(string FileName)
      {
       return(false);
      }
-   if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
-     {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
-   if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
-     {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
-   if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
-     {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
+   //if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
+   //  {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
+   //if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
+   //  {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
+   //if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
+   //  {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
 // Print(ann);
    return(true);
   }
