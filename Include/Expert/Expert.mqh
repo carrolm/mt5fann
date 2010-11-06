@@ -72,7 +72,7 @@ public:
    //---
    virtual void      Deinit();
    //---
-   int               MaxOrders() const                    { return(m_max_orders);                                   }
+   int               MaxOrders()                    const { return(m_max_orders);                                   }
    void              MaxOrders(int max_orders)            { m_max_orders=max_orders;                                }
    //--- event handlers
    virtual void      OnTick();

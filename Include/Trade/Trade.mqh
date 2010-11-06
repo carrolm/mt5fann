@@ -638,10 +638,11 @@ bool CTrade::Buy(double volume,const string symbol=NULL,double price=0.0,double 
       m_result.retcode=TRADE_RETCODE_INVALID_VOLUME;
       return(false);
      }
+//--- check symbol
+   sym.Name((symbol==NULL)?Symbol():symbol);
 //--- check price
    if(price==0.0)
      {
-      sym.Name((symbol==NULL)?Symbol():symbol);
       sym.RefreshRates();
       price=sym.Ask();
      }
@@ -668,10 +669,11 @@ bool CTrade::Sell(double volume,const string symbol=NULL,double price=0.0,double
       m_result.retcode=TRADE_RETCODE_INVALID_VOLUME;
       return(false);
      }
+//--- check symbol
+   sym.Name((symbol==NULL)?Symbol():symbol);
 //--- check price
    if(price==0.0)
      {
-      sym.Name((symbol==NULL)?Symbol():symbol);
       sym.RefreshRates();
       price=sym.Bid();
      }
@@ -695,8 +697,6 @@ bool CTrade::BuyLimit(double volume,double price,const string symbol=NULL,double
                       ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="")
   {
    string sym;
-//--- check symbol
-   sym=(symbol==NULL)?Symbol():symbol;
 //--- check volume
    if(volume<=0.0)
      {
@@ -704,13 +704,15 @@ bool CTrade::BuyLimit(double volume,double price,const string symbol=NULL,double
       return(false);
      }
 //--- check price
-   if(price!=0.0)
+   if(price==0.0)
      {
       m_result.retcode=TRADE_RETCODE_INVALID_PRICE;
       return(false);
      }
+//--- check symbol
+   sym=(symbol==NULL)?Symbol():symbol;
 //--- send "BUY_LIMIT" order
-   return(OrderOpen(symbol,ORDER_TYPE_BUY_LIMIT,volume,0.0,price,sl,tp,type_time,expiration,comment));
+   return(OrderOpen(sym,ORDER_TYPE_BUY_LIMIT,volume,0.0,price,sl,tp,type_time,expiration,comment));
   }
 //+------------------------------------------------------------------+
 //| Send BUY_STOP order.                                             |
@@ -729,8 +731,6 @@ bool CTrade::BuyStop(double volume,double price,const string symbol=NULL,double 
                      ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="")
   {
    string sym;
-//--- check symbol
-   sym=(symbol==NULL)?Symbol():symbol;
 //--- check volume
    if(volume<=0.0)
      {
@@ -738,13 +738,15 @@ bool CTrade::BuyStop(double volume,double price,const string symbol=NULL,double 
       return(false);
      }
 //--- check price
-   if(price!=0.0)
+   if(price==0.0)
      {
       m_result.retcode=TRADE_RETCODE_INVALID_PRICE;
       return(false);
      }
+//--- check symbol
+   sym=(symbol==NULL)?Symbol():symbol;
 //--- send "BUY_STOP" order
-   return(OrderOpen(symbol,ORDER_TYPE_BUY_STOP,volume,0.0,price,sl,tp,type_time,expiration,comment));
+   return(OrderOpen(sym,ORDER_TYPE_BUY_STOP,volume,0.0,price,sl,tp,type_time,expiration,comment));
   }
 //+------------------------------------------------------------------+
 //| Send SELL_LIMIT order.                                           |
@@ -763,8 +765,6 @@ bool CTrade::SellLimit(double volume,double price,const string symbol=NULL,doubl
                        ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="")
   {
    string sym;
-//--- check symbol
-   sym=(symbol==NULL)?Symbol():symbol;
 //--- check volume
    if(volume<=0.0)
      {
@@ -772,13 +772,15 @@ bool CTrade::SellLimit(double volume,double price,const string symbol=NULL,doubl
       return(false);
      }
 //--- check price
-   if(price!=0.0)
+   if(price==0.0)
      {
       m_result.retcode=TRADE_RETCODE_INVALID_PRICE;
       return(false);
      }
+//--- check symbol
+   sym=(symbol==NULL)?Symbol():symbol;
 //--- send "SELL_LIMIT" order
-   return(OrderOpen(symbol,ORDER_TYPE_SELL_LIMIT,volume,0.0,price,sl,tp,type_time,expiration,comment));
+   return(OrderOpen(sym,ORDER_TYPE_SELL_LIMIT,volume,0.0,price,sl,tp,type_time,expiration,comment));
   }
 //+------------------------------------------------------------------+
 //| Send SELL_STOP order.                                            |
@@ -797,8 +799,6 @@ bool CTrade::SellStop(double volume,double price,const string symbol=NULL,double
                       ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="")
   {
    string sym;
-//--- check symbol
-   sym=(symbol==NULL)?Symbol():symbol;
 //--- check volume
    if(volume<=0.0)
      {
@@ -806,11 +806,13 @@ bool CTrade::SellStop(double volume,double price,const string symbol=NULL,double
       return(false);
      }
 //--- check price
-   if(price!=0.0)
+   if(price==0.0)
      {
       m_result.retcode=TRADE_RETCODE_INVALID_PRICE;
       return(false);
      }
+//--- check symbol
+   sym=(symbol==NULL)?Symbol():symbol;
 //--- send "SELL_STOP" order
    return(OrderOpen(sym,ORDER_TYPE_SELL_STOP,volume,0.0,price,sl,tp,type_time,expiration,comment));
   }

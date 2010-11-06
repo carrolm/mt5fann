@@ -8,7 +8,7 @@
 #property version   "1.00"
 
 //#include <Fann2MQL.mqh>
-#import "Fann2MQL.dll"
+#import "Fann2MQL114b2.dll"
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_from_file(uchar& path[]);
@@ -65,7 +65,7 @@ int OnInit()
    f2M_parallel_init();
    ann=CreateAnn();
    Print("ann=",ann);
-   ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\1.net");
+   //ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\1.net");
    //ann_save(ann,"1");
    TrainNN();
    get_res();
@@ -79,7 +79,7 @@ void OnDeinit(const int reason)
   {
 //---
 
-   ann_save(ann,"D:\\1.nn");
+   ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\fann.net");
    ann_destroy();
    f2M_parallel_deinit();
 //---

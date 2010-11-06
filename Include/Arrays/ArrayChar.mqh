@@ -2,7 +2,7 @@
 //|                                                    ArrayChar.mqh |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                                              Revision 2010.10.29 |
 //+------------------------------------------------------------------+
 #include "Array.mqh"
 //+------------------------------------------------------------------+
@@ -576,11 +576,11 @@ int CArrayChar::QuickSearch(char element) const
      {
       //--- ">>1" is quick division by 2
       m=(j+i)>>1;
-      if(m==0 || m==m_data_total-1) break;
+      if(m<0 || m>=m_data_total) break;
       t_char=m_data[m];
       if(t_char==(uchar)element) break;
-      if(t_char>(uchar)element) j=m-1;
-      else                      i=m+1;
+      if(t_char>(uchar)element)  j=m-1;
+      else                       i=m+1;
      }
 //---
    return(m);

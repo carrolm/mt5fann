@@ -60,14 +60,14 @@ void CTrailingFixedPips::CTrailingFixedPips()
 bool CTrailingFixedPips::ValidationSettings()
   {
 //--- initial data checks
-   if(m_profit_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
+   if(m_profit_level!=0 && m_profit_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
      {
-      printf(__FUNCTION__+": Take Profit Level must be greater than %d",m_symbol.StopsLevel());
+      printf(__FUNCTION__+": trailing Profit Level must be 0 or greater than %d",m_symbol.StopsLevel());
       return(false);
      }
-   if(m_stop_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
+   if(m_stop_level!=0 && m_stop_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
      {
-      printf(__FUNCTION__+": Trailing Stop Level must be greater than %d",m_symbol.StopsLevel());
+      printf(__FUNCTION__+": trailing Stop Level must be 0 or greater than %d",m_symbol.StopsLevel());
       return(false);
      }
 //--- ok
@@ -82,29 +82,21 @@ bool CTrailingFixedPips::ValidationSettings()
 bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)
   {
 //--- check
-   if(position==NULL) return(false);
+   if(position==NULL)  return(false);
+   if(m_stop_level==0) return(false);
 //---
    double delta;
-   double price=m_symbol.Bid();
+   double pos_sl=position.StopLoss();
+   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double price =m_symbol.Bid();
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(m_stop_level!=0)
+   delta=m_stop_level*m_adjusted_point;
+   if(price-base>delta)
      {
-      delta=m_stop_level*m_adjusted_point;
-      if(position.StopLoss()==0.0)
-        {
-         if(price-position.PriceOpen()>delta) sl=price-delta;
-        }
-      else
-        {
-         if(price-position.StopLoss()>delta)  sl=price-delta;
-        }
-     }
-   if(m_profit_level!=0)
-     {
-      delta=m_profit_level*m_adjusted_point;
-      if(sl!=EMPTY_VALUE) tp=price+delta;
+      sl=price-delta;
+      if(m_profit_level!=0) tp=price+m_profit_level*m_adjusted_point;
      }
 //---
    return(sl!=EMPTY_VALUE);
@@ -118,29 +110,21 @@ bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo *position,double& s
 bool CTrailingFixedPips::CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp)
   {
 //--- check
-   if(position==NULL) return(false);
+   if(position==NULL)  return(false);
+   if(m_stop_level==0) return(false);
 //---
    double delta;
-   double price=m_symbol.Ask();
+   double pos_sl=position.StopLoss();
+   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double price =m_symbol.Ask();
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(m_stop_level!=0)
+   delta=m_stop_level*m_adjusted_point;
+   if(base-price>delta)
      {
-      delta=m_stop_level*m_adjusted_point;
-      if(position.StopLoss()==0.0)
-        {
-         if(position.PriceOpen()-price>delta) sl=price+delta;
-        }
-      else
-        {
-         if(position.StopLoss()-price>delta)  sl=price+delta;
-        }
-     }
-   if(m_profit_level!=0)
-     {
-      delta=m_profit_level*m_adjusted_point;
-      if(sl!=EMPTY_VALUE) tp=price-delta;
+      sl=price+delta;
+      if(m_profit_level!=0) tp=price-m_profit_level*m_adjusted_point;
      }
 //---
    return(sl!=EMPTY_VALUE);

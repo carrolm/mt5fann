@@ -22,9 +22,9 @@
 #property copyright "Mariusz Woloszyn"
 #property link      ""
 
-#import "Fann2MQL113.dll"
+#import "Fann2MQL.dll"
 int f2M_create_standard(int num_layers, int l1num, int l2num, int l3num, int l4num);
-int f2M_create_from_file(uchar& path[]);
+int f2M_create_from_file(string path);
 int f2M_run(int ann, double& input_vector[]);
 int f2M_destroy(int ann);
 int f2M_destroy_all_anns();
@@ -37,7 +37,7 @@ int f2M_train(int ann, double& input_vector[], double& output_vector[]);
 int f2M_train_fast(int ann, double& input_vector[], double& output_vector[]);
 int f2M_randomize_weights(int ann, double min_weight, double max_weight);
 double f2M_get_MSE(int ann);
-int f2M_save(int ann, uchar &path[]);
+int f2M_save(int ann, string path);
 int f2M_reset_MSE(int ann);
 int f2M_test(int ann, double& input_vector[], double& output_vector[]);
 int f2M_set_act_function_layer(int ann, int activation_function, int layer);
@@ -58,18 +58,7 @@ int f2M_Run(int ann, double& input_vector[]);
 int f2M_Destroy(int ann);
 int f2M_fann_create_standard(int num_layers, int l1num, int l2num, int l3num, int l4num);
 #import
-int f2M_create_from_file(string path)
-  {
-   uchar p[];
-   StringToCharArray(path,p);
-   return f2M_create_from_file(p);
-  }
-int f2M_save(int ann, string path)
-  {
-   uchar p[];
-   StringToCharArray(path,p);
-   return f2M_save(ann,p);
-  }
+
 #define F2M_MAX_THREADS	64
 
 #define FANN_DOUBLE_ERROR	-1000000000

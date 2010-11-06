@@ -458,7 +458,10 @@ bool CList::Delete(int index)
 void CList::Clear()
   {
    GetFirstNode();
-   while(m_data_total!=0) DeleteCurrent();
+   while(m_data_total!=0)
+     {
+      if(!DeleteCurrent()) break;
+     }
   }
 //+------------------------------------------------------------------+
 //| Equality comparing of two lists.                                 |
@@ -592,6 +595,7 @@ CObject* CList::QuickSearch(CObject *element)
       if(t_node.Compare(element,m_sort_mode)==0) break;
       if(t_node.Compare(element,m_sort_mode)>0)  j=m-1;
       else                                       i=m+1;
+      t_node=NULL;
      }
 //---
    return(t_node);
@@ -606,7 +610,7 @@ CObject* CList::Search(CObject *element)
   {
    CObject *result;
 //--- checking
-   if(!CheckPointer(element) || !m_data_sort) return(NULL);
+   if(!CheckPointer(element) || !m_data_sort)    return(NULL);
 //--- search
    result=QuickSearch(element);
 //---

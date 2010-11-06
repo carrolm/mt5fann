@@ -85,7 +85,7 @@ bool CTrailingMA::ValidationSettings()
 //--- initial data checks
    if(m_ma_period<=0)
      {
-      printf(__FUNCTION__+": Period MA must be greater than 0");
+      printf(__FUNCTION__+": period MA must be greater than 0");
       return(false);
      }
 //--- ok
@@ -107,20 +107,20 @@ bool CTrailingMA::InitIndicators(CIndicators *indicators)
    if(m_MA==NULL)
       if((m_MA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add MA indicator to collection
    if(!indicators.Add(m_MA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_MA;
       return(false);
      }
 //--- initialize MA indicator
    if(!m_MA.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_method,m_ma_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_MA.BufferResize(3+m_ma_shift);
@@ -140,11 +140,12 @@ bool CTrailingMA::CheckTrailingStopLong(CPositionInfo *position,double& sl,doubl
 //---
    double level =NormalizeDouble(m_symbol.Bid()-m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
    double new_sl=NormalizeDouble(m_MA.Main(1),m_symbol.Digits());
+   double pos_sl=position.StopLoss();
+   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(new_sl>position.PriceOpen() && new_sl>position.StopLoss() && new_sl<level)
-      sl=new_sl;
+   if(new_sl>base && new_sl<level) sl=new_sl;
 //---
    return(sl!=EMPTY_VALUE);
   }
@@ -161,11 +162,12 @@ bool CTrailingMA::CheckTrailingStopShort(CPositionInfo *position,double& sl,doub
 //---
    double level =NormalizeDouble(m_symbol.Ask()+m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
    double new_sl=NormalizeDouble(m_MA.Main(1)+m_symbol.Spread()*m_symbol.Point(),m_symbol.Digits());
+   double pos_sl=position.StopLoss();
+   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(new_sl<position.PriceOpen() && (new_sl<position.StopLoss() || position.StopLoss()==0.0) && new_sl>level)
-      sl=new_sl;
+   if(new_sl<base && new_sl>level) sl=new_sl;
 //---
    return(sl!=EMPTY_VALUE);
   }

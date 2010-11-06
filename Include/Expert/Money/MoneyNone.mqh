@@ -25,15 +25,26 @@ class CMoneyNone : public CExpertMoney
 public:
    virtual bool      ValidationSettings() { Percent(100.0); return(true); }
    //---
-   virtual double    CheckOpen(double price,double sl);
+   virtual double    CheckOpenLong(double price,double sl);
+   virtual double    CheckOpenShort(double price,double sl);
   };
 //+------------------------------------------------------------------+
-//| Getting lot size for open.                                       |
+//| Getting lot size for open long position.                         |
 //| INPUT:  no.                                                      |
 //| OUTPUT: minimum lot.                                             |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CMoneyNone::CheckOpen(double price,double sl)
+double CMoneyNone::CheckOpenLong(double price,double sl)
+  {
+   return(m_symbol.LotsMin());
+  }
+//+------------------------------------------------------------------+
+//| Getting lot size for open short position.                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: minimum lot.                                             |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+double CMoneyNone::CheckOpenShort(double price,double sl)
   {
    return(m_symbol.LotsMin());
   }

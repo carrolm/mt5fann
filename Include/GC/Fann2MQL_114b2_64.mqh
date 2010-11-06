@@ -22,7 +22,7 @@
 #property copyright "Mariusz Woloszyn"
 #property link      ""
 
-#import "Fann2MQL.dll"
+#import "Fann2MQL114b2_64.dll"
 
 /* Creation/Execution */
 int f2M_create_standard(int num_layers, int l1num, int l2num, int l3num, int l4num);

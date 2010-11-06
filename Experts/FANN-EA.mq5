@@ -72,7 +72,7 @@ int ann_load (string path) {
     if (ann != -1) {
 	  debug (1, "ANN: '" + path + "' loaded successfully with handler " + (string)ann);
     }
-    if (ann == -1) {
+    else{
 
 	     /* Create ANN */
 	     ann = f2M_create_standard (4, AnnInputs, AnnInputs, AnnInputs / 2 + 1, 1);

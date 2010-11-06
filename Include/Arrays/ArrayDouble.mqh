@@ -2,7 +2,7 @@
 //|                                                  ArrayDouble.mqh |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                                              Revision 2010.10.29 |
 //+------------------------------------------------------------------+
 #include "Array.mqh"
 //+------------------------------------------------------------------+
@@ -573,7 +573,7 @@ int CArrayDouble::QuickSearch(double element) const
      {
       //--- ">>1" is quick division by 2
       m=(j+i)>>1;
-      if(m==0 || m==m_data_total-1) break;
+      if(m<0 || m>=m_data_total) break;
       t_double=m_data[m];
       //--- compared with a tolerance
       if(MathAbs(t_double-element)<=m_delta) break;

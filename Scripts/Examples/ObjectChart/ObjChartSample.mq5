@@ -219,9 +219,9 @@ void CChartSample::CheckPanelScales()
      {
       //--- Set Scale Up
       i=(int)StringToInteger(m_edit[1].Description());
-      if(i<32)
+      if(i<5)
         {
-         i*=2;
+         i++;
          m_chart.Scale(i);
          m_edit[1].Description(IntegerToString(i));
         }
@@ -231,9 +231,9 @@ void CChartSample::CheckPanelScales()
      {
       //--- Set Scale Down
       i=(int)StringToInteger(m_edit[1].Description());
-      if(i>1)
+      if(i>0)
         {
-         i/=2;
+         i--;
          m_chart.Scale(i);
          m_edit[1].Description(IntegerToString(i));
         }

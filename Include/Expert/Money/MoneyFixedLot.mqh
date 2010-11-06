@@ -34,7 +34,8 @@ public:
    void              Lots(double lots) { m_lots=lots; }
    virtual bool      ValidationSettings();
    //---
-   virtual double    CheckOpen(double price,double sl);
+   virtual double    CheckOpenLong(double price,double sl);
+   virtual double    CheckOpenShort(double price,double sl);
   };
 //+------------------------------------------------------------------+
 //| Constructor CMoneyFixedLot.                                      |
@@ -71,12 +72,22 @@ bool CMoneyFixedLot::ValidationSettings()
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Getting lot size for open.                                       |
+//| Getting lot size for open long position.                         |
 //| INPUT:  no.                                                      |
 //| OUTPUT: lot-if successful, 0.0 otherwise.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CMoneyFixedLot::CheckOpen(double price,double sl)
+double CMoneyFixedLot::CheckOpenLong(double price,double sl)
+  {
+   return(m_lots);
+  }
+//+------------------------------------------------------------------+
+//| Getting lot size for open short position.                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+double CMoneyFixedLot::CheckOpenShort(double price,double sl)
   {
    return(m_lots);
   }
