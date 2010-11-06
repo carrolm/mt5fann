@@ -175,11 +175,13 @@ private:
    int               ann;
    int               num_layers;
    int               CreateAnn();
+public:
    double            InputVector[];
    double            OutputVector[];
-public:
    int               ann_load(string path="");
    int               train_on_file(string path,int max_epoch=1000,double desired_error=0.0001);
+   int               get_num_input(){if(-1==ann)return(-1); else return(f2M_get_num_input(ann));};
+   int               get_num_output(){return((-1==ann)?-1:f2M_get_num_output(ann));};
    bool              ann_save(string path="");
    bool              ini_load(string path="");
    bool              ini_save(string path="");
@@ -264,7 +266,7 @@ bool CMT5FANN::ann_save(string path="")
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
    StringToCharArray(path,p);
-                     if(f2M_save(ann,p)<0)
+   if(f2M_save(ann,p)<0)
      {
       if(debug)Print("ne shmogla ",path);
       return(false);
@@ -280,8 +282,8 @@ int CMT5FANN::ann_load(string path="")
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
    StringToCharArray(path,p);
-                     return(f2M_create_from_file(p));
-                     }
+   return(f2M_create_from_file(p));
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -385,7 +387,8 @@ bool  CMT5FANN::Init(string FileName)
       //File_Name="";
       return(false);
      }
-
+   ArrayResize(InputVector,get_num_input());
+   ArrayResize(OutputVector,get_num_output());
    MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
 // Проверяем, если секция существует, читаем ее KeyNames
    if(MyIniFile.SectionExists("SymbolsArray"))
@@ -397,7 +400,6 @@ bool  CMT5FANN::Init(string FileName)
      }
    else
      {
-      File_Name="";
       return(false);
      }
    if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))

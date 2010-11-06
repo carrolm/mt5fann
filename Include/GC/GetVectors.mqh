@@ -6,22 +6,58 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //+------------------------------------------------------------------+
-//| defines                                                          |
+//|                                                                  |
 //+------------------------------------------------------------------+
-// #define MacrosHello   "Hello, world!"
-// #define MacrosYear    2010
+bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,int shift=0,string params="")
+  {// пара, период, смещение назад (для индикатора полезно)
+   if("Easy"==fn_name) return(GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+   return(false);
+  }
 //+------------------------------------------------------------------+
-//| DLL imports                                                      |
+//|                                                                  |
 //+------------------------------------------------------------------+
-// #import "user32.dll"
-//   int      SendMessageA(int hWnd,int Msg,int wParam,int lParam);
-// #import "my_expert.dll"
-//   int      ExpertRecalculate(int wParam,int lParam);
-// #import
+bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,int shift=0,string params="")
+  {// пара, период, смещение назад (для индикатора полезно)
+   int shft_his=7;
+   int shft_cur=0;
+
+   string smbl=_Symbol;
+   ENUM_TIMEFRAMES   tf=_Period;
+   double Close[];
+   ArraySetAsSeries(Close,true);
+// копируем историю
+   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Close);
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   if(maxcount<num_inputvectors+num_outputvectors+2)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+   int i,j;j=1;
+   for(i=0;i<num_outputvectors;i++,j++)
+     {
+      // вычислим и отнормируем
+      OutputVector[i]=100*(Close[j]-Close[j+1]);
+     }
+   for(i=0;i<num_inputvectors;i++,j++)
+     {
+      // вычислим и отнормируем
+      InputVector[i]=100*(Close[j]-Close[j+1]);
+     }
+//  OutputVector[0]=100*(Close[1]-Close[2]);
+   return(true);
+  }
 //+------------------------------------------------------------------+
-//| EX5 imports                                                      |
+//|  Для теста нейросети                                             |
 //+------------------------------------------------------------------+
-// #import "stdlib.ex5"
-//   string ErrorDescription(int error_code);
-// #import
+bool GetVectors_Sinex(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,int shift=0,string params="")
+  {// пара, период, смещение назад (для индикатора полезно)
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   InputVector[0]=0.050000;OutputVector[0]=0.479426;
+
+   return(true);
+  }
 //+------------------------------------------------------------------+

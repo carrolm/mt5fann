@@ -45,7 +45,7 @@ void OnStart()
 //                                                 //WriteFile( 1,5,2010); // день, мес€ц, год 
 //Write_File(SymbolsArray,MaxSymbols,1000,10); //
 
-   if(!mt5fann.Init("sinex")) mt5fann.Init("sinex",SymbolsArray,MaxSymbols,10,2,4);
+   mt5fann.Init("sinex") ;
 //mt5fann.Init("forex");
   }
 //+------------------------------------------------------------------+
