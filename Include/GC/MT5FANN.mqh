@@ -182,6 +182,8 @@ public:
    int               train_on_file(string path,int max_epoch=1000,double desired_error=0.0001);
    int               get_num_input(){if(-1==ann)return(-1); else return(f2M_get_num_input(ann));};
    int               get_num_output(){return((-1==ann)?-1:f2M_get_num_output(ann));};
+   int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));};
+   bool              get_output();
    bool              ann_save(string path="");
    bool              ini_load(string path="");
    bool              ini_save(string path="");
@@ -198,6 +200,17 @@ public:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool CMT5FANN::get_output()
+  {
+   if(-1==ann) return(false);
+   for(int i=0;i<get_output();i++)
+      OutputVector[i]=f2M_get_output(ann,i);
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+
 bool CMT5FANN::ini_save(string path="")
   {
    if(path=="") path=File_Name;
