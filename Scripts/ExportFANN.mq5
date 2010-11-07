@@ -73,11 +73,12 @@ void OnStart()
    if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
    if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, месяц, год 
-   Write_File(SymbolsArray,MaxSymbols,1000,10); //
+   Write_File(SymbolsArray,MaxSymbols,100,10,5); //
+   Print("File created...");
    return;// работа скрипта завершена
   }
 //+------------------------------------------------------------------+
-int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,int Pers=5)
+int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,int Pers)
   {
    int shift=0;
 // test
@@ -113,27 +114,28 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
      {
       FileWrite(FileHandle,// записываем в файл шапку
                 needcopy,// 
-                2+(1+Pers)*MaxSymbols,// количество секунд, прошедших с 1 января 1970 года
+ //               2+(1+Pers)*MaxSymbols,
+                Pers*MaxSymbols,
                 MaxSymbols);
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
-         Print("Баров в истории = ",bars);
+         //Print("Баров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,OB,Pers,SymbolsArray[SymbolIdx],_Period,3,shift))
+            if(GetVectors_f(IB,OB,Pers,SymbolsArray[SymbolIdx],_Period,3,shift))
               {
                i++;
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
                TimeToStruct(rates[2].time,tm);
                //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
-               outstr=""+(string)tm.day_of_week+" "+(string)tm.hour;
-               // news
-               for(int ibj=0;ibj<MaxSymbols;ibj++)
-                 {
-                  outstr=outstr+" 0";
-                 }
-               // data
-               for(int ibj=0;ibj<=Pers;ibj++)
+               outstr="";//+(string)tm.day_of_week+" "+(string)tm.hour;
+               //// news
+               //for(int ibj=0;ibj<MaxSymbols;ibj++)
+               //  {
+               //   outstr=outstr+" 0";
+               //  }
+               //// data
+               for(int ibj=0;ibj<Pers;ibj++)
                  {
                   outstr=outstr+" "+(string)(IB[ibj]);
                  }
@@ -191,7 +193,7 @@ string fTimeFrameName(int arg)
 //| просто разница                                                   |
 //+------------------------------------------------------------------+
 
-bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
+bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
@@ -210,10 +212,10 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,s
       return(false);
      }
    int i;
-   for(i=1;i<num_vectors;i++)
+   for(i=0;i<num_vectors;i++)
      {
       // вычислим и отнормируем
-      InputVector[i-1]=100*(Close[i]-Close[i+1]);
+      InputVector[i]=100*(Close[i]-Close[i+1]);
      }
      OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
@@ -225,8 +227,9 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors=5,s
 //| Заполняем вектор ! вначале -выходы -потом вход                   |
 //| Фракталы                                                         |
 //+------------------------------------------------------------------+
+bool GetVectors_f(double &InputVector[],double &OutputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
 
-bool GetVectors_f(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
+//bool GetVectors_f(double &InputVector[],double &OutputVector[],int num_ivectors,int num_ovectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
@@ -239,7 +242,8 @@ bool GetVectors_f(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TI
    int ncl=CopyLow(smbl,tf,shift,num_vectors*10*npf,Low);
    int nch=CopyHigh(smbl,tf,shift,num_vectors*10*npf,High);
    ArrayInitialize(InputVector,EMPTY_VALUE);
-   int maxcount=MathMin(ncl,nch);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+      int maxcount=MathMin(ncl,nch);
    if(maxcount<num_vectors*10*npf)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -330,7 +334,7 @@ bool GetVectors_f(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TI
    if((MathAbs(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT)))>5)
      {
       // заполняем массив выходной 
-      InputVector[0]=prf-prl;
+      OutputVector[0]=prf-prl;
       prf=prl;fp=j;
       for(i=0;i<num_vectors;i++)
         {
@@ -338,7 +342,7 @@ bool GetVectors_f(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TI
          if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
             prl=UpperBuffer[j];
          else  prl=LowerBuffer[j];
-         InputVector[i+1]=100*(prf-prl);      prf=prl;fp=j;
+         InputVector[i]=100*(prf-prl);      prf=prl;fp=j;
         }
 
       return(true);// 

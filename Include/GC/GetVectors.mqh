@@ -8,16 +8,16 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,int shift=0,string params="")
+bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,int shift,string &params[])
   {// пара, период, смещение назад (для индикатора полезно)
    if("Easy"==fn_name) return(GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
-   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+//   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
    return(false);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,int shift=0,string params="")
+bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,int shift,string &params[])
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
@@ -49,18 +49,3 @@ bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputv
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
-//+------------------------------------------------------------------+
-//|  Для теста нейросети                                             |
-//+------------------------------------------------------------------+
-bool GetVectors_Sinex(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,int shift=0,string params="")
-  {// пара, период, смещение назад (для индикатора полезно)
-   ArrayInitialize(InputVector,EMPTY_VALUE);
-   ArrayInitialize(OutputVector,EMPTY_VALUE);
-   if(0==shift) {InputVector[0]=0.330000;OutputVector[0]=-0.157746;}
-   else if(1==shift) {InputVector[0]=0.630000;OutputVector[0]=0.016814;}
-   else if(2==shift) {InputVector[0]=0.100000;OutputVector[0]=0.841471;}
-   else return(false);
-
-   return(true);
-  }
-//+------------------------------------------------------------------+

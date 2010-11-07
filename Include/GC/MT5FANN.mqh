@@ -171,34 +171,35 @@ private:
    int               num_in_vectors;
    int               num_out_vectors;
    string            File_Name;
+   string            ffn_name;
    CIniFile          MyIniFile;                   // Создаем экземпляр класса
    CArrayString      Strings;                     // Необходим для работы с массивами данных
    int               ann;
 public:
+                     CMT5FANN(){Init();}
+                    ~CMT5FANN(){DeInit();}
    double            InputVector[];
    double            OutputVector[];
    int               ann_load(string path="");
-   int               train(){return(f2M_train(ann,InputVector,OutputVector));}
+   bool              ann_save(string path="");
+   bool              ini_load(string path="");
+   bool              ini_save(string path="");
    int               get_num_input(){return(num_in_vectors);};
    int               get_num_output(){return(num_out_vectors);};
+   int               train(){return(f2M_train(ann,InputVector,OutputVector));}
    int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));}
    int               test(){return(f2M_test(ann,InputVector,OutputVector));}
    int               reset_MSE(){return(f2M_reset_MSE(ann));}
    double            get_MSE(){return(f2M_get_MSE(ann));}
    bool              get_output();
-   bool              ann_save(string path="");
-   bool              ini_load(string path="");
-   bool              ini_save(string path="");
    bool              debug;
-                     CMT5FANN(){Init();}
-                    ~CMT5FANN(){DeInit();}
    void              Init();
    int               train_on_file(string path="",int max_epoch=5000,float desired_error=(float)0.001,bool resetprev=false);
    int               test_on_file(string path="");
    //   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers);
    bool              Init(string FileName);
    void              DeInit();
-   bool              GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0);
+   bool              GetVectors(int shift=0);
 
   };
 //+------------------------------------------------------------------+
@@ -232,11 +233,7 @@ bool CMT5FANN::ini_save(string path="")
         {//if(debug) Print("Error on write string");return(false);
         }
      }
-   if(!MyIniFile.WriteInteger("VectorsSize","Input",num_in_vectors))
-     {File_Name="";if(debug) Print("Error on write num_in_vectors");return(false);}
-   if(!MyIniFile.WriteInteger("VectorsSize","Output",num_out_vectors))
-     {File_Name="";if(debug) Print("Error on write num_out_vectors");return(false);}
-   return(true);
+    return(true);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -395,7 +392,7 @@ int  CMT5FANN::test_on_file(string path)
             OutputVector[j]=StringToDouble(FileReadString(FileHandle));
            }
          tmpstr=FileReadString(FileHandle);// CR
- //        Print("in=",InputVector[0]," out=",OutputVector[0]);
+                                           //        Print("in=",InputVector[0]," out=",OutputVector[0]);
          need_output=OutputVector[0];
          run();
          if(get_output()) Print(" out=",OutputVector[0]," need=",need_output);
@@ -555,7 +552,7 @@ bool  CMT5FANN::Init(string FileName)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-bool CMT5FANN::GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
+bool CMT5FANN::GetVectors(int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
