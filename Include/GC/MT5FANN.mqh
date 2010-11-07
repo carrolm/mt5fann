@@ -9,7 +9,9 @@
 #property link      ""
 #include <GC\IniFile.mqh>
 //#include <Fann2MQL.mqh>
-#import "Fann2MQL114b2.dll"
+//#import "Fann2MQL114b2.dll"
+#import "Fann2MQL113.dll"
+
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_from_file(uchar &path[]);
@@ -40,7 +42,7 @@ int f2M_parallel_deinit();
 int f2M_run_threaded(int anns_count,int &anns[],double &input_vector[]);
 int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
 ///* Data training */
-//int f2M_train_on_file(int ann,uchar &path[],int max_epoch,float desired_error);
+int f2M_train_on_file(int ann,uchar &path[],int max_epoch,float desired_error);
 #import
 
 //#import "fanndoubleMT.dll"
@@ -157,12 +159,11 @@ int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
 //    }
 //}
 
-
 //+------------------------------------------------------------------+
 //|     CMT5FANN                                                     |
 //+------------------------------------------------------------------+
 class CMT5FANN
-  {// changes
+  {
 private:
    string            Symbols_Array[30];
    int               Max_Symbols;
@@ -170,19 +171,20 @@ private:
    int               num_in_vectors;
    int               num_out_vectors;
    string            File_Name;
-   CIniFile          MyIniFile;                       // —оздаем экземпл€р класса
+   CIniFile          MyIniFile;                   // —оздаем экземпл€р класса
    CArrayString      Strings;                     // Ќеобходим дл€ работы с массивами данных
    int               ann;
-   int               num_layers;
-   int               CreateAnn();
 public:
    double            InputVector[];
    double            OutputVector[];
    int               ann_load(string path="");
-   int               train_on_file(string path,int max_epoch=1000,double desired_error=0.0001);
+   int               train(){return(f2M_train(ann,InputVector,OutputVector));}
    int               get_num_input(){return(num_in_vectors);};
    int               get_num_output(){return(num_out_vectors);};
-   int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));};
+   int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));}
+   int               test(){return(f2M_test(ann,InputVector,OutputVector));}
+   int               reset_MSE(){return(f2M_reset_MSE(ann));}
+   double            get_MSE(){return(f2M_get_MSE(ann));}
    bool              get_output();
    bool              ann_save(string path="");
    bool              ini_load(string path="");
@@ -191,6 +193,8 @@ public:
                      CMT5FANN(){Init();}
                     ~CMT5FANN(){DeInit();}
    void              Init();
+   int               train_on_file(string path="",int max_epoch=5000,float desired_error=(float)0.001,bool resetprev=false);
+   int               test_on_file(string path="");
    //   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers);
    bool              Init(string FileName);
    void              DeInit();
@@ -232,8 +236,6 @@ bool CMT5FANN::ini_save(string path="")
      {File_Name="";if(debug) Print("Error on write num_in_vectors");return(false);}
    if(!MyIniFile.WriteInteger("VectorsSize","Output",num_out_vectors))
      {File_Name="";if(debug) Print("Error on write num_out_vectors");return(false);}
-   if(!MyIniFile.WriteInteger("Layers","Num",num_layers))
-     {File_Name="";if(debug) Print("Error on write num_layers");return(false);}
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -257,12 +259,6 @@ bool CMT5FANN::ini_load(string path="")
       File_Name="";
       return(false);
      }
-   if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
-     {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
-   if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
-     {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
-   if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
-     {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
    if(-1==(ann=ann_load()))
      {
       //File_Name="";
@@ -301,42 +297,151 @@ int CMT5FANN::ann_load(string path="")
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CMT5FANN::train_on_file(string path,int max_epoch=1000,double desired_error=0.0001)
+int  CMT5FANN::train_on_file(string path,int max_epoch,float desired_error,bool resetprev)
   {
-   ArrayResize(InputVector,num_in_vectors+1);
-   ArrayResize(OutputVector,num_out_vectors+1);
-   int FileHandle=0;
-   FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_TXT,' ');
-//   struct data_header
-//  {
-//   int  cnt;     // значение допустимого проскальзывани€ -размер 1 байт
-//   int   num_in_vectors;    // 1 байт пропуска
-//   int  num_out_vectors;    // 2 байта пропуска
-//   };
-// 
-//
-//   if(FileHandle!=INVALID_HANDLE)
-//     {
-//      FileReadArray(FileHandle,data_header);
-//      Print(data_header.cnt);
-//      //if(f2M_train(fann,input_vector,output_vector)==-1)
-//        {
-//         Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
-//         return(-1);
-//        }
-//     }
 //char p[];
-//StringToCharArray(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path,p);
+   if(path=="") path=File_Name+".train";
+//path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path;
+//StringToCharArray(path,p);
 //return(f2M_train_on_file(ann,p,max_epoch,desired_error));
-   return(0);
+   string tmpstr;
+   int cnt=0;
+   int i,j,epoch;
+   int FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_CSV,' ');
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      if(resetprev) f2M_randomize_weights(ann,-1.0,1.0);
+      for(epoch=0;epoch<max_epoch;epoch++)
+        {
+         FileSeek(FileHandle,0,SEEK_SET);
+         cnt=(int)StringToInteger(FileReadString(FileHandle));
+         if(StringToInteger(FileReadString(FileHandle))!=num_in_vectors)
+           {
+            Print("Size vectors not equals!");
+            return(-1);
+           }
+         if(StringToInteger(FileReadString(FileHandle))!=num_out_vectors)
+           {
+            Print("Size vectors not equals!");
+            return(-1);
+           }
+         for(i=0;i<cnt;i++)
+           {
+            ArrayInitialize(InputVector,EMPTY_VALUE);
+            ArrayInitialize(OutputVector,EMPTY_VALUE);
+            // input vectors
+            for(j=0;j<num_in_vectors;j++)
+              {
+               InputVector[j]=StringToDouble(FileReadString(FileHandle));
+              }
+            FileReadString(FileHandle);// CR
+                                       // output vectors
+            for(j=0;j<num_out_vectors;j++)
+              {
+               OutputVector[j]=StringToDouble(FileReadString(FileHandle));
+              }
+            //Print(InputVector[0]," ",OutputVector[0]);
+            train();FileReadString(FileHandle);// CR
+           }
+         //if(debug) Print("Epoch=",epoch," MSE=",get_MSE());
+        }
+      if(debug) Print(" MSE=",get_MSE());
+     }
+   return(cnt);
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int  CMT5FANN::test_on_file(string path)
+  {
+//char p[];
+   if(path=="") path=File_Name+".test";
+//path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path;
+//StringToCharArray(path,p);
+//return(f2M_train_on_file(ann,p,max_epoch,desired_error));
+   string tmpstr;
+   int cnt=0;
+   int i,j;
+   double need_output;
+   int FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_CSV,' ');
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      FileSeek(FileHandle,0,SEEK_SET);
+      cnt=(int)StringToInteger(FileReadString(FileHandle));
+      if(StringToInteger(FileReadString(FileHandle))!=num_in_vectors)
+        {
+         Print("Size vectors not equals!");
+         return(-1);
+        }
+      if(StringToInteger(FileReadString(FileHandle))!=num_out_vectors)
+        {
+         Print("Size vectors not equals!");
+         return(-1);
+        }
+      //tmpstr=FileReadString(FileHandle);// CR
+      for(i=0;i<cnt;i++)
+        {
+         ArrayInitialize(InputVector,EMPTY_VALUE);
+         ArrayInitialize(OutputVector,EMPTY_VALUE);
+         // input vectors
+         for(j=0;j<num_in_vectors;j++)
+           {
+            InputVector[j]=StringToDouble(FileReadString(FileHandle));
+           }
+         tmpstr=FileReadString(FileHandle);// CR
+                                           // output vectors
+         for(j=0;j<num_out_vectors;j++)
+           {
+            OutputVector[j]=StringToDouble(FileReadString(FileHandle));
+           }
+         tmpstr=FileReadString(FileHandle);// CR
+ //        Print("in=",InputVector[0]," out=",OutputVector[0]);
+         need_output=OutputVector[0];
+         run();
+         if(get_output()) Print(" out=",OutputVector[0]," need=",need_output);
+        }
+      //if(debug) Print("Epoch=",epoch," MSE=",get_MSE());
+
+     }
+   return(cnt);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+//int CMT5FANN::train_on_file(string path,int max_epoch=1000,double desired_error=0.0001)
+//  {
+//   ArrayResize(InputVector,num_in_vectors+1);
+//   ArrayResize(OutputVector,num_out_vectors+1);
+//   int FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_TXT,' ');
+////   struct data_header
+////  {
+////   int  cnt;    
+////   int   num_in_vectors;    
+////   int  num_out_vectors;    
+////   };
+//// 
+////
+////   if(FileHandle!=INVALID_HANDLE)
+////     {
+////      FileReadArray(FileHandle,data_header);
+////      Print(data_header.cnt);
+////      //if(f2M_train(fann,input_vector,output_vector)==-1)
+////        {
+////         Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
+////         return(-1);
+////        }
+////     }
+////char p[];
+////StringToCharArray(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path,p);
+////return(f2M_train_on_file(ann,p,max_epoch,desired_error));
+//   return(0);
+//  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void CMT5FANN::Init()
   {
    debug=false;
-   num_layers=4;
    num_in_vectors=-1;
    num_out_vectors=-1;
 // Initialize Intel TBB threads
@@ -420,12 +525,12 @@ bool  CMT5FANN::Init(string FileName)
      {
       return(false);
      }
-   //if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
-   //  {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
-   //if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
-   //  {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
-   //if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
-   //  {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
+//if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
+//  {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
+//if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
+//  {File_Name="";if(debug) Print("Error on read num_out_vectors");return(false);}
+//if(0==(num_layers=(int)MyIniFile.ReadInteger("Layers","Num",0)))
+//  {File_Name="";if(debug) Print("Error on read num_layers");return(false);}
 // Print(ann);
    return(true);
   }
