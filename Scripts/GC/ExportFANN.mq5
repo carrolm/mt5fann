@@ -12,6 +12,7 @@
 #property link      "https://login.mql5.com/ru/users/Prival"
 #property version   "1.08"
 //#include <Fractals.mqh>
+#include <GC\GetVectors.mqh>
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
@@ -73,11 +74,12 @@ void OnStart()
    if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
    if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, месяц, год 
-   Write_File(SymbolsArray,MaxSymbols,1000,10); //
+   Write_File(SymbolsArray,MaxSymbols,10000,10,_Pers_); //
+   Print("Files created...");
    return;// работа скрипта завершена
   }
 //+------------------------------------------------------------------+
-int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,int Pers=5)
+int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,int Pers)
   {
    int shift=0;
 // test
@@ -95,8 +97,9 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int train_qty,int test_qty,
 int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,int qty,int Pers,int shift)
   {
    int i;
-   double IB[];
+   double IB[],OB[];
    ArrayResize(IB,Pers+2);
+   ArrayResize(OB,Pers+2);
    int FileHandle=0;
    int needcopy=0;
    int copied=0;
@@ -112,33 +115,34 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
      {
       FileWrite(FileHandle,// записываем в файл шапку
                 needcopy,// 
-                2+(1+Pers)*MaxSymbols,// количество секунд, прошедших с 1 января 1970 года
+ //               2+(1+Pers)*MaxSymbols,
+                Pers*MaxSymbols,
                 MaxSymbols);
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
-         Print("Баров в истории = ",bars);
+         //Print("Баров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,Pers,SymbolsArray[SymbolIdx],_Period,3,shift))
+            if(GetVectors(IB,OB,Pers,1,"RSI",SymbolsArray[SymbolIdx],_Period,shift))
               {
                i++;
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
                TimeToStruct(rates[2].time,tm);
                //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
-               outstr=""+(string)tm.day_of_week+" "+(string)tm.hour;
-               // news
-               for(int ibj=0;ibj<MaxSymbols;ibj++)
-                 {
-                  outstr=outstr+" 0";
-                 }
-               // data
-               for(int ibj=1;ibj<=Pers;ibj++)
+               outstr="";//+(string)tm.day_of_week+" "+(string)tm.hour;
+               //// news
+               //for(int ibj=0;ibj<MaxSymbols;ibj++)
+               //  {
+               //   outstr=outstr+" 0";
+               //  }
+               //// data
+               for(int ibj=0;ibj<Pers;ibj++)
                  {
                   outstr=outstr+" "+(string)(IB[ibj]);
                  }
 
                FileWrite(FileHandle,outstr);       // 
-               FileWrite(FileHandle,IB[0]); // 
+               FileWrite(FileHandle,OB[0]); // 
               }
         }
      }
@@ -190,7 +194,7 @@ string fTimeFrameName(int arg)
 //| просто разница                                                   |
 //+------------------------------------------------------------------+
 
-bool GetVectors(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
+bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int shft_his=7;
    int shft_cur=0;
@@ -202,6 +206,7 @@ bool GetVectors(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIME
 // копируем историю
    int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
    if(maxcount<num_vectors)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -213,134 +218,9 @@ bool GetVectors(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIME
       // вычислим и отнормируем
       InputVector[i]=100*(Close[i]-Close[i+1]);
      }
+     OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
 
 
 
-//+------------------------------------------------------------------+
-//| Заполняем вектор ! вначале -выходы -потом вход                   |
-//| Фракталы                                                         |
-//+------------------------------------------------------------------+
-
-bool GetVectors_f(double &InputVector[],int num_vectors=5,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
-  {// пара, период, смещение назад (для индикатора полезно)
-   int shft_his=7;
-   int shft_cur=0;
-
-   if(""==smbl) smbl=_Symbol;
-   if(0==tf) tf=_Period;
-   double Low[],High[];
-   ArraySetAsSeries(Low,true); ArraySetAsSeries(High,true);
-// копируем историю
-   int ncl=CopyLow(smbl,tf,shift,num_vectors*10*npf,Low);
-   int nch=CopyHigh(smbl,tf,shift,num_vectors*10*npf,High);
-   ArrayInitialize(InputVector,EMPTY_VALUE);
-   int maxcount=MathMin(ncl,nch);
-   if(maxcount<num_vectors*10*npf)
-     {
-      Print("Shift = ",shift," maxcount = ",maxcount);
-      return(false);
-     }
-   double UpperBuffer[];
-   double LowerBuffer[];
-   ArrayResize(UpperBuffer,num_vectors*10*npf);
-   ArrayResize(LowerBuffer,num_vectors*10*npf);
-   ArrayInitialize(UpperBuffer,EMPTY_VALUE);
-   ArrayInitialize(LowerBuffer,EMPTY_VALUE);
-   int i,j;
-   for(i=npf-1;i<maxcount-2;i++)
-     {
-      if(((5==npf) && (High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2]))
-         || ((3==npf) && ((High[i]>High[i+1] && High[i]>=High[i-1]))))
-        {
-         UpperBuffer[i]=High[i];
-         // проверка что предыдущее тоже верх и ниже
-         for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-         if(UpperBuffer[j]==EMPTY_VALUE)
-           {
-            if(LowerBuffer[j]>UpperBuffer[i])UpperBuffer[i]=EMPTY_VALUE;// ExtUpperBuffer[i]=High[i];
-           }
-         else
-           {
-            if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
-            else
-              {
-               UpperBuffer[j]=EMPTY_VALUE;
-               for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-               if(LowerBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
-               else
-                 {
-                  if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-                  else LowerBuffer[j]=EMPTY_VALUE;
-                 }
-              }
-           }
-        }
-      else UpperBuffer[i]=EMPTY_VALUE;
-
-      //---- Lower Fractal
-      if(((5==npf) && (Low[i]<Low[i+1] && Low[i]<Low[i+2] && Low[i]<=Low[i-1] && Low[i]<=Low[i-2]))
-         || ((3==npf) && ((Low[i]<Low[i+1] && Low[i]<=Low[i-1]))))
-        {
-         LowerBuffer[i]=Low[i];
-         // проверка что предыдущее тоже верх и ниже
-         for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-         if(LowerBuffer[j]==EMPTY_VALUE)
-           {
-            if(UpperBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-           }
-         else
-           {
-            if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-            else
-              {
-               LowerBuffer[j]=EMPTY_VALUE;
-               for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-               if(UpperBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
-               else
-                 {
-                  if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
-                 }
-              }
-           }
-
-        }
-      else LowerBuffer[i]=EMPTY_VALUE;
-     }
-// Возьмем num_vectors значимых элементов
-// вначале проверим что последний "красивый" -тоесть на котором можно заработать
-   int fp=npf-1;
-   double prf=0,prl=0;
-   if(UpperBuffer[fp]==EMPTY_VALUE && LowerBuffer[fp]==EMPTY_VALUE) return(false);// нет фрактала  
-                                                                                  //   do
-     {
-      if(LowerBuffer[fp]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-         prf=UpperBuffer[fp];
-      else  prf=LowerBuffer[fp];
-      //fp=j;
-      for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
-      if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-         prl=UpperBuffer[j];
-      else  prl=LowerBuffer[j];
-     }
-   if((MathAbs(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT)))>5)
-     {
-      // заполняем массив выходной 
-      InputVector[0]=prf-prl;
-      prf=prl;fp=j;
-      for(i=0;i<num_vectors;i++)
-        {
-         for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
-         if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-            prl=UpperBuffer[j];
-         else  prl=LowerBuffer[j];
-         InputVector[i+1]=100*(prf-prl);      prf=prl;fp=j;
-        }
-
-      return(true);// 
-     }
-   else
-      return(false);// нет свечки  
-   return(true);// нет свечки
-  }
