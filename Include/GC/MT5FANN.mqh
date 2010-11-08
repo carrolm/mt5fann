@@ -509,19 +509,19 @@ bool  CMT5FANN::Init(string FileName)
    num_out_vectors=f2M_get_num_output(ann);
    ArrayResize(InputVector,get_num_input());
    ArrayResize(OutputVector,get_num_output());
-   MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
-// ѕровер€ем, если секци€ существует, читаем ее KeyNames
-   if(MyIniFile.SectionExists("SymbolsArray"))
-     {
-      MyIniFile.ReadSection("SymbolsArray",Strings);
-      Max_Symbols=Strings.Total();
-      for(int i=0; i<Strings.Total(); i++)
-        {Symbols_Array[i]=Strings.At(i);if(debug) Print(Strings.At(i));}
-     }
-   else
-     {
-      return(false);
-     }
+//   MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
+//// ѕровер€ем, если секци€ существует, читаем ее KeyNames
+//   if(MyIniFile.SectionExists("SymbolsArray"))
+//     {
+//      MyIniFile.ReadSection("SymbolsArray",Strings);
+//      Max_Symbols=Strings.Total();
+//      for(int i=0; i<Strings.Total(); i++)
+//        {Symbols_Array[i]=Strings.At(i);if(debug) Print(Strings.At(i));}
+//     }
+//   else
+//     {
+//      return(false);
+//     }
 //if(0==(num_in_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Input",0)))
 //  {File_Name="";if(debug) Print("Error on read num_in_vectors");return(false);}
 //if(0==(num_out_vectors=(int)MyIniFile.ReadInteger("VectorsSize","Output",0)))
@@ -554,29 +554,6 @@ bool  CMT5FANN::Init(string FileName)
 
 bool CMT5FANN::GetVectors(int shift)
   {// пара, период, смещение назад (дл€ индикатора полезно)
-   int shft_his=7;
-   int shft_cur=0;
-
-   if(""==smbl) smbl=_Symbol;
-   if(0==tf) tf=_Period;
-   double Close[];
-   ArraySetAsSeries(Close,true);
-// копируем историю
-   int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
-   ArrayInitialize(InputVector,EMPTY_VALUE);
-   ArrayInitialize(OutputVector,EMPTY_VALUE);
-   if(maxcount<num_vectors)
-     {
-      Print("Shift = ",shift," maxcount = ",maxcount);
-      return(false);
-     }
-   int i;
-   for(i=1;i<num_vectors;i++)
-     {
-      // вычислим и отнормируем
-      InputVector[i-1]=100*(Close[i]-Close[i+1]);
-     }
-   OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
 //+------------------------------------------------------------------+
