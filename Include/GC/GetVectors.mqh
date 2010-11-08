@@ -89,27 +89,27 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
          || ((3==npf) && ((High[i]>High[i+1] && High[i]>=High[i-1]))))
         {
          UpperBuffer[i]=High[i];
-         // проверка что предыдущее тоже верх и ниже
-         for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-         if(UpperBuffer[j]==EMPTY_VALUE)
-           {
-            if(LowerBuffer[j]>UpperBuffer[i])UpperBuffer[i]=EMPTY_VALUE;// ExtUpperBuffer[i]=High[i];
-           }
-         else
-           {
-            if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
-            else
-              {
-               UpperBuffer[j]=EMPTY_VALUE;
-               for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-               if(LowerBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
-               else
-                 {
-                  if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-                  else LowerBuffer[j]=EMPTY_VALUE;
-                 }
-              }
-           }
+         //// проверка что предыдущее тоже верх и ниже
+         //for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
+         //if(UpperBuffer[j]==EMPTY_VALUE)
+         //  {
+         //   if(LowerBuffer[j]>UpperBuffer[i])UpperBuffer[i]=EMPTY_VALUE;// ExtUpperBuffer[i]=High[i];
+         //  }
+         //else
+         //  {
+         //   if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
+         //   else
+         //     {
+         //      UpperBuffer[j]=EMPTY_VALUE;
+         //      for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
+         //      if(LowerBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
+         //      else
+         //        {
+         //         if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
+         //         else LowerBuffer[j]=EMPTY_VALUE;
+         //        }
+         //     }
+         //  }
         }
       else UpperBuffer[i]=EMPTY_VALUE;
 
@@ -119,25 +119,25 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
         {
          LowerBuffer[i]=Low[i];
          // проверка что предыдущее тоже верх и ниже
-         for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-         if(LowerBuffer[j]==EMPTY_VALUE)
-           {
-            if(UpperBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-           }
-         else
-           {
-            if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
-            else
-              {
-               LowerBuffer[j]=EMPTY_VALUE;
-               for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
-               if(UpperBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
-               else
-                 {
-                  if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
-                 }
-              }
-           }
+         //for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
+         //if(LowerBuffer[j]==EMPTY_VALUE)
+         //  {
+         //   if(UpperBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
+         //  }
+         //else
+         //  {
+         //   if(LowerBuffer[j]<LowerBuffer[i]) LowerBuffer[i]=EMPTY_VALUE;
+         //   else
+         //     {
+         //      LowerBuffer[j]=EMPTY_VALUE;
+         //      for(j=i-1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j>0;j--);
+         //      if(UpperBuffer[j]==EMPTY_VALUE);// ExtUpperBuffer[i]=High[i];
+         //      else
+         //        {
+         //         if(UpperBuffer[j]>UpperBuffer[i]) UpperBuffer[i]=EMPTY_VALUE;
+         //        }
+         //     }
+         //  }
 
         }
       else LowerBuffer[i]=EMPTY_VALUE;
@@ -147,36 +147,37 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    int fp=npf-1;
    double prf=0,prl=0;
    if(UpperBuffer[fp]==EMPTY_VALUE && LowerBuffer[fp]==EMPTY_VALUE) return(false);// нет фрактала  
-                                                                                  //   do
+   if(LowerBuffer[fp]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
+      prf=UpperBuffer[fp];
+   else  prf=LowerBuffer[fp];
+//fp=j;
+   for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
+   if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
+      prl=UpperBuffer[j];
+   else  prl=LowerBuffer[j];
+// заполняем массив выходной 
+   double res = (prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
+   if(res>5)
+      OutputVector[0]=0.95;
+   else if(res>1)
+      OutputVector[0]=0.25;
+   else if(res<-5)
+      OutputVector[0]=-0.95;
+   else if(res<-1)
+      OutputVector[0]=-0.25;
+   else    OutputVector[0]=0.0;
+   prf=prl;fp=j;
+   for(i=0;i<num_inputvectors;i++)
      {
-      if(LowerBuffer[fp]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-         prf=UpperBuffer[fp];
-      else  prf=LowerBuffer[fp];
-      //fp=j;
       for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
       if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
          prl=UpperBuffer[j];
       else  prl=LowerBuffer[j];
+      InputVector[i]=(prf-prl)/1000/SymbolInfoDouble(smbl,SYMBOL_POINT);      prf=prl;fp=j;
      }
-   if((MathAbs(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT)))>5)
-     {
-      // заполняем массив выходной 
-      OutputVector[0]=(prf-prl)/1000/SymbolInfoDouble(smbl,SYMBOL_POINT);
-      prf=prl;fp=j;
-      for(i=0;i<num_inputvectors;i++)
-        {
-         for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
-         if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-            prl=UpperBuffer[j];
-         else  prl=LowerBuffer[j];
-         InputVector[i]=(prf-prl)/1000/SymbolInfoDouble(smbl,SYMBOL_POINT);      prf=prl;fp=j;
-        }
 
-      return(true);// 
-     }
-   else
-      return(false);// нет свечки  
-   return(true);// нет свечки
+   return(true);// 
+
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -205,9 +206,9 @@ bool GetVectors_RSI(double &InputVector[],double &OutputVector[],int num_inputve
      {
       // вычислим и отнормируем
       res=(rsi_buffer[i]-50.0)/50.0;
-      if(MathAbs(res)>1) 
+      if(MathAbs(res)>1)
         {
-         if(res>0) 
+         if(res>0)
            {
             InputVector[i]=1.0;
               } else {

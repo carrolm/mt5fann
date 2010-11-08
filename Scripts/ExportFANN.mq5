@@ -74,7 +74,7 @@ void OnStart()
    if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
    if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, месяц, год 
-   Write_File(SymbolsArray,MaxSymbols,10000,10,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,10000,50,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
   }
@@ -123,7 +123,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
          //Print("Баров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,OB,Pers,1,"RSI",SymbolsArray[SymbolIdx],_Period,shift))
+            if(GetVectors(IB,OB,Pers,1,"Fractals",SymbolsArray[SymbolIdx],_Period,shift))
               {
                i++;
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
@@ -194,33 +194,7 @@ string fTimeFrameName(int arg)
 //| просто разница                                                   |
 //+------------------------------------------------------------------+
 
-bool GetVectors(double &InputVector[],double &OutputVector[],int num_vectors,string smbl="",ENUM_TIMEFRAMES tf=0,int npf=3,int shift=0)
-  {// пара, период, смещение назад (для индикатора полезно)
-   int shft_his=7;
-   int shft_cur=0;
 
-   if(""==smbl) smbl=_Symbol;
-   if(0==tf) tf=_Period;
-   double Close[];
-   ArraySetAsSeries(Close,true); 
-// копируем историю
-   int maxcount=CopyClose(smbl,tf,shift,num_vectors+2,Close);
-   ArrayInitialize(InputVector,EMPTY_VALUE);
-   ArrayInitialize(OutputVector,EMPTY_VALUE);
-   if(maxcount<num_vectors)
-     {
-      Print("Shift = ",shift," maxcount = ",maxcount);
-      return(false);
-     }
-   int i;
-   for(i=0;i<num_vectors;i++)
-     {
-      // вычислим и отнормируем
-      InputVector[i]=100*(Close[i]-Close[i+1]);
-     }
-     OutputVector[0]=100*(Close[1]-Close[2]);
-   return(true);
-  }
 
 
 

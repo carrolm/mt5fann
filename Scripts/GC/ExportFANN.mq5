@@ -74,7 +74,7 @@ void OnStart()
    if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
    if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
-   Write_File(SymbolsArray,MaxSymbols,10000,10,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,5000,50,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
   }
@@ -123,7 +123,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
          //Print("Ѕаров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,OB,Pers,1,"RSI",SymbolsArray[SymbolIdx],_Period,shift))
+            if(GetVectors(IB,OB,Pers,1,"Fractals",SymbolsArray[SymbolIdx],_Period,shift))
               {
                i++;
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
