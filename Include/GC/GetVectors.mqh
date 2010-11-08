@@ -157,12 +157,16 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    else  prl=LowerBuffer[j];
 // заполняем массив выходной 
    double res = (prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-   if(res>5)
+   if(res>10)
       OutputVector[0]=0.95;
+   else if(res>5)
+      OutputVector[0]=0.50;
    else if(res>1)
       OutputVector[0]=0.25;
-   else if(res<-5)
+   else if(res<-10)
       OutputVector[0]=-0.95;
+   else if(res<-5)
+      OutputVector[0]=-0.50;
    else if(res<-1)
       OutputVector[0]=-0.25;
    else    OutputVector[0]=0.0;
