@@ -8,6 +8,9 @@
 //|                                                    Привалов С.В. |
 //|                           https://login.mql5.com/ru/users/Prival |
 //+------------------------------------------------------------------+
+
+//проверка на  потерю данных
+
 #property copyright "Привалов С.В."
 #property link      "https://login.mql5.com/ru/users/Prival"
 #property version   "1.08"
