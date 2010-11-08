@@ -116,7 +116,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
       FileWrite(FileHandle,// записываем в файл шапку
                 needcopy,// 
  //               2+(1+Pers)*MaxSymbols,
-                Pers*MaxSymbols,
+                2+Pers*MaxSymbols,
                 MaxSymbols);
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
@@ -129,7 +129,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
                copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
                TimeToStruct(rates[2].time,tm);
                //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
-               outstr="";//+(string)tm.day_of_week+" "+(string)tm.hour;
+               outstr=""+(string)((double)tm.day_of_week/7)+" "+(string)((double)tm.hour/24);
                //// news
                //for(int ibj=0;ibj<MaxSymbols;ibj++)
                //  {
