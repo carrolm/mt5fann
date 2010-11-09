@@ -20,9 +20,9 @@ void OnStart()
    if(!mt5fann.Init("fx_eliot")) Print("Init error");
    if(GetVectors(mt5fann.InputVector,mt5fann.OutputVector,5,1,"Fractals"))
      {
-     mt5fann.run();
-     mt5fann.get_output();
-     Print(mt5fann.OutputVector[0]);
+      mt5fann.run();
+      mt5fann.get_output();
+      Print(mt5fann.OutputVector[0]);
      }
   }
 //+------------------------------------------------------------------+
