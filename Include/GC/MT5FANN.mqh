@@ -9,40 +9,41 @@
 #property link      ""
 #include <GC\IniFile.mqh>
 //#include <Fann2MQL.mqh>
-//#import "Fann2MQL114b2.dll"
-#import "Fann2MQL113.dll"
+#import "Fann2MQL114b2.dll"
+#import "fanndouble.dll"
+//#import "Fann2MQL113.dll"
 
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-int f2M_create_from_file(uchar &path[]);
-int f2M_run(int ann,double &input_vector[]);
-int f2M_destroy(int ann);
-int f2M_destroy_all_anns();
+int f2M5_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
+int f2M5_create_from_file(uchar &path[]);
+int f2M5_run(int ann,double &input_vector[]);
+int f2M5_destroy(int ann);
+int f2M5_destroy_all_anns();
 
-double f2M_get_output(int ann,int output);
-int  f2M_get_num_input(int ann);
-int  f2M_get_num_output(int ann);
+double f2M5_get_output(int ann,int output);
+int  f2M5_get_num_input(int ann);
+int  f2M5_get_num_output(int ann);
 
-int f2M_train(int ann,double &input_vector[],double &output_vector[]);
-int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
-int f2M_randomize_weights(int ann,double min_weight,double max_weight);
-double f2M_get_MSE(int ann);
-int f2M_save(int ann,char &path[]);
-int f2M_reset_MSE(int ann);
-int f2M_test(int ann,double &input_vector[],double &output_vector[]);
-int f2M_set_act_function_layer(int ann,int activation_function,int layer);
-int f2M_set_act_function_hidden(int ann,int activation_function);
-int f2M_set_act_function_output(int ann,int activation_function);
+int f2M5_train(int ann,double &input_vector[],double &output_vector[]);
+int f2M5_train_fast(int ann,double &input_vector[],double &output_vector[]);
+int f2M5_randomize_weights(int ann,double min_weight,double max_weight);
+double f2M5_get_MSE(int ann);
+int f2M5_save(int ann,char &path[]);
+int f2M5_reset_MSE(int ann);
+int f2M5_test(int ann,double &input_vector[],double &output_vector[]);
+int f2M5_set_act_function_layer(int ann,int activation_function,int layer);
+int f2M5_set_act_function_hidden(int ann,int activation_function);
+int f2M5_set_act_function_output(int ann,int activation_function);
 
 /* Threads functions */
-int f2M_threads_init(int num_threads);
-int f2M_threads_deinit();
-int f2M_parallel_init();
-int f2M_parallel_deinit();
-int f2M_run_threaded(int anns_count,int &anns[],double &input_vector[]);
-int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
+int f2M5_threads_init(int num_threads);
+int f2M5_threads_deinit();
+int f2M5_parallel_init();
+int f2M5_parallel_deinit();
+int f2M5_run_threaded(int anns_count,int &anns[],double &input_vector[]);
+int f2M5_run_parallel(int anns_count,int &anns[],double &input_vector[]);
 ///* Data training */
-int f2M_train_on_file(int ann,uchar &path[],int max_epoch,float desired_error);
+int f2M5_train_on_file(int ann,uchar &path[],int max_epoch,float desired_error);
 #import
 
 //#import "fanndoubleMT.dll"
@@ -166,6 +167,7 @@ class CMT5FANN
   {
 private:
    string            Symbols_Array[30];
+   ENUM_TIMEFRAMES   TimeFrame;
    int               Max_Symbols;
    int               FileHandle;
    int               num_in_vectors;
@@ -186,11 +188,11 @@ public:
    bool              ini_save(string path="");
    int               get_num_input(){return(num_in_vectors);};
    int               get_num_output(){return(num_out_vectors);};
-   int               train(){return(f2M_train(ann,InputVector,OutputVector));}
-   int               run(){return((-1==ann)?-1:f2M_run(ann,InputVector));}
-   int               test(){return(f2M_test(ann,InputVector,OutputVector));}
-   int               reset_MSE(){return(f2M_reset_MSE(ann));}
-   double            get_MSE(){return(f2M_get_MSE(ann));}
+   int               train(){return(f2M5_train(ann,InputVector,OutputVector));}
+   int               run(){return((-1==ann)?-1:f2M5_run(ann,InputVector));}
+   int               test(){return(f2M5_test(ann,InputVector,OutputVector));}
+   int               reset_MSE(){return(f2M5_reset_MSE(ann));}
+   double            get_MSE(){return(f2M5_get_MSE(ann));}
    bool              get_output();
    bool              debug;
    void              Init();
@@ -209,7 +211,7 @@ bool CMT5FANN::get_output()
   {
    if(-1==ann) return(false);
    for(int i=0;i<num_out_vectors;i++)
-      OutputVector[i]=f2M_get_output(ann,i);
+      OutputVector[i]=f2M5_get_output(ann,i);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -225,15 +227,18 @@ bool CMT5FANN::ini_save(string path="")
 //string outstr;
    for(int SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
-
       resb=MyIniFile.WriteString("SymbolsArray",Symbols_Array[SymbolIdx],"True");
       if(!resb)
-         //{if(debug) Print("Ok write string");}
-         //else
-        {//if(debug) Print("Error on write string");return(false);
+        {
+         if(debug) Print("Ok write string");
+        }
+      else
+        {
+         if(debug) Print("Error on write string");return(false);
         }
      }
-    return(true);
+    resb=MyIniFile.WriteInteger("Settings","TimeFrame",TimeFrame); 
+   return(true);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -273,7 +278,7 @@ bool CMT5FANN::ann_save(string path="")
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
    StringToCharArray(path,p);
-   if(f2M_save(ann,p)<0)
+   if(f2M5_save(ann,p)<0)
      {
       if(debug)Print("ne shmogla ",path);
       return(false);
@@ -289,7 +294,16 @@ int CMT5FANN::ann_load(string path="")
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
    StringToCharArray(path,p);
-   return(f2M_create_from_file(p));
+   ann=f2M5_create_from_file(p);
+   if(-1==ann)
+     {
+/* Создание нейросети */
+      ann=f2M5_create_standard(4,num_in_vectors,num_in_vectors,num_in_vectors/2+num_out_vectors,num_out_vectors);
+      f2M5_set_act_function_hidden(ann,FANN_ELLIOT_SYMMETRIC);
+      f2M5_set_act_function_output(ann,FANN_SIGMOID_SYMMETRIC_STEPWISE);
+      f2M5_randomize_weights(ann,-0.99,0.99);
+     }
+   return(ann);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -307,7 +321,7 @@ int  CMT5FANN::train_on_file(string path,int max_epoch,float desired_error,bool 
    int FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_CSV,' ');
    if(FileHandle!=INVALID_HANDLE)
      {
-      if(resetprev) f2M_randomize_weights(ann,-1.0,1.0);
+      if(resetprev) f2M5_randomize_weights(ann,-1.0,1.0);
       for(epoch=0;epoch<max_epoch;epoch++)
         {
          FileSeek(FileHandle,0,SEEK_SET);
@@ -441,6 +455,7 @@ void CMT5FANN::Init()
    debug=false;
    num_in_vectors=-1;
    num_out_vectors=-1;
+   TimeFrame = _Period;
 // Initialize Intel TBB threads
 //  f2M_parallel_init();
 
@@ -457,7 +472,7 @@ void CMT5FANN::DeInit()
       ann_save();
       ini_save();
      }
-   f2M_destroy(ann);
+   f2M5_destroy(ann);
 //  f2M_parallel_deinit();
 
 //   f2M_save(ann,File_Name+".net");
@@ -505,8 +520,8 @@ bool  CMT5FANN::Init(string FileName)
       //File_Name="";
       return(false);
      }
-   num_in_vectors=f2M_get_num_input(ann);
-   num_out_vectors=f2M_get_num_output(ann);
+   num_in_vectors=f2M5_get_num_input(ann);
+   num_out_vectors=f2M5_get_num_output(ann);
    ArrayResize(InputVector,get_num_input());
    ArrayResize(OutputVector,get_num_output());
 //   MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
