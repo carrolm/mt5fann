@@ -5,19 +5,21 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
+string VectorFunctions[21]={"Fractals","Easy","RSI","","","","","","","","","",""};
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
+   bool ret=false;
    int shift_history=7;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
-   if("Easy"==fn_name) return(GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history));
-   if("RSI"==fn_name) return(GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history));
-   if("Fractals"==fn_name) return(GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history));
+   if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+   if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+   if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
 //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
-   return(false);
+   return(ret);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |

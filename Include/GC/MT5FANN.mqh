@@ -9,7 +9,8 @@
 #property link      ""
 #include <GC\IniFile.mqh>
 #include <GC\Fann2MQL5.mqh>
-
+#include <GC\GetVectors.mqh>
+//#include <GC\CurrPairs.mqh>
 //train_RPROP
 //hiden ELIOT_SYM
 //out SIGMOID_SYM_STEPWISE!
@@ -21,8 +22,13 @@ class CMT5FANN
   {
 private:
    string            Symbols_Array[30];
-   ENUM_TIMEFRAMES   TimeFrame;
    int               Max_Symbols;
+   string            Functions_Array[10];
+   int               Max_Functions;
+   ENUM_TIMEFRAMES   TimeFrame;
+   bool              WithNews;
+   bool              WithHours;
+   bool              WithDayOfWeek;
    int               FileHandle;
    int               num_in_vectors;
    int               num_out_vectors;
@@ -55,9 +61,86 @@ public:
    //   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers);
    bool              Init(string FileName);
    void              DeInit();
-   bool              GetVectors(int shift=0);
-
+   bool              GetVector(int shift=0);
+   int               ExportFANNDataWithTest(int train_qty,int test_qty,string FileName="");
+   int               ExportFANNData(int qty,int shift,string FileName);
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CMT5FANN::ExportFANNDataWithTest(int train_qty,int test_qty,string FileName="")
+  {
+   if(""==FileName) FileName=File_Name;
+   int shift=0;
+// test
+   shift=ExportFANNData(test_qty,shift,FileName+"_test.test");
+   shift=ExportFANNData(train_qty,shift,FileName+"_train.train");
+// чето ниже не работает :(
+   FileCopy("Forex_test.test",FILE_COMMON,"Forex_test.dat",FILE_REWRITE);
+   FileCopy("Forex_train.train",FILE_COMMON,"Forex_train.dat",FILE_REWRITE);
+//\
+   return(shift);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
+  {
+   int i;
+   double IB[],OB[];
+   ArrayResize(IB,num_in_vectors+2);
+   ArrayResize(OB,num_out_vectors+2);
+   int FileHandle=0;
+   int needcopy=0;
+   int copied=0;
+   MqlRates rates[];
+   MqlDateTime tm;
+   ArraySetAsSeries(rates,true);
+   string outstr;
+   int SymbolIdx;
+   FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
+   needcopy=qty;
+
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      FileWrite(FileHandle,// записываем в файл шапку
+                needcopy,// 
+                //               2+(1+Pers)*MaxSymbols,
+                2+((WithNews)?1:0+num_in_vectors)*Max_Symbols,
+                Max_Symbols);
+      for(SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
+        {
+         int bars=Bars(Symbols_Array[SymbolIdx],_Period);
+         //Print("Баров в истории = ",bars);
+         for(i=0;i<needcopy && shift<bars;shift++)
+            if(GetVectors(IB,OB,num_in_vectors,1,"Fractals",Symbols_Array[SymbolIdx],_Period,shift))
+              {
+               i++;
+               copied=CopyRates(Symbols_Array[SymbolIdx],_Period,shift,3,rates);
+               TimeToStruct(rates[2].time,tm);
+               //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
+               outstr=""+(string)((double)tm.day_of_week/7)+" "+(string)((double)tm.hour/24);
+               // news
+               if(WithNews)
+                  for(int ibj=0;ibj<Max_Symbols;ibj++)
+                    {
+                     outstr=outstr+" 0";
+                    }
+               // data
+               for(int ibj=0;ibj<num_in_vectors;ibj++)
+                 {
+                  outstr=outstr+" "+(string)(IB[ibj]);
+                 }
+
+               FileWrite(FileHandle,outstr);       // 
+               FileWrite(FileHandle,OB[0]); // 
+              }
+        }
+     }
+   FileClose(FileHandle);
+
+   return(shift);
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -78,7 +161,8 @@ bool CMT5FANN::ini_save(string path="")
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".ini";
    MyIniFile.Init(path);// Пишем 
    bool     resb;
-//string outstr;
+   if(Max_Symbols==1 && Symbols_Array[0]==_Symbol);
+   else
    for(int SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
       resb=MyIniFile.WriteString("SymbolsArray",Symbols_Array[SymbolIdx],"True");
@@ -91,7 +175,22 @@ bool CMT5FANN::ini_save(string path="")
          if(debug) Print("Error on write string");return(false);
         }
      }
-    resb=MyIniFile.WriteInteger("Settings","TimeFrame",TimeFrame); 
+   for(int FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
+     {
+      resb=MyIniFile.WriteString("FunctionsArray",Functions_Array[FunctionsIdx],"True");
+      if(!resb)
+        {
+         if(debug) Print("Ok write string");
+        }
+      else
+        {
+         if(debug) Print("Error on write string");return(false);
+        }
+     }
+   resb=MyIniFile.WriteInteger("Settings","TimeFrame",TimeFrame);
+   resb=MyIniFile.WriteBool("Settings","WithNews",WithNews);
+   resb=MyIniFile.WriteBool("Settings","WithHours",WithHours);
+   resb=MyIniFile.WriteBool("Settings","WithDayOfWeek",WithDayOfWeek);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -112,9 +211,20 @@ bool CMT5FANN::ini_load(string path="")
      }
    else
      {
-      File_Name="";
-      return(false);
+      Max_Symbols=1;Symbols_Array[0]=_Symbol;
      }
+   if(MyIniFile.SectionExists("FunctionsArray"))
+     {
+      MyIniFile.ReadSection("FunctionsArray",Strings);
+      Max_Functions=Strings.Total();
+      for(int i=0; i<Strings.Total(); i++)
+        {Functions_Array[i]=Strings.At(i);if(debug) Print(Strings.At(i));}
+     }
+   else
+     {
+      Max_Functions=1;Functions_Array[0]=VectorFunctions[0];
+     }
+
    if(-1==(ann=ann_load()))
      {
       //File_Name="";
@@ -142,6 +252,18 @@ bool CMT5FANN::ann_save(string path="")
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+int CMT5FANN::ann_create()
+  {
+/* Создание нейросети */
+   ann=f2M5_create_standard(4,num_in_vectors,num_in_vectors,num_in_vectors/2+num_out_vectors,num_out_vectors);
+   f2M5_set_act_function_hidden(ann,FANN_ELLIOT_SYMMETRIC);
+   f2M5_set_act_function_output(ann,FANN_SIGMOID_SYMMETRIC_STEPWISE);
+   f2M5_randomize_weights(ann,-0.99,0.99);
+   return(ann);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMT5FANN::ann_load(string path="")
   {
    char p[];
@@ -149,14 +271,6 @@ int CMT5FANN::ann_load(string path="")
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
    StringToCharArray(path,p);
    ann=f2M5_create_from_file(p);
-   if(-1==ann)
-     {
-/* Создание нейросети */
-      ann=f2M5_create_standard(4,num_in_vectors,num_in_vectors,num_in_vectors/2+num_out_vectors,num_out_vectors);
-      f2M5_set_act_function_hidden(ann,FANN_ELLIOT_SYMMETRIC);
-      f2M5_set_act_function_output(ann,FANN_SIGMOID_SYMMETRIC_STEPWISE);
-      f2M5_randomize_weights(ann,-0.99,0.99);
-     }
    return(ann);
   }
 //+------------------------------------------------------------------+
@@ -273,43 +387,15 @@ int  CMT5FANN::test_on_file(string path)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//int CMT5FANN::train_on_file(string path,int max_epoch=1000,double desired_error=0.0001)
-//  {
-//   ArrayResize(InputVector,num_in_vectors+1);
-//   ArrayResize(OutputVector,num_out_vectors+1);
-//   int FileHandle=FileOpen(path,FILE_READ|FILE_ANSI|FILE_TXT,' ');
-////   struct data_header
-////  {
-////   int  cnt;    
-////   int   num_in_vectors;    
-////   int  num_out_vectors;    
-////   };
-//// 
-////
-////   if(FileHandle!=INVALID_HANDLE)
-////     {
-////      FileReadArray(FileHandle,data_header);
-////      Print(data_header.cnt);
-////      //if(f2M_train(fann,input_vector,output_vector)==-1)
-////        {
-////         Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
-////         return(-1);
-////        }
-////     }
-////char p[];
-////StringToCharArray(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path,p);
-////return(f2M_train_on_file(ann,p,max_epoch,desired_error));
-//   return(0);
-//  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 void CMT5FANN::Init()
   {
    debug=false;
    num_in_vectors=-1;
    num_out_vectors=-1;
-   TimeFrame = _Period;
+   TimeFrame= _Period;
+   WithNews = false;
+   WithHours= false;
+   WithDayOfWeek=false;
 // Initialize Intel TBB threads
 //  f2M_parallel_init();
 
@@ -378,6 +464,7 @@ bool  CMT5FANN::Init(string FileName)
    num_out_vectors=f2M5_get_num_output(ann);
    ArrayResize(InputVector,get_num_input());
    ArrayResize(OutputVector,get_num_output());
+   ini_load();
 //   MyIniFile.Init(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+FileName+".ini");
 //// Проверяем, если секция существует, читаем ее KeyNames
 //   if(MyIniFile.SectionExists("SymbolsArray"))
@@ -421,7 +508,7 @@ bool  CMT5FANN::Init(string FileName)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-bool CMT5FANN::GetVectors(int shift)
+bool CMT5FANN::GetVector(int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    return(true);
   }
