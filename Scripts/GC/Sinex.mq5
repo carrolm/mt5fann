@@ -8,6 +8,7 @@
 #property version   "1.00"
 #include <GC\MT5FANN.mqh>
 #include <GC\GetVectors.mqh>
+// add comment!
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
