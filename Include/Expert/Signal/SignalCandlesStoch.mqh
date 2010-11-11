@@ -18,14 +18,14 @@
 //| Parameter=ShadowBig,double,0.5                                   |
 //| Parameter=ShadowLittle,double,0.2                                |
 //| Parameter=Limit,double,0.0                                       |
-//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=StopLoss,double,2.0                                    |
+//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=Expiration,int,4                                       |
 //| Parameter=PeriodK,int,8                                          |
 //| Parameter=PeriodD,int,3                                          |
 //| Parameter=PeriodSlow,int,3                                       |
 //| Parameter=Applied,ENUM_STO_PRICE,STO_LOWHIGH                     |
-//| Parameter=ExtrMapp,int,149796                                    |
+//| Parameter=ExtrMapp,int,11184810                                  |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -56,7 +56,7 @@ public:
    void              PeriodSlow(int period)          { m_period_slow=period;        }
    void              Applied(ENUM_STO_PRICE applied) { m_applied=applied;           }
    void              ExtrMapp(int mapp)              { m_extr_mapp=mapp;            }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -65,7 +65,7 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitStoch(CIndicators *indicators);
+   bool              InitStoch(CIndicators* indicators);
    //---
    double            StochMain(int ind)              { return(m_stoch.Main(ind));   }
    double            StochSignal(int ind)            { return(m_stoch.Signal(ind)); }
@@ -88,7 +88,7 @@ void CSignalCandlesStoch::CSignalCandlesStoch()
    m_periodD    =3;
    m_period_slow=3;
    m_applied    =STO_LOWHIGH;
-   m_extr_mapp  =149796;
+   m_extr_mapp  =11184810;   // 101010101010101010101010b
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalCandlesStoch.                                  |
@@ -111,12 +111,12 @@ bool CSignalCandlesStoch::ValidationSettings()
    if(!CSignalCandles::ValidationSettings()) return(false);
    if(m_periodK<=0)
      {
-      printf(__FUNCTION__+": Period%K Stochastic must be greater than 0");
+      printf(__FUNCTION__+": period%K Stochastic must be greater than 0");
       return(false);
      }
    if(m_periodD<=0)
      {
-      printf(__FUNCTION__+": Period%D Stochastic must be greater than 0");
+      printf(__FUNCTION__+": period%D Stochastic must be greater than 0");
       return(false);
      }
 //--- ok
@@ -128,7 +128,7 @@ bool CSignalCandlesStoch::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesStoch::InitIndicators(CIndicators *indicators)
+bool CSignalCandlesStoch::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)                            return(false);
@@ -159,26 +159,26 @@ bool CSignalCandlesStoch::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesStoch::InitStoch(CIndicators *indicators)
+bool CSignalCandlesStoch::InitStoch(CIndicators* indicators)
   {
 //--- create Stochastic indicator
    if(m_stoch==NULL)
       if((m_stoch=new CiStochastic)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Stochastic indicator to collection
    if(!indicators.Add(m_stoch))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_stoch;
       return(false);
      }
 //--- initialize Stochastic indicator
    if(!m_stoch.Create(m_symbol.Name(),m_period,m_periodK,m_periodD,m_period_slow,MODE_SMA,m_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_stoch.BufferResize(100);
@@ -246,9 +246,9 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
            {
             extr_pr[i]=m_app_price_low.MinValue(pos-2,5,index);
             mapp=0;
-            if(extr_pr[i-2]<extr_pr[i])   mapp+=1;
-            if(extr_osc[i-2]<extr_osc[i]) mapp+=2;
-            extr_mapp+=mapp<<(3*(i-2));
+            if(extr_pr[i-2]<extr_pr[i])   mapp+=1;  // set bit 0
+            if(extr_osc[i-2]<extr_osc[i]) mapp+=4;  // set bit 2
+            extr_mapp+=mapp<<(4*(i-2));
            }
          else
             extr_pr[i]=m_app_price_low.MinValue(pos-1,4,index);
@@ -261,9 +261,9 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
            {
             extr_pr[i]=m_app_price_high.MaxValue(pos-2,5,index);
             mapp=0;
-            if(extr_pr[i-2]>extr_pr[i])   mapp+=1;
-            if(extr_osc[i-2]>extr_osc[i]) mapp+=2;
-            extr_mapp+=mapp<<(3*(i-2));
+            if(extr_pr[i-2]>extr_pr[i])   mapp+=1;  // set bit 0
+            if(extr_osc[i-2]>extr_osc[i]) mapp+=4;  // set bit 2
+            extr_mapp+=mapp<<(4*(i-2));
            }
          else
             extr_pr[i]=m_app_price_high.MaxValue(pos-1,4,index);
@@ -285,11 +285,11 @@ bool CSignalCandlesStoch::ComapareMapps(int mapp)
   {
    int inp_mapp,check_mapp;
 //---
-   for(int i=0;i<6;i++)
+   for(int i=0;i<12;i++)
      {
-      inp_mapp=(m_extr_mapp>>(3*i))&7;
+      inp_mapp=(m_extr_mapp>>(2*i))&3;
       if(inp_mapp>=4) continue;
-      check_mapp=(mapp>>(3*i))&7;
+      check_mapp=(mapp>>(2*i))&3;
       if(inp_mapp!=check_mapp) return(false);
      }
 //---
@@ -306,12 +306,9 @@ bool CSignalCandlesStoch::ComapareMapps(int mapp)
 //+------------------------------------------------------------------+
 bool CSignalCandlesStoch::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
-   if(!CSignalCandles::CheckOpenLong(price,sl,tp,expiration)) return(false);
-   int state_o=StateStoch(1);
-//---
-   if(state_o<=0)        return(false);
-//   if(!ExtStateStoch(1)) return(false);
-//---
+   if(!CSignalCandles::CheckOpenLong(price,sl,tp,expiration))  return(false);
+   if(StateStoch(1)<=0)                                        return(false);
+   if(!ExtStateStoch(1))                                       return(false);
 //---
    return(true);
   }
@@ -323,9 +320,10 @@ bool CSignalCandlesStoch::CheckOpenLong(double& price,double& sl,double& tp,date
 //+------------------------------------------------------------------+
 bool CSignalCandlesStoch::CheckCloseLong(double& price)
   {
-   price=0.0;
+   if(!CSignalCandles::CheckCloseLong(price))                  return(false);
+   if(StateStoch(1)>=0)                                        return(false);
 //---
-   return(false);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position open.                        |
@@ -338,13 +336,9 @@ bool CSignalCandlesStoch::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignalCandlesStoch::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
-//   int state_c=Candle(1);
    if(!CSignalCandles::CheckOpenShort(price,sl,tp,expiration)) return(false);
-   int state_o=StateStoch(1);
-//---
-//   if(state_c>=0)        return(false);
-   if(state_o>=0)        return(false);
-//   if(!ExtStateStoch(1)) return(false);
+   if(StateStoch(1)>=0)                                        return(false);
+   if(!ExtStateStoch(1))                                       return(false);
 //---
    return(true);
   }
@@ -356,8 +350,9 @@ bool CSignalCandlesStoch::CheckOpenShort(double& price,double& sl,double& tp,dat
 //+------------------------------------------------------------------+
 bool CSignalCandlesStoch::CheckCloseShort(double& price)
   {
-   price=0.0;
+   if(!CSignalCandles::CheckCloseShort(price))                 return(false);
+   if(StateStoch(1)<=0)                                        return(false);
 //---
-   return(false);
+   return(true);
   }
 //+------------------------------------------------------------------+

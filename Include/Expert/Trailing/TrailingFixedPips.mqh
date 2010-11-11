@@ -36,8 +36,8 @@ public:
    void              ProfitLevel(int profit_level) { m_profit_level=profit_level; }
    virtual bool      ValidationSettings();
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp);
-   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp);
   };
 //+------------------------------------------------------------------+
 //| Constructor CTrailingFixedPips.                                  |
@@ -79,7 +79,7 @@ bool CTrailingFixedPips::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL)  return(false);
@@ -107,7 +107,7 @@ bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo *position,double& s
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingFixedPips::CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingFixedPips::CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL)  return(false);

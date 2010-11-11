@@ -21,8 +21,8 @@
 //| Parameter=SlowShift,int,0                                        |
 //| Parameter=SlowMethod,ENUM_MA_METHOD,MODE_EMA                     |
 //| Parameter=SlowApplied,ENUM_APPLIED_PRICE,PRICE_CLOSE             |
-//| Parameter=TakeProfit,int,50                                      |
 //| Parameter=StopLoss,int,20                                        |
+//| Parameter=TakeProfit,int,50                                      |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -61,7 +61,7 @@ public:
    void              SlowApplied(ENUM_APPLIED_PRICE applied) { m_slow_applied=applied;            }
    void              StopLoss(int stop_loss)                 { m_stop_loss=stop_loss;             }
    void              TakeProfit(int take_profit)             { m_take_profit=take_profit;         }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -70,8 +70,8 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitFastMA(CIndicators *indicators);
-   bool              InitSlowMA(CIndicators *indicators);
+   bool              InitFastMA(CIndicators* indicators);
+   bool              InitSlowMA(CIndicators* indicators);
    //---
    double            FastMA(int ind)                         { return(m_FastMA.Main(ind));        }
    double            SlowMA(int ind)                         { return(m_SlowMA.Main(ind));        }
@@ -135,7 +135,7 @@ bool CSignalCrossMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossMA::InitIndicators(CIndicators *indicators)
+bool CSignalCrossMA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)        return(false);
@@ -152,26 +152,26 @@ bool CSignalCrossMA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossMA::InitFastMA(CIndicators *indicators)
+bool CSignalCrossMA::InitFastMA(CIndicators* indicators)
   {
 //--- create fast MA indicator
    if(m_FastMA==NULL)
       if((m_FastMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add fast MA indicator to collection
    if(!indicators.Add(m_FastMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_FastMA;
       return(false);
      }
 //--- initialize fast MA indicator
    if(!m_FastMA.Create(m_symbol.Name(),m_period,m_fast_period,m_fast_shift,m_fast_method,m_fast_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -183,26 +183,26 @@ bool CSignalCrossMA::InitFastMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossMA::InitSlowMA(CIndicators *indicators)
+bool CSignalCrossMA::InitSlowMA(CIndicators* indicators)
   {
 //--- create slow MA indicator
    if(m_SlowMA==NULL)
       if((m_SlowMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add slow MA indicator to collection
    if(!indicators.Add(m_SlowMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_SlowMA;
       return(false);
      }
 //--- initialize slow MA indicator
    if(!m_SlowMA.Create(m_symbol.Name(),m_period,m_slow_period,m_slow_shift,m_slow_method,m_slow_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

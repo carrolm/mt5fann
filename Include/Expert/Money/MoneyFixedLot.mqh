@@ -60,12 +60,12 @@ bool CMoneyFixedLot::ValidationSettings()
 //--- initial data checks
    if(m_lots<m_symbol.LotsMin() || m_lots>m_symbol.LotsMax())
      {
-      printf(__FUNCTION__+": Lots amount must be in the range from %f to %f",m_symbol.LotsMin(),m_symbol.LotsMax());
+      printf(__FUNCTION__+": lots amount must be in the range from %f to %f",m_symbol.LotsMin(),m_symbol.LotsMax());
       return(false);
      }
    if(MathAbs(m_lots/m_symbol.LotsStep()-MathRound(m_lots/m_symbol.LotsStep()))>1.0E-10)
      {
-      printf(__FUNCTION__+": Lots amount is not corresponding with lot step %f",m_symbol.LotsStep());
+      printf(__FUNCTION__+": lots amount is not corresponding with lot step %f",m_symbol.LotsStep());
       return(false);
      }
 //--- ok

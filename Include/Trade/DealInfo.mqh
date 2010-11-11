@@ -38,6 +38,8 @@ public:
    bool              InfoInteger(ENUM_DEAL_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_DEAL_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_DEAL_PROPERTY_STRING prop_id,string& var) const;
+   //--- method for select deal
+   bool              SelectByIndex(int index);
   };
 //+------------------------------------------------------------------+
 //| Get the property value "DEAL_ORDER".                             |
@@ -267,5 +269,19 @@ bool CDealInfo::InfoDouble(ENUM_DEAL_PROPERTY_DOUBLE prop_id,double& var) const
 bool CDealInfo::InfoString(ENUM_DEAL_PROPERTY_STRING prop_id,string& var) const
   {
    return(HistoryDealGetString(m_ticket,prop_id,var));
+  }
+//+------------------------------------------------------------------+
+//| Select a deal on the index.                                      |
+//| INPUT:  index - deal index.                                      |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CDealInfo::SelectByIndex(int index)
+  {
+   ulong ticket=HistoryDealGetTicket(index);
+   if(ticket==0) return(false);
+   Ticket(ticket);
+//---
+   return(true);
   }
 //+------------------------------------------------------------------+

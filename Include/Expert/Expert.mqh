@@ -51,7 +51,7 @@ protected:
    //---
    CExpertTrade     *m_trade;                    // trading object
    CExpertSignal    *m_signal;                   // trading signals object
-   CExpertMoney     *m_money;                    // money mamager object
+   CExpertMoney     *m_money;                    // money manager object
    CExpertTrailing  *m_trailing;                 // trailing stops object
    //--- indicators
    CIndicators      *m_indicators;               // indicator collection to fast recalculations
@@ -143,24 +143,24 @@ protected:
    void              NoWaitEvent(ENUM_TRADE_EVENTS event) { m_waiting_event&=~event;                                }
    //--- check waiting events
    bool              IsWaitingPositionOpen()        const { return(m_waiting_event&TRADE_EVENT_POSITION_OPEN);      }
-   bool              IsWaitingPositionAdd()         const { return(m_waiting_event&TRADE_EVENT_POSITION_ADD);       }
+   bool              IsWaitingPositionAddSub()      const { return(m_waiting_event&TRADE_EVENT_POSITION_ADD);       }
    bool              IsWaitingPositionModify()      const { return(m_waiting_event&TRADE_EVENT_POSITION_MODIFY);    }
    bool              IsWaitingPositionClose()       const { return(m_waiting_event&TRADE_EVENT_POSITION_CLOSE);     }
    bool              IsWaitingPositionStopTake()    const { return(m_waiting_event&TRADE_EVENT_POSITION_STOP_TAKE); }
    bool              IsWaitingOrderPlace()          const { return(m_waiting_event&TRADE_EVENT_ORDER_PLACE);        }
-   bool              IsWaitingOrderModyfy()         const { return(m_waiting_event&TRADE_EVENT_ORDER_MODIFY);       }
+   bool              IsWaitingOrderModify()         const { return(m_waiting_event&TRADE_EVENT_ORDER_MODIFY);       }
    bool              IsWaitingOrderDelete()         const { return(m_waiting_event&TRADE_EVENT_ORDER_DELETE);       }
    bool              IsWaitingOrderTrigger()        const { return(m_waiting_event&TRADE_EVENT_ORDER_TRIGGER);      }
    //--- trade events
    virtual bool      TradeEventStopTakeTrigger()          { return(true);                                           }
-   virtual bool      TradeEventPendingTrigger()           { return(true);                                           }
+   virtual bool      TradeEventOrderTrigger()             { return(true);                                           }
    virtual bool      TradeEventPositionOpen()             { return(true);                                           }
    virtual bool      TradeEventPositionAddSub()           { return(true);                                           }
    virtual bool      TradeEventPositionModify()           { return(true);                                           }
    virtual bool      TradeEventPositionClose()            { return(true);                                           }
-   virtual bool      TradeEventPendingPlace()             { return(true);                                           }
-   virtual bool      TradeEventPendingModify()            { return(true);                                           }
-   virtual bool      TradeEventPendingDelete()            { return(true);                                           }
+   virtual bool      TradeEventOrderPlace()               { return(true);                                           }
+   virtual bool      TradeEventOrderModify()              { return(true);                                           }
+   virtual bool      TradeEventOrderDelete()              { return(true);                                           }
    virtual bool      TradeEventNotIdentified()            { return(true);                                           }
    //--- timeframe functions
    void              TimeframeAdd(ENUM_TIMEFRAMES period);
@@ -465,22 +465,27 @@ bool CExpert::Processing()
 //--- check the possibility of opening a position/setting pending order
    if(CheckOpen()) return(true);
 //--- check if plased pending orders
-   if(OrdersTotal()!=0)
+   int total=OrdersTotal();
+   if(total!=0)
      {
-      m_order.Select(OrderGetTicket(0));
-      if(m_order.Type()==ORDER_TYPE_BUY_LIMIT || m_order.Type()==ORDER_TYPE_BUY_STOP)
+      for(int i=total-1;i>=0;i--)
         {
-         //--- check the ability to delete a pending order to buy
-         if(CheckDeleteOrderLong()) return(true);
-         //--- check the possibility of modifying a pending order to buy
-         if(CheckTrailingOrderLong()) return(true);
-        }
-      else
-        {
-         //--- check the ability to delete a pending order to sell
-         if(CheckDeleteOrderShort()) return(true);
-         //--- check the possibility of modifying a pending order to sell
-         if(CheckTrailingOrderShort()) return(true);
+         m_order.Select(OrderGetTicket(i));
+         if(m_order.Symbol()!=m_symbol.Name()) continue;
+         if(m_order.Type()==ORDER_TYPE_BUY_LIMIT || m_order.Type()==ORDER_TYPE_BUY_STOP)
+           {
+            //--- check the ability to delete a pending order to buy
+            if(CheckDeleteOrderLong()) return(true);
+            //--- check the possibility of modifying a pending order to buy
+            if(CheckTrailingOrderLong()) return(true);
+           }
+         else
+           {
+            //--- check the ability to delete a pending order to sell
+            if(CheckDeleteOrderShort()) return(true);
+            //--- check the possibility of modifying a pending order to sell
+            if(CheckTrailingOrderShort()) return(true);
+           }
         }
      }
 //--- return without operations
@@ -1054,7 +1059,7 @@ bool CExpert::CheckTradeState()
         }
       if(IsWaitingPositionModify())
         {
-         res=TradeEventPendingModify();
+         res=TradeEventOrderModify();
          NoWaitEvent(TRADE_EVENT_ORDER_MODIFY);
         }
       return(true);
@@ -1063,7 +1068,7 @@ bool CExpert::CheckTradeState()
    if(hist_ord_tot==m_hist_ord_tot && ord_tot==m_ord_tot+1 && deal_tot==m_deal_tot && pos_tot==m_pos_tot)
      {
       //--- was added a pending order
-      res=TradeEventPendingPlace();
+      res=TradeEventOrderPlace();
       //--- establishment of the checkpoint history of the trade
       HistoryPoint(true);
       return(true);
@@ -1079,7 +1084,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot)
            {
             //--- position update/subtracting
-            if(IsWaitingPositionAdd())
+            if(IsWaitingPositionAddSub())
               {
                res=TradeEventPositionAddSub();
                NoWaitEvent(TRADE_EVENT_POSITION_ADD);
@@ -1131,7 +1136,7 @@ bool CExpert::CheckTradeState()
    if(hist_ord_tot==m_hist_ord_tot+1 && ord_tot==m_ord_tot-1 && deal_tot==m_deal_tot && pos_tot==m_pos_tot)
      {
       //--- delete pending order
-      res=TradeEventPendingDelete();
+      res=TradeEventOrderDelete();
       //--- establishment of the checkpoint history of the trade
       HistoryPoint(true);
       //---
@@ -1148,7 +1153,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot)
            {
             //--- position update/subtracting
-            res=TradeEventPendingTrigger();
+            res=TradeEventOrderTrigger();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1158,7 +1163,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot+1)
            {
             //--- position open
-            res=TradeEventPendingTrigger();
+            res=TradeEventOrderTrigger();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1168,7 +1173,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot-1)
            {
             //--- position is closed
-            res=TradeEventPendingTrigger();
+            res=TradeEventOrderTrigger();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1226,7 +1231,7 @@ void CExpert::TimeframeAdd(ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| Forms timeframes flags                                           |
-//| INPUT:  no.                                                      |
+//| INPUT:  time - reference.                                        |
 //| OUTPUT: timeframes flags.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+

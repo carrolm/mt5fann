@@ -18,12 +18,12 @@
 //| Parameter=ShadowBig,double,0.5                                   |
 //| Parameter=ShadowLittle,double,0.2                                |
 //| Parameter=Limit,double,0.0                                       |
-//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=StopLoss,double,2.0                                    |
+//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=Expiration,int,4                                       |
 //| Parameter=PeriodRSI,int,12                                       |
 //| Parameter=AppliedRSI,ENUM_APPLIED_PRICE,PRICE_CLOSE              |
-//| Parameter=ExtrMapp,int,149796                                    |
+//| Parameter=ExtrMapp,int,11184810                                  |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -49,7 +49,7 @@ public:
    void              PeriodRSI(int period)                  { m_periodRSI=period;      }
    void              AppliedRSI(ENUM_APPLIED_PRICE applied) { m_appliedRSI=applied;    }
    void              ExtrMapp(int mapp)                     { m_extr_mapp=mapp;        }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -58,8 +58,8 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitRSI(CIndicators *indicators);
-   bool              InitApplied(CIndicators *indicators);
+   bool              InitRSI(CIndicators* indicators);
+   bool              InitApplied(CIndicators* indicators);
    //---
    double            RSI(int ind)                           { return(m_RSI.Main(ind)); }
    int               StateRSI(int ind);
@@ -80,7 +80,7 @@ void CSignalCandlesRSI::CSignalCandlesRSI()
 //--- set default inputs
    m_periodRSI =12;
    m_appliedRSI=PRICE_CLOSE;
-   m_extr_mapp =149796;
+   m_extr_mapp =11184810;   // 101010101010101010101010b
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalCandlesRSI.                                    |
@@ -103,7 +103,7 @@ bool CSignalCandlesRSI::ValidationSettings()
    if(!CSignalCandles::ValidationSettings()) return(false);
    if(m_periodRSI<=0)
      {
-      printf(__FUNCTION__+": Period RSI must be greater than 0");
+      printf(__FUNCTION__+": period RSI must be greater than 0");
       return(false);
      }
 //--- ok
@@ -115,7 +115,7 @@ bool CSignalCandlesRSI::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesRSI::InitIndicators(CIndicators *indicators)
+bool CSignalCandlesRSI::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)                            return(false);
@@ -134,26 +134,26 @@ bool CSignalCandlesRSI::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesRSI::InitRSI(CIndicators *indicators)
+bool CSignalCandlesRSI::InitRSI(CIndicators* indicators)
   {
 //--- create RSI indicator
    if(m_RSI==NULL)
       if((m_RSI=new CiRSI)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add RSI indicator to collection
    if(!indicators.Add(m_RSI))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_RSI;
       return(false);
      }
 //--- initialize RSI indicator
    if(!m_RSI.Create(m_symbol.Name(),m_period,m_periodRSI,m_appliedRSI))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_RSI.BufferResize(100);
@@ -166,26 +166,26 @@ bool CSignalCandlesRSI::InitRSI(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesRSI::InitApplied(CIndicators *indicators)
+bool CSignalCandlesRSI::InitApplied(CIndicators* indicators)
   {
 //--- create Price indicator
    if(m_app_price==NULL)
       if((m_app_price=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Price indicator to collection
    if(!indicators.Add(m_app_price))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_app_price;
       return(false);
      }
 //--- initialize Price indicator
    if(!m_app_price.Create(m_symbol.Name(),m_period,1,0,MODE_SMA,m_appliedRSI))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_app_price.BufferResize(100);
@@ -255,8 +255,8 @@ bool CSignalCandlesRSI::ExtStateRSI(int ind)
            {
             mapp=0;
             if(extr_pr[i-2]<extr_pr[i])   mapp+=1;
-            if(extr_osc[i-2]<extr_osc[i]) mapp+=2;
-            extr_mapp+=mapp<<(3*(i-2));
+            if(extr_osc[i-2]<extr_osc[i]) mapp+=4;
+            extr_mapp+=mapp<<(4*(i-2));
            }
         }
       else
@@ -268,8 +268,8 @@ bool CSignalCandlesRSI::ExtStateRSI(int ind)
            {
             mapp=0;
             if(extr_pr[i-2]>extr_pr[i])   mapp+=1;
-            if(extr_osc[i-2]>extr_osc[i]) mapp+=2;
-            extr_mapp+=mapp<<(3*(i-2));
+            if(extr_osc[i-2]>extr_osc[i]) mapp+=4;
+            extr_mapp+=mapp<<(4*(i-2));
            }
         }
       extr_pos[i]=pos;
@@ -289,11 +289,11 @@ bool CSignalCandlesRSI::ComapareMapps(int mapp)
   {
    int inp_mapp,check_mapp;
 //---
-   for(int i=0;i<6;i++)
+   for(int i=0;i<12;i++)
      {
-      inp_mapp=(m_extr_mapp>>(3*i))&7;
-      if(inp_mapp>=4) continue;
-      check_mapp=(mapp>>(3*i))&7;
+      inp_mapp=(m_extr_mapp>>(2*i))&3;
+      if(inp_mapp>=2) continue;
+      check_mapp=(mapp>>(2*i))&2;
       if(inp_mapp!=check_mapp) return(false);
      }
 //---
@@ -310,16 +310,9 @@ bool CSignalCandlesRSI::ComapareMapps(int mapp)
 //+------------------------------------------------------------------+
 bool CSignalCandlesRSI::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
-   int state_c=Candle(1);
-   int state_o=StateRSI(1);
-//---
-   if(state_c<=0)      return(false);
-   if(state_o<=0)      return(false);
-   if(!ExtStateRSI(1)) return(false);
-//---
-   price=0.0;
-   sl   =0.0;
-   tp   =0.0;
+   if(!CSignalCandles::CheckOpenLong(price,sl,tp,expiration))  return(false);
+   if(StateRSI(1)<=0)                                          return(false);
+   if(!ExtStateRSI(1))                                         return(false);
 //---
    return(true);
   }
@@ -331,9 +324,10 @@ bool CSignalCandlesRSI::CheckOpenLong(double& price,double& sl,double& tp,dateti
 //+------------------------------------------------------------------+
 bool CSignalCandlesRSI::CheckCloseLong(double& price)
   {
-   price=0.0;
+   if(!CSignalCandles::CheckCloseLong(price))                  return(false);
+   if(StateRSI(1)>=0)                                          return(false);
 //---
-   return(false);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position open.                        |
@@ -346,16 +340,9 @@ bool CSignalCandlesRSI::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignalCandlesRSI::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
-   int state_c=Candle(1);
-   int state_o=StateRSI(1);
-//---
-   if(state_c>=0)      return(false);
-   if(state_o>=0)      return(false);
-   if(!ExtStateRSI(1)) return(false);
-//---
-   price=0.0;
-   sl   =0.0;
-   tp   =0.0;
+   if(!CSignalCandles::CheckOpenShort(price,sl,tp,expiration)) return(false);
+   if(StateRSI(1)>=0)                                          return(false);
+   if(!ExtStateRSI(1))                                         return(false);
 //---
    return(true);
   }
@@ -367,8 +354,9 @@ bool CSignalCandlesRSI::CheckOpenShort(double& price,double& sl,double& tp,datet
 //+------------------------------------------------------------------+
 bool CSignalCandlesRSI::CheckCloseShort(double& price)
   {
-   price=0.0;
+   if(!CSignalCandles::CheckCloseShort(price))                 return(false);
+   if(StateRSI(1)<=0)                                          return(false);
 //---
-   return(false);
+   return(true);
   }
 //+------------------------------------------------------------------+

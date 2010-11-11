@@ -19,7 +19,7 @@ void OnStart()
    mt5fann.debug=true;
 
    if(!mt5fann.Init("fx_eliot")) Print("Init error");
-   mt5fann.ExportFANNDataWithTest(1500,100);
+   mt5fann.ExportFANNDataWithTest(0,100,_Symbol);
    if(GetVectors(mt5fann.InputVector,mt5fann.OutputVector,5,1,"Fractals"))
      {
       mt5fann.run();

@@ -59,7 +59,7 @@ public:
    void              MaMethod(ENUM_MA_METHOD method)     { m_ma_method=method;             }
    void              Applied(ENUM_APPLIED_PRICE applied) { m_applied=applied;              }
    void              CrossMeasure(int measure);
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -131,7 +131,7 @@ bool CSignalAlligator::ValidationSettings()
 //--- initial data checks
    if(m_jaw_period<=m_teeth_period || m_teeth_period<=m_lips_period)
      {
-      printf(__FUNCTION__+": Check the periods of the alligator");
+      printf(__FUNCTION__+": check the periods of the alligator");
       return(false);
      }
 //--- ok
@@ -143,7 +143,7 @@ bool CSignalAlligator::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalAlligator::InitIndicators(CIndicators *indicators)
+bool CSignalAlligator::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL) return(false);
@@ -151,13 +151,13 @@ bool CSignalAlligator::InitIndicators(CIndicators *indicators)
    if(m_alligator==NULL)
       if((m_alligator=new CiAlligator)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Alligator indicator to collection
    if(!indicators.Add(m_alligator))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_alligator;
       return(false);
      }
@@ -166,7 +166,7 @@ bool CSignalAlligator::InitIndicators(CIndicators *indicators)
       m_jaw_period,  m_jaw_shift, m_teeth_period,m_teeth_shift,
       m_lips_period, m_lips_shift,m_ma_method,   m_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

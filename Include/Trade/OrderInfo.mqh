@@ -51,9 +51,10 @@ public:
    bool              InfoInteger(ENUM_ORDER_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_ORDER_PROPERTY_STRING prop_id,string& var) const;
-   //---
+   //--- method for select order
    bool              Select(ulong ticket);
-   //---
+   bool              SelectByIndex(int index);
+   //--- addition methods
    void              StoreState();
    bool              CheckState();
   };
@@ -437,6 +438,19 @@ bool COrderInfo::Select(ulong ticket)
    m_ticket=ULONG_MAX;
 //---
    return(false);
+  }
+//+------------------------------------------------------------------+
+//| Select a order on the index.                                     |
+//| INPUT:  index - order index.                                     |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool COrderInfo::SelectByIndex(int index)
+  {
+   ulong ticket=OrderGetTicket(index);
+   if(ticket==0) return(false);
+//---
+   return(Select(ticket));
   }
 //+------------------------------------------------------------------+
 //| Stored order's current state.                                    |

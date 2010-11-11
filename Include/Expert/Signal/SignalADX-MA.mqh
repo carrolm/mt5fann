@@ -16,8 +16,8 @@
 //| Parameter=PeriodADX,int,8                                        |
 //| Parameter=MinimumADX,double,22.0                                 |
 //| Parameter=PeriodMA,int,8                                         |
-//| Parameter=TakeProfit,int,100                                     |
 //| Parameter=StopLoss,int,30                                        |
+//| Parameter=TakeProfit,int,100                                     |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -35,8 +35,8 @@ protected:
    int               m_period_ADX;
    double            m_minimum_ADX;
    int               m_period_MA;
-   int               m_take_profit;
    int               m_stop_loss;
+   int               m_take_profit;
 
 public:
                      CSignalADX_MA();
@@ -45,9 +45,9 @@ public:
    void              PeriodADX(int period)       { m_period_ADX=period;                }
    void              MinimumADX(double minimum)  { m_minimum_ADX=minimum;              }
    void              PeriodMA(int period)        { m_period_MA=period;                 }
-   void              TakeProfit(int take_profit) { m_take_profit=take_profit;          }
    void              StopLoss(int stop_loss)     { m_stop_loss=stop_loss;              }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   void              TakeProfit(int take_profit) { m_take_profit=take_profit;          }
+   virtual bool      InitIndicators(CIndicators* indicators);
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
    virtual bool      CheckCloseLong(double& price);
@@ -55,9 +55,9 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitADX(CIndicators *indicators);
-   bool              InitEMA(CIndicators *indicators);
-   bool              InitClose(CIndicators *indicators);
+   bool              InitADX(CIndicators* indicators);
+   bool              InitEMA(CIndicators* indicators);
+   bool              InitClose(CIndicators* indicators);
    //---
    double            PlusADX(int ind)            { return(m_ADX.Plus(ind));            }
    double            MainADX(int ind)            { return(m_ADX.Main(ind));            }
@@ -84,8 +84,8 @@ void CSignalADX_MA::CSignalADX_MA()
    m_period_ADX =8;
    m_minimum_ADX=22.0;
    m_period_MA  =8;
-   m_take_profit=100;
    m_stop_loss  =30;
+   m_take_profit=100;
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalADX_MA.                                        |
@@ -103,7 +103,7 @@ void CSignalADX_MA::~CSignalADX_MA()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalADX_MA::InitIndicators(CIndicators *indicators)
+bool CSignalADX_MA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)       return(false);
@@ -122,26 +122,26 @@ bool CSignalADX_MA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalADX_MA::InitADX(CIndicators *indicators)
+bool CSignalADX_MA::InitADX(CIndicators* indicators)
   {
 //--- create ADX indicator
    if(m_ADX==NULL)
       if((m_ADX=new CiADX)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add ADX indicator to collection
    if(!indicators.Add(m_ADX))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_ADX;
       return(false);
      }
 //--- initialize ADX indicator
    if(!m_ADX.Create(m_symbol.Name(),m_period,m_period_ADX))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -153,26 +153,26 @@ bool CSignalADX_MA::InitADX(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalADX_MA::InitEMA(CIndicators *indicators)
+bool CSignalADX_MA::InitEMA(CIndicators* indicators)
   {
 //--- create EMA indicator
    if(m_EMA==NULL)
       if((m_EMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add EMA indicator to collection
    if(!indicators.Add(m_EMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_EMA;
       return(false);
      }
 //--- initialize EMA indicator
    if(!m_EMA.Create(m_symbol.Name(),m_period,m_period_MA,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -184,26 +184,26 @@ bool CSignalADX_MA::InitEMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalADX_MA::InitClose(CIndicators *indicators)
+bool CSignalADX_MA::InitClose(CIndicators* indicators)
   {
 //--- create Close series
    if(m_close==NULL)
       if((m_close=new CiClose)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Close series to collection
    if(!indicators.Add(m_close))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_close;
       return(false);
      }
 //--- initialize Close series
    if(!m_close.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

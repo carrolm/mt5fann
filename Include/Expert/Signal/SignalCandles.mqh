@@ -18,8 +18,8 @@
 //| Parameter=ShadowBig,double,0.5                                   |
 //| Parameter=ShadowLittle,double,0.2                                |
 //| Parameter=Limit,double,0.0                                       |
-//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=StopLoss,double,2.0                                    |
+//| Parameter=TakeProfit,double,1.0                                  |
 //| Parameter=Expiration,int,4                                       |
 //+------------------------------------------------------------------+
 // wizard description end
@@ -43,8 +43,8 @@ protected:
    double            m_shadow_big;
    double            m_shadow_little;
    double            m_limit;
-   double            m_take_profit;
    double            m_stop_loss;
+   double            m_take_profit;
    int               m_expiration;
 
 public:
@@ -56,10 +56,10 @@ public:
    void              ShadowBig(double shadow_big)       { m_shadow_big=shadow_big;       }
    void              ShadowLittle(double shadow_little) { m_shadow_little=shadow_little; }
    void              Limit(double limit)                { m_limit=limit;                 }
-   void              TakeProfit(double take_profit)     { m_take_profit=take_profit;     }
    void              StopLoss(double stop_loss)         { m_stop_loss=stop_loss;         }
+   void              TakeProfit(double take_profit)     { m_take_profit=take_profit;     }
    void              Expiration(int expiration)         { m_expiration=expiration;       }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -70,10 +70,10 @@ public:
    int               Candle(int ind);
 
 protected:
-   bool              InitOpen(CIndicators *indicators);
-   bool              InitHigh(CIndicators *indicators);
-   bool              InitLow(CIndicators *indicators);
-   bool              InitClose(CIndicators *indicators);
+   bool              InitOpen(CIndicators* indicators);
+   bool              InitHigh(CIndicators* indicators);
+   bool              InitLow(CIndicators* indicators);
+   bool              InitClose(CIndicators* indicators);
    //---
    double            Open(int ind)                      { return(m_open.GetData(ind));   }
    double            High(int ind)                      { return(m_high.GetData(ind));   }
@@ -103,8 +103,8 @@ void CSignalCandles::CSignalCandles()
    m_shadow_big   =0.5;
    m_shadow_little=0.2;
    m_limit        =0.0;
-   m_take_profit  =1.0;
    m_stop_loss    =2.0;
+   m_take_profit  =1.0;
    m_expiration   =4;
   }
 //+------------------------------------------------------------------+
@@ -127,7 +127,7 @@ bool CSignalCandles::ValidationSettings()
   {
    if(m_range<=0)
      {
-      printf(__FUNCTION__+": Candles range must be greater than 0");
+      printf(__FUNCTION__+": candles range must be greater than 0");
       return(false);
      }
    m_size=m_minimum*m_adjusted_point;
@@ -140,7 +140,7 @@ bool CSignalCandles::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandles::InitIndicators(CIndicators *indicators)
+bool CSignalCandles::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)       return(false);
@@ -161,26 +161,26 @@ bool CSignalCandles::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandles::InitOpen(CIndicators *indicators)
+bool CSignalCandles::InitOpen(CIndicators* indicators)
   {
 //--- create Open series
    if(m_open==NULL)
       if((m_open=new CiOpen)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Open series to collection
    if(!indicators.Add(m_open))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_open;
       return(false);
      }
 //--- initialize Open series
    if(!m_open.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_open.BufferResize(100);
@@ -193,26 +193,26 @@ bool CSignalCandles::InitOpen(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandles::InitHigh(CIndicators *indicators)
+bool CSignalCandles::InitHigh(CIndicators* indicators)
   {
 //--- create High series
    if(m_high==NULL)
       if((m_high=new CiHigh)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add High series to collection
    if(!indicators.Add(m_high))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_high;
       return(false);
      }
 //--- initialize High series
    if(!m_high.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_high.BufferResize(100);
@@ -225,26 +225,26 @@ bool CSignalCandles::InitHigh(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandles::InitLow(CIndicators *indicators)
+bool CSignalCandles::InitLow(CIndicators* indicators)
   {
 //--- create Low series
    if(m_low==NULL)
       if((m_low=new CiLow)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Low series to collection
    if(!indicators.Add(m_low))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_low;
       return(false);
      }
 //--- initialize Low series
    if(!m_low.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_low.BufferResize(100);
@@ -257,26 +257,26 @@ bool CSignalCandles::InitLow(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandles::InitClose(CIndicators *indicators)
+bool CSignalCandles::InitClose(CIndicators* indicators)
   {
 //--- create Close series
    if(m_close==NULL)
       if((m_close=new CiClose)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Close series to collection
    if(!indicators.Add(m_close))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_close;
       return(false);
      }
 //--- initialize Close series
    if(!m_close.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_close.BufferResize(100);
@@ -296,8 +296,8 @@ bool CSignalCandles::CheckOpenLong(double& price,double& sl,double& tp,datetime&
   {
 //---
    price=m_symbol.NormalizePrice(m_symbol.Ask()-m_limit*m_size);
-   sl   =m_symbol.NormalizePrice(m_symbol.Bid()-m_stop_loss*m_size);
-   tp   =m_symbol.NormalizePrice(m_symbol.Bid()+m_take_profit*m_size);
+   sl   =m_symbol.NormalizePrice(m_symbol.Ask()-m_stop_loss*m_size);
+   tp   =m_symbol.NormalizePrice(m_symbol.Ask()+m_take_profit*m_size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
    return(Candle(1)>0);
@@ -327,8 +327,8 @@ bool CSignalCandles::CheckOpenShort(double& price,double& sl,double& tp,datetime
   {
 //---
    price=m_symbol.NormalizePrice(m_symbol.Bid()+m_limit*m_size);
-   sl   =m_symbol.NormalizePrice(m_symbol.Ask()+m_stop_loss*m_size);
-   tp   =m_symbol.NormalizePrice(m_symbol.Ask()-m_take_profit*m_size);
+   sl   =m_symbol.NormalizePrice(m_symbol.Bid()+m_stop_loss*m_size);
+   tp   =m_symbol.NormalizePrice(m_symbol.Bid()-m_take_profit*m_size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
    return(Candle(1)<0);

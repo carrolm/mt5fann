@@ -59,3 +59,23 @@ int f2M5_train_on_file(int ann,uchar &path[],int max_epoch,float desired_error);
 #define FANN_TRAIN_BATCH				1
 #define FANN_TRAIN_RPROP				2
 #define FANN_TRAIN_QUICKPROP			3
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int f2M5_create_from_file(string path)
+  {
+   char p[];
+   StringToCharArray(path,p);
+   return(f2M5_create_from_file(p));
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int f2M5_save(int ann,string path)
+  {
+   char p[];
+   StringToCharArray(path,p);
+   return(f2M5_save(ann,p));
+  }
+
+//+------------------------------------------------------------------+

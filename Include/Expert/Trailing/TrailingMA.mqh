@@ -42,11 +42,11 @@ public:
    void              Shift(int shift)                    { m_ma_shift=shift;     }
    void              Method(ENUM_MA_METHOD method)       { m_ma_method=method;   }
    void              Applied(ENUM_APPLIED_PRICE applied) { m_ma_applied=applied; }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp);
-   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp);
   };
 //+------------------------------------------------------------------+
 //| Constructor CTrailingMA.                                         |
@@ -99,7 +99,7 @@ bool CTrailingMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::InitIndicators(CIndicators *indicators)
+bool CTrailingMA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)       return(false);
@@ -133,7 +133,7 @@ bool CTrailingMA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingMA::CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL) return(false);
@@ -155,7 +155,7 @@ bool CTrailingMA::CheckTrailingStopLong(CPositionInfo *position,double& sl,doubl
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingMA::CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL) return(false);

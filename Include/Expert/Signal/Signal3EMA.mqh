@@ -16,8 +16,8 @@
 //| Parameter=FastPeriod,int,5                                       |
 //| Parameter=MediumPeriod,int,12                                    |
 //| Parameter=SlowPeriod,int,24                                      |
-//| Parameter=TakeProfit,int,50                                      |
 //| Parameter=StopLoss,int,20                                        |
+//| Parameter=TakeProfit,int,50                                      |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -47,7 +47,7 @@ public:
    void              SlowPeriod(int period)      { m_slow_period=period;          }
    void              StopLoss(int stop_loss)     { m_stop_loss=stop_loss;         }
    void              TakeProfit(int take_profit) { m_take_profit=take_profit;     }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -56,9 +56,9 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitFastEMA(CIndicators *indicators);
-   bool              InitMediumEMA(CIndicators *indicators);
-   bool              InitSlowEMA(CIndicators *indicators);
+   bool              InitFastEMA(CIndicators* indicators);
+   bool              InitMediumEMA(CIndicators* indicators);
+   bool              InitSlowEMA(CIndicators* indicators);
    //---
    double            FastEMA(int ind)            { return(m_FastEMA.Main(ind));   }
    double            MediumEMA(int ind)          { return(m_MediumEMA.Main(ind)); }
@@ -120,7 +120,7 @@ bool CSignal3EMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignal3EMA::InitIndicators(CIndicators *indicators)
+bool CSignal3EMA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)           return(false);
@@ -139,26 +139,26 @@ bool CSignal3EMA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignal3EMA::InitFastEMA(CIndicators *indicators)
+bool CSignal3EMA::InitFastEMA(CIndicators* indicators)
   {
 //--- create fast EMA indicator
    if(m_FastEMA==NULL)
       if((m_FastEMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add fast EMA indicator to collection
    if(!indicators.Add(m_FastEMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_FastEMA;
       return(false);
      }
 //--- initialize fast EMA indicator
    if(!m_FastEMA.Create(m_symbol.Name(),m_period,m_fast_period,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -170,26 +170,26 @@ bool CSignal3EMA::InitFastEMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignal3EMA::InitMediumEMA(CIndicators *indicators)
+bool CSignal3EMA::InitMediumEMA(CIndicators* indicators)
   {
 //--- create medium EMA indicator
    if(m_MediumEMA==NULL)
       if((m_MediumEMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add medium EMA indicator to collection
    if(!indicators.Add(m_MediumEMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_MediumEMA;
       return(false);
      }
 //--- initialize medium EMA indicator
    if(!m_MediumEMA.Create(m_symbol.Name(),m_period,m_medium_period,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -201,26 +201,26 @@ bool CSignal3EMA::InitMediumEMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignal3EMA::InitSlowEMA(CIndicators *indicators)
+bool CSignal3EMA::InitSlowEMA(CIndicators* indicators)
   {
 //--- create slow EMA indicator
    if(m_SlowEMA==NULL)
       if((m_SlowEMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add slow EMA indicator to collection
    if(!indicators.Add(m_SlowEMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_SlowEMA;
       return(false);
      }
 //--- initialize slow EMA indicator
    if(!m_SlowEMA.Create(m_symbol.Name(),m_period,m_slow_period,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

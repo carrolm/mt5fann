@@ -96,24 +96,24 @@ public:
                                ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="");
    bool              SellStop(double volume,double price,const string symbol=NULL,double sl=0.0,double tp=0.0,
                               ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="");
-   //---
+   //--- info methods
    void              PrintRequest() const;
    void              PrintResult() const;
-   //--- позиции
+   //--- positions
    string            FormatPositionType(string &str,const uint type) const;
    string            FormatPosition(string &str,const CPositionInfo *position) const;
-   //--- ордера
+   //--- orders
    string            FormatOrderType(string &str,const uint type) const;
    string            FormatOrderStatus(string &str,const uint status) const;
    string            FormatOrderTypeFilling(string &str,const uint type) const;
    string            FormatOrderTypeTime(string &str,const uint type) const;
    string            FormatOrder(string &str,const COrderInfo *order) const;
    string            FormatOrderPrice(string &str,const double price_order,const double price_trigger,const uint digits) const;
-   //--- сделки
+   //--- deals
    string            FormatDealAction(string &str,const uint action) const;
    string            FormatDealEntry(string &str,const uint entry) const;
    string            FormatDeal(string &str,const CDealInfo *deal) const;
-   //--- торговый запрос
+   //--- trade request
    string            FormatRequest(string &str,const MqlTradeRequest &request) const;
    string            FormatRequestResult(string &str,const MqlTradeRequest &request,const MqlTradeResult &result) const;
 

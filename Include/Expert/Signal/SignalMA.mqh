@@ -44,7 +44,7 @@ public:
    void              Shift(int shift)                    { m_ma_shift=shift;             }
    void              Method(ENUM_MA_METHOD method)       { m_ma_method=method;           }
    void              Applied(ENUM_APPLIED_PRICE applied) { m_ma_applied=applied;         }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -53,9 +53,9 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitMA(CIndicators *indicators);
-   bool              InitOpen(CIndicators *indicators);
-   bool              InitClose(CIndicators *indicators);
+   bool              InitMA(CIndicators* indicators);
+   bool              InitOpen(CIndicators* indicators);
+   bool              InitClose(CIndicators* indicators);
    //---
    double            MA(int ind)                         { return(m_MA.Main(ind));       }
    double            Open(int ind)                       { return(m_open.GetData(ind));  }
@@ -115,7 +115,7 @@ bool CSignalMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitIndicators(CIndicators *indicators)
+bool CSignalMA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)       return(false);
@@ -134,26 +134,26 @@ bool CSignalMA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitMA(CIndicators *indicators)
+bool CSignalMA::InitMA(CIndicators* indicators)
   {
 //--- create MA indicator
    if(m_MA==NULL)
       if((m_MA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add MA indicator to collection
    if(!indicators.Add(m_MA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_MA;
       return(false);
      }
 //--- initialize MA indicator
    if(!m_MA.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_method,m_ma_applied))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_MA.BufferResize(3+m_ma_shift);
@@ -166,26 +166,26 @@ bool CSignalMA::InitMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitOpen(CIndicators *indicators)
+bool CSignalMA::InitOpen(CIndicators* indicators)
   {
 //--- create Open series
    if(m_open==NULL)
       if((m_open=new CiOpen)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Open series to collection
    if(!indicators.Add(m_open))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_open;
       return(false);
      }
 //--- initialize Open series
    if(!m_open.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok
@@ -197,26 +197,26 @@ bool CSignalMA::InitOpen(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitClose(CIndicators *indicators)
+bool CSignalMA::InitClose(CIndicators* indicators)
   {
 //--- create Close series
    if(m_close==NULL)
       if((m_close=new CiClose)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add Close series to collection
    if(!indicators.Add(m_close))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_close;
       return(false);
      }
 //--- initialize Close series
    if(!m_close.Create(m_symbol.Name(),m_period))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

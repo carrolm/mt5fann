@@ -24,7 +24,7 @@ public:
                      CExpertTrailing();
    //--- methods initialize protected data
    virtual bool      Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double adjusted_point);
-   virtual bool      InitIndicators(CIndicators *indicators)                               { return(true);  }
+   virtual bool      InitIndicators(CIndicators* indicators)                               { return(true);  }
    virtual bool      ValidationSettings()                                                  { return(true);  }
    //---
    virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)  { return(false); }

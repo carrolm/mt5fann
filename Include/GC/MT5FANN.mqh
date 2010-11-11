@@ -24,7 +24,8 @@ private:
    string            Symbols_Array[30];
    int               Max_Symbols;
    string            Functions_Array[10];
-   int               Max_Functions;
+   int               Functions_Count[10];
+      int               Max_Functions;
    ENUM_TIMEFRAMES   TimeFrame;
    bool              WithNews;
    bool              WithHours;
@@ -88,27 +89,17 @@ int CMT5FANN::ExportFANNDataWithTest(int train_qty,int test_qty,string FileName=
 int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
   {
    int i;
-   //double IB[],OB[];
-   //ArrayResize(IB,num_in_vectors+2);
-   //ArrayResize(OB,num_out_vectors+2);
    int FileHandle=0;
    int needcopy=0;
    int copied=0;
-//MqlRates rates[];
-//MqlDateTime tm;
-//   ArraySetAsSeries(rates,true);
+
    string outstr;
-//   int SymbolIdx;
    FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
    needcopy=qty;
 
    if(FileHandle!=INVALID_HANDLE)
-     {
-      FileWrite(FileHandle,// записываем в файл шапку
-                needcopy,// 
-                //               2+(1+Pers)*MaxSymbols,
-                num_in_vectors,
-                num_out_vectors);
+     {// записываем в файл шапку
+      FileWrite(FileHandle,needcopy,num_in_vectors,num_out_vectors);
       for(i=0;i<needcopy;shift++)
         {
          if(GetVector(shift))
@@ -117,47 +108,20 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
             outstr="";
             for(int ibj=0;ibj<num_in_vectors;ibj++)
               {
-               outstr=outstr+" "+(string)(InputVector[ibj]);
+               outstr=outstr+(string)(InputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
-            FileWrite(FileHandle,OutputVector[0]); // 
-
+            outstr="";
+            for(int ibj=0;ibj<num_out_vectors;ibj++)
+              {
+               outstr=outstr+(string)(OutputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
            }
         }
-      //      GetVector(shift)
-      //      for(SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
-      //        {
-      //         int bars=Bars(Symbols_Array[SymbolIdx],TimeFrame);
-      //         for(i=0;i<needcopy && shift<bars;shift++)
-      //            if(GetVectors(IB,OB,num_in_vectors,1,Functions_Array[0],Symbols_Array[SymbolIdx],TimeFrame,shift))
-      //              {
-      //               i++;
-      //               copied=CopyRates(Symbols_Array[SymbolIdx],TimeFrame,shift,3,rates);
-      //               TimeToStruct(rates[2].time,tm);
-      //               //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
-      //               outstr="";
-      //               if(WithDayOfWeek) outstr=outstr+(string)((double)tm.day_of_week/7);
-      //               if(WithDayOfWeek && WithHours)outstr=outstr+" ";
-      //               if(WithHours) outstr=outstr+(string)((double)tm.hour/24);
-      //               // news
-      //               //if(WithNews)
-      //               //   for(int ibj=0;ibj<Max_Symbols;ibj++)
-      //               //     {
-      //               //      outstr=outstr+" 0";
-      //               //     }
-      //               // data
-      //               for(int ibj=0;ibj<num_in_vectors;ibj++)
-      //                 {
-      //                  outstr=outstr+" "+(string)(IB[ibj]);
-      //                 }
-      //
-      //               FileWrite(FileHandle,outstr);       // 
-      //               FileWrite(FileHandle,OB[0]); // 
-      //              }
-      //        }
      }
    FileClose(FileHandle);
-
+   Print("Create file "+FileName);
    return(shift);
   }
 //+------------------------------------------------------------------+
@@ -196,7 +160,7 @@ bool CMT5FANN::ini_save(string path="")
      }
    for(int FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
      {
-      resb=MyIniFile.WriteString("FunctionsArray",Functions_Array[FunctionsIdx],"True");
+      resb=MyIniFile.WriteInteger("FunctionsArray",Functions_Array[FunctionsIdx],Functions_Count[FunctionsIdx]);
       if(!resb)
         {
          //if(debug) Print("Ok write string");
@@ -240,7 +204,8 @@ bool CMT5FANN::ini_load(string path="")
       Max_Functions=Strings.Total();
       for(int i=0; i<Strings.Total(); i++)
         {
-         Functions_Array[i]=Strings.At(i);//if(debug) Print(Strings.At(i));
+         Functions_Array[i]=Strings.At(i);
+         Functions_Count[i]=(int)MyIniFile.ReadInteger("FunctionsArray",Functions_Array[i],1);
         }
      }
    else
@@ -264,11 +229,9 @@ bool CMT5FANN::ini_load(string path="")
 //+------------------------------------------------------------------+
 bool CMT5FANN::ann_save(string path="")
   {
-   char p[];
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
-   StringToCharArray(path,p);
-   if(f2M5_save(ann,p)<0)
+   if(f2M5_save(ann,path)<0)
      {
       if(debug)Print("ne shmogla ",path);
       return(false);
@@ -292,11 +255,9 @@ int CMT5FANN::ann_create()
 //+------------------------------------------------------------------+
 int CMT5FANN::ann_load(string path="")
   {
-   char p[];
    if(path=="") path=File_Name;
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".net";
-   StringToCharArray(path,p);
-   ann=f2M5_create_from_file(p);
+   ann=f2M5_create_from_file(path);
    return(ann);
   }
 //+------------------------------------------------------------------+

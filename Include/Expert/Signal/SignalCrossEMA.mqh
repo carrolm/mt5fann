@@ -37,7 +37,7 @@ public:
    //--- methods initialize protected data
    void              FastPeriod(int period) { m_fast_period=period;                }
    void              SlowPeriod(int period) { m_slow_period=period;                }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -46,8 +46,8 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   bool              InitFastEMA(CIndicators *indicators);
-   bool              InitSlowEMA(CIndicators *indicators);
+   bool              InitFastEMA(CIndicators* indicators);
+   bool              InitSlowEMA(CIndicators* indicators);
    //---
    double            FastEMA(int ind)       { return(m_FastEMA.Main(ind));         }
    double            SlowEMA(int ind)       { return(m_SlowEMA.Main(ind));         }
@@ -90,7 +90,7 @@ bool CSignalCrossEMA::ValidationSettings()
   {
    if(m_fast_period>=m_slow_period)
      {
-      printf(__FUNCTION__+": InpCSignalCrossEMASlowPeriod must be greater than InpCSignalCrossEMAFastPeriod");
+      printf(__FUNCTION__+": period of slow EMA must be greater than period of fast EMA");
       return(false);
      }
 //--- ok
@@ -102,7 +102,7 @@ bool CSignalCrossEMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossEMA::InitIndicators(CIndicators *indicators)
+bool CSignalCrossEMA::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)         return(false);
@@ -119,26 +119,26 @@ bool CSignalCrossEMA::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossEMA::InitFastEMA(CIndicators *indicators)
+bool CSignalCrossEMA::InitFastEMA(CIndicators* indicators)
   {
 //--- create fast EMA indicator
    if(m_FastEMA==NULL)
       if((m_FastEMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add fast EMA indicator to collection
    if(!indicators.Add(m_FastEMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_FastEMA;
       return(false);
      }
 //--- initialize fast EMA indicator
    if(!m_FastEMA.Create(m_symbol.Name(),m_period,m_fast_period,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_FastEMA.BufferResize(1000);
@@ -151,26 +151,26 @@ bool CSignalCrossEMA::InitFastEMA(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCrossEMA::InitSlowEMA(CIndicators *indicators)
+bool CSignalCrossEMA::InitSlowEMA(CIndicators* indicators)
   {
 //--- create slow EMA indicator
    if(m_SlowEMA==NULL)
       if((m_SlowEMA=new CiMA)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add slow EMA indicator to collection
    if(!indicators.Add(m_SlowEMA))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_SlowEMA;
       return(false);
      }
 //--- initialize slow EMA indicator
    if(!m_SlowEMA.Create(m_symbol.Name(),m_period,m_slow_period,0,MODE_EMA,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
    m_SlowEMA.BufferResize(1000);

@@ -392,7 +392,14 @@ bool CArrayObj::Delete(int index)
 //--- checking
    if(index>=m_data_total) return(false);
 //--- delete
-   if(index<0 || index<m_data_total-1) MemMove(index,index+1,m_data_total-index-1);
+   if(index<m_data_total-1)
+     {
+      if(index>=0) MemMove(index,index+1,m_data_total-index-1);
+     }
+   else
+     {
+      if(m_free_mode && CheckPointer(m_data[index])==POINTER_DYNAMIC) delete m_data[index];
+     }
    m_data_total--;
 //---
    return(true);

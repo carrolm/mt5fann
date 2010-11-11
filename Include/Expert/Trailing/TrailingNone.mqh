@@ -23,7 +23,7 @@
 class CTrailingNone : public CExpertTrailing
   {
 public:
-   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)  { return (false); }
-   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp) { return (false); }
+   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)  { return (false); }
+   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp) { return (false); }
   };
 //+------------------------------------------------------------------+

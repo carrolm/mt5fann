@@ -17,8 +17,8 @@
 //| Parameter=PeriodFast,int,12                                      |
 //| Parameter=PeriodSlow,int,24                                      |
 //| Parameter=PeriodSignal,int,9                                     |
-//| Parameter=TakeProfit,int,50                                      |
 //| Parameter=StopLoss,int,20                                        |
+//| Parameter=TakeProfit,int,50                                      |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -35,8 +35,8 @@ protected:
    int               m_period_fast;
    int               m_period_slow;
    int               m_period_signal;
-   int               m_take_profit;
    int               m_stop_loss;
+   int               m_take_profit;
 
 public:
                      CSignalMACD();
@@ -45,9 +45,9 @@ public:
    void              PeriodFast(int period_fast)     { m_period_fast=period_fast;               }
    void              PeriodSlow(int period_slow)     { m_period_slow=period_slow;               }
    void              PeriodSignal(int period_signal) { m_period_signal=period_signal;           }
-   void              TakeProfit(int take_profit)     { m_take_profit=take_profit;               }
    void              StopLoss(int stop_loss)         { m_stop_loss=stop_loss;                   }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   void              TakeProfit(int take_profit)     { m_take_profit=take_profit;               }
+   virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
@@ -75,8 +75,8 @@ void CSignalMACD::CSignalMACD()
    m_period_fast  =12;
    m_period_slow  =24;
    m_period_signal=9;
-   m_take_profit  =50;
    m_stop_loss    =20;
+   m_take_profit  =50;
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalMACD.                                          |
@@ -110,7 +110,7 @@ bool CSignalMACD::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMACD::InitIndicators(CIndicators *indicators)
+bool CSignalMACD::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL) return(false);
@@ -118,20 +118,20 @@ bool CSignalMACD::InitIndicators(CIndicators *indicators)
    if(m_MACD==NULL)
       if((m_MACD=new CiMACD)==NULL)
         {
-         printf(__FUNCTION__+": Error creating object");
+         printf(__FUNCTION__+": error creating object");
          return(false);
         }
 //--- add MACD indicator to collection
    if(!indicators.Add(m_MACD))
      {
-      printf(__FUNCTION__+": Error adding object");
+      printf(__FUNCTION__+": error adding object");
       delete m_MACD;
       return(false);
      }
 //--- initialize MACD indicator
    if(!m_MACD.Create(m_symbol.Name(),m_period,m_period_fast,m_period_slow,m_period_signal,PRICE_CLOSE))
      {
-      printf(__FUNCTION__+": Error initializing object");
+      printf(__FUNCTION__+": error initializing object");
       return(false);
      }
 //--- ok

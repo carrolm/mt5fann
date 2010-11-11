@@ -47,7 +47,7 @@ double CMoneyFixedMargin::CheckOpenLong(double price,double sl)
    return(lot);
   }
 //+------------------------------------------------------------------+
-//| Getting lot size for open long position.                         |
+//| Getting lot size for open short position.                        |
 //| INPUT:  no.                                                      |
 //| OUTPUT: lot-if successful, 0.0 otherwise.                        |
 //| REMARK: no.                                                      |

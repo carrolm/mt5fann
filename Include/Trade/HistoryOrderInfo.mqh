@@ -45,6 +45,8 @@ public:
    bool              InfoInteger(ENUM_ORDER_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_ORDER_PROPERTY_STRING prop_id,string& var) const;
+   //--- method for select history order
+   bool              SelectByIndex(int index);
   };
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_TIME_SETUP".                       |
@@ -393,5 +395,19 @@ bool CHistoryOrderInfo::InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& va
 bool CHistoryOrderInfo::InfoString(ENUM_ORDER_PROPERTY_STRING prop_id,string& var) const
   {
    return(HistoryOrderGetString(m_ticket,prop_id,var));
+  }
+//+------------------------------------------------------------------+
+//| Select a history order on the index.                             |
+//| INPUT:  index - history order index.                             |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CHistoryOrderInfo::SelectByIndex(int index)
+  {
+   ulong ticket=HistoryOrderGetTicket(index);
+   if(ticket==0) return(false);
+   Ticket(ticket);
+//---
+   return(true);
   }
 //+------------------------------------------------------------------+

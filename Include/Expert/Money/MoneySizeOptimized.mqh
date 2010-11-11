@@ -63,7 +63,7 @@ bool CMoneySizeOptimized::ValidationSettings()
 //--- initial data checks
    if(m_decrease_factor<=0.0)
      {
-      printf(__FUNCTION__+": Decrease factor must be greater then 0");
+      printf(__FUNCTION__+": decrease factor must be greater then 0");
       return(false);
      }
 //--- ok

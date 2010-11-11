@@ -36,10 +36,10 @@ public:
    //--- methods initialize protected data
    void              Step(double step)       { m_step=step;       }
    void              Maximum(double maximum) { m_maximum=maximum; }
-   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      InitIndicators(CIndicators* indicators);
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp);
-   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp);
   };
 //+------------------------------------------------------------------+
 //| Constructor CTrailingPSAR.                                       |
@@ -73,7 +73,7 @@ void CTrailingPSAR::~CTrailingPSAR()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingPSAR::InitIndicators(CIndicators *indicators)
+bool CTrailingPSAR::InitIndicators(CIndicators* indicators)
   {
 //--- check
    if(indicators==NULL)       return(false);
@@ -106,7 +106,7 @@ bool CTrailingPSAR::InitIndicators(CIndicators *indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingPSAR::CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingPSAR::CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL) return(false);
@@ -128,7 +128,7 @@ bool CTrailingPSAR::CheckTrailingStopLong(CPositionInfo *position,double& sl,dou
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingPSAR::CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp)
+bool CTrailingPSAR::CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp)
   {
 //--- check
    if(position==NULL) return(false);

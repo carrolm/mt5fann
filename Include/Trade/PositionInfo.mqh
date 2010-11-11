@@ -19,28 +19,29 @@ protected:
 
 public:
    //--- fast access methods to the integer position propertyes
-   datetime           Time() const;
-   ENUM_POSITION_TYPE Type() const;
+   datetime           Time()            const;
+   ENUM_POSITION_TYPE Type()            const;
    string             TypeDescription() const;
-   long               Magic() const;
-   long               Identifier() const;
+   long               Magic()           const;
+   long               Identifier()      const;
    //--- fast access methods to the double position propertyes
-   double            Volume() const;
-   double            PriceOpen() const;
-   double            StopLoss() const;
-   double            TakeProfit() const;
-   double            PriceCurrent() const;
-   double            Commission() const;
-   double            Swap() const;
-   double            Profit() const;
+   double            Volume()           const;
+   double            PriceOpen()        const;
+   double            StopLoss()         const;
+   double            TakeProfit()       const;
+   double            PriceCurrent()     const;
+   double            Commission()       const;
+   double            Swap()             const;
+   double            Profit()           const;
    //--- fast access methods to the string position propertyes
-   string            Symbol() const;
+   string            Symbol()           const;
    //--- access methods to the API MQL5 functions
    bool              InfoInteger(ENUM_POSITION_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_POSITION_PROPERTY_STRING prop_id,string& var) const;
-   //--- method for select position
+   //--- methods for select position
    bool              Select(const string symbol);
+   bool              SelectByIndex(int index);
    //---
    void              StoreState();
    bool              CheckState();
@@ -243,7 +244,20 @@ bool CPositionInfo::Select(const string symbol)
    return(PositionSelect(symbol));
   }
 //+------------------------------------------------------------------+
-//| Stored position's current state.                                  |
+//| Select a position on the index.                                  |
+//| INPUT:  index - position index.                                  |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CPositionInfo::SelectByIndex(int index)
+  {
+   string name=PositionGetSymbol(index);
+   if(name=="") return(false);
+//---
+   return(PositionSelect(name));
+  }
+//+------------------------------------------------------------------+
+//| Stored position's current state.                                 |
 //| INPUT:  no.                                                      |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
