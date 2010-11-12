@@ -132,8 +132,7 @@ bool Trailing()
       TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
       if(TrailingStop<55) TrailingStop=55;
       if(PositionSelect(smb))
-        {
-         // есть открытые
+        {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
            { // смотрим есть ли заказ на закрытие
             if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
@@ -193,15 +192,14 @@ bool Trailing()
            }
         }
       else
-        { // открываем позицию
+        { // открываем позиции
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
             && (
             (OrderGetInteger(ORDER_MAGIC)%10)==0
             || (OrderGetDouble(ORDER_TP)>lasttick.bid)
             )
             )
-           {// нашли на продажу - значит надо закрыться
-            //           Print("closepos ",sell_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
+           {
             trReq.action=TRADE_ACTION_DEAL;
             trReq.magic=777;
             trReq.symbol=smb;                 // Trade symbol
@@ -225,7 +223,6 @@ bool Trailing()
             || (OrderGetDouble(ORDER_TP)<lasttick.ask)
             ))
            {
-            //       Print("closepos ",buy_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
             trReq.action=TRADE_ACTION_DEAL;
             trReq.magic=777;
             trReq.symbol=smb;                 // Trade symbol
@@ -233,7 +230,7 @@ bool Trailing()
             trReq.deviation=1;                     // Maximal possible deviation from the requested price
             trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.price=lasttick.bid;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.type=ORDER_TYPE_SELL;              // Order type
+            trReq.type=ORDER_TYPE_BUY;              // Order type
             OrderSend(trReq,trRez);
             if(10009==trRez.retcode)
               {
