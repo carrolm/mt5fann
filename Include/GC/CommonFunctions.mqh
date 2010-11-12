@@ -13,6 +13,34 @@ int TrailingStop=3;
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,datetime expiration=0)
   {
+   ulong    ticket;
+   ticket=0;
+   int i;
+// есть такой-же отложенный ордер
+   for(i=0;i<OrdersTotal();i++)
+     {
+      OrderGetTicket(i);
+      if(OrderGetString(ORDER_SYMBOL)==smb) 
+      {
+       if(type==ORDER_TYPE_BUY&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)     return(false);
+       if(type==ORDER_TYPE_SELL&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)     return(false);
+      }
+     }
+// есть открытая позиция
+   for(i=0;i<PositionsTotal();i++)
+     {
+      if(smb==PositionGetSymbol(i))
+      {
+       if(type==ORDER_TYPE_BUY&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)     return(false);
+       if(type==ORDER_TYPE_SELL&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)     return(false);
+     }
+     }
+   if(ticket!=0)
+     {
+     return(false);
+     }
+//Print("ticket=",ticket," OrsTotal=",OrsTotal);
+
 //Print("NewOrder");
    MqlTick lasttick;
    MqlTradeRequest trReq;
@@ -32,25 +60,6 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
       && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
       );else return(false);
 //Print("NewOrder-his0k");
-   ulong    ticket=0;
-   int OrsTotal=OrdersTotal();
-   int i;
-// есть такой-же отложенный ордер
-   for(i=0;i<OrsTotal;i++)
-     {
-      OrderGetTicket(i);
-      if(OrderGetString(ORDER_SYMBOL)==smb) ticket=OrderGetTicket(i);
-     }
-// есть открытая позиция
-   for(i=0;i<PositionsTotal()&&_OpenNewPosition_;i++)
-     {
-      if(smb==PositionGetSymbol(i)) ticket=i;
-     }
-//Print("ticket=",ticket," OrsTotal=",OrsTotal);
-   if(ticket>0)
-     {
-     }
-   else
      {
       trReq.action=TRADE_ACTION_PENDING;
       trReq.magic=777;
@@ -60,7 +69,8 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
       trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
       trReq.tp=price;
       trReq.comment=comment;
-      if(0==expiration) expiration = TimeCurrent()+PeriodSeconds(per);
+      Print(smb," ",type," ",comment);
+      if(0==expiration) expiration = TimeCurrent()+3*PeriodSeconds(per);
       trReq.expiration=expiration;
       if(type==ORDER_TYPE_BUY)
         {
@@ -105,7 +115,7 @@ bool Trailing()
    MqlTradeResult    trRez;
 
    ENUM_TIMEFRAMES per=_Period;//!!!!!!!!!!!!!!!!!!!!!!!
-   for(i=0;i<OrdTotal&&_TrailingPosition_;i++)
+   for(i=0;i<OrdTotal&&_OpenNewPosition_;i++)
      {
       ulong    ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -142,6 +152,7 @@ bool Trailing()
                trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
                trReq.type=ORDER_TYPE_SELL;                           // Order type
                trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
                if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
@@ -169,6 +180,7 @@ bool Trailing()
                trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.price=lasttick.bid;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
                trReq.type=ORDER_TYPE_SELL;              // Order type
+               trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
                if(10009==trRez.retcode)
                  {
@@ -234,7 +246,7 @@ bool Trailing()
         }
      }
 /// traling open           
-   for(i=0;i<PositionsTotal()&&_OpenNewPosition_;i++)
+   for(i=0;i<PositionsTotal()&&_TrailingPosition_;i++)
      {
       smb=PositionGetSymbol(i);
       // текущая история
