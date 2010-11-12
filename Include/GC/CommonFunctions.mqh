@@ -5,10 +5,13 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
+input bool _TrailingPosition_=true;//–азрешить следить за ордерами
+input bool _OpenNewPosition_=true;//–азрешить входить в рынок
+int TrailingStop=3;
 //+------------------------------------------------------------------+
 //|   «аказ на ордер - хранитс€ на сервере -не открываетс€ автоматом так как цена нереальна€  |
 //+------------------------------------------------------------------+
-bool NewOrder(string smb,ENUM_ORDER_TYPE type,double price=0,datetime expiration=0)
+bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,datetime expiration=0)
   {
 //Print("NewOrder");
    MqlTick lasttick;
@@ -32,10 +35,16 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,double price=0,datetime expiration
    ulong    ticket=0;
    int OrsTotal=OrdersTotal();
    int i;
+// есть такой-же отложенный ордер
    for(i=0;i<OrsTotal;i++)
      {
       OrderGetTicket(i);
       if(OrderGetString(ORDER_SYMBOL)==smb) ticket=OrderGetTicket(i);
+     }
+// есть открыта€ позици€
+   for(i=0;i<PositionsTotal()&&_OpenNewPosition_;i++)
+     {
+      if(smb==PositionGetSymbol(i)) ticket=i;
      }
 //Print("ticket=",ticket," OrsTotal=",OrsTotal);
    if(ticket>0)
@@ -50,6 +59,8 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,double price=0,datetime expiration
       trReq.deviation=1;                                    // Maximal possible deviation from the requested price
       trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
       trReq.tp=price;
+      trReq.comment=comment;
+      if(0==expiration) expiration = TimeCurrent()+PeriodSeconds(per);
       trReq.expiration=expiration;
       if(type==ORDER_TYPE_BUY)
         {
@@ -94,8 +105,7 @@ bool Trailing()
    MqlTradeResult    trRez;
 
    ENUM_TIMEFRAMES per=_Period;//!!!!!!!!!!!!!!!!!!!!!!!
-   int TrailingStop;
-   for(i=0;i<OrdTotal;i++)
+   for(i=0;i<OrdTotal&&_TrailingPosition_;i++)
      {
       ulong    ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -224,7 +234,7 @@ bool Trailing()
         }
      }
 /// traling open           
-   for(i=0;i<PositionsTotal();i++)
+   for(i=0;i<PositionsTotal()&&_OpenNewPosition_;i++)
      {
       smb=PositionGetSymbol(i);
       // текуща€ истори€

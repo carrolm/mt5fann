@@ -283,7 +283,7 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
             break;
          case KEY_NUMLOCK_MINUS:
             break;
-         default:                Print("Ќажата кака€-то неперечисленна€ клавиша");
+         default:              //  Print("Ќажата кака€-то неперечисленна€ клавиша");
         }
       ChartRedraw();
      }

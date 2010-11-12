@@ -45,8 +45,9 @@ void OnTick()
      {
       fannExpert.run();
       fannExpert.get_output();
-      if(fannExpert.OutputVector[0]>.5 )  NewOrder(_Symbol,ORDER_TYPE_BUY);
-      if(fannExpert.OutputVector[0]<-.5 ) NewOrder(_Symbol,ORDER_TYPE_SELL);
+      //Print(_Symbol,fannExpert," ".OutputVector[0]);
+      if(fannExpert.OutputVector[0]>0.3 )  NewOrder(_Symbol,ORDER_TYPE_BUY,(string)fannExpert.OutputVector[0]);
+      if(fannExpert.OutputVector[0]<-0.3 ) NewOrder(_Symbol,ORDER_TYPE_SELL,(string)fannExpert.OutputVector[0]);
       
  //     Print(fannExpert.OutputVector[0]);
      }

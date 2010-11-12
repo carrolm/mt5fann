@@ -20,11 +20,13 @@ void OnStart()
 
    if(!mt5fann.Init("fx_eliot")) Print("Init error");
    mt5fann.ExportFANNDataWithTest(0,100,_Symbol);
-   if(GetVectors(mt5fann.InputVector,mt5fann.OutputVector,5,1,"Fractals"))
+   for (int i=0;i<100;i++)
+   if(mt5fann.GetVector(i))
      {
       mt5fann.run();
       mt5fann.get_output();
-      Print(mt5fann.OutputVector[0]);
+      Print(_Symbol," ",mt5fann.OutputVector[0]);
+      return;
      }
   }
 //+------------------------------------------------------------------+
