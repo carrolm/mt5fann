@@ -12,22 +12,22 @@
 input double LotSize=0.1; // Размер лота
 #include <GC\CurrPairs.mqh> // пары
 CMT5FANN fannExpert;
-MqlDateTime lasttick;
+MqlDateTime last_tick;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   MqlDateTime time;
+//MqlDateTime time;
 //--- check need processing
-   TimeCurrent(lasttick);
+   TimeCurrent(last_tick);
 
    fannExpert.debug=true;
 
    if(!fannExpert.Init("fx_eliot")) Print("Init error");
-  
+
 //---
-   
+
 //---
    return(0);
   }
@@ -37,7 +37,7 @@ int OnInit()
 void OnDeinit(const int reason)
   {
 //---
-   
+
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -47,21 +47,22 @@ void OnTick()
    MqlDateTime time;
 //--- check need processing
    TimeCurrent(time);
-   if(lasttick.min == time.min ) return;
-   lasttick = time;
-   if(fannExpert.GetVector())
+   if(last_tick.min!=time.min)
      {
-      fannExpert.run();
-      fannExpert.get_output();
-      //Print(_Symbol,fannExpert," ".OutputVector[0]);
-      if(fannExpert.OutputVector[0]>0.3 )  NewOrder(_Symbol,ORDER_TYPE_BUY,(string)(fannExpert.OutputVector[0]));
-      if(fannExpert.OutputVector[0]<-0.3 ) NewOrder(_Symbol,ORDER_TYPE_SELL,(string)(fannExpert.OutputVector[0]));
-      
- //     Print(fannExpert.OutputVector[0]);
+      last_tick=time;
+      if(fannExpert.GetVector())
+        {
+         fannExpert.run();
+         fannExpert.get_output();
+         //Print(_Symbol,fannExpert," ".OutputVector[0]);
+         if(fannExpert.OutputVector[0]>0.3 )  NewOrder(_Symbol,ORDER_TYPE_BUY,(string)(fannExpert.OutputVector[0]));
+         if(fannExpert.OutputVector[0]<-0.3 ) NewOrder(_Symbol,ORDER_TYPE_SELL,(string)(fannExpert.OutputVector[0]));
+
+         //     Print(fannExpert.OutputVector[0]);
+        }
      }
    Trailing();
   }
-  
-   
+
 
 //+------------------------------------------------------------------+

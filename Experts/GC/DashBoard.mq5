@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 #property version   "0.00a"
 
-#include <DashBoard.mqh>
+#include <GC\DashBoard.mqh>
 // sell  фигня
 void CDashBoard::Trailing()
   {
@@ -102,7 +102,7 @@ void CDashBoard::Trailing()
            }
         }
      }
-   for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+   for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       if(PositionSelect(SymbolsArray[SymbolIdx])) continue;// есть открытая - обработка была выше
       SymbolInfoTick(SymbolsArray[SymbolIdx],lasttick);
@@ -283,7 +283,7 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
             break;
          case KEY_NUMLOCK_MINUS:
             break;
-         default:              //  Print("Нажата какая-то неперечисленная клавиша");
+         default: ;             //  Print("Нажата какая-то неперечисленная клавиша");
         }
       ChartRedraw();
      }

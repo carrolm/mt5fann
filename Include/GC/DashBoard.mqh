@@ -209,18 +209,18 @@ CTimer::~CTimer()
 //+------------------------------------------------------------------+
 //| Метод создания объекта / Method of creation of object            |
 //+------------------------------------------------------------------+
-bool CTimer::Create(long chart_id,string name,int window,int X,int Y,int FontSize)
+bool CTimer::Create(long chart_id,string name,int window,int X,int Y,int Font_Size)
   {
-   bool result;
+   bool result=false;
    if(_TimePeriod>PERIOD_D1) return(false);
    if(ObjectFind(0,name)==-1)
      {
       ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
       ObjectSetInteger(0,name,OBJPROP_XDISTANCE,X);
       ObjectSetInteger(0,name,OBJPROP_YDISTANCE,Y);
-      ObjectSetInteger(0,name,OBJPROP_XSIZE,FontSize*10);
-      ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
-      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
+      ObjectSetInteger(0,name,OBJPROP_XSIZE,Font_Size*10);
+      ObjectSetInteger(0,name,OBJPROP_YSIZE,Font_Size*2);
+      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,Font_Size);
       ObjectSetString(0,name,OBJPROP_TEXT,"Wait...");
       ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
       result=true;
@@ -267,8 +267,8 @@ bool CTimer::Create(long chart_id,string name,int window,int X,int Y,int FontSiz
 //+------------------------------------------------------------------+
 bool CTimer::SignalOn()
   {
-   int      X,Y;
-   string   name_obj;
+   //int      X,Y;
+   //string   name_obj;
 
    return(true);
   }
@@ -277,8 +277,8 @@ bool CTimer::SignalOn()
 //+------------------------------------------------------------------+
 bool CTimer::SignalOff()
   {
-   int      X,Y;
-   string   name_obj;
+   //int      X,Y;
+   //string   name_obj;
    bool     result=true;
 
 //   if(TimerSignalButton==NULL) return(false);
@@ -294,7 +294,7 @@ bool CTimer::SignalOff()
 //+-----------------------------------------------------------------------------+
 void CTimer::OnTimer()
   {
-   static bool BlinkFlag=true;
+   //static bool BlinkFlag=true;
    if(InitTimer)
      {
       if(_TimePeriod>PERIOD_D1) return;
@@ -392,7 +392,7 @@ bool CTimer::ColorBackground(color col)
 //+---------------------------------------------------------------------------+
 bool CTimer::Corner(ENUM_BASE_CORNER corner)
   {
-   bool result;
+   bool result=true;
    _Corner=corner;
 //result=TimerText.Corner(_Corner);
 //result&=TimerSubstrate.Corner(_Corner);
@@ -677,7 +677,7 @@ bool CDashBoard::Refresh(void)
             if(0>profit) ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Red);
             else ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Green);
            }
-         for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+         for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
            {
             if(SymbolsArray[SymbolIdx]==ChartSymbol(currChart))
               {
@@ -764,7 +764,7 @@ bool CDashBoard::Refresh(void)
         }
    TimeToStruct(LastRefresh,str1);
    TimeToStruct(TimeCurrent(),str2);
-   for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+   for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
         {
@@ -786,7 +786,7 @@ bool CDashBoard::Refresh(void)
 //+------------------------------------------------------------------+
    if(str1.min!=str2.min)
      {
-      for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+      for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
          for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
            {
             if((3599<PeriodSeconds(PeriodNumber[iperiod]) && str1.hour!=str2.hour)
@@ -910,7 +910,7 @@ bool CDashBoard::Refresh(void)
          else
            {
             int DealsTotal=HistoryDealsTotal();
-            MqlDateTime str1;
+ //           MqlDateTime str1;
             datetime dtstart=TimeCurrent();// выбор периодов!
             TimeToStruct(dtstart,str1);
             str1.hour=0; str1.min=0;str1.sec=0;

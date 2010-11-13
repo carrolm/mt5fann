@@ -39,26 +39,26 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
      {
      return(false);
      }
-//Print("ticket=",ticket," OrsTotal=",OrsTotal);
 
-//Print("NewOrder");
-   MqlTick lasttick;
    MqlTradeRequest trReq;
    MqlTradeResult trRez;
-   double BufferO[],BufferC[],BufferL[],BufferH[];
-   ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
-   ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
-   int needcopy=5;ENUM_TIMEFRAMES per=_Period;
-   SymbolInfoTick(smb,lasttick);
-   ArrayInitialize(BufferC,0);ArrayInitialize(BufferO,0);
-   ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
+   //double BufferO[],
+   double BufferC[];
+   //,BufferL[],BufferH[];
+   //ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
+   //ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
+   int needcopy=2;ENUM_TIMEFRAMES per=_Period;
+   ArrayInitialize(BufferC,0);
+   //ArrayInitialize(BufferO,0);
+   //ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
 // текущая история
 
-   if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
-      && (CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
-      && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
-      && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
-      );else return(false);
+   //if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
+   //   && 
+   if(CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
+   //   && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
+   //   && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
+   //   );else return(false);
 //Print("NewOrder-his0k");
      {
       trReq.action=TRADE_ACTION_PENDING;
@@ -114,10 +114,12 @@ bool Trailing()
    MqlTradeRequest   trReq;
    MqlTradeResult    trRez;
 
-   ENUM_TIMEFRAMES per=_Period;//!!!!!!!!!!!!!!!!!!!!!!!
+   ENUM_TIMEFRAMES per=PERIOD_M1;
+ulong  ticket;
+   // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal&&_OpenNewPosition_;i++)
-     {
-      ulong    ticket=OrderGetTicket(i);
+     {// есть "заказы" и открытие разрешено
+      ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
       ArrayInitialize(BufferC,0);ArrayInitialize(BufferO,0);
       ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
