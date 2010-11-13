@@ -149,7 +149,7 @@ bool Trailing()
                trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
                trReq.deviation=1;                                    // Maximal possible deviation from the requested price
                trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-               trReq.type=ORDER_TYPE_SELL;                           // Order type
+               trReq.type=ORDER_TYPE_BUY;                           // Order type
                trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
@@ -207,6 +207,7 @@ bool Trailing()
             trReq.deviation=1;                                    // Maximal possible deviation from the requested price
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
+             trReq.comment=OrderGetString(ORDER_COMMENT);
             trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             OrderSend(trReq,trRez);
             if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
@@ -231,6 +232,7 @@ bool Trailing()
             trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.price=lasttick.bid;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_BUY;              // Order type
+            trReq.comment=OrderGetString(ORDER_COMMENT);
             OrderSend(trReq,trRez);
             if(10009==trRez.retcode)
               {
