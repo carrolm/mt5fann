@@ -31,6 +31,8 @@ void OnInit()
    IndicatorSetString(INDICATOR_SHORTNAME,"Volumes");
 //---- indicator digits
    IndicatorSetInteger(INDICATOR_DIGITS,0);
+   ArraySetAsSeries(ExtVolumesBuffer,true);
+   ArraySetAsSeries(ExtColorsBuffer,true);
 //----
   }
 //+------------------------------------------------------------------+
@@ -46,6 +48,12 @@ int OnCalculate(const int rates_total,const int prev_calculated,
                 const long &Volume[],
                 const int &Spread[])
   {
+   ArraySetAsSeries(Time,true);
+   ArraySetAsSeries(High,true);
+   ArraySetAsSeries(Low,true);
+   ArraySetAsSeries(Open,true);
+   ArraySetAsSeries(Close,true);
+
 //---check for rates total
    if(rates_total<2)
       return(0);
@@ -57,7 +65,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    string smbl=_Symbol;double res;
    int      TrailingStop=(int)(2*SymbolInfoInteger(smbl,SYMBOL_SPREAD));
    if(TrailingStop<55) TrailingStop=55;
-   Print(TrailingStop);
+   //Print(TrailingStop);
    for(int i=start;i<rates_total;i++)
      {
       res=(High[i]-Low[i])/(TrailingStop*SymbolInfoDouble(smbl,SYMBOL_POINT));
