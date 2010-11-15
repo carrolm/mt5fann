@@ -28,7 +28,7 @@ void OnInit()
    SetIndexBuffer(0,ExtVolumesBuffer,INDICATOR_DATA);
    SetIndexBuffer(1,ExtColorsBuffer,INDICATOR_COLOR_INDEX);
 //---- name for DataWindow and indicator subwindow label
-   IndicatorSetString(INDICATOR_SHORTNAME,"Volumes");
+   IndicatorSetString(INDICATOR_SHORTNAME,"GC Analizer");
 //---- indicator digits
    IndicatorSetInteger(INDICATOR_DIGITS,0);
    ArraySetAsSeries(ExtVolumesBuffer,true);

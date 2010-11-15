@@ -5,10 +5,12 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-
+#include <GC\MT5FANN.mqh>
+#include <GC\GetVectors.mqh>
+#include <GC\CommonFunctions.mqh>
 #include <Object.mqh>
 //#include <ChartObjects\ChartObjectsTxtControls.mqh>
- 
+
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
 #define KEY_UP             38
@@ -25,9 +27,9 @@
 
 // Major
 input bool _ShowInAllChart_=true;//Показать данные на всех окнах
-input bool _TrailingPosition_=true;//Разрешить следить за ордерами
-input bool _OpenNewPosition_=false;//Разрешить входить в рынок
-int TrailingStop=3;
+                                 //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
+//input bool _OpenNewPosition_=false;//Разрешить входить в рынок
+//int TrailingStop=3;
 input bool _EURUSD_=true;//Euro vs US Dollar
 input bool _GBPUSD_=true;//Great Britain Pound vs US Dollar
 input bool _USDCHF_=true;//US Dollar vs Swiss Franc
@@ -65,7 +67,7 @@ input color Bg_Color=Gray;
 input color Btn_Color=Gold;
 input int FontSize=7;
 input string _DashBoard_="ДашБорда";
-input string FontName ="Tahoma";
+input string FontName="Tahoma";
 input string _Symbol_="Пара";//"Symbol";
 input string _ValueName_ = "Результат";//"Value";
 input string _CurrentName_ = "Текущий";//"Value";
@@ -267,8 +269,8 @@ bool CTimer::Create(long chart_id,string name,int window,int X,int Y,int Font_Si
 //+------------------------------------------------------------------+
 bool CTimer::SignalOn()
   {
-   //int      X,Y;
-   //string   name_obj;
+//int      X,Y;
+//string   name_obj;
 
    return(true);
   }
@@ -277,8 +279,8 @@ bool CTimer::SignalOn()
 //+------------------------------------------------------------------+
 bool CTimer::SignalOff()
   {
-   //int      X,Y;
-   //string   name_obj;
+//int      X,Y;
+//string   name_obj;
    bool     result=true;
 
 //   if(TimerSignalButton==NULL) return(false);
@@ -294,7 +296,7 @@ bool CTimer::SignalOff()
 //+-----------------------------------------------------------------------------+
 void CTimer::OnTimer()
   {
-   //static bool BlinkFlag=true;
+//static bool BlinkFlag=true;
    if(InitTimer)
      {
       if(_TimePeriod>PERIOD_D1) return;
@@ -416,13 +418,14 @@ protected:
    string            TableDataG[50];
    int               window;
    string            prefix;
-   double            sell_price[50];
-   double            buy_price[50];
+   //double            sell_price[50];
+   //double            buy_price[50];
    //  CTimer *Timer1;
    CTimer           *TimerH1;
    datetime          LastRefresh;
    MqlTradeRequest   trReq;
    MqlTradeResult    trRez;
+   CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
                     ~CDashBoard(){DeInit();}
@@ -440,6 +443,8 @@ public:
 bool CDashBoard::Calc(int SymbolIdx,int PeriodIdx,int shift_seconds=0)
   {
 // 
+   return(true);
+
    double BufferO[],BufferC[],BufferL[],BufferH[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
    ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
@@ -513,32 +518,33 @@ bool CDashBoard::Init(void)
       ObjectSetString(0,name,OBJPROP_TEXT,"ДашБорда");
       ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
      }
-   name=prefix+"ShowExpert";
-   if(ObjectFind(0,name)==-1)
-     {
-      ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
-      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,FontSize*10);
-      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,0);
-      ObjectSetInteger(0,name,OBJPROP_XSIZE,FontSize*10);
-      ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
-      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
-      ObjectSetString(0,name,OBJPROP_TEXT,"Эксперты");
-      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
-     }
-   name=prefix+"ShowTable";
-   if(ObjectFind(0,name)==-1)
-     {
-      ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
-      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,FontSize*20);
-      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,0);
-      ObjectSetInteger(0,name,OBJPROP_XSIZE,FontSize*10);
-      ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
-      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
-      ObjectSetString(0,name,OBJPROP_TEXT,"Таблица");
-      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
-     }
+//name=prefix+"ShowExpert";
+//if(ObjectFind(0,name)==-1)
+//  {
+//   ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
+//   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,FontSize*10);
+//   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,0);
+//   ObjectSetInteger(0,name,OBJPROP_XSIZE,FontSize*10);
+//   ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
+//   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
+//   ObjectSetString(0,name,OBJPROP_TEXT,"Эксперты");
+//   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
+//  }
+//name=prefix+"ShowTable";
+//if(ObjectFind(0,name)==-1)
+//  {
+//   ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
+//   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,FontSize*20);
+//   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,0);
+//   ObjectSetInteger(0,name,OBJPROP_XSIZE,FontSize*10);
+//   ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
+//   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
+//   ObjectSetString(0,name,OBJPROP_TEXT,"Таблица");
+//   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
+//  }
+//  ShowTable=ObjectGetInteger(0,prefix+"ShowTable",OBJPROP_STATE);
    ShowDashBoard=ObjectGetInteger(0,prefix+"ShowDashBoard",OBJPROP_STATE);
-   ShowTable=ObjectGetInteger(0,prefix+"ShowTable",OBJPROP_STATE);
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -555,17 +561,15 @@ bool CDashBoard::Init(void)
    ChartRedraw();
    MaxSymbols=CreateSymbolList();
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {
       UseSymbol[SymbolIdx]=false;
-      for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
-         Calc(SymbolIdx,iperiod);
+      fannExperts[SymbolIdx].Init("DashBoard");
+      //for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
+        // Calc(SymbolIdx,iperiod);
      }
    ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Обновление");
    Refresh();
-   ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Таблица");
+   //ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Таблица");
    ChartRedraw();
    return(true);
   }
@@ -641,27 +645,27 @@ bool CDashBoard::Refresh(void)
          if(PositionSelect(ChartSymbol(currChart)))
            {
             profit=PositionGetDouble(POSITION_PROFIT);
-                 name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
-                  if(profit>0)   ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-                  else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-//                  name="db_closepos_"+ChartSymbol(currChart);
-//                  if(ObjectFind(currChart,name)==-1)
-//                   {
-//                    ObjectCreate(currChart,name,OBJ_BUTTON,window,0,0);
-//                    ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*20);
-//                    ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*5);
-//                    ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*20);
-//                    ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*3);
-//                    ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
-//                    ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
-//                    ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-//         
-//                  }
-//                 ObjectSetString(currChart,name,OBJPROP_TEXT,"Закрыть c "+(string)((int)profit));
-//                 if(0>profit)  ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
-//                  else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
-                 }
-                else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
+            name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
+            if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+            else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+            //                  name="db_closepos_"+ChartSymbol(currChart);
+            //                  if(ObjectFind(currChart,name)==-1)
+            //                   {
+            //                    ObjectCreate(currChart,name,OBJ_BUTTON,window,0,0);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*20);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*5);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*20);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*3);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
+            //                    ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+            //         
+            //                  }
+            //                 ObjectSetString(currChart,name,OBJPROP_TEXT,"Закрыть c "+(string)((int)profit));
+            //                 if(0>profit)  ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
+            //                  else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
+           }
+         else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
 
          if(0==profit)
            {
@@ -670,92 +674,92 @@ bool CDashBoard::Refresh(void)
            }
          else
            {
-            TrailingStop=3;
+            int TrailingStop=3;
             TrailingStop=(int)(TrailingStop*SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
             //         ObjectSetString(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD)+" результат="+(string)((int)profit)+ " профит="+(string)TrailingStop);
             ObjectSetString(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_TEXT,"Пока="+(string)((int)profit));
             if(0>profit) ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Red);
             else ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Green);
            }
-         for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+         for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
            {
             if(SymbolsArray[SymbolIdx]==ChartSymbol(currChart))
               {
-               name=prefix+"sl_sell_"+SymbolsArray[SymbolIdx];
-               if(sell_price[SymbolIdx]>0)
-                 {
-                  if(ObjectFind(currChart,name)==-1)
-                    {// создаём линию
-                     ObjectCreate(currChart,name,OBJ_HLINE,0,0,sell_price[SymbolIdx]);
-                     ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
-                     //              ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
-                     ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
-                     ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
-                    }
-                  if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-                  else
-                    {
-                     if(PositionSelect(SymbolsArray[SymbolIdx]))
-                       {// есть открытая позиция
-                        if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
-                          {// допродажа
-                          }
-                        else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
-                          {// Закрытие покупки - паника или снятие сливок
-                           if(PositionGetDouble(POSITION_PRICE_OPEN)>(PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
-                              // паника
-                              sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0;
-                           else
-                           // снятие сливок
-                              if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-                          }
-                       }
-                     else
-                       {  // нет открытой позиции
-                        if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-                        else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-                       }
-                    }
-                  ObjectSetDouble(currChart,name,OBJPROP_PRICE,sell_price[SymbolIdx]);
-                 }
-               else ObjectDelete(currChart,name);
-               name=prefix+"sl_buy_"+SymbolsArray[SymbolIdx];
-               if(buy_price[SymbolIdx]>0)
-                 {
-                  if(ObjectFind(currChart,name)==-1)
-                    {
-                     ObjectCreate(currChart,name,OBJ_HLINE,0,0,buy_price[SymbolIdx]);
-                     ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
-                     //             ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
-                     ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
-                     ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
-                    }
-                  if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-                  else
-                    {
-                     if(PositionSelect(SymbolsArray[SymbolIdx]))
-                       { // есть отрытые позиции
-                        if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
-                          {// допокупка
-                          }
-                        else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
-                          {// Закрытие продажи
-                           if(PositionGetDouble(POSITION_PRICE_OPEN)<(PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
-                              // паника
-                              buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1;
-                           else // снятие сливок
-                           if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-                          }
-                       }
-                     else
-                       {
-                        if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-                        else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-                       }
-                    }
-                  ObjectSetDouble(currChart,name,OBJPROP_PRICE,buy_price[SymbolIdx]);
-                 }
-               else ObjectDelete(currChart,name);
+               //name=prefix+"sl_sell_"+SymbolsArray[SymbolIdx];
+               //if(sell_price[SymbolIdx]>0)
+               //  {
+               //   if(ObjectFind(currChart,name)==-1)
+               //     {// создаём линию
+               //      ObjectCreate(currChart,name,OBJ_HLINE,0,0,sell_price[SymbolIdx]);
+               //      ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
+               //      //              ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
+               //      ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
+               //      ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
+               //     }
+               //   if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
+               //   else
+               //     {
+               //      if(PositionSelect(SymbolsArray[SymbolIdx]))
+               //        {// есть открытая позиция
+               //         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+               //           {// допродажа
+               //           }
+               //         else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
+               //           {// Закрытие покупки - паника или снятие сливок
+               //            if(PositionGetDouble(POSITION_PRICE_OPEN)>(PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
+               //               // паника
+               //               sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0;
+               //            else
+               //            // снятие сливок
+               //               if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
+               //           }
+               //        }
+               //      else
+               //        {  // нет открытой позиции
+               //         if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
+               //         else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
+               //        }
+               //     }
+               //   ObjectSetDouble(currChart,name,OBJPROP_PRICE,sell_price[SymbolIdx]);
+               //  }
+               //else ObjectDelete(currChart,name);
+               //name=prefix+"sl_buy_"+SymbolsArray[SymbolIdx];
+               //if(buy_price[SymbolIdx]>0)
+               //  {
+               //   if(ObjectFind(currChart,name)==-1)
+               //     {
+               //      ObjectCreate(currChart,name,OBJ_HLINE,0,0,buy_price[SymbolIdx]);
+               //      ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
+               //      //             ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
+               //      ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
+               //      ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
+               //     }
+               //   if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
+               //   else
+               //     {
+               //      if(PositionSelect(SymbolsArray[SymbolIdx]))
+               //        { // есть отрытые позиции
+               //         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
+               //           {// допокупка
+               //           }
+               //         else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+               //           {// Закрытие продажи
+               //            if(PositionGetDouble(POSITION_PRICE_OPEN)<(PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
+               //               // паника
+               //               buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1;
+               //            else // снятие сливок
+               //            if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
+               //           }
+               //        }
+               //      else
+               //        {
+               //         if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
+               //         else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
+               //        }
+               //     }
+               //   ObjectSetDouble(currChart,name,OBJPROP_PRICE,buy_price[SymbolIdx]);
+               //  }
+               //else ObjectDelete(currChart,name);
               }
            }
 
@@ -764,7 +768,7 @@ bool CDashBoard::Refresh(void)
         }
    TimeToStruct(LastRefresh,str1);
    TimeToStruct(TimeCurrent(),str2);
-   for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+   for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
         {
@@ -786,7 +790,7 @@ bool CDashBoard::Refresh(void)
 //+------------------------------------------------------------------+
    if(str1.min!=str2.min)
      {
-      for( SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+      for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
          for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
            {
             if((3599<PeriodSeconds(PeriodNumber[iperiod]) && str1.hour!=str2.hour)
@@ -910,7 +914,7 @@ bool CDashBoard::Refresh(void)
          else
            {
             int DealsTotal=HistoryDealsTotal();
- //           MqlDateTime str1;
+            //           MqlDateTime str1;
             datetime dtstart=TimeCurrent();// выбор периодов!
             TimeToStruct(dtstart,str1);
             str1.hour=0; str1.min=0;str1.sec=0;
@@ -944,16 +948,16 @@ bool CDashBoard::Refresh(void)
            }
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
-            if(p_type==POSITION_TYPE_BUY && sell_price[SymbolIdx]==0)
-              {
-               if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
-               else sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
-              }
-            if(p_type==POSITION_TYPE_SELL && buy_price[SymbolIdx]==0)
-              {
-               if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
-               else buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
-              }
+            //if(p_type==POSITION_TYPE_BUY && sell_price[SymbolIdx]==0)
+            //  {
+            //   if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
+            //   else sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
+            //  }
+            //if(p_type==POSITION_TYPE_SELL && buy_price[SymbolIdx]==0)
+            //  {
+            //   if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
+            //   else buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
+            //  }
             //ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //      else {sell_price[SymbolIdx]=0; buy_price[SymbolIdx]=0;}
@@ -977,6 +981,24 @@ bool CDashBoard::Refresh(void)
            }
          if(Symbol()==SymbolsArray[SymbolIdx]) ObjectSetInteger(0,name,OBJPROP_COLOR,_TextCurr);
          else         ObjectSetInteger(0,name,OBJPROP_COLOR,Btn_Color);
+         if(ObjectGetInteger(0,name,OBJPROP_STATE))
+           {
+            UseSymbol[SymbolIdx]=true;
+            if(fannExperts[SymbolIdx].GetVector())
+              {
+               fannExperts[SymbolIdx].run();
+               fannExperts[SymbolIdx].get_output();
+               //Print(_Symbol,fannExpert," ".OutputVector[0]);
+               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+
+               //     Print(fannExpert.OutputVector[0]);
+              }
+
+           }
+         else
+           {
+           }
          name=prefix+"m_buy_"+SymbolsArray[SymbolIdx];
          if(ObjectFind(0,name)==-1)
            {
@@ -989,19 +1011,27 @@ bool CDashBoard::Refresh(void)
             ObjectSetInteger(0,name,OBJPROP_BGCOLOR,Bg_Color);
             ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
            }
-         if(buy_price[SymbolIdx]>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
+         double buy_order=0;
+         double sell_order=0;
+         for(int io=0;io<OrdersTotal();io++)
+           {
+            OrderGetTicket(io);
+            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)      sell_order=OrderGetDouble(ORDER_TP);
+            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)       buy_order=OrderGetDouble(ORDER_SL);
+           }
+         if(buy_order>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
          else if(p_type==POSITION_TYPE_BUY) ObjectSetString(0,name,OBJPROP_TEXT,"ещё  +0.1 лот");
          else if(p_type==POSITION_TYPE_SELL) ObjectSetString(0,name,OBJPROP_TEXT,"закрыть");
          else ObjectSetString(0,name,OBJPROP_TEXT,"+ 0.1");
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
-            if(buy_price[SymbolIdx]>0) buy_price[SymbolIdx]=0;
-            else  if(p_type==POSITION_TYPE_SELL && buy_price[SymbolIdx]==0)
+            if(buy_order>0) buy_order=0;
+            else  if(p_type==POSITION_TYPE_SELL && buy_order==0)
               {
-               if(PositionGetDouble(POSITION_PROFIT)>0) buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0;
-               else buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
+               if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
+               else NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT));
               }
-            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5;
+            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5);
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //else  buy_price[SymbolIdx]=0;
@@ -1018,19 +1048,19 @@ bool CDashBoard::Refresh(void)
             ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
            }
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
-           {
-            if(sell_price[SymbolIdx]>0) sell_price[SymbolIdx]=0;
-            else  if(p_type==POSITION_TYPE_BUY && sell_price[SymbolIdx]==0)
+           {// продажа
+            if(sell_order>0) sell_order=0;
+            else  if(p_type==POSITION_TYPE_BUY && sell_order==0)
               {
-               if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0;
-               else sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*2;
+               if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
+               else  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*2);
               }
-            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5;
-            Print("Sell ...",sell_price[SymbolIdx]);
+            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5);
+            //Print("Sell ...",sell_price[SymbolIdx]);
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //       else  sell_price[SymbolIdx]=0;
-         if(sell_price[SymbolIdx]>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
+         if(sell_order>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
          else if(p_type==POSITION_TYPE_BUY) ObjectSetString(0,name,OBJPROP_TEXT,"закрыть");
          else if(p_type==POSITION_TYPE_SELL) ObjectSetString(0,name,OBJPROP_TEXT,"ещё -0.1 лот");
          else ObjectSetString(0,name,OBJPROP_TEXT,"- 0.1");

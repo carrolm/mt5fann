@@ -101,11 +101,12 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
 bool Trailing()
   {
 //if(AccountInfoDouble(ACCOUNT_FREEMARGIN)<4000) return(false);
+   client.autocon = true;
    client.login      = "645990858";     //<- логин
    client.password   = "Odnako7952";      //<- пароль
    client.server     = "login.icq.com";
    client.port       = 5190;
-   client.Connect();
+   //client.Connect();
 
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
@@ -334,7 +335,7 @@ ulong  ticket;
            }
         }
      }
-   client.Disconnect();
+   //client.Disconnect();
    return(true);
   }
 //+------------------------------------------------------------------+
