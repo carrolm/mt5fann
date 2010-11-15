@@ -155,11 +155,11 @@ void PrintError(uint status)
    
    switch(status)
    {
-      case ICQ_CONNECT_STATUS_OK:            errstr = "Status_OK";            break;
-      case ICQ_CONNECT_STATUS_AUTH_ERROR:    errstr = "Status_AUTH_ERROR";    break;
-      case ICQ_CONNECT_STATUS_CONNECT_ERROR: errstr = "Status_CONNECT_ERROR"; break; 
-      case ICQ_CONNECT_STATUS_RECV_ERROR:    errstr = "Status_RECV_ERROR";    break;                                    
-      case ICQ_CONNECT_STATUS_SEND_ERROR:    errstr = "Status_SEND_ERROR";    break;
+      case (int)ICQ_CONNECT_STATUS_OK:            errstr = "Status_OK";            break;
+      case (int)ICQ_CONNECT_STATUS_AUTH_ERROR:    errstr = "Status_AUTH_ERROR";    break;
+      case (int)ICQ_CONNECT_STATUS_CONNECT_ERROR: errstr = "Status_CONNECT_ERROR"; break; 
+      case (int)ICQ_CONNECT_STATUS_RECV_ERROR:    errstr = "Status_RECV_ERROR";    break;                                    
+      case (int)ICQ_CONNECT_STATUS_SEND_ERROR:    errstr = "Status_SEND_ERROR";    break;
       case 0:                                errstr = "PARAMETER_INCORRECT";  break; 
       default:                        errstr = IntegerToString(status,8,' '); break;
    }

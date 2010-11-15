@@ -5,9 +5,12 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
+#include <icq_mql5.mqh>
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 int TrailingStop=3;
+COscarClient client;
+
 //+------------------------------------------------------------------+
 //|   Заказ на ордер - хранится на сервере -не открывается автоматом так как цена нереальная  |
 //+------------------------------------------------------------------+
@@ -98,6 +101,12 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
 bool Trailing()
   {
 //if(AccountInfoDouble(ACCOUNT_FREEMARGIN)<4000) return(false);
+   client.login      = "645990858";     //<- логин
+   client.password   = "Odnako7952";      //<- пароль
+   client.server     = "login.icq.com";
+   client.port       = 5190;
+   client.Connect();
+
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
    int i;
@@ -158,6 +167,8 @@ ulong  ticket;
                if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
+                  client.SendMessage("36770049",        //<- номер получателя 
+                                        "ORDER_TYPE_BUY"); //<- текст сообщения 
                   trReq.order=ticket;
                   trReq.action=TRADE_ACTION_REMOVE;
                   OrderSend(trReq,trRez);
@@ -185,6 +196,8 @@ ulong  ticket;
                OrderSend(trReq,trRez);
                if(10009==trRez.retcode)
                  {
+                  client.SendMessage("36770049",        //<- номер получателя 
+                                        "ORDER_TYPE_SELL"); //<- текст сообщения 
                   trReq.order=ticket;
                   trReq.action=TRADE_ACTION_REMOVE;
                   OrderSend(trReq,trRez);
@@ -321,6 +334,7 @@ ulong  ticket;
            }
         }
      }
+   client.Disconnect();
    return(true);
   }
 //+------------------------------------------------------------------+
