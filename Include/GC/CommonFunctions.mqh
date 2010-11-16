@@ -10,7 +10,6 @@ input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 int TrailingStop=3;
 COscarClient client;
-
 //+------------------------------------------------------------------+
 //|   Заказ на ордер - хранится на сервере -не открывается автоматом так как цена нереальная  |
 //+------------------------------------------------------------------+
@@ -23,57 +22,57 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
    for(i=0;i<OrdersTotal();i++)
      {
       OrderGetTicket(i);
-      if(OrderGetString(ORDER_SYMBOL)==smb) 
-      {
-       if(type==ORDER_TYPE_BUY&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)     return(false);
-       if(type==ORDER_TYPE_SELL&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)     return(false);
-      }
+      if(OrderGetString(ORDER_SYMBOL)==smb)
+        {
+         if(type==ORDER_TYPE_BUY &&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) return(false);
+         if(type==ORDER_TYPE_SELL&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT) return(false);
+        }
      }
 // есть открытая позиция
    for(i=0;i<PositionsTotal();i++)
      {
       if(smb==PositionGetSymbol(i))
-      {
-       if(type==ORDER_TYPE_BUY&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)     return(false);
-       if(type==ORDER_TYPE_SELL&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)     return(false);
-     }
+        {
+         if(type==ORDER_TYPE_BUY &&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) return(false);
+         if(type==ORDER_TYPE_SELL&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
+        }
      }
    if(ticket!=0)
      {
-     return(false);
+      return(false);
      }
 
    MqlTradeRequest trReq;
    MqlTradeResult trRez;
-   //double BufferO[],
+//double BufferO[],
    double BufferC[];
-   //,BufferL[],BufferH[];
-   //ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
-   //ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
+//,BufferL[],BufferH[];
+//ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
+//ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
    int needcopy=2;ENUM_TIMEFRAMES per=_Period;
    ArrayInitialize(BufferC,0);
-   //ArrayInitialize(BufferO,0);
-   //ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
+//ArrayInitialize(BufferO,0);
+//ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
 // текущая история
 
-   //if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
-   //   && 
+//if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
+//   && 
    if(CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
-   //   && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
-   //   && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
-   //   );else return(false);
-//Print("NewOrder-his0k");
+      //   && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
+      //   && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
+      //   );else return(false);
+      //Print("NewOrder-his0k");
      {
       trReq.action=TRADE_ACTION_PENDING;
       trReq.magic=777;
       trReq.symbol=smb;                 // Trade symbol
       trReq.volume=0.1;      // Requested volume for a deal in lots
-      trReq.deviation=1;                                    // Maximal possible deviation from the requested price
+      trReq.deviation=5;                                    // Maximal possible deviation from the requested price
       trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
       trReq.tp=price;
       trReq.comment=comment;
-      Print(smb," ",type," ",comment);
-      if(0==expiration) expiration = TimeCurrent()+3*PeriodSeconds(per);
+      //Print(smb," ",type," ",comment);
+      if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(per);
       trReq.expiration=expiration;
       if(type==ORDER_TYPE_BUY)
         {
@@ -101,12 +100,12 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
 bool Trailing()
   {
 //if(AccountInfoDouble(ACCOUNT_FREEMARGIN)<4000) return(false);
-   client.autocon = true;
-   client.login      = "645990858";     //<- логин
-   client.password   = "Odnako7952";      //<- пароль
+   client.autocon=true;
+   client.login="645990858";     //<- логин
+   client.password="Odnako7952";      //<- пароль
    client.server     = "login.icq.com";
-   client.port       = 5190;
-   //client.Connect();
+   client.port       = 80;
+//client.Connect();
 
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
@@ -125,9 +124,9 @@ bool Trailing()
    MqlTradeResult    trRez;
 
    ENUM_TIMEFRAMES per=PERIOD_M1;
-ulong  ticket;
-   // проверяем -стоит ли открыть новую позицию, или закрыть старую
-   for(i=0;i<OrdTotal&&_OpenNewPosition_;i++)
+   ulong  ticket;
+// проверяем -стоит ли открыть новую позицию, или закрыть старую
+   for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
      {// есть "заказы" и открытие разрешено
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -141,8 +140,8 @@ ulong  ticket;
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<55) TrailingStop=55;
+      TrailingStop=(int)(3*SymbolInfoInteger(smb,SYMBOL_SPREAD));
+      if(TrailingStop<60) TrailingStop=60;
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -159,21 +158,21 @@ ulong  ticket;
                trReq.magic=777;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
-               trReq.deviation=1;                                    // Maximal possible deviation from the requested price
+               trReq.deviation=5;                                    // Maximal possible deviation from the requested price
                trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-               trReq.type=ORDER_TYPE_BUY;                           // Order type
+               trReq.type=ORDER_TYPE_SELL;                           // Order type
                trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
                if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
-                  client.SendMessage("36770049",        //<- номер получателя 
-                                        "ORDER_TYPE_BUY"); //<- текст сообщения 
-                  trReq.order=ticket;
-                  trReq.action=TRADE_ACTION_REMOVE;
-                  OrderSend(trReq,trRez);
-                  if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                  client.SendMessage("36770049",//<- номер получателя 
+                                     smb+" закрыли "); //<- текст сообщения 
+                  //trReq.order=ticket;
+                  //trReq.action=TRADE_ACTION_REMOVE;
+                  //OrderSend(trReq,trRez);
+                  //if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                  }
               }
            }
@@ -189,20 +188,20 @@ ulong  ticket;
                trReq.magic=777;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
-               trReq.deviation=1;                     // Maximal possible deviation from the requested price
+               trReq.deviation=5;                     // Maximal possible deviation from the requested price
                trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.price=lasttick.bid;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-               trReq.type=ORDER_TYPE_SELL;              // Order type
+               trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
+               trReq.type=ORDER_TYPE_BUY;              // Order type
                trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
                if(10009==trRez.retcode)
                  {
-                  client.SendMessage("36770049",        //<- номер получателя 
-                                        "ORDER_TYPE_SELL"); //<- текст сообщения 
-                  trReq.order=ticket;
-                  trReq.action=TRADE_ACTION_REMOVE;
-                  OrderSend(trReq,trRez);
-                  if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                  client.SendMessage("36770049",//<- номер получателя 
+                                     smb+" закрыли "); //<- текст сообщения 
+                  //trReq.order=ticket;
+                  //trReq.action=TRADE_ACTION_REMOVE;
+                  //OrderSend(trReq,trRez);
+                  //if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                  }
               }
            }
@@ -223,7 +222,7 @@ ulong  ticket;
             trReq.deviation=1;                                    // Maximal possible deviation from the requested price
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-             trReq.comment=OrderGetString(ORDER_COMMENT);
+            trReq.comment=OrderGetString(ORDER_COMMENT);
             trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             OrderSend(trReq,trRez);
             if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
@@ -261,7 +260,7 @@ ulong  ticket;
         }
      }
 /// traling open           
-   for(i=0;i<PositionsTotal()&&_TrailingPosition_;i++)
+   for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
      {
       smb=PositionGetSymbol(i);
       // текущая история
@@ -274,14 +273,14 @@ ulong  ticket;
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<55) TrailingStop=55;
+      TrailingStop=(int)(3*SymbolInfoInteger(smb,SYMBOL_SPREAD));
+      if(TrailingStop<60) TrailingStop=60;
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL))
            {
             trReq.action=TRADE_ACTION_SLTP;
-            Print(lasttick.ask," ",1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
+            //Print(lasttick.ask," ",1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
             trReq.sl=lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.tp=PositionGetDouble(POSITION_TP);
             //if((PositionGetDouble(POSITION_SL)-trReq.sl)>SymbolInfoDouble(smb,SYMBOL_POINT)) 
@@ -313,7 +312,7 @@ ulong  ticket;
             trReq.action=TRADE_ACTION_SLTP;
             trReq.sl= lasttick.bid-1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.tp= PositionGetDouble(POSITION_TP);
-            Print(trReq.sl," tp=",trReq.tp);
+            //Print(trReq.sl," tp=",trReq.tp);
             //if((trReq.sl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)) 
             OrderSend(trReq,BigDogModifResult);
            }
@@ -335,7 +334,7 @@ ulong  ticket;
            }
         }
      }
-   //client.Disconnect();
+//client.Disconnect();
    return(true);
   }
 //+------------------------------------------------------------------+

@@ -58,7 +58,7 @@ public:
    bool              get_output();
    bool              debug;
    void              Init();
-   bool              Init(string FileName);
+   bool              Init(string FileName,string smbl="");
    int               train_on_file(string path="",int max_epoch=5000,float desired_error=(float)0.001,bool resetprev=false);
    int               test_on_file(string path="");
    //   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers);
@@ -144,7 +144,7 @@ bool CMT5FANN::ini_save(string path="")
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".ini";
    MyIniFile.Init(path);// Пишем 
    bool     resb;
-   if(Max_Symbols==1 && Symbols_Array[0]==_Symbol);
+   if(Max_Symbols==1 );//&& Symbols_Array[0]==_Symbol);
    else
    for(int SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
@@ -406,10 +406,12 @@ void CMT5FANN::DeInit()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  CMT5FANN::Init(string FileName)
+bool  CMT5FANN::Init(string FileName,string smbl)
   {
    File_Name=FileName;
    ini_load();
+   if(""!=smbl) {Max_Symbols=1;Symbols_Array[0]=smbl;}
+   
    if(-1==(ann=ann_load()))
      {
       //File_Name="";

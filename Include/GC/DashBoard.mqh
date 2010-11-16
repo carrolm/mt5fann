@@ -423,8 +423,8 @@ protected:
    //  CTimer *Timer1;
    CTimer           *TimerH1;
    datetime          LastRefresh;
-   MqlTradeRequest   trReq;
-   MqlTradeResult    trRez;
+//   MqlTradeRequest   trReq;
+//   MqlTradeResult    trRez;
    CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
@@ -563,7 +563,7 @@ bool CDashBoard::Init(void)
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       UseSymbol[SymbolIdx]=false;
-      fannExperts[SymbolIdx].Init("DashBoard");
+      fannExperts[SymbolIdx].Init("DashBoard",SymbolsArray[SymbolIdx]);
       //for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
         // Calc(SymbolIdx,iperiod);
      }
@@ -935,7 +935,7 @@ bool CDashBoard::Refresh(void)
               }
            }
          ptotal+=profit;
-         if(p_type==POSITION_TYPE_BUY || p_type==POSITION_TYPE_SELL) ObjectSetString(0,name,OBJPROP_TEXT,"Закрыть "+(string)(int)profit);
+         if(p_type==POSITION_TYPE_BUY || p_type==POSITION_TYPE_SELL) ObjectSetString(0,name,OBJPROP_TEXT,"Перейти "+(string)(int)profit);
          else {ObjectSetString(0,name,OBJPROP_TEXT,(string)(int)profit);ObjectSetInteger(0,name,OBJPROP_STATE,false);}
          ObjectSetInteger(0,name,OBJPROP_COLOR,_Data);
          if(profit>0)
