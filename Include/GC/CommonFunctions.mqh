@@ -10,10 +10,13 @@ input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 int TrailingStop=3;
 COscarClient client;
+
+// ask
+// bid
 //+------------------------------------------------------------------+
 //|   Заказ на ордер - хранится на сервере -не открывается автоматом так как цена нереальная  |
 //+------------------------------------------------------------------+
-bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,datetime expiration=0)
+bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
    ulong    ticket;
    ticket=0;
@@ -64,11 +67,11 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,date
       //Print("NewOrder-his0k");
      {
       trReq.action=TRADE_ACTION_PENDING;
-      trReq.magic=777;
+      trReq.magic=magic;
       trReq.symbol=smb;                 // Trade symbol
       trReq.volume=0.1;      // Requested volume for a deal in lots
       trReq.deviation=5;                                    // Maximal possible deviation from the requested price
-      trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+      trReq.sl=1;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
       trReq.tp=price;
       trReq.comment=comment;
       //Print(smb," ",type," ",comment);
@@ -140,8 +143,8 @@ bool Trailing()
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
-      TrailingStop=(int)(3*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<60) TrailingStop=60;
+      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
+      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -155,24 +158,20 @@ bool Trailing()
               {// нашли на продажу - значит надо закрыться
                //           Print("closepos ",sell_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
                trReq.action=TRADE_ACTION_DEAL;
-               trReq.magic=777;
+               trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
                trReq.deviation=5;                                    // Maximal possible deviation from the requested price
                trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
                trReq.type=ORDER_TYPE_SELL;                           // Order type
-               trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.sl=0;// trReq.price+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
-               if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+               if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
                   client.SendMessage("36770049",//<- номер получателя 
                                      smb+" закрыли "); //<- текст сообщения 
-                  //trReq.order=ticket;
-                  //trReq.action=TRADE_ACTION_REMOVE;
-                  //OrderSend(trReq,trRez);
-                  //if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                  }
               }
            }
@@ -185,11 +184,11 @@ bool Trailing()
               {
                //       Print("closepos ",buy_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
                trReq.action=TRADE_ACTION_DEAL;
-               trReq.magic=777;
+               trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
                trReq.deviation=5;                     // Maximal possible deviation from the requested price
-               trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.sl=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
                trReq.type=ORDER_TYPE_BUY;              // Order type
                trReq.comment=OrderGetString(ORDER_COMMENT);
@@ -198,16 +197,13 @@ bool Trailing()
                  {
                   client.SendMessage("36770049",//<- номер получателя 
                                      smb+" закрыли "); //<- текст сообщения 
-                  //trReq.order=ticket;
-                  //trReq.action=TRADE_ACTION_REMOVE;
-                  //OrderSend(trReq,trRez);
-                  //if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                  }
               }
            }
         }
       else
         { // открываем позиции
+         trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
             && (
             (OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -215,48 +211,39 @@ bool Trailing()
             )
             )
            {
-            trReq.action=TRADE_ACTION_DEAL;
-            trReq.magic=777;
-            trReq.symbol=smb;                 // Trade symbol
-            trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
-            trReq.deviation=1;                                    // Maximal possible deviation from the requested price
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.comment=OrderGetString(ORDER_COMMENT);
-            trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            OrderSend(trReq,trRez);
-            if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-            else
-              {
-               trReq.order=ticket;
-               trReq.action=TRADE_ACTION_REMOVE;
-               OrderSend(trReq,trRez);
-               if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-              }
+            trReq.sl=lasttick.bid + 1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
             || (OrderGetDouble(ORDER_TP)<lasttick.ask)
             ))
            {
-            trReq.action=TRADE_ACTION_DEAL;
-            trReq.magic=777;
-            trReq.symbol=smb;                 // Trade symbol
-            trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
-            trReq.deviation=1;                     // Maximal possible deviation from the requested price
-            trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.price=lasttick.bid;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
+            trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
+            trReq.sl=lasttick.ask - 1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
+           }
+          // будем открываться...
+          if( trReq.price>0)
+           { 
+            trReq.action=TRADE_ACTION_DEAL;
+            trReq.magic=OrderGetInteger(ORDER_MAGIC);
+            trReq.symbol=OrderGetString(ORDER_SYMBOL);                 // Trade symbol
+            trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
             trReq.comment=OrderGetString(ORDER_COMMENT);
+            trReq.deviation=1;                                    // Maximal possible deviation from the requested price
             OrderSend(trReq,trRez);
-            if(10009==trRez.retcode)
+            if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+            else
               {
                trReq.order=ticket;
                trReq.action=TRADE_ACTION_REMOVE;
                OrderSend(trReq,trRez);
-               if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+               if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
               }
            }
+ 
         }
      }
 /// traling open           
@@ -273,8 +260,8 @@ bool Trailing()
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
-      TrailingStop=(int)(3*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<60) TrailingStop=60;
+      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
+      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL))

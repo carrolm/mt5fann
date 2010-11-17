@@ -629,7 +629,7 @@ bool CDashBoard::Refresh(void)
          //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
            {
             // выведем спред на график
-            name=prefix+"chart_"+ChartSymbol(currChart);
+            name=prefix+"chart_SI";
             if(ObjectFind(currChart,name)==-1)
               {
                ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
@@ -648,38 +648,19 @@ bool CDashBoard::Refresh(void)
             name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
             if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
             else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-            //                  name="db_closepos_"+ChartSymbol(currChart);
-            //                  if(ObjectFind(currChart,name)==-1)
-            //                   {
-            //                    ObjectCreate(currChart,name,OBJ_BUTTON,window,0,0);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*20);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*5);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*20);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*3);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
-            //                    ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-            //         
-            //                  }
-            //                 ObjectSetString(currChart,name,OBJPROP_TEXT,"Закрыть c "+(string)((int)profit));
-            //                 if(0>profit)  ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
-            //                  else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
            }
          else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
 
          if(0==profit)
            {
-            ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Bg_Color);
-            ObjectSetString(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
+            ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
+            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
            }
          else
            {
-            int TrailingStop=3;
-            TrailingStop=(int)(TrailingStop*SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
-            //         ObjectSetString(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD)+" результат="+(string)((int)profit)+ " профит="+(string)TrailingStop);
-            ObjectSetString(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_TEXT,"Пока="+(string)((int)profit));
-            if(0>profit) ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Red);
-            else ObjectSetInteger(currChart,prefix+"chart_"+ChartSymbol(currChart),OBJPROP_COLOR,Green);
+            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Пока="+(string)((int)profit));
+            if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
+            else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
            }
          for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
            {
