@@ -71,7 +71,7 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,int 
       trReq.symbol=smb;                 // Trade symbol
       trReq.volume=0.1;      // Requested volume for a deal in lots
       trReq.deviation=5;                                    // Maximal possible deviation from the requested price
-      trReq.sl=1;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+      trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
       trReq.tp=price;
       trReq.comment=comment;
       //Print(smb," ",type," ",comment);
@@ -213,7 +213,7 @@ bool Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=lasttick.bid + 1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -221,7 +221,7 @@ bool Trailing()
             ))
            {
             trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.sl=lasttick.ask - 1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.ask - 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
            }
           // будем открываться...
