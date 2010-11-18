@@ -144,7 +144,7 @@ bool Trailing()
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -261,7 +261,7 @@ bool Trailing()
       trReq.symbol=smb;
       trReq.deviation=3;
       TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL))

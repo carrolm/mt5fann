@@ -63,7 +63,7 @@ public:
    int               test_on_file(string path="");
    //   bool              Init(string FileName,string &SymbolsArray[],int MaxSymbols,int num_invectors,int num_outvectors,int new_num_layers);
    void              DeInit();
-   bool              GetVector(int shift=0);
+   bool              GetVector(int shift=0,bool train=false);
    int               ExportFANNDataWithTest(int train_qty,int test_qty,string FileName="");
    int               ExportFANNData(int qty,int shift,string FileName);
   };
@@ -427,7 +427,7 @@ bool  CMT5FANN::Init(string FileName,string smbl)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-bool CMT5FANN::GetVector(int shift)
+bool CMT5FANN::GetVector(int shift,bool train)
   {// пара, период, смещение назад (для индикатора полезно)
    double IB[],OB[];
    ArrayResize(IB,num_in_vectors+2);
@@ -439,15 +439,17 @@ bool CMT5FANN::GetVector(int shift)
    CopyRates(Symbols_Array[0],TimeFrame,shift,3,rates);
    TimeToStruct(rates[2].time,tm);
    int n_vectors=num_in_vectors;
+   int n_o_vectors=0;
    int pos_in=0,pos_out=0,i;
    if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
    if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
    n_vectors=(n_vectors-pos_in)/Max_Symbols;
+   if(train) n_o_vectors=1;
    for(SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
       for(FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
         {
-         if(GetVectors(IB,OB,n_vectors,1,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],TimeFrame,shift))
+         if(GetVectors(IB,OB,n_vectors,n_o_vectors,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],TimeFrame,shift))
            {
             for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i];
             OutputVector[pos_out++]=OB[0];

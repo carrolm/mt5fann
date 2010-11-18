@@ -15,6 +15,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    int shift_history=7;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
+   if (0==num_outputvectors) shift_history=0;
    if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);

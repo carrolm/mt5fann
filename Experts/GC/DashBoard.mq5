@@ -32,8 +32,6 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
 //   }
 //
 //  else 
-//  if(Timer1!=NULL) Timer1.OnEvent(id,lparam,dparam,sparam);
-   if(TimerH1!=NULL)TimerH1.OnEvent(id,lparam,dparam,sparam);
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -192,7 +190,8 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
-//  DashBoard.Refresh();
+   if(_TrailingPosition_) Trailing();;//DashBoard.Trailing();
+   DashBoard.Refresh();
   }
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -204,13 +203,6 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
    DashBoard.OnChartEvent(id,lparam,dparam,sparam);
   }
 //+------------------------------------------------------------------+
-void OnTimer()
-  {
-   if(_TrailingPosition_) Trailing();;//DashBoard.Trailing();
-   DashBoard.OnTimer();
-   DashBoard.Refresh();
-
-  }
 //+------------------------------------------------------------------+
 //| OnTrade function                                                 |
 //+------------------------------------------------------------------+

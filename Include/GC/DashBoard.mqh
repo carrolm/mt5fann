@@ -8,8 +8,6 @@
 #include <GC\MT5FANN.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
-#include <Object.mqh>
-//#include <ChartObjects\ChartObjectsTxtControls.mqh>
 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
@@ -132,275 +130,6 @@ struct prediction
    datetime          BestBefore;// время до 
    int               shift;// на сколько сдвинуть 
   };
-//+------------------------------------------------------------------+
-//| Class CTimer                                                     |
-//+------------------------------------------------------------------+
-class CTimer :public CObject
-  {
-private:
-   ENUM_TIMEFRAMES   _TimePeriod;
-   // Для вывода значения таймера | For an output of value of the timer
-   string            oname;
-   // Для вывода подложки таймера | For an output of a substrate of the timer
-   //CChartObjectLabel *TimerSubstrate;
-   // Клавиша включения звукового сигнала | Key of inclusion of beep
-   //   CChartObjectButton *TimerSignalButton;
-
-   color             _Color,_Substrate;
-   ENUM_BASE_CORNER  _Corner;
-   bool              InitTimer;
-   bool              SoundFlag;
-   string            SignalName;
-public:
-                     CTimer();
-                    ~CTimer();
-   //--- метод создания объекта / method of creation of object
-   bool              Create(long chart_id,string name,int window,int X,int Y,int FontSize);
-   //--- метод изменения цвета текста / method of change of colour of the text
-   bool              Color(color col);
-   color             Color(){return(_Color);}
-   //--- метод изменения цвета фона / method of change of colour of a background
-   bool              ColorBackground(color col);
-   color             ColorBackground(){return(_Substrate);}
-   //--- метод изменения угла привязки / method of change of a corner of a binding
-   bool              Corner(ENUM_BASE_CORNER corner);
-   ENUM_BASE_CORNER  Corner();
-   //--- метод установки звукового файла / method of installation of a sound file
-   void              SignalFile(string pach){SignalName=pach;StringTrimLeft(SignalName);StringTrimRight(SignalName);SignalOn();}
-   string            SignalFile(){return(SignalName);}
-   //--- метод включения сигнала / method of inclusion of a signal
-   bool              SignalOn();
-   //--- метод отключения сигнала / method of switching-off of a signal
-   bool              SignalOff();
-   //--- метод обработки события OnTimer() / method of processing of event OnTimer()
-   void              OnTimer();
-   //--- метод обработки событий мыши / method of event processing of the mouse
-   void              OnEvent(const int id,const long &lparam,const double &dparam,const string &sparam);
-   //--- метод изменения периода таймера / method of change of the period of the timer
-   void              TimePeriod(ENUM_TIMEFRAMES period){_TimePeriod=period; OnTimer();}
-   ENUM_TIMEFRAMES   TimePeriod(){return(_TimePeriod);}
-private:
-   datetime          TimeEndOfPeriod();
-  };
-//+------------------------------------------------------------------+
-//| Конструктор / Сonstructor                                        |
-//+------------------------------------------------------------------+
-CTimer::CTimer()
-  {
-//   TimerSubstrate=NULL;
-//   TimerText=NULL;
-//   TimerSignalButton=NULL;
-   _TimePeriod=_Period;
-   _Color=White;
-   _Substrate=Green;
-   _Corner=CORNER_RIGHT_LOWER;
-   InitTimer=false;
-   SoundFlag=false;
-   SignalName="";
-  }
-//+------------------------------------------------------------------+
-//| Диструктор / Destructor                                          |
-//+------------------------------------------------------------------+
-CTimer::~CTimer()
-  {
-   InitTimer=false;
-//   if(TimerSubstrate!=NULL) delete TimerSubstrate;
-//   if(TimerText!=NULL) delete TimerText;
-//   if(TimerSignalButton!=NULL) delete TimerSignalButton;
-  }
-//+------------------------------------------------------------------+
-//| Метод создания объекта / Method of creation of object            |
-//+------------------------------------------------------------------+
-bool CTimer::Create(long chart_id,string name,int window,int X,int Y,int Font_Size)
-  {
-   bool result=false;
-   if(_TimePeriod>PERIOD_D1) return(false);
-   if(ObjectFind(0,name)==-1)
-     {
-      ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
-      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,X);
-      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,Y);
-      ObjectSetInteger(0,name,OBJPROP_XSIZE,Font_Size*10);
-      ObjectSetInteger(0,name,OBJPROP_YSIZE,Font_Size*2);
-      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,Font_Size);
-      ObjectSetString(0,name,OBJPROP_TEXT,"Wait...");
-      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
-      result=true;
-     }
-   oname=name;
-//TimerSubstrate=new CChartObjectLabel();
-//if(ObjectFind(0,"Substrate"+name)==-1)
-//   result=TimerSubstrate.Create(0,"Substrate"+name,0,X,Y);
-//else
-//  {
-//   result=TimerSubstrate.Attach(0,"Substrate"+name,0,2);
-//   TimerSubstrate.X_Distance(X);
-//   TimerSubstrate.Y_Distance(Y);
-//  }
-//result&=TimerSubstrate.Anchor(ANCHOR_CENTER);
-//result&=TimerSubstrate.Font("Webdings");
-//result&=TimerSubstrate.FontSize(13);
-//result&=TimerSubstrate.Color(_Substrate);
-//result&=TimerSubstrate.Corner(_Corner);
-//result&=TimerSubstrate.Description("gggg");
-//result&=TimerSubstrate.Background(true);
-//TimerText=new CChartObjectLabel();
-//if(ObjectFind(0,name)==-1)
-//   result&=TimerText.Create(0,name,0,X,Y);
-//else
-//  {
-//   result&=TimerText.Attach(0,name,0,2);
-//   TimerText.X_Distance(X);
-//   TimerText.Y_Distance(Y);
-//  }
-//result&=TimerText.Anchor(ANCHOR_CENTER);
-//result&=TimerText.Font("Arial Black");
-//result&=TimerText.FontSize(10);
-//result&=TimerText.Color(_Color);
-//result&=TimerText.Corner(_Corner);
-//result&=TimerText.Background(false);
-//result&=TimerText.Description(TimeToString(TimeEndOfPeriod(),TIME_SECONDS));
-   SignalOn();
-   if(result) InitTimer=true;
-   return(result);
-  }
-//+------------------------------------------------------------------+
-//| метод включения сигнала / method of inclusion of a signal        |
-//+------------------------------------------------------------------+
-bool CTimer::SignalOn()
-  {
-//int      X,Y;
-//string   name_obj;
-
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| метод отключения сигнала / method of switching-off of a signal   |
-//+------------------------------------------------------------------+
-bool CTimer::SignalOff()
-  {
-//int      X,Y;
-//string   name_obj;
-   bool     result=true;
-
-//   if(TimerSignalButton==NULL) return(false);
-//   if(!TimerSignalButton.State()) TimerSignalButton.State(true);
-//   TimerSignalButton.Color(Red);
-//   TimerSignalButton.Description("V");
-//   TimerSignalButton.State(false);
-   SoundFlag=false;
-   return(result);
-  }
-//+-----------------------------------------------------------------------------+
-//| Метод обработки события OnTimer() / Method of processing of event OnTimer() |
-//+-----------------------------------------------------------------------------+
-void CTimer::OnTimer()
-  {
-//static bool BlinkFlag=true;
-   if(InitTimer)
-     {
-      if(_TimePeriod>PERIOD_D1) return;
-      datetime tmpTime=TimeEndOfPeriod();
-      //      TimerText.Description(TimeToString(tmpTime,TIME_SECONDS));
-      if(ObjectFind(0,oname)!=-1)
-        {
-         ObjectSetString(0,oname,OBJPROP_TEXT,TimeToString(tmpTime,TIME_SECONDS));
-        }
-
-      //if(tmpTime<=10)
-      //  {
-      //   if(SoundFlag && tmpTime<=1)
-      //     {
-      //      if(!PlaySound(SignalName)) Print("Signal error "+SignalName);
-      //     }
-      //   if(BlinkFlag)
-      //     {
-      //      TimerSubstrate.Color(Red);
-      //      BlinkFlag=false;
-      //     }
-      //   else
-      //     {
-      //      TimerSubstrate.Color(_Substrate);
-      //      BlinkFlag=true;
-      //     }
-      //  }
-      //else
-      //   TimerSubstrate.Color(_Substrate);
-      ChartRedraw();
-     }
-  }
-//+------------------------------------------------------------------------+
-//| Метод обработки событий мыши / Method of event processing of the mouse |
-//+------------------------------------------------------------------------+
-void CTimer::OnEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
-  {
-   if(id==(int)CHARTEVENT_OBJECT_CLICK)
-     {
-     }
-  }
-//+-------------------------------------------------------------------+
-//| Получение времени оставшееся до закрытия периода                  |
-//| Time reception remained before period closing                     |
-//+-------------------------------------------------------------------+
-datetime CTimer::TimeEndOfPeriod()
-  {
-   datetime tmpDateTime;
-   int tmp;
-   MqlDateTime last_time;
-   TimeToStruct(TimeTradeServer(),last_time);
-   last_time.sec=0;
-   if(Period()<=PERIOD_H1)
-     {
-      tmp=(PeriodSeconds(_TimePeriod)/PeriodSeconds(PERIOD_M1));
-      tmp=last_time.min/tmp;
-      last_time.min=(tmp+1)*PeriodSeconds(_TimePeriod)/PeriodSeconds(PERIOD_M1);
-     }
-   else
-   if(Period()>PERIOD_H1 && Period()<=PERIOD_D1)
-     {
-      tmp=(PeriodSeconds(_TimePeriod)/PeriodSeconds(PERIOD_H1));
-      tmp=last_time.hour/tmp;
-      last_time.hour=(tmp+1)*PeriodSeconds(_TimePeriod)/PeriodSeconds(PERIOD_H1);
-      last_time.min=0;
-     }
-   tmpDateTime=StructToTime(last_time);
-   tmpDateTime=tmpDateTime-TimeTradeServer();
-   return(tmpDateTime);
-  }
-//+------------------------------------------------------------------------+
-//| Метод изменения цвета текста / Method of change of colour of the text  |
-//+------------------------------------------------------------------------+
-bool CTimer::Color(color col)
-  {
-   _Color=col;
-//if(TimerText!=NULL)
-//   return(TimerText.Color(col));
-//else
-   return(false);
-  }
-//+-------------------------------------------------------------------------+
-//| Метод изменения цвета фона / Method of change of colour of a background |
-//+-------------------------------------------------------------------------+
-bool CTimer::ColorBackground(color col)
-  {
-   _Substrate=col;
-//   if(TimerSubstrate!=NULL)
-//      return(TimerSubstrate.Color(col));
-//   else
-   return(false);
-  }
-//+---------------------------------------------------------------------------+
-//| Метод изменения угла привязки / Method of change of a corner of a binding |
-//+---------------------------------------------------------------------------+
-bool CTimer::Corner(ENUM_BASE_CORNER corner)
-  {
-   bool result=true;
-   _Corner=corner;
-//result=TimerText.Corner(_Corner);
-//result&=TimerSubstrate.Corner(_Corner);
-//OnTimer();
-   return(result);
-  }
 //+==================================================================+
 //| CDashBoard                                                                 |
 //+==================================================================+
@@ -418,13 +147,7 @@ protected:
    string            TableDataG[50];
    int               window;
    string            prefix;
-   //double            sell_price[50];
-   //double            buy_price[50];
-   //  CTimer *Timer1;
-   CTimer           *TimerH1;
    datetime          LastRefresh;
-//   MqlTradeRequest   trReq;
-//   MqlTradeResult    trRez;
    CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
@@ -435,7 +158,6 @@ public:
    bool              DeInit();
    bool              Refresh();
    bool              Calc(int SymbolIdx,int iperiod,int shift_seconds=0);
-   void              OnTimer();
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -483,11 +205,6 @@ bool CDashBoard::Calc(int SymbolIdx,int PeriodIdx,int shift_seconds=0)
    return(true);
   }
 //      /\\\/////\
-void CDashBoard::OnTimer()
-  {
-//   if(Timer1!=NULL) Timer1.OnTimer();
-   if(TimerH1!=NULL) TimerH1.OnTimer();
-  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -543,21 +260,14 @@ bool CDashBoard::Init(void)
 //   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
 //  }
 //  ShowTable=ObjectGetInteger(0,prefix+"ShowTable",OBJPROP_STATE);
+   ObjectSetInteger(0,prefix+"ShowDashBoard",OBJPROP_STATE,true);
    ShowDashBoard=ObjectGetInteger(0,prefix+"ShowDashBoard",OBJPROP_STATE);
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-   if(Period()<PERIOD_H1)
-     {
-      TimerH1=new CTimer();
-      TimerH1.TimePeriod(PERIOD_H1);
-      TimerH1.Create(0,prefix+"H1_Timer",window,FontSize*30,0,FontSize);
-      TimerH1.SignalFile(InpPathSecondSound);
-     }
-   EventSetTimer(1);
 
-   ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Расчет...");
+   ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Ждите...");
    ChartRedraw();
    MaxSymbols=CreateSymbolList();
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
@@ -591,7 +301,6 @@ bool CDashBoard::DeInit(void)
       j++;// не забудем увеличить счетчик
      }
 //  if(Timer1!=NULL) {delete Timer1; Timer1=NULL;}
-   if(TimerH1!=NULL) {delete TimerH1; TimerH1=NULL;}
    EventKillTimer();
 
    return(true);
@@ -906,7 +615,7 @@ bool CDashBoard::Refresh(void)
             dtstart=StructToTime(str1);
             for(int idt=0;idt<DealsTotal;idt++)
               {
-               if(ticket=HistoryDealGetTicket(idt))
+               if((bool)(ticket=HistoryDealGetTicket(idt)))
                  {
                   if(HistoryDealGetString(ticket,DEAL_SYMBOL)==SymbolsArray[SymbolIdx]&HistoryDealGetInteger(ticket,DEAL_TIME)>dtstart)
                     {
@@ -1107,6 +816,15 @@ bool CDashBoard::Refresh(void)
       else if(TypeResult==1) ObjectSetString(0,prefix+"m_equity",OBJPROP_TEXT, "За день "+(string)(int)ptotal);
       else if(TypeResult==2) ObjectSetString(0,prefix+"m_equity",OBJPROP_TEXT, "За месяц "+(string)(int)ptotal);
       else if(TypeResult==3)  ObjectSetString(0,prefix+"m_equity",OBJPROP_TEXT, "Всего "+(string)(int)ptotal);
+      ObjectSetInteger(0,prefix+"m_equity",OBJPROP_COLOR,_Data);
+      if(ptotal>0)
+        {
+         ObjectSetInteger(0,prefix+"m_equity",OBJPROP_COLOR,_DataPlus);
+        }
+      if(ptotal<0)
+        {
+         ObjectSetInteger(0,prefix+"m_equity",OBJPROP_COLOR,_DataMinus);
+        }
 
      }
    return(true);
