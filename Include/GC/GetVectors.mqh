@@ -92,7 +92,7 @@ bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvec
       OutputVector[1]=100*(Low[j]-Low[j+1]);
       j++;
      }
-   for(i=0;i<num_inputvectors;i++,j++)
+   for(i=0;i<num_inputvectors;j++)
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
