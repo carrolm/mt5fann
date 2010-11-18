@@ -15,10 +15,11 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    int shift_history=7;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
-   if (0==num_outputvectors) shift_history=0;
+   if(0==num_outputvectors) shift_history=0;
    if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+   if("HL"==fn_name) ret=GetVectors_HL(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
 //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
    return(ret);
   }
@@ -56,6 +57,55 @@ bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputv
    return(true);
   }
 //+------------------------------------------------------------------+
+//| Прогноз минимальных и максимальных цен                           |
+//+------------------------------------------------------------------+
+bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
+  {// пара, период, смещение назад (для индикатора полезно)
+
+   int shft_cur=0;
+
+   double Close[]; ArraySetAsSeries(Close,true);
+   double High[]; ArraySetAsSeries(High,true);
+   double Low[]; ArraySetAsSeries(Low,true);
+//if(num_outputvectors!=2 ||num_inputvectors%3!=0)
+//  {
+//   Print("Output vectors only 2!");
+//   return(false);
+//  }
+// копируем историю
+   int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+num_outputvectors+2,High);
+   maxcount=CopyClose(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Close);
+   maxcount=CopyLow(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Low);
+
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   if(maxcount<num_inputvectors+num_outputvectors+2)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+   int i,j;j=1;
+// вычислим и отнормируем
+   if(0!=num_outputvectors)
+     {
+      OutputVector[0]=100*(High[j]-High[j+1]);
+      OutputVector[1]=100*(Low[j]-Low[j+1]);
+      j++;
+     }
+   for(i=0;i<num_inputvectors;i++,j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      // вычислим и отнормируем
+      InputVector[i++]=100*(High[j]-High[j+1]);
+      InputVector[i++]=100*(Low[j]-Low[j+1]);
+      InputVector[i++]=100*(Close[j]-Close[j+1]);
+     }
+//  OutputVector[0]=100*(Close[1]-Close[2]);
+   return(true);
+  }
+//+------------------------------------------------------------------+
 //| Заполняем вектор ! вначале -выходы -потом вход                   |
 //| Фракталы                                                         |
 //+------------------------------------------------------------------+
@@ -74,6 +124,9 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    ArrayInitialize(InputVector,EMPTY_VALUE);
    ArrayInitialize(OutputVector,EMPTY_VALUE);
    int maxcount=MathMin(ncl,nch);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors*10*npf)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -87,6 +140,9 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    ArrayInitialize(LowerBuffer,EMPTY_VALUE);
    int i,j;
    for(i=npf-1;i<maxcount-2;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       if(((5==npf) && (High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2]))
          || ((3==npf) && ((High[i]>High[i+1] && High[i]>=High[i-1]))))
@@ -159,7 +215,7 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
       prl=UpperBuffer[j];
    else  prl=LowerBuffer[j];
 // заполняем массив выходной 
-   double res = (prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
+   double res=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
    if(res>10)
       OutputVector[0]=0.95;
    else if(res>5)
@@ -175,6 +231,9 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    else    OutputVector[0]=0.0;
    prf=prl;fp=j;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
       if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
@@ -201,7 +260,9 @@ bool GetVectors_RSI(double &InputVector[],double &OutputVector[],int num_inputve
    int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
    ArrayInitialize(OutputVector,EMPTY_VALUE);
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors+num_outputvectors+2)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -210,6 +271,9 @@ bool GetVectors_RSI(double &InputVector[],double &OutputVector[],int num_inputve
    OutputVector[0]=100*(Close[0]-Close[shft_his]);
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=(rsi_buffer[i]-50.0)/50.0;

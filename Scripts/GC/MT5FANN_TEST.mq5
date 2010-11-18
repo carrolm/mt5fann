@@ -18,8 +18,8 @@ void OnStart()
    CMT5FANN mt5fann;
    mt5fann.debug=true;
 
-   if(!mt5fann.Init("fx_eliot")) Print("Init error");
-   mt5fann.ExportFANNDataWithTest(0,100,_Symbol);
+   if(!mt5fann.Init("HL")) Print("Init error");
+   mt5fann.ExportFANNDataWithTest(10000,100,_Symbol);
    for (int i=0;i<100;i++)
    if(mt5fann.GetVector(i))
      {

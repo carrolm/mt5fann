@@ -25,7 +25,7 @@ private:
    int               Max_Symbols;
    string            Functions_Array[10];
    int               Functions_Count[10];
-      int               Max_Functions;
+   int               Max_Functions;
    ENUM_TIMEFRAMES   TimeFrame;
    bool              WithNews;
    bool              WithHours;
@@ -102,7 +102,7 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
       FileWrite(FileHandle,needcopy,num_in_vectors,num_out_vectors);
       for(i=0;i<needcopy;shift++)
         {
-         if(GetVector(shift))
+         if(GetVector(shift,true))
            {
             i++;
             outstr="";
@@ -212,6 +212,7 @@ bool CMT5FANN::ini_load(string path="")
      {
       Max_Functions=1;Functions_Array[0]=VectorFunctions[0];
      }
+   TimeFrame=MyIniFile.ReadInteger("Settings","TimeFrame",_Period);
    WithNews=MyIniFile.ReadBool("Settings","WithNews",false);
    WithHours=MyIniFile.WriteBool("Settings","WithHours",false);
    WithDayOfWeek=MyIniFile.WriteBool("Settings","WithDayOfWeek",false);
@@ -439,12 +440,14 @@ bool CMT5FANN::GetVector(int shift,bool train)
    CopyRates(Symbols_Array[0],TimeFrame,shift,3,rates);
    TimeToStruct(rates[2].time,tm);
    int n_vectors=num_in_vectors;
-   int n_o_vectors=0;
+   int n_o_vectors=num_out_vectors;
    int pos_in=0,pos_out=0,i;
    if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
    if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
    n_vectors=(n_vectors-pos_in)/Max_Symbols;
-   if(train) n_o_vectors=1;
+   n_o_vectors=(n_o_vectors)/Max_Symbols;
+   if(!train)n_o_vectors=0;
+//   if(train) n_o_vectors=1;
    for(SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
       for(FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
@@ -452,7 +455,7 @@ bool CMT5FANN::GetVector(int shift,bool train)
          if(GetVectors(IB,OB,n_vectors,n_o_vectors,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],TimeFrame,shift))
            {
             for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i];
-            OutputVector[pos_out++]=OB[0];
+            for(i=0;i<n_o_vectors;i++) OutputVector[i]=OB[i];
            }
          else return(false);
         }
