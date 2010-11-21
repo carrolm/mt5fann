@@ -5,7 +5,8 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-string VectorFunctions[21]={"Fractals","Easy","RSI","","","","","","","","","",""};
+#include <GC\CommonFunctions.mqh>
+string VectorFunctions[21]={"Fractals","Easy","RSI","HL","High","Low","","","","","","",""};
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -20,6 +21,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
    if("HL"==fn_name) ret=GetVectors_HL(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+   if("High"==fn_name) ret=GetVectors_High(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+   if("Low"==fn_name) ret=GetVectors_Low(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
 //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
    return(ret);
   }
@@ -61,7 +64,54 @@ bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputv
 //+------------------------------------------------------------------+
 bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
   {// пара, период, смещение назад (для индикатора полезно)
+   int shft_cur=0;
 
+   double Close[]; ArraySetAsSeries(Close,true);
+   double High[]; ArraySetAsSeries(High,true);
+   double Low[]; ArraySetAsSeries(Low,true);
+//if(num_outputvectors!=2 ||num_inputvectors%3!=0)
+//  {
+//   Print("Output vectors only 2!");
+//   return(false);
+//  }
+// копируем историю
+   int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+num_outputvectors+2,High);
+   maxcount=CopyClose(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Close);
+   maxcount=CopyLow(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Low);
+
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   if(maxcount<num_inputvectors+num_outputvectors+2)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+   int i,j;j=1;
+// вычислим и отнормируем
+   if(0!=num_outputvectors)
+     {
+      OutputVector[0]=1000*(High[j]-High[j+1]);
+      OutputVector[1]=1000*(Low[j]-Low[j+1]);
+      j++;
+     }
+   for(i=0;i<num_inputvectors;j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      // вычислим и отнормируем
+      InputVector[i++]=1000*(High[j]-High[j+1]);
+      InputVector[i++]=1000*(Low[j]-Low[j+1]);
+      InputVector[i++]=1000*(Close[j]-Close[j+1]);
+     }
+//  OutputVector[0]=100*(Close[1]-Close[2]);
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Прогноз  максимальных цен                           |
+//+------------------------------------------------------------------+
+bool GetVectors_High(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
+  {// пара, период, смещение назад (для индикатора полезно)
    int shft_cur=0;
 
    double Close[]; ArraySetAsSeries(Close,true);
@@ -89,7 +139,7 @@ bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvec
    if(0!=num_outputvectors)
      {
       OutputVector[0]=100*(High[j]-High[j+1]);
-      OutputVector[1]=100*(Low[j]-Low[j+1]);
+      //OutputVector[1]=100*(Low[j]-Low[j+1]);
       j++;
      }
    for(i=0;i<num_inputvectors;j++)
@@ -105,6 +155,56 @@ bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvec
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
+//+------------------------------------------------------------------+
+//| Прогноз  максимальных цен                           |
+//+------------------------------------------------------------------+
+bool GetVectors_Low(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int shft_cur=0;
+
+   double Close[]; ArraySetAsSeries(Close,true);
+   double High[]; ArraySetAsSeries(High,true);
+   double Low[]; ArraySetAsSeries(Low,true);
+//if(num_outputvectors!=2 ||num_inputvectors%3!=0)
+//  {
+//   Print("Output vectors only 2!");
+//   return(false);
+//  }
+// копируем историю
+   int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+num_outputvectors+2,High);
+   maxcount=CopyClose(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Close);
+   maxcount=CopyLow(smbl,tf,shift,num_inputvectors+num_outputvectors+2,Low);
+
+   ArrayInitialize(InputVector,EMPTY_VALUE);
+   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   if(maxcount<num_inputvectors+num_outputvectors+2)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+   int i,j;j=1;
+// вычислим и отнормируем
+   if(0!=num_outputvectors)
+     {
+      OutputVector[0]=100*(Low[j]-Low[j+1]);
+      //OutputVector[1]=100*(Low[j]-Low[j+1]);
+      j++;
+     }
+   for(i=0;i<num_inputvectors;j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      // вычислим и отнормируем
+      InputVector[i++]=100*(High[j]-High[j+1]);
+      InputVector[i++]=100*(Low[j]-Low[j+1]);
+      InputVector[i++]=100*(Close[j]-Close[j+1]);
+     }
+//  OutputVector[0]=100*(Close[1]-Close[2]);
+   return(true);
+  }
+
+
 //+------------------------------------------------------------------+
 //| Заполняем вектор ! вначале -выходы -потом вход                   |
 //| Фракталы                                                         |

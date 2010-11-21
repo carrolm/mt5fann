@@ -674,16 +674,17 @@ bool CDashBoard::Refresh(void)
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
             UseSymbol[SymbolIdx]=true;
-            if(fannExperts[SymbolIdx].GetVector())
-              {
-               fannExperts[SymbolIdx].run();
-               fannExperts[SymbolIdx].get_output();
-               //Print(_Symbol,fannExpert," ".OutputVector[0]);
-               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-
-               //     Print(fannExpert.OutputVector[0]);
-              }
+            NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),(string)(fannExperts[SymbolIdx].OutputVector[0]));
+//            if(fannExperts[SymbolIdx].GetVector())
+//              {
+//               fannExperts[SymbolIdx].run();
+//               fannExperts[SymbolIdx].get_output();
+//               //Print(_Symbol,fannExpert," ".OutputVector[0]);
+//               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+//               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+//
+//               //     Print(fannExpert.OutputVector[0]);
+//              }
 
            }
          else
@@ -742,8 +743,9 @@ bool CDashBoard::Refresh(void)
             if(sell_order>0) sell_order=0;
             else  if(p_type==POSITION_TYPE_BUY && sell_order==0)
               {
-               if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
-               else  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*2);
+               NewOrder(SymbolsArray[SymbolIdx],NewOrderWaitSell,"Press DB");
+               //if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
+               //else  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*2);
               }
             else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5);
             //Print("Sell ...",sell_price[SymbolIdx]);

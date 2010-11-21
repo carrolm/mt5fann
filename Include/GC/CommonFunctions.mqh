@@ -9,15 +9,37 @@
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 int TrailingStop=3;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+enum NewOrder_Type
+  {
+   NewOrderBuy=1,// 
+   NewOrderWaitBuy=2,// 
+   NewOrderWait=3,// 
+   NewOrderWaitSell=4,
+   NewOrderSell=5
+  };
 COscarClient client;
-
 // ask
 // bid
 //+------------------------------------------------------------------+
 //|   Заказ на ордер - хранится на сервере -не открывается автоматом так как цена нереальная  |
 //+------------------------------------------------------------------+
-bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,int magic=777,datetime expiration=0)
+bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,datetime expiration=0)
   {
+   if(0.6<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
+   if(0.3<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
+   if(-0.6>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
+   if(-0.3>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
+  {
+   if(NewOrderWait==type) return(false);
    ulong    ticket;
    ticket=0;
    int i;
@@ -27,8 +49,10 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,int 
       OrderGetTicket(i);
       if(OrderGetString(ORDER_SYMBOL)==smb)
         {
-         if(type==ORDER_TYPE_BUY &&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) return(false);
-         if(type==ORDER_TYPE_SELL&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT) return(false);
+         if(type==NewOrderBuy && OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) return(false);
+         if(type==NewOrderWaitBuy && OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) return(false);
+         if(type==NewOrderSell  &&  OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT) return(false);
+         if(type==NewOrderWaitSell && OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT) return(false);
         }
      }
 // есть открытая позиция
@@ -36,64 +60,84 @@ bool NewOrder(string smb,ENUM_ORDER_TYPE type,string comment,double price=0,int 
      {
       if(smb==PositionGetSymbol(i))
         {
-         if(type==ORDER_TYPE_BUY &&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) return(false);
-         if(type==ORDER_TYPE_SELL&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
+         // докупать? закомментировать тогда!
+         if(type==NewOrderBuy && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) return(false);
+         // допродать? закомментировать тогда!
+         if(type==NewOrderSell && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
+         // если открыта позиция - и сигнал против -тогда перейти врежим паники!!
+         ticket=PositionGetInteger(POSITION_IDENTIFIER);
+         break;
         }
      }
-   if(ticket!=0)
+   MqlTick lasttick;
+   SymbolInfoTick(smb,lasttick);
+   if(price==0)
      {
-      return(false);
+      if(ticket!=0)
+        {// есть открытая и она выбрана то паника - ставим на цену с мин прибылью -лишь бы закрыть
+         magic=666;
+         if(type==NewOrderWaitBuy || type==NewOrderBuy)
+           {
+            if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+              {
+               // если прибыль уже есть -то приближаем к идиалу
+               if(PositionGetDouble(POSITION_PROFIT)>0)
+                  price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
+               else// иначе ставим на мин прибыль
+               price=PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+              }
+            else return(false);
+           }
+         if(type==NewOrderWaitSell || type==NewOrderSell)
+           {
+            if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
+              {
+               // если прибыль уже есть -то приближаем к идиалу
+               if(PositionGetDouble(POSITION_PROFIT)>0)
+                  price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
+               else// иначе ставим на мин прибыль
+               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+              }
+            else return(false);
+           }
+
+         // трекинг на закрытие - этот одрер будет жить до закрытия открытой 
+         if(0==expiration) expiration=TimeCurrent()+PeriodSeconds(PERIOD_H4);
+        }
+      else
+        {
+         if(type==NewOrderBuy) price=lasttick.bid;
+         if(type==NewOrderSell) price=lasttick.ask;
+        }
      }
+   if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
 
    MqlTradeRequest trReq;
    MqlTradeResult trRez;
-//double BufferO[],
-   double BufferC[];
-//,BufferL[],BufferH[];
-//ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
-//ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
-   int needcopy=2;ENUM_TIMEFRAMES per=_Period;
-   ArrayInitialize(BufferC,0);
-//ArrayInitialize(BufferO,0);
-//ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
-// текущая история
-
-//if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
-//   && 
-   if(CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
-      //   && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
-      //   && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
-      //   );else return(false);
-      //Print("NewOrder-his0k");
+   trReq.action=TRADE_ACTION_PENDING;
+   trReq.magic=magic;
+   trReq.symbol=smb;                 // Trade symbol
+   trReq.volume=0.1;      // Requested volume for a deal in lots
+   trReq.deviation=5;                                    // Maximal possible deviation from the requested price
+   trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+   trReq.tp=price;
+   trReq.comment=comment;
+//Print(smb," ",type," ",comment);
+   trReq.expiration=expiration;
+   if(type==NewOrderBuy)
      {
-      trReq.action=TRADE_ACTION_PENDING;
-      trReq.magic=magic;
-      trReq.symbol=smb;                 // Trade symbol
-      trReq.volume=0.1;      // Requested volume for a deal in lots
-      trReq.deviation=5;                                    // Maximal possible deviation from the requested price
-      trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-      trReq.tp=price;
-      trReq.comment=comment;
-      //Print(smb," ",type," ",comment);
-      if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(per);
-      trReq.expiration=expiration;
-      if(type==ORDER_TYPE_BUY)
-        {
-         trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-         trReq.type=ORDER_TYPE_BUY_LIMIT;
-         if(price==0) trReq.tp=BufferC[1];
-        }
-      else
-      if(type==ORDER_TYPE_SELL)
-        {
-         trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-         trReq.type=ORDER_TYPE_SELL_LIMIT;
-         if(price==0) trReq.tp=BufferC[1];
-        }
-      OrderSend(trReq,trRez);
-      if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-
+      trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+      trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
+   else
+   if(type==NewOrderSell)
+     {
+      trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+      trReq.type=ORDER_TYPE_SELL_LIMIT;
+     }
+   OrderSend(trReq,trRez);
+   if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -174,6 +218,25 @@ bool Trailing()
                                      smb+" закрыли "); //<- текст сообщения 
                  }
               }
+            else
+              { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
+               double newtp=lasttick.bid-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               if(OrderGetDouble(ORDER_TP)<newtp)
+                 {
+                  trReq.order=ticket;
+                  trReq.comment= OrderGetString(ORDER_COMMENT);
+                  trReq.symbol = OrderGetString(ORDER_SYMBOL);
+                  trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
+                  trReq.sl=OrderGetDouble(ORDER_SL);
+                  trReq.magic=OrderGetInteger(ORDER_MAGIC);
+                  //if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
+                  trReq.tp=newtp;
+
+                  trReq.action=TRADE_ACTION_MODIFY;
+                  OrderSend(trReq,trRez);
+                  if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                 }
+              }
            }
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
            {//sell
@@ -199,10 +262,39 @@ bool Trailing()
                                      smb+" закрыли "); //<- текст сообщения 
                  }
               }
+            else
+              { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
+               double newtp=lasttick.ask+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               if(OrderGetDouble(ORDER_TP)<newtp)
+                 {
+                  trReq.order=ticket;
+                  trReq.comment= OrderGetString(ORDER_COMMENT);
+                  trReq.symbol = OrderGetString(ORDER_SYMBOL);
+                  trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
+                  trReq.sl=OrderGetDouble(ORDER_SL);
+                  trReq.magic=OrderGetInteger(ORDER_MAGIC);
+                  //if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
+                  trReq.tp=newtp;
+
+                  trReq.action=TRADE_ACTION_MODIFY;
+                  OrderSend(trReq,trRez);
+                  if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                 }
+              }
            }
         }
       else
-        { // открываем позиции
+        {
+         // если был ордер на закрытие -то удаляем просто
+         if(666==OrderGetInteger(ORDER_MAGIC))
+           {
+            trReq.order=ticket;
+            trReq.action=TRADE_ACTION_REMOVE;
+            OrderSend(trReq,trRez);
+            if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+
+           }
+         // открываем позиции
          trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
             && (
@@ -213,7 +305,7 @@ bool Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.bid+1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -221,12 +313,12 @@ bool Trailing()
             ))
            {
             trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.sl=lasttick.ask - 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.ask-1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
            }
-          // будем открываться...
-          if( trReq.price>0)
-           { 
+         // будем открываться...
+         if(trReq.price>0)
+           {
             trReq.action=TRADE_ACTION_DEAL;
             trReq.magic=OrderGetInteger(ORDER_MAGIC);
             trReq.symbol=OrderGetString(ORDER_SYMBOL);                 // Trade symbol
@@ -243,7 +335,6 @@ bool Trailing()
                if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
               }
            }
- 
         }
      }
 /// traling open           
