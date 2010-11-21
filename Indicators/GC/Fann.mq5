@@ -27,7 +27,6 @@ double ExtUpperBuffer[];
 double ExtLowerBuffer[];
 CMT5FANN mt5fannHigh;
 CMT5FANN mt5fannLow;
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -47,9 +46,9 @@ int OnInit()
    PlotIndexSetDouble(0,PLOT_EMPTY_VALUE,EMPTY_VALUE);
    PlotIndexSetDouble(1,PLOT_EMPTY_VALUE,EMPTY_VALUE);
 //---- initialization done
-ArraySetAsSeries(ExtUpperBuffer,true);
-ArraySetAsSeries(ExtLowerBuffer,true);
-   //mt5fann.debug=true;
+   ArraySetAsSeries(ExtUpperBuffer,true);
+   ArraySetAsSeries(ExtLowerBuffer,true);
+//mt5fann.debug=true;
 
    if(!mt5fannHigh.Init("High")) Print("Init error");
    if(!mt5fannLow.Init("Low")) Print("Init error");
@@ -71,8 +70,8 @@ int OnCalculate(const int rates_total,
                 const int &spread[])
   {
    int i,limit;
-ArraySetAsSeries(high,true);
-ArraySetAsSeries(low,true);
+   ArraySetAsSeries(high,true);
+   ArraySetAsSeries(low,true);
 //---
    if(rates_total<1)
       return(0);
@@ -85,35 +84,36 @@ ArraySetAsSeries(low,true);
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
    else limit=rates_total-1;
-
+   double res;
    for(i=1;i<limit;i++)
      {
+      res=GetTrend(10,"",0,i);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
       ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;
-//      if(mt5fannHigh.GetVector(i))
-//        {
-//         mt5fannHigh.run();
-//         mt5fannHigh.get_output();
-//
-//         ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.OutputVector[0]/100;
-//        }
-//      else ExtUpperBuffer[i]=EMPTY_VALUE;
-       ExtLowerBuffer[i]=low[i+1]+mt5fannLow.forecast(i)/100;
-//      if(mt5fannLow.GetVector(i))
-//        {
-//         mt5fannLow.run();
-//         mt5fannLow.get_output();
-//
-//         ExtLowerBuffer[i]=low[i+1]+mt5fannLow.OutputVector[0]/100;
-//        }
-//      else ExtLowerBuffer[i]=EMPTY_VALUE;
+      //      if(mt5fannHigh.GetVector(i))
+      //        {
+      //         mt5fannHigh.run();
+      //         mt5fannHigh.get_output();
+      //
+      //         ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.OutputVector[0]/100;
+      //        }
+      //      else ExtUpperBuffer[i]=EMPTY_VALUE;
+      ExtLowerBuffer[i]=low[i+1]+mt5fannLow.forecast(i)/100;
+      //      if(mt5fannLow.GetVector(i))
+      //        {
+      //         mt5fannLow.run();
+      //         mt5fannLow.get_output();
+      //
+      //         ExtLowerBuffer[i]=low[i+1]+mt5fannLow.OutputVector[0]/100;
+      //        }
+      //      else ExtLowerBuffer[i]=EMPTY_VALUE;
 
       //---- Lower Fractal
       //     if(Low[i]<Low[i+1] && Low[i]<Low[i+2] && Low[i]<=Low[i-1] && Low[i]<=Low[i-2])
-//      if(low[i]<low[i+1] && low[i]<=low[i-1])
-//         ExtLowerBuffer[i]=low[i];
-//      else ExtLowerBuffer[i]=EMPTY_VALUE;
+      //      if(low[i]<low[i+1] && low[i]<=low[i-1])
+      //         ExtLowerBuffer[i]=low[i];
+      //      else ExtLowerBuffer[i]=EMPTY_VALUE;
      }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

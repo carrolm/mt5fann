@@ -17,15 +17,110 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
-   if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-   if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-   if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-   if("HL"==fn_name) ret=GetVectors_HL(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-   if("High"==fn_name) ret=GetVectors_High(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-   if("Low"==fn_name) ret=GetVectors_Low(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
-//   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+// работаем только если есть фарктал! только на экстремумах!
+   double Low[],High[];
+   ArraySetAsSeries(Low,true); ArraySetAsSeries(High,true);
+// копируем историю
+   int ncl=CopyLow(smbl,tf,shift+shift_history,4,Low);
+   int nch=CopyHigh(smbl,tf,shift+shift_history,4,High);
+   if((High[2]>High[1] && High[2]>High[3]) || (Low[2]<Low[1] && Low[2]<Low[3]))
+     {// Есть!
+      if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      if("HL"==fn_name) ret=GetVectors_HL(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      if("High"==fn_name) ret=GetVectors_High(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      if("Low"==fn_name) ret=GetVectors_Low(InputVector,OutputVector,num_inputvectors,num_outputvectors,smbl,tf,shift,shift_history);
+      //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl, tf, shift);
+    }
    return(ret);
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {
+   double mS=0,mB=0,S=0,B=0;
+   double Close[]; ArraySetAsSeries(Close,true);
+   double High[]; ArraySetAsSeries(High,true);
+   double Low[]; ArraySetAsSeries(Low,true);
+   datetime Time[]; ArraySetAsSeries(Time,true);
+//if(num_outputvectors!=2 ||num_inputvectors%3!=0)
+//  {
+//   Print("Output vectors only 2!");
+//   return(false);
+//  }
+// копируем историю
+   if(""==smb) smb=_Symbol;
+   if(0==tf) tf=_Period;
+   int maxcount=CopyHigh(smb,tf,shift,shift_history+1,High);
+   maxcount=CopyClose(smb,tf,shift,shift_history+1,Close);
+   maxcount=CopyLow(smb,tf,shift,shift_history+1,Low);
+   maxcount=CopyTime(smb,tf,shift,shift_history+1,Time);
+   S=Close[shift_history]; B=Close[shift_history];
+   double   TS=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
+   if(TS<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TS=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+   if(0==TS) TS=60;
+   TS=TS*SymbolInfoDouble(smb,SYMBOL_POINT);
+//  ObjectCreate(0,"GV_S",OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[1],Low[1]);
+//   ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
+
+   for(int i=shift_history-1;i>0;i--)
+     {
+      if(0==mS)
+        {
+         if(S<(High[i]-TS))
+           {
+            mS=Close[shift_history]-S;
+            //S=0;
+           }
+         else
+           {
+            if(S>Low[i])S=Low[i];
+            ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[i],S);
+           }
+        }
+      if(0==mB)
+        {
+         if(B>(Low[i]+TS))
+           {
+            mB=B-Close[shift_history];
+            //B=0;
+           }
+         else
+           {
+            if(B<High[i])B=High[i];
+            ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[i],B);
+           }
+        }
+
+     }
+   mB=B-Close[shift_history];mS=Close[shift_history]-S;
+   double res;//=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
+   if(mS>mB)  {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);}
+   else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);}
+   res=res/(SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT));
+   if(res>10)
+      res=0.95;
+   else if(res>5)
+      res=0.50;
+   else if(res>1)
+      res=0.25;
+   else if(res<-10)
+      res=-0.95;
+   else if(res<-5)
+      res=-0.50;
+   else if(res<-1)
+      res=-0.25;
+   else    res=0.0;
+  
+   return(res);
+   
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -59,6 +154,9 @@ bool GetVectors_Easy(double &InputVector[],double &OutputVector[],int num_inputv
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Прогноз минимальных и максимальных цен                           |
 //+------------------------------------------------------------------+
@@ -108,6 +206,9 @@ bool GetVectors_HL(double &InputVector[],double &OutputVector[],int num_inputvec
    return(true);
   }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //| Прогноз  максимальных цен                           |
 //+------------------------------------------------------------------+
 bool GetVectors_High(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
@@ -156,6 +257,9 @@ bool GetVectors_High(double &InputVector[],double &OutputVector[],int num_inputv
    return(true);
   }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //| Прогноз  максимальных цен                           |
 //+------------------------------------------------------------------+
 bool GetVectors_Low(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0,int shft_his=7)
@@ -203,8 +307,9 @@ bool GetVectors_Low(double &InputVector[],double &OutputVector[],int num_inputve
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
   }
-
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Заполняем вектор ! вначале -выходы -потом вход                   |
 //| Фракталы                                                         |
@@ -345,6 +450,9 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    return(true);// 
 
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
