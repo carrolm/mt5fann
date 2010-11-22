@@ -62,8 +62,10 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         {
          // докупать? закомментировать тогда!
          if(type==NewOrderBuy && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) return(false);
+         if(type==NewOrderWaitBuy && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) return(false);
          // допродать? закомментировать тогда!
          if(type==NewOrderSell && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
+         if(type==NewOrderWaitSell && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
          // если открыта позиция - и сигнал против -тогда перейти врежим паники!!
          ticket=PositionGetInteger(POSITION_IDENTIFIER);
          break;
@@ -132,7 +134,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
    else
-   if(type==NewOrderSell||type==NewOrderWaitSell)
+//   if(type==NewOrderSell||type==NewOrderWaitSell)
      {
       trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
@@ -217,8 +219,7 @@ bool Trailing()
                if(10009!=trRez.retcode) Print(__FUNCTION__," sell:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
-                  client.SendMessage("36770049",//<- номер получателя 
-                                     smb+" закрыли "); //<- текст сообщения 
+                  //client.SendMessage("36770049",  smb+" закрыли "); //<- текст сообщения 
                  }
               }
             else
@@ -264,8 +265,8 @@ bool Trailing()
                if(10009!=trRez.retcode) Print(__FUNCTION__," buy:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
-                  client.SendMessage("36770049",//<- номер получателя 
-                                     smb+" закрыли "); //<- текст сообщения 
+                 // client.SendMessage("36770049",//<- номер получателя 
+                   //                  smb+" закрыли "); //<- текст сообщения 
                  }
               }
             else
