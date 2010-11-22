@@ -38,9 +38,11 @@ private:
    CIniFile          MyIniFile;                   // Создаем экземпляр класса
    CArrayString      Strings;                     // Необходим для работы с массивами данных
    int               ann;
+   double            forecast;
 public:
                      CMT5FANN(){Init();}
                     ~CMT5FANN(){DeInit();}
+   double            forecast(int shift=0,bool train=false);
    double            InputVector[];
    double            OutputVector[];
    int               CMT5FANN::ann_create();
@@ -144,7 +146,7 @@ bool CMT5FANN::ini_save(string path="")
    path=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+path+".ini";
    MyIniFile.Init(path);// Пишем 
    bool     resb;
-   if(Max_Symbols==1 );//&& Symbols_Array[0]==_Symbol);
+   if(Max_Symbols==1);//&& Symbols_Array[0]==_Symbol);
    else
    for(int SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
@@ -212,11 +214,11 @@ bool CMT5FANN::ini_load(string path="")
      {
       Max_Functions=1;Functions_Array[0]=VectorFunctions[0];
      }
-   TimeFrame=MyIniFile.ReadInteger("Settings","TimeFrame",_Period);
+   TimeFrame=(ENUM_TIMEFRAMES)MyIniFile.ReadInteger("Settings","TimeFrame",_Period);
    WithNews=MyIniFile.ReadBool("Settings","WithNews",false);
    WithHours=MyIniFile.WriteBool("Settings","WithHours",false);
    WithDayOfWeek=MyIniFile.WriteBool("Settings","WithDayOfWeek",false);
-
+   if(TimeFrame!= _Period) Print("TimeFrame not equals! Need ",TimeFrame);
    if(-1==(ann=ann_load()))
      {
       //File_Name="";
@@ -412,7 +414,7 @@ bool  CMT5FANN::Init(string FileName,string smbl)
    File_Name=FileName;
    ini_load();
    if(""!=smbl) {Max_Symbols=1;Symbols_Array[0]=smbl;}
-   
+
    if(-1==(ann=ann_load()))
      {
       //File_Name="";
@@ -438,7 +440,7 @@ bool CMT5FANN::GetVector(int shift,bool train)
    ArraySetAsSeries(rates,true);
    MqlDateTime tm;
    CopyRates(Symbols_Array[0],TimeFrame,shift,3,rates);
-   TimeToStruct(rates[2].time,tm);
+   TimeToStruct(rates[1].time,tm);
    int n_vectors=num_in_vectors;
    int n_o_vectors=num_out_vectors;
    int pos_in=0,pos_out=0,i;
@@ -465,3 +467,17 @@ bool CMT5FANN::GetVector(int shift,bool train)
    return(true);
   }
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double  CMT5FANN::forecast(int shift,bool train)
+  {
+   if(GetVector(shift,train))
+     {
+      run();
+      get_output();
+      forecast=OutputVector[0];
+      return(forecast);
+     }
+   else return(0);
+  }
