@@ -4,6 +4,7 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.08.01 |
 //+------------------------------------------------------------------+
+#include <Trade\SymbolInfo.mqh>
 //+------------------------------------------------------------------+
 //| Class COrderInfo.                                                |
 //| Appointment: Class for access to order info.                     |
@@ -51,6 +52,13 @@ public:
    bool              InfoInteger(ENUM_ORDER_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_ORDER_PROPERTY_STRING prop_id,string& var) const;
+   //--- info methods
+   string            FormatType(string& str,const uint type)                    const;
+   string            FormatStatus(string& str,const uint status)                const;
+   string            FormatTypeFilling(string& str,const uint type)             const;
+   string            FormatTypeTime(string& str,const uint type)                const;
+   string            FormatOrder(string& str)                                   const;
+   string            FormatPrice(string& str,const double price_order,const double price_trigger,const uint digits) const;
    //--- method for select order
    bool              Select(ulong ticket);
    bool              SelectByIndex(int index);
@@ -104,37 +112,7 @@ string COrderInfo::TypeDescription() const
   {
    string str;
 //---
-   switch(Type())
-     {
-      case ORDER_TYPE_BUY:
-         str="Market order to buy";
-         break;
-      case ORDER_TYPE_SELL:
-         str="Market order to sell";
-         break;
-      case ORDER_TYPE_BUY_LIMIT:
-         str="Pending order Buy Limit";
-         break;
-      case ORDER_TYPE_SELL_LIMIT:
-         str="Pending order Sell Limit";
-         break;
-      case ORDER_TYPE_BUY_STOP:
-         str="Pending order Buy Stop";
-         break;
-      case ORDER_TYPE_SELL_STOP:
-         str="Pending order Sell Stop";
-         break;
-      case ORDER_TYPE_BUY_STOP_LIMIT:
-         str="Upon reaching the price order is placed pending order Buy Limit price StopLimit";
-         break;
-      case ORDER_TYPE_SELL_STOP_LIMIT:
-         str="Upon reaching the price order is placed pending order Sell Limit price StopLimit";
-         break;
-      default:
-         str="Unknown type";
-     }
-//---
-   return(str);
+   return(FormatType(str,Type()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_STATE".                            |
@@ -156,34 +134,7 @@ string COrderInfo::StateDescription() const
   {
    string str;
 //---
-   switch(State())
-     {
-      case ORDER_STATE_STARTED:
-         str="The order is checked for correctness, but not yet adopted broker";
-         break;
-      case ORDER_STATE_PLACED:
-         str="The order adopted";
-         break;
-      case ORDER_STATE_CANCELED:
-         str="Order canselled by the client";
-         break;
-      case ORDER_STATE_PARTIAL:
-         str="Order has been partially implemented";
-         break;
-      case ORDER_STATE_FILLED:
-         str="Order is executed completely";
-         break;
-      case ORDER_STATE_REJECTED:
-         str="The order denied";
-         break;
-      case ORDER_STATE_EXPIRED:
-         str="Order withdrawn after the expiry of its validity";
-         break;
-      default:
-         str="Unknown state";
-     }
-//---
-   return(str);
+   return(FormatStatus(str,State()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_TIME_EXPIRATION".                  |
@@ -225,22 +176,7 @@ string COrderInfo::TypeFillingDescription() const
   {
    string str;
 //---
-   switch(TypeFilling())
-     {
-      case ORDER_FILLING_AON:
-         str="Specified volume only";
-         break;
-      case ORDER_FILLING_CANCEL:
-         str="Most accessible market volume";
-         break;
-      case ORDER_FILLING_RETURN:
-         str="Most accessible market volume with order the remainder";
-         break;
-      default:
-         str="Unknown filling type";
-     }
-//---
-   return(str);
+   return(FormatTypeFilling(str,TypeFilling()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_TYPE_TIME".                        |
@@ -262,22 +198,7 @@ string COrderInfo::TypeTimeDescription() const
   {
    string str;
 //---
-   switch(TypeTime())
-     {
-      case ORDER_TIME_GTC:
-         str="The order will be placed in the queue until withdrawn";
-         break;
-      case ORDER_TIME_DAY:
-         str="Order shall be effective only during the current trading day";
-         break;
-      case ORDER_TIME_SPECIFIED:
-         str="Order will be valid until the expiry";
-         break;
-      default:
-         str="Unknown time type";
-     }
-//---
-   return(str);
+   return(FormatTypeTime(str,TypeFilling()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_MAGIC".                            |
@@ -421,6 +342,170 @@ bool COrderInfo::InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& var) cons
 bool COrderInfo::InfoString(ENUM_ORDER_PROPERTY_STRING prop_id,string& var) const
   {
    return(OrderGetString(prop_id,var));
+  }
+//+------------------------------------------------------------------+
+//| Converts the order type to text.                                 |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - order type.                                       |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatType(string& str,const uint type) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(type)
+     {
+      case ORDER_TYPE_BUY            : str="buy";             break;
+      case ORDER_TYPE_SELL           : str="sell";            break;
+      case ORDER_TYPE_BUY_LIMIT      : str="buy limit";       break;
+      case ORDER_TYPE_SELL_LIMIT     : str="sell limit";      break;
+      case ORDER_TYPE_BUY_STOP       : str="buy stop";        break;
+      case ORDER_TYPE_SELL_STOP      : str="sell stop";       break;
+      case ORDER_TYPE_BUY_STOP_LIMIT : str="buy stop limit";  break;
+      case ORDER_TYPE_SELL_STOP_LIMIT: str="sell stop limit"; break;
+
+      default:
+         str="unknown order type "+(string)type;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the order status to text.                               |
+//| INPUT:  str    - receiving string,                               |
+//|         status - order status.                                   |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatStatus(string& str,const uint status) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(status)
+     {
+      case ORDER_STATE_STARTED : str="started";  break;
+      case ORDER_STATE_PLACED  : str="placed";   break;
+      case ORDER_STATE_CANCELED: str="canceled"; break;
+      case ORDER_STATE_PARTIAL : str="partial";  break;
+      case ORDER_STATE_FILLED  : str="filled";   break;
+      case ORDER_STATE_REJECTED: str="rejected"; break;
+      case ORDER_STATE_EXPIRED : str="expired";  break;
+
+      default:
+         str="unknown order status "+(string)status;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the order filling type to text.                         |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - order filling type.                               |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatTypeFilling(string& str,const uint type) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(type)
+     {
+      case ORDER_FILLING_RETURN: str="return remainder"; break;
+      case ORDER_FILLING_CANCEL: str="cancel remainder"; break;
+      case ORDER_FILLING_AON   : str="all or none";      break;
+
+      default:
+         str="unknown type filling "+(string)type;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the type of order by expiration to text.                |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - type of order by expiration.                      |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatTypeTime(string& str,const uint type) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(type)
+     {
+      case ORDER_TIME_GTC      : str="gtc";       break;
+      case ORDER_TIME_DAY      : str="day";       break;
+      case ORDER_TIME_SPECIFIED: str="specified"; break;
+
+      default:
+         str="unknown type time "+(string)type;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the order parameters to text.                           |
+//| INPUT:  str      - receiving string,                             |
+//|         position - pointer at the class instance.                |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatOrder(string& str) const
+  {
+   string type,volume,price;
+   CSymbolInfo symbol;
+//--- set up
+   symbol.Name(Symbol());
+   int digits=symbol.Digits();
+//--- form the order description
+   StringFormat("#%I64u %s %s %s",
+                Ticket(),
+                FormatType(type,Type()),
+                DoubleToString(VolumeInitial(),2),
+                Symbol());
+//--- receive the price of the order
+   FormatPrice(price,PriceOpen(),PriceStopLimit(),digits);
+//--- if there is price, write it
+   if(price!="")
+     {
+      str+=" at ";
+      str+=price;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the order prices to text.                               |
+//| INPUT:  str           - receiving string,                        |
+//|         price_order   - order price,                             |
+//|         price_trigger - the order trigger price.                 |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string COrderInfo::FormatPrice(string& str,const double price_order,const double price_trigger,const uint digits) const
+  {
+   string price,trigger;
+//--- clean
+   str="";
+//--- Is there its trigger price?
+   if(price_trigger)
+     {
+      price  =DoubleToString(price_order,digits);
+      trigger=DoubleToString(price_trigger,digits);
+      str    =StringFormat("%s (%s)",price,trigger);
+     }
+   else str=DoubleToString(price_order,digits);
+//--- return the result
+   return(str);
   }
 //+------------------------------------------------------------------+
 //| Selecting a order to access.                                     |

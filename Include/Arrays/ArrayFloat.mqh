@@ -439,8 +439,8 @@ bool CArrayFloat::DeleteRange(int from,int to)
    if(from>to || from>=m_data_total) return(false);
 //--- deleting
    if(to>=m_data_total-1) to=m_data_total-1;
-   else                   MemMove(from,to,m_data_total-to-1);
-   m_data_total-=to-from;
+   MemMove(from,to+1,m_data_total-to);
+   m_data_total-=to-from+1;
 //---
    return(true);
   }

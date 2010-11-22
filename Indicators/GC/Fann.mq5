@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #property indicator_chart_window
-#include <GC\MT5FANN.mqh>
+//#include <GC\MT5FANN.mqh>
 #include <GC\GetVectors.mqh>
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -19,14 +19,26 @@
 #property indicator_type1   DRAW_LINE
 #property indicator_type2   DRAW_LINE
 #property indicator_color1  Yellow
-#property indicator_color2  Red
+#property indicator_color2  Blue
 #property indicator_label1  "Price High"
 #property indicator_label2  "Price Low"
 //---- indicator buffers
 double ExtUpperBuffer[];
 double ExtLowerBuffer[];
-CMT5FANN mt5fannHigh;
-CMT5FANN mt5fannLow;
+//CMT5FANN mt5fannHigh;
+//CMT5FANN mt5fannLow;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void OnDeinit(const int)
+
+  {
+   int i=0;
+
+   for(i=ObjectsTotal(0);i>=0;i--)
+      if(StringSubstr(ObjectName(0,i),0,3)=="GV_") ObjectDelete(0,ObjectName(0,i));
+
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -50,9 +62,9 @@ int OnInit()
    ArraySetAsSeries(ExtLowerBuffer,true);
 //mt5fann.debug=true;
 
-   if(!mt5fannHigh.Init("High")) Print("Init error");
-   if(!mt5fannLow.Init("Low")) Print("Init error");
-
+//   if(!mt5fannHigh.Init("High")) Print("Init error");
+//   if(!mt5fannLow.Init("Low")) Print("Init error");
+   Print("SYMBOL_SPREAD=",SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)," SYMBOL_TRADE_STOPS_LEVEL =",SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL));
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -83,14 +95,14 @@ int OnCalculate(const int rates_total,
       ArrayInitialize(ExtUpperBuffer,EMPTY_VALUE);
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
-   else limit=rates_total-1;
+   else limit=rates_total-prev_calculated;
    double res;
    for(i=1;i<limit;i++)
      {
       res=GetTrend(10,"",0,i);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
-      ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;
+      //ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;
       //      if(mt5fannHigh.GetVector(i))
       //        {
       //         mt5fannHigh.run();
@@ -99,7 +111,7 @@ int OnCalculate(const int rates_total,
       //         ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.OutputVector[0]/100;
       //        }
       //      else ExtUpperBuffer[i]=EMPTY_VALUE;
-      ExtLowerBuffer[i]=low[i+1]+mt5fannLow.forecast(i)/100;
+      //ExtLowerBuffer[i]=low[i+1]+mt5fannLow.forecast(i,true)/100;
       //      if(mt5fannLow.GetVector(i))
       //        {
       //         mt5fannLow.run();

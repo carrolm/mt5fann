@@ -4,6 +4,7 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.09.14 |
 //+------------------------------------------------------------------+
+#include <Trade\SymbolInfo.mqh>
 //+------------------------------------------------------------------+
 //| Class CDealInfo.                                                 |
 //| Appointment: Class for access to history deal info.              |
@@ -38,6 +39,10 @@ public:
    bool              InfoInteger(ENUM_DEAL_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_DEAL_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_DEAL_PROPERTY_STRING prop_id,string& var) const;
+   //--- info methods
+   string            FormatAction(string& str,const uint action)               const;
+   string            FormatEntry(string& str,const uint entry)                 const;
+   string            FormatDeal(string& str)                                   const;
    //--- method for select deal
    bool              SelectByIndex(int index);
   };
@@ -269,6 +274,106 @@ bool CDealInfo::InfoDouble(ENUM_DEAL_PROPERTY_DOUBLE prop_id,double& var) const
 bool CDealInfo::InfoString(ENUM_DEAL_PROPERTY_STRING prop_id,string& var) const
   {
    return(HistoryDealGetString(m_ticket,prop_id,var));
+  }
+//+------------------------------------------------------------------+
+//| Converths the type of a  deal to text.                           |
+//| INPUT:  str    - receiving string,                               |
+//|         action - type of deal.                                   |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CDealInfo::FormatAction(string& str,const uint action) const
+  {
+//--- clean
+   str="";
+//--- see the type  
+   switch(action)
+     {
+      case DEAL_TYPE_BUY       : str="buy";        break;
+      case DEAL_TYPE_SELL      : str="sell";       break;
+      case DEAL_TYPE_BALANCE   : str="balance";    break;
+      case DEAL_TYPE_CREDIT    : str="credit";     break;
+      case DEAL_TYPE_CHARGE    : str="charge";     break;
+      case DEAL_TYPE_CORRECTION: str="correction"; break;
+
+      default:
+         str="unknown deal type "+(string)action;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the deal direction to text.                             |
+//| INPUT:  str   - receiving string,                                |
+//|         entry - direction of the deal.                           |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CDealInfo::FormatEntry(string& str,const uint entry) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(entry)
+     {
+      case DEAL_ENTRY_IN   : str="in";     break;
+      case DEAL_ENTRY_OUT  : str="out";    break;
+      case DEAL_ENTRY_INOUT: str="in/out"; break;
+
+      default:
+         str="unknown deal entry "+(string)entry;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the deal parameters to text.                            |
+//| INPUT:  str  - receiving string,                                 |
+//|         deal - pointer at the class instance.                    |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CDealInfo::FormatDeal(string& str) const
+  {
+   string type,volume,price,date;
+   CSymbolInfo symbol;
+//--- set up
+   symbol.Name(Symbol());
+   int digits=symbol.Digits();
+//--- form the description of the deal
+   switch(Type())
+     {
+      //--- Buy-Sell
+      case DEAL_TYPE_BUY       :
+      case DEAL_TYPE_SELL      :
+         str=StringFormat("#%I64u %s %s %s at %s",
+                          Ticket(),
+                          FormatAction(type,Type()),
+                          DoubleToString(Volume(),2),
+                          Symbol(),
+                          DoubleToString(Price(),digits));
+      break;
+
+      //--- balance operations
+      case DEAL_TYPE_BALANCE   :
+      case DEAL_TYPE_CREDIT    :
+      case DEAL_TYPE_CHARGE    :
+      case DEAL_TYPE_CORRECTION:
+         str=StringFormat("#%I64u %s %s [%s]",
+                          Ticket(),
+                          FormatAction(type,Type()),
+                          DoubleToString(Profit(),2),
+                          Comment());
+      break;
+
+      default:
+         str="unknown deal type "+(string)Type();
+         break;
+     }
+//--- return the result
+   return(str);
   }
 //+------------------------------------------------------------------+
 //| Select a deal on the index.                                      |
