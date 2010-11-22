@@ -4,6 +4,7 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.05.14 |
 //+------------------------------------------------------------------+
+#include <Trade\SymbolInfo.mqh>
 //+------------------------------------------------------------------+
 //| Class CPositionInfo.                                             |
 //| Appointment: Class for access to position info.                  |
@@ -39,6 +40,9 @@ public:
    bool              InfoInteger(ENUM_POSITION_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_POSITION_PROPERTY_STRING prop_id,string& var) const;
+   //--- info methods
+   string            FormatType(string& str,const uint type)                       const;
+   string            FormatPosition(string& str)                                   const;
    //--- methods for select position
    bool              Select(const string symbol);
    bool              SelectByIndex(int index);
@@ -76,19 +80,7 @@ string CPositionInfo::TypeDescription() const
   {
    string str;
 //---
-   switch(Type())
-     {
-      case POSITION_TYPE_BUY:
-         str="Buy";
-         break;
-      case POSITION_TYPE_SELL:
-         str="Sell";
-         break;
-      default:
-         str="Unknown type";
-     }
-//---
-   return(str);
+   return(FormatType(str,Type()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "POSITION_MAGIC".                         |
@@ -232,6 +224,58 @@ bool CPositionInfo::InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var
 bool CPositionInfo::InfoString(ENUM_POSITION_PROPERTY_STRING prop_id,string& var) const
   {
    return(PositionGetString(prop_id,var));
+  }
+//+------------------------------------------------------------------+
+//| Converts the position type to text.                              |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - position type.                                    |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CPositionInfo::FormatType(string& str,const uint type) const
+  {
+//--- clean
+   str="";
+//--- see the type
+   switch(type)
+     {
+      case POSITION_TYPE_BUY : str="buy";  break;
+      case POSITION_TYPE_SELL: str="sell"; break;
+
+      default:
+         str="unknown position type "+(string)type;
+         break;
+     }
+//--- return the result
+   return(str);
+  }
+//+------------------------------------------------------------------+
+//| Converts the position parameters to text.                        |
+//| INPUT:  str      - receiving string,                             |
+//|         position - pointer at the class instance.                |
+//| OUTPUT: formatted string.                                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CPositionInfo::FormatPosition(string& str) const
+  {
+   string tmp,type,volume,price;
+   CSymbolInfo symbol;
+//--- set up
+   symbol.Name(Symbol());
+   int digits=symbol.Digits();
+//--- form the position description
+   str=StringFormat("%s %s %s %s",
+                    FormatType(type,Type()),
+                    DoubleToString(Volume(),2),
+                    Symbol(),
+                    DoubleToString(PriceOpen(),digits+3));
+//--- add stops if there are any
+   double sl=StopLoss();
+   double tp=TakeProfit();
+   if(sl) { tmp=StringFormat(" sl: %s",DoubleToString(sl,digits)); str+=tmp; }
+   if(tp) { tmp=StringFormat(" tp: %s",DoubleToString(tp,digits)); str+=tmp; }
+//--- return the result
+   return(str);
   }
 //+------------------------------------------------------------------+
 //| Access functions PositionSelect(...).                            |

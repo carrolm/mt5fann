@@ -22,56 +22,59 @@ protected:
    ulong             m_magic;           // expert magic number
    ulong             m_deviation;       // deviation default
    ENUM_ORDER_TYPE_FILLING m_type_filling;
+   //---
+   int               m_log_level;
 
 public:
                      CTrade();
    //--- methods of access to protected data
+   void              LogLevel(int log_level)                 { m_log_level=log_level;               }
    void              Request(MqlTradeRequest &request) const;
-   ENUM_TRADE_REQUEST_ACTIONS RequestAction() const        { return(m_request.action);            }
-   string            RequestActionDescription() const;
-   ulong             RequestMagic() const                  { return(m_request.magic);             }
-   ulong             RequestOrder() const                  { return(m_request.order);             }
-   string            RequestSymbol() const                 { return(m_request.symbol);            }
-   double            RequestVolume() const                 { return(m_request.volume);            }
-   double            RequestPrice() const                  { return(m_request.price);             }
-   double            RequestStopLimit() const              { return(m_request.stoplimit);         }
-   double            RequestSL() const                     { return(m_request.sl);                }
-   double            RequestTP() const                     { return(m_request.tp);                }
-   ulong             RequestDeviation() const              { return(m_request.deviation);         }
-   ENUM_ORDER_TYPE   RequestType() const                   { return(m_request.type);              }
-   string            RequestTypeDescription() const;
-   ENUM_ORDER_TYPE_FILLING RequestTypeFilling() const      { return(m_request.type_filling);      }
-   string            RequestTypeFillingDescription() const;
-   ENUM_ORDER_TYPE_TIME RequestTypeTime() const            { return(m_request.type_time);         }
-   string            RequestTypeTimeDescription() const;
-   datetime          RequestExpiration() const             { return(m_request.expiration);        }
-   string            RequestComment() const                { return(m_request.comment);           }
+   ENUM_TRADE_REQUEST_ACTIONS RequestAction()          const { return(m_request.action);            }
+   string            RequestActionDescription()        const;
+   ulong             RequestMagic()                    const { return(m_request.magic);             }
+   ulong             RequestOrder()                    const { return(m_request.order);             }
+   string            RequestSymbol()                   const { return(m_request.symbol);            }
+   double            RequestVolume()                   const { return(m_request.volume);            }
+   double            RequestPrice()                    const { return(m_request.price);             }
+   double            RequestStopLimit()                const { return(m_request.stoplimit);         }
+   double            RequestSL()                       const { return(m_request.sl);                }
+   double            RequestTP()                       const { return(m_request.tp);                }
+   ulong             RequestDeviation()                const { return(m_request.deviation);         }
+   ENUM_ORDER_TYPE   RequestType()                     const { return(m_request.type);              }
+   string            RequestTypeDescription()          const;
+   ENUM_ORDER_TYPE_FILLING RequestTypeFilling()        const { return(m_request.type_filling);      }
+   string            RequestTypeFillingDescription()   const;
+   ENUM_ORDER_TYPE_TIME RequestTypeTime()              const { return(m_request.type_time);         }
+   string            RequestTypeTimeDescription()      const;
+   datetime          RequestExpiration()               const { return(m_request.expiration);        }
+   string            RequestComment()                  const { return(m_request.comment);           }
    //---
-   void              Result(MqlTradeResult &result) const;
-   uint              ResultRetcode() const                 { return(m_result.retcode);            }
-   string            ResultRetcodeDescription() const;
-   ulong             ResultDeal() const                    { return(m_result.deal);               }
-   ulong             ResultOrder() const                   { return(m_result.order);              }
-   double            ResultVolume() const                  { return(m_result.volume);             }
-   double            ResultPrice() const                   { return(m_result.price);              }
-   double            ResultBid() const                     { return(m_result.bid);                }
-   double            ResultAsk() const                     { return(m_result.ask);                }
-   string            ResultComment() const                 { return(m_result.comment);            }
+   void              Result(MqlTradeResult &result)    const;
+   uint              ResultRetcode()                   const { return(m_result.retcode);            }
+   string            ResultRetcodeDescription()        const;
+   ulong             ResultDeal()                      const { return(m_result.deal);               }
+   ulong             ResultOrder()                     const { return(m_result.order);              }
+   double            ResultVolume()                    const { return(m_result.volume);             }
+   double            ResultPrice()                     const { return(m_result.price);              }
+   double            ResultBid()                       const { return(m_result.bid);                }
+   double            ResultAsk()                       const { return(m_result.ask);                }
+   string            ResultComment()                   const { return(m_result.comment);            }
    //---
    void              CheckResult(MqlTradeCheckResult &check_result) const;
-   uint              CheckResultRetcode() const            { return(m_check_result.retcode);      }
-   string            CheckResultRetcodeDescription() const;
-   double            CheckResultBalance() const            { return(m_check_result.balance);      }
-   double            CheckResultEquity() const             { return(m_check_result.equity);       }
-   double            CheckResultProfit() const             { return(m_check_result.profit);       }
-   double            CheckResultMargin() const             { return(m_check_result.margin);       }
-   double            CheckResultMarginFree() const         { return(m_check_result.margin_free);  }
-   double            CheckResultMarginLevel() const        { return(m_check_result.margin_level); }
-   string            CheckResultComment() const            { return(m_check_result.comment);      }
+   uint              CheckResultRetcode()              const { return(m_check_result.retcode);      }
+   string            CheckResultRetcodeDescription()   const;
+   double            CheckResultBalance()              const { return(m_check_result.balance);      }
+   double            CheckResultEquity()               const { return(m_check_result.equity);       }
+   double            CheckResultProfit()               const { return(m_check_result.profit);       }
+   double            CheckResultMargin()               const { return(m_check_result.margin);       }
+   double            CheckResultMarginFree()           const { return(m_check_result.margin_free);  }
+   double            CheckResultMarginLevel()          const { return(m_check_result.margin_level); }
+   string            CheckResultComment()              const { return(m_check_result.comment);      }
    //--- trade methods
-   void              SetExpertMagicNumber(ulong magic)     { m_magic=magic;                       }
-   void              SetDeviationInPoints(ulong deviation) { m_deviation=deviation;               }
-   void              SetTypeFilling(ENUM_ORDER_TYPE_FILLING filling) { m_type_filling=filling;    }
+   void              SetExpertMagicNumber(ulong magic)       { m_magic=magic;                       }
+   void              SetDeviationInPoints(ulong deviation)   { m_deviation=deviation;               }
+   void              SetTypeFilling(ENUM_ORDER_TYPE_FILLING filling) { m_type_filling=filling;      }
    //--- methods for working with positions
    bool              PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double volume,
                                   double price,double sl,double tp,const string comment="");
@@ -98,24 +101,18 @@ public:
                               ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="");
    //--- info methods
    void              PrintRequest() const;
-   void              PrintResult() const;
+   void              PrintResult()  const;
    //--- positions
-   string            FormatPositionType(string &str,const uint type) const;
-   string            FormatPosition(string &str,const CPositionInfo *position) const;
+   string            FormatPositionType(string& str,const uint type)           const;
    //--- orders
-   string            FormatOrderType(string &str,const uint type) const;
-   string            FormatOrderStatus(string &str,const uint status) const;
-   string            FormatOrderTypeFilling(string &str,const uint type) const;
-   string            FormatOrderTypeTime(string &str,const uint type) const;
-   string            FormatOrder(string &str,const COrderInfo *order) const;
-   string            FormatOrderPrice(string &str,const double price_order,const double price_trigger,const uint digits) const;
-   //--- deals
-   string            FormatDealAction(string &str,const uint action) const;
-   string            FormatDealEntry(string &str,const uint entry) const;
-   string            FormatDeal(string &str,const CDealInfo *deal) const;
+   string            FormatOrderType(string& str,const uint type)              const;
+   string            FormatOrderStatus(string& str,const uint status)          const;
+   string            FormatOrderTypeFilling(string& str,const uint type)       const;
+   string            FormatOrderTypeTime(string& str,const uint type)          const;
+   string            FormatOrderPrice(string& str,const double price_order,const double price_trigger,const uint digits) const;
    //--- trade request
-   string            FormatRequest(string &str,const MqlTradeRequest &request) const;
-   string            FormatRequestResult(string &str,const MqlTradeRequest &request,const MqlTradeResult &result) const;
+   string            FormatRequest(string& str,const MqlTradeRequest& request) const;
+   string            FormatRequestResult(string& str,const MqlTradeRequest& request,const MqlTradeResult& result) const;
 
 protected:
    void              ClearStructures();
@@ -133,14 +130,18 @@ void CTrade::CTrade()
    m_magic       =0;
    m_deviation   =10;
    m_type_filling=ORDER_FILLING_AON;
+   m_log_level   =1;                                      // only errors logged
+//--- check programm mode
+   if(MQL5InfoInteger(MQL5_OPTIMIZATION)) m_log_level=0;  // no message logged
+   if(MQL5InfoInteger(MQL5_TESTING))      m_log_level=2;  // all message logged
   }
 //+------------------------------------------------------------------+
 //| Get the request structure.                                       |
-//| INPUT:  no.                                                      |
+//| INPUT:  request - reference.                                     |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CTrade::Request(MqlTradeRequest &request) const
+void CTrade::Request(MqlTradeRequest& request) const
   {
    request.action      =m_request.action;
    request.magic       =m_request.magic;
@@ -216,11 +217,11 @@ string CTrade::RequestTypeTimeDescription() const
   }
 //+------------------------------------------------------------------+
 //| Get the result structure.                                        |
-//| INPUT:  no.                                                      |
+//| INPUT:  result - refernce.                                       |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CTrade::Result(MqlTradeResult &result) const
+void CTrade::Result(MqlTradeResult& result) const
   {
    result.retcode=m_result.retcode;
    result.deal   =m_result.deal;
@@ -247,11 +248,11 @@ string CTrade::ResultRetcodeDescription() const
   }
 //+------------------------------------------------------------------+
 //| Get the check result structure.                                  |
-//| INPUT:  no.                                                      |
+//| INPUT:  check_result - reference.                                |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CTrade::CheckResult(MqlTradeCheckResult &check_result) const
+void CTrade::CheckResult(MqlTradeCheckResult& check_result) const
   {
 //--- copy structure
    check_result.retcode     =m_check_result.retcode;
@@ -320,17 +321,17 @@ bool CTrade::PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double 
    if(!OrderCheck(m_request,m_check_result))
      {
       m_result.retcode=m_check_result.retcode;
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       //--- copy return code
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -357,16 +358,16 @@ bool CTrade::PositionModify(const string symbol,double sl,double tp)
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -429,7 +430,7 @@ bool CTrade::PositionClose(const string symbol,ulong deviation)
         {
          //--- copy return code
          m_result.retcode=m_check_result.retcode;
-         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+         if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
          return(false);
         }
       //--- order send
@@ -438,14 +439,14 @@ bool CTrade::PositionClose(const string symbol,ulong deviation)
          if(--retry_count!=0) continue;
          if(retcode==TRADE_RETCODE_DONE_PARTIAL)
             m_result.retcode=retcode;
-         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+         if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
          return(false);
         }
       retcode=TRADE_RETCODE_DONE_PARTIAL;
       if(partial_close) Sleep(1000);
      }
    while(partial_close);
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -497,16 +498,16 @@ bool CTrade::OrderOpen(const string symbol,ENUM_ORDER_TYPE order_type,double vol
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -539,22 +540,22 @@ bool CTrade::OrderModify(ulong ticket,double price,double sl,double tp,ENUM_ORDE
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Delete specified pending order.                                  |
-//| INPUT:  ticket -ticket of order for delete.                      |
+//| INPUT:  ticket - ticket of order for delete.                     |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -571,16 +572,16 @@ bool CTrade::OrderDelete(ulong ticket)
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -592,6 +593,8 @@ bool CTrade::OrderDelete(ulong ticket)
 //+------------------------------------------------------------------+
 void CTrade::PrintRequest() const
   {
+   if(m_log_level<2) return;
+//---
    string str;
    printf("%s",FormatRequest(str,m_request));
   }
@@ -601,8 +604,10 @@ void CTrade::PrintRequest() const
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CTrade::PrintResult(void) const
+void CTrade::PrintResult() const
   {
+   if(m_log_level<2) return;
+//---
    string str;
    printf("%s",FormatRequestResult(str,m_request,m_result));
   }
@@ -817,20 +822,17 @@ bool CTrade::SellStop(double volume,double price,const string symbol=NULL,double
    return(OrderOpen(sym,ORDER_TYPE_SELL_STOP,volume,0.0,price,sl,tp,type_time,expiration,comment));
   }
 //+------------------------------------------------------------------+
-//| позиции                                                          |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид тип позиции.                         |
-//| INPUT:  str  - строка-приёмник,                                  |
-//|         type - тип позиции.                                      |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the position type to text.                              |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - position type.                                    |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatPositionType(string &str,const uint type) const
+string CTrade::FormatPositionType(string& str,const uint type) const
   {
-//--- чистим
+//--- clean
    str="";
-//--- смотрим тип
+//--- see the type
    switch(type)
      {
       case POSITION_TYPE_BUY : str="buy";  break;
@@ -840,54 +842,21 @@ string CTrade::FormatPositionType(string &str,const uint type) const
          str="unknown position type "+(string)type;
          break;
      }
-//--- вернем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Преобразует в текстовый вид параметры позиции.                   |
-//| INPUT:  str      - строка-приёмник,                              |
-//|         position - указатель на экземпляр класса.                |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the order type to text.                                 |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - order type.                                       |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatPosition(string &str,const CPositionInfo *position) const
+string CTrade::FormatOrderType(string& str,const uint type) const
   {
-   string tmp,type,volume,price;
-   CSymbolInfo symbol;
-//--- проверяем
-   if(position==NULL) return("NULL pointer");
-//--- настраиваем
-   symbol.Name(position.Symbol());
-   int digits=symbol.Digits();
-//--- формируем описание позиции
-   str=StringFormat("%s %s %s %s",
-                    FormatPositionType(type,position.Type()),
-                    DoubleToString(position.Volume(),2),
-                    position.Symbol(),
-                    DoubleToString(position.PriceOpen(),digits+3));
-//--- добавляем стопы если есть
-   double sl=position.StopLoss();
-   double tp=position.TakeProfit();
-   if(sl) { tmp=StringFormat(" sl: %s",DoubleToString(sl,digits)); str+=tmp; }
-   if(tp) { tmp=StringFormat(" tp: %s",DoubleToString(tp,digits)); str+=tmp; }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| ордера                                                           |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид тип ордера.                          |
-//| INPUT:  str  - строка-приёмник,                                  |
-//|         type - тип ордера.                                       |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatOrderType(string &str,const uint type) const
-  {
-//--- чистим
+//--- clean
    str="";
-//--- смотрим тип
+//--- see the type
    switch(type)
      {
       case ORDER_TYPE_BUY            : str="buy";             break;
@@ -903,50 +872,21 @@ string CTrade::FormatOrderType(string &str,const uint type) const
          str="unknown order type "+(string)type;
          break;
      }
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Преобразует в текстовый вид статус ордера.                       |
-//| INPUT:  str    - строка-приёмник,                                |
-//|         status - статус ордера.                                  |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the order filling type to text.                         |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - order filling type.                               |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatOrderStatus(string &str,const uint status) const
+string CTrade::FormatOrderTypeFilling(string& str,const uint type) const
   {
-//--- чистим
+//--- clean
    str="";
-//--- смотрим тип
-   switch(status)
-     {
-      case ORDER_STATE_STARTED : str="started";  break;
-      case ORDER_STATE_PLACED  : str="placed";   break;
-      case ORDER_STATE_CANCELED: str="canceled"; break;
-      case ORDER_STATE_PARTIAL : str="partial";  break;
-      case ORDER_STATE_FILLED  : str="filled";   break;
-      case ORDER_STATE_REJECTED: str="rejected"; break;
-      case ORDER_STATE_EXPIRED : str="expired";  break;
-
-      default:
-         str="unknown order status "+(string)status;
-         break;
-     }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид тип ордера по заполнению.            |
-//| INPUT:  str  - строка-приёмник,                                  |
-//|         type - тип ордера по заполнению.                         |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatOrderTypeFilling(string &str,const uint type) const
-  {
-//--- чистим
-   str="";
-//--- смотрим тип
+//--- see the type
    switch(type)
      {
       case ORDER_FILLING_RETURN: str="return remainder"; break;
@@ -957,21 +897,21 @@ string CTrade::FormatOrderTypeFilling(string &str,const uint type) const
          str="unknown type filling "+(string)type;
          break;
      }
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Преобразует в текстовый вид тип ордера по сроку действия.        |
-//| INPUT:  str  - строка-приёмник,                                  |
-//|         type - тип ордера по сроку действия.                     |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the type of order by expiration to text.                |
+//| INPUT:  str  - receiving string,                                 |
+//|         type - type of order by expiration.                      |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatOrderTypeTime(string &str,const uint type) const
+string CTrade::FormatOrderTypeTime(string& str,const uint type) const
   {
-//--- чистим
+//--- clean
    str="";
-//--- смотрим тип
+//--- see the type
    switch(type)
      {
       case ORDER_TIME_GTC      : str="gtc";       break;
@@ -982,56 +922,23 @@ string CTrade::FormatOrderTypeTime(string &str,const uint type) const
          str="unknown type time "+(string)type;
          break;
      }
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Преобразует в текстовый вид параметры ордера.                    |
-//| INPUT:  str      - строка-приёмник,                              |
-//|         position - указатель на экземпляр класса.                |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the order prices to text.                               |
+//| INPUT:  str           - receiving string,                        |
+//|         price_order   - order price,                             |
+//|         price_trigger - the order trigger price.                 |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatOrder(string &str,const COrderInfo *order) const
-  {
-   string type,volume,price;
-   CSymbolInfo symbol;
-//--- проверяем
-   if(order==NULL) return("NULL pointer");
-//--- настраиваем
-   symbol.Name(order.Symbol());
-   int digits=symbol.Digits();
-//--- формируем описание ордера
-   StringFormat("#%I64u %s %s %s",
-                order.Ticket(),
-                FormatOrderType(type,order.Type()),
-                DoubleToString(order.VolumeInitial(),2),
-                order.Symbol());
-//--- получим цену ордера
-   FormatOrderPrice(price,order.PriceOpen(),order.PriceStopLimit(),digits);
-//--- если цена есть то допишем ее
-   if(price!="")
-     {
-      str+=" at ";
-      str+=price;
-     }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид цены ордера.                         |
-//| INPUT:  str           - строка-приёмник,                         |
-//|         price_order   - цена ордера,                             |
-//|         price_trigger - триггерная цена ордера.                  |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatOrderPrice(string &str,const double price_order,const double price_trigger,const uint digits) const
+string CTrade::FormatOrderPrice(string& str,const double price_order,const double price_trigger,const uint digits) const
   {
    string price,trigger;
-//--- чистим
+//--- clean
    str="";
-//--- есть триггерная цена?
+//--- Is there its trigger price?
    if(price_trigger)
      {
       price  =DoubleToString(price_order,digits);
@@ -1039,189 +946,80 @@ string CTrade::FormatOrderPrice(string &str,const double price_order,const doubl
       str    =StringFormat("%s (%s)",price,trigger);
      }
    else str=DoubleToString(price_order,digits);
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| сделки                                                           |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид тип сделки.                          |
-//| INPUT:  str    - строка-приёмник,                                |
-//|         action - тип сделки.                                     |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts the parameters of a trade request to text.              |
+//| INPUT:  str     - receiving string,                              |
+//|         request - reference ri the request structure.            |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatDealAction(string &str,const uint action) const
-  {
-//--- чистим
-   str="";
-//--- смотрим тип  
-   switch(action)
-     {
-      case DEAL_TYPE_BUY       : str="buy";        break;
-      case DEAL_TYPE_SELL      : str="sell";       break;
-      case DEAL_TYPE_BALANCE   : str="balance";    break;
-      case DEAL_TYPE_CREDIT    : str="credit";     break;
-      case DEAL_TYPE_CHARGE    : str="charge";     break;
-      case DEAL_TYPE_CORRECTION: str="correction"; break;
-
-      default:
-         str="unknown deal type "+(string)action;
-         break;
-     }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид направление сделки.                  |
-//| INPUT:  str   - строка-приёмник,                                 |
-//|         entry - направление сделки.                              |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatDealEntry(string &str,const uint entry) const
-  {
-//--- чистим
-   str="";
-//--- смотрим тип    
-   switch(entry)
-     {
-      case DEAL_ENTRY_IN   : str="in";     break;
-      case DEAL_ENTRY_OUT  : str="out";    break;
-      case DEAL_ENTRY_INOUT: str="in/out"; break;
-
-      default:
-         str="unknown deal entry "+(string)entry;
-         break;
-     }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид параметры сделки.                    |
-//| INPUT:  str  - строка-приёмник,                                  |
-//|         deal - указатель на экземпляр класса.                    |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatDeal(string &str,const CDealInfo *deal) const
-  {
-   string type,volume,price,date;
-   CSymbolInfo symbol;
-//--- проверяем
-   if(deal==NULL) return("NULL pointer");
-//--- настраиваем
-   symbol.Name(deal.Symbol());
-   int digits=symbol.Digits();
-//--- формируем описание сделки
-   switch(deal.Type())
-     {
-      //--- купля-продажа
-      case DEAL_TYPE_BUY       :
-      case DEAL_TYPE_SELL      :
-         str=StringFormat("#%I64u %s %s %s at %s",
-                          deal.Ticket(),
-                          FormatDealAction(type,deal.Type()),
-                          DoubleToString(deal.Volume(),2),
-                          deal.Symbol(),
-                          DoubleToString(deal.Price(),digits));
-      break;
-
-      //--- балансовые операции
-      case DEAL_TYPE_BALANCE   :
-      case DEAL_TYPE_CREDIT    :
-      case DEAL_TYPE_CHARGE    :
-      case DEAL_TYPE_CORRECTION:
-         str=StringFormat("#%I64u %s %s [%s]",
-                          deal.Ticket(),
-                          FormatDealAction(type,deal.Type()),
-                          //            DoubleToString(deal.Profit(),deal.digits_currency),
-                          DoubleToString(deal.Profit(),2),
-                          deal.Comment());
-      break;
-
-      default:
-         str="unknown deal type "+(string)deal.Type();
-         break;
-     }
-//--- отдаем результат
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| торговый запрос                                                  |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Преобразует в текстовый вид параметры запроса.                   |
-//| INPUT:  str     - строка-приёмник,                               |
-//|         request - ссылка на структуру запроса.                   |
-//| OUTPUT: форматированная строка.                                  |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string CTrade::FormatRequest(string &str,const MqlTradeRequest &request) const
+string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
   {
    string      type,volume,volume_new,price,sl,tp,price_new,sl_new,tp_new;
    string      tmp;
    CSymbolInfo symbol;
-//--- чистим
+//--- clean
    str="";
-//--- настраиваем
+//--- set up
    symbol.Name(request.symbol);
    int digits=symbol.Digits();
-//--- смотрим чего хотят
+//--- see what is wanted
    switch(request.action)
      {
-      //--- немедленное совершение сделки
+      //--- instant execution of a deal
       case TRADE_ACTION_DEAL:
          switch(symbol.TradeExecution())
            {
-            //--- по запросу
+            //--- request execution
             case SYMBOL_TRADE_EXECUTION_REQUEST:
                str=StringFormat("request %s %s %s at %s",
                                 FormatOrderType(type,request.type),
                                 DoubleToString(request.volume,2),
                                 request.symbol,
                                 DoubleToString(request.price,digits));
-            //--- есть SL или TP?
+            //--- Is there SL or TP?
             if(request.sl) { tmp=StringFormat(" sl: %s",DoubleToString(request.sl,digits)); str+=tmp; }
             if(request.tp) { tmp=StringFormat(" tp: %s",DoubleToString(request.tp,digits)); str+=tmp; }
             break;
-            //--- по инстанту
+            //--- instant execution
             case SYMBOL_TRADE_EXECUTION_INSTANT:
                str=StringFormat("instant %s %s %s at %s",
                                 FormatOrderType(type,request.type),
                                 DoubleToString(request.volume,2),
                                 request.symbol,
                                 DoubleToString(request.price,digits));
-            //--- есть SL или TP?
+            //--- Is there SL or TP?
             if(request.sl) { tmp=StringFormat(" sl: %s",DoubleToString(request.sl,digits)); str+=tmp; }
             if(request.tp) { tmp=StringFormat(" tp: %s",DoubleToString(request.tp,digits)); str+=tmp; }
             break;
-            //--- по рынку
+            //--- market execution
             case SYMBOL_TRADE_EXECUTION_MARKET:
                str=StringFormat("market %s %s %s",
                                 FormatOrderType(type,request.type),
                                 DoubleToString(request.volume,2),
                                 request.symbol);
-            //--- есть SL или TP?
+            //--- Is there SL or TP?
             if(request.sl) { tmp=StringFormat(" sl: %s",DoubleToString(request.sl,digits)); str+=tmp; }
             if(request.tp) { tmp=StringFormat(" tp: %s",DoubleToString(request.tp,digits)); str+=tmp; }
             break;
            }
          break;
-         //--- выставление отложенного ордера
+         //--- setting a pending order
       case TRADE_ACTION_PENDING:
          str=StringFormat("%s %s %s at %s",
                           FormatOrderType(type,request.type),
                           DoubleToString(request.volume,2),
                           request.symbol,
                           FormatOrderPrice(price,request.price,request.stoplimit,digits));
-      //--- есть SL или TP?
+      //--- Is there SL or TP?
       if(request.sl) { tmp=StringFormat(" sl: %s",DoubleToString(request.sl,digits)); str+=tmp; }
       if(request.tp) { tmp=StringFormat(" tp: %s",DoubleToString(request.tp,digits)); str+=tmp; }
       break;
 
-      //--- выставление SL/TP
+      //--- Setting SL/TP
       case TRADE_ACTION_SLTP:
          str=StringFormat("modify %s %s %s (sl: %s, tp: %s)",
                           FormatOrderType(type,request.type),
@@ -1231,7 +1029,7 @@ string CTrade::FormatRequest(string &str,const MqlTradeRequest &request) const
                           DoubleToString(request.tp,digits));
       break;
 
-      //--- модифицирование отложенного ордера
+      //--- modifying a pending order
       case TRADE_ACTION_MODIFY:
          str=StringFormat("modify #%I64u %s %s %s at %s (sl: %s tp: %s)",
                           request.order,
@@ -1243,7 +1041,7 @@ string CTrade::FormatRequest(string &str,const MqlTradeRequest &request) const
                           DoubleToString(request.tp,digits));
       break;
 
-      //--- удаление отложенного ордера
+      //--- deleting a pending order
       case TRADE_ACTION_REMOVE:
          str=StringFormat("cancel #%I64u %s %s %s at %s",
                           request.order,
@@ -1257,27 +1055,27 @@ string CTrade::FormatRequest(string &str,const MqlTradeRequest &request) const
          str="unknown action "+(string)request.action;
          break;
      }
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Преобразует в текстовый вид результат запроса.                   |
-//| INPUT:  str     - строка-приёмник,                               |
-//|         request - ссылка на структуру запроса,                   |
-//|         result  - ссылка на структуру результата запроса.        |
-//| OUTPUT: форматированная строка.                                  |
+//| Converts teh result of a request to text.                        |
+//| INPUT:  str     - receiving string,                              |
+//|         request - reference at the request structure,            |
+//|         result  - reference at the request result.               |
+//| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-string CTrade::FormatRequestResult(string &str,const MqlTradeRequest &request,const MqlTradeResult &result) const
+string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,const MqlTradeResult& result) const
   {
    string      bid,ask;
    CSymbolInfo symbol;
-//--- чистим
+//--- clean
    str="";
-//--- настраиваем
+//--- set up
    symbol.Name(request.symbol);
    int digits=symbol.Digits();
-//--- смотрим код ответа
+//--- see the response code
    switch(result.retcode)
      {
       case TRADE_RETCODE_REQUOTE:
@@ -1291,8 +1089,8 @@ string CTrade::FormatRequestResult(string &str,const MqlTradeRequest &request,co
             symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_INSTANT ||
             symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_MARKET)
             str=StringFormat("done at %s",DoubleToString(result.price,digits));
-      else
-         str="done";
+         else
+            str="done";
       break;
 
       case TRADE_RETCODE_DONE_PARTIAL:
@@ -1302,9 +1100,9 @@ string CTrade::FormatRequestResult(string &str,const MqlTradeRequest &request,co
             str=StringFormat("done partially %s at %s",
                              DoubleToString(result.volume,2),
                              DoubleToString(result.price,digits));
-      else
-         str=StringFormat("done partially %s",
-                          DoubleToString(result.volume,2));
+         else
+            str=StringFormat("done partially %s",
+                             DoubleToString(result.volume,2));
       break;
 
       case TRADE_RETCODE_REJECT            : str="rejected";           break;
@@ -1339,7 +1137,7 @@ string CTrade::FormatRequestResult(string &str,const MqlTradeRequest &request,co
          str="unknown retcode "+(string)result.retcode;
          break;
      }
-//--- отдаем результат
+//--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
