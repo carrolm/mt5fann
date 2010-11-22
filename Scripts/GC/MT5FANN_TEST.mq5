@@ -17,16 +17,9 @@ void OnStart()
 //---
    CMT5FANN mt5fann;
    mt5fann.debug=true;
-
-   if(!mt5fann.Init("HL")) Print("Init error");
-   mt5fann.ExportFANNDataWithTest(10000,100,_Symbol);
-   for (int i=0;i<100;i++)
-   if(mt5fann.GetVector(i))
-     {
-      mt5fann.run();
-      mt5fann.get_output();
-      Print(_Symbol," ",mt5fann.OutputVector[0]);
-      return;
-     }
+   string fn_name="Low";
+   if(!mt5fann.Init(fn_name)) Print("Init error");
+   mt5fann.ExportFANNDataWithTest(1000,100,fn_name+"_"+_Symbol);
+   //for (int i=0;i<10;i++)      Print(_Symbol," ",mt5fann.forecast());
   }
 //+------------------------------------------------------------------+
