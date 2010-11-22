@@ -209,27 +209,30 @@ bool GetVectors_Fractals(double &InputVector[],double &OutputVector[],int num_in
    if(LowerBuffer[fp]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
       prf=UpperBuffer[fp];
    else  prf=LowerBuffer[fp];
-//fp=j;
-   for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
-   if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
-      prl=UpperBuffer[j];
-   else  prl=LowerBuffer[j];
-// заполняем массив выходной 
-   double res=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-   if(res>10)
-      OutputVector[0]=0.95;
-   else if(res>5)
-      OutputVector[0]=0.50;
-   else if(res>1)
-      OutputVector[0]=0.25;
-   else if(res<-10)
-      OutputVector[0]=-0.95;
-   else if(res<-5)
-      OutputVector[0]=-0.50;
-   else if(res<-1)
-      OutputVector[0]=-0.25;
-   else    OutputVector[0]=0.0;
-   prf=prl;fp=j;
+   if(num_outputvectors==1)
+     {
+      //fp=j;
+      for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
+      if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
+         prl=UpperBuffer[j];
+      else  prl=LowerBuffer[j];
+      // заполняем массив выходной 
+      double res=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
+      if(res>10)
+         OutputVector[0]=0.95;
+      else if(res>5)
+         OutputVector[0]=0.50;
+      else if(res>1)
+         OutputVector[0]=0.25;
+      else if(res<-10)
+         OutputVector[0]=-0.95;
+      else if(res<-5)
+         OutputVector[0]=-0.50;
+      else if(res<-1)
+         OutputVector[0]=-0.25;
+      else    OutputVector[0]=0.0;
+      prf=prl;fp=j;
+     }
    for(i=0;i<num_inputvectors;i++)
       //+------------------------------------------------------------------+
       //|                                                                  |
