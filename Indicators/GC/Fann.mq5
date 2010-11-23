@@ -84,6 +84,8 @@ int OnCalculate(const int rates_total,
    int i,limit;
    ArraySetAsSeries(high,true);
    ArraySetAsSeries(low,true);
+   ArraySetAsSeries(time,true);
+
 //---
    if(rates_total<1)
       return(0);
@@ -96,11 +98,17 @@ int OnCalculate(const int rates_total,
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
    else limit=rates_total-prev_calculated;
-   limit=100;
+   limit=10;
    double res;
+
+
+   for(i=ObjectsTotal(0);i>=0;i--)
+      if(StringSubstr(ObjectName(0,i),0,3)=="GV_") ObjectDelete(0,ObjectName(0,i));
+
    for(i=1;i<limit;i++)
      {
-      res=GetTrend(30,"",0,i);
+      res=GetTrend(20,_Symbol,0,i);
+      if(0!=res)Print(res);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
       //ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;

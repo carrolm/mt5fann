@@ -63,11 +63,14 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
    maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
    double res=0;
+   int is,ib;
+//Print(Time[1]," ",Time[shift_history]);
    if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       S=Close[shift_history]; B=Close[shift_history];
-      double   TS=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TS<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TS=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      is=ib=shift_history;
+      double   TS=(int)(3*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      //if(TS<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TS=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(0==TS) TS=60;
       TS=TS*SymbolInfoDouble(smb,SYMBOL_POINT);
       //  ObjectCreate(0,"GV_S",OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[1],Low[1]);
@@ -84,8 +87,8 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
               }
             else
               {
-               if(S>Low[i])S=Low[i];
-               ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[i],S);
+               if(S>Low[i]){S=Low[i];is=i;}
+               ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
               }
            }
          if(0==mB)
@@ -97,30 +100,24 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
               }
             else
               {
-               if(B<High[i])B=High[i];
-               ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[10],Close[10],Time[i],B);
+               if(B<High[i]) {B=High[i];ib=i;}
+               ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
               }
            }
 
         }
       mB=B-Close[shift_history];mS=Close[shift_history]-S;
-      double res;//=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-      if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);}
-      else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);}
-      res=res/(SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT));
-      if(res>10)
-         res=0.95;
-      else if(res>5)
-         res=0.50;
-      else if(res>1)
-         res=0.25;
-      else if(res<-10)
-         res=-0.95;
-      else if(res<-5)
-         res=-0.50;
-      else if(res<-1)
-         res=-0.25;
-      else    res=0.0;
+      double rat;//=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
+      if(mS>mB) {rat=-mS;ObjectDelete(0,"GV_B_"+(string)shift);}
+      else      { rat=mB;ObjectDelete(0,"GV_S_"+(string)shift);}
+      rat=rat/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT));
+      res=2*(1/(1+MathExp(-rat/5))-0.5);
+      //if(rat>1) res=0.25;
+      //if(rat>5)  res=0.50;
+      //if(rat>10) res=0.95;
+      //if(rat<-1) res=-0.25;
+      //if(rat<-5) res=-0.50;
+      //if(rat<-10) res=-0.95;
      }
    return(res);
 
