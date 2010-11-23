@@ -96,10 +96,11 @@ int OnCalculate(const int rates_total,
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
    else limit=rates_total-prev_calculated;
+   limit=100;
    double res;
    for(i=1;i<limit;i++)
      {
-      res=GetTrend(10,"",0,i);
+      res=GetTrend(30,"",0,i);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
       //ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;

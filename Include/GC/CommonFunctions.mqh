@@ -28,6 +28,7 @@ COscarClient client;
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,datetime expiration=0)
   {
+   if(""==comment) comment=(string)way;
    if(0.6<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
    if(0.3<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
    if(-0.6>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
@@ -86,7 +87,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                if(PositionGetDouble(POSITION_PROFIT)>0)
                   price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                else// иначе ставим на мин прибыль
-               price=PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+               price=lasttick.bid;//PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
               }
             else return(false);
            }
@@ -98,7 +99,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                if(PositionGetDouble(POSITION_PROFIT)>0)
                   price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                else// иначе ставим на мин прибыль
-               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+               price=lasttick.ask;//PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
               }
             else return(false);
            }
@@ -224,7 +225,7 @@ bool Trailing()
               }
             else
               { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
-               double newtp=lasttick.bid-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               double newtp=lasttick.bid-1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
                if(OrderGetDouble(ORDER_TP)<newtp)
                  {
                   trReq.order=ticket;
@@ -271,8 +272,8 @@ bool Trailing()
               }
             else
               { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
-               double newtp=lasttick.ask+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
-               if(OrderGetDouble(ORDER_TP)<newtp)
+               double newtp=lasttick.ask+1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               if(OrderGetDouble(ORDER_TP)>newtp)
                  {
                   trReq.order=ticket;
                   trReq.comment= OrderGetString(ORDER_COMMENT);
@@ -346,9 +347,11 @@ bool Trailing()
         }
      }
 /// traling open           
+   double newsl=0;
    for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
      {
       smb=PositionGetSymbol(i);
+      newsl=0;
       // текущая история
       if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
          && (CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
@@ -369,23 +372,25 @@ bool Trailing()
             //Print(lasttick.ask," ",1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
             trReq.sl=lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.tp=PositionGetDouble(POSITION_TP);
-            //if((PositionGetDouble(POSITION_SL)-trReq.sl)>SymbolInfoDouble(smb,SYMBOL_POINT)) 
             OrderSend(trReq,BigDogModifResult);
             //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode,"lt.ask=",lasttick.ask," trReq.sl=",trReq.sl);
            }
          else
            {
-            if(
-               ((PositionGetDouble(POSITION_PRICE_OPEN)-lasttick.ask)/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               && ((BufferH[1]+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT))<PositionGetDouble(POSITION_SL)
-               && (PositionGetDouble(POSITION_SL)-lasttick.ask)/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               )
-
+            newsl=lasttick.ask+1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if(PositionGetDouble(POSITION_SL)>newsl)
+//            if(
+//               ((PositionGetDouble(POSITION_PRICE_OPEN)-lasttick.ask)/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
+//               && ((lasttick.ask+1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT))<PositionGetDouble(POSITION_SL)
+//               && (PositionGetDouble(POSITION_SL)-lasttick.ask)/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
+//               )
+//
               {
                //Print(TimeCurrent()," ",dt[1]," ",smb," ",BufferH[1]," ",BufferH[1] + TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
                trReq.action=TRADE_ACTION_SLTP;
-               trReq.sl=BufferH[1]+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.tp=PositionGetDouble(POSITION_TP);
+               trReq.sl=lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               //trReq.sl=BufferH[1]+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.tp=0;//PositionGetDouble(POSITION_TP);
                if((PositionGetDouble(POSITION_SL)-trReq.sl)>SymbolInfoDouble(smb,SYMBOL_POINT)) OrderSend(trReq,BigDogModifResult);
                //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode,"lt.ask=",lasttick.ask," trReq.sl=",trReq.sl);
               }
@@ -404,16 +409,18 @@ bool Trailing()
            }
          else
            {
-            if(
-               ((lasttick.bid-PositionGetDouble(POSITION_PRICE_OPEN))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               && ((BufferL[1]-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT))>PositionGetDouble(POSITION_SL)
-               && (lasttick.bid-PositionGetDouble(POSITION_SL))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               )
+            newsl=lasttick.bid-1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if(PositionGetDouble(POSITION_SL)<newsl)
+            //if(
+            //   ((lasttick.bid-PositionGetDouble(POSITION_PRICE_OPEN))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
+            //   && ((lasttick.bid-1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT))>PositionGetDouble(POSITION_SL)
+            //   && (lasttick.bid-PositionGetDouble(POSITION_SL))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
+            //   )
               {
                // Print(TimeCurrent()," ",BufferL[1] - TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
                trReq.action=TRADE_ACTION_SLTP;
-               trReq.sl= BufferL[1]-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.tp= PositionGetDouble(POSITION_TP);
+               trReq.sl= lasttick.bid-1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.tp= 0;//PositionGetDouble(POSITION_TP);
                if((trReq.sl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)) OrderSend(trReq,BigDogModifResult);
                //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," lt.bid=",lasttick.bid," trReq.sl=",trReq.sl);
               }
