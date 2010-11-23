@@ -525,8 +525,18 @@ bool CDashBoard::Refresh(void)
          ObjectSetInteger(0,name,OBJPROP_YSIZE,FontSize*2);
          ObjectSetString(0,name,OBJPROP_TEXT,_Symbol_);
          ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
-         ObjectSetInteger(0,name,OBJPROP_SELECTABLE,1);
+         ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
         }
+       if(ObjectGetInteger(0,name,OBJPROP_STATE))
+         {
+          int newstate = (ObjectGetInteger(0,prefix+"m_"+SymbolsArray[0],OBJPROP_STATE))?0:1;
+          for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+           {
+            ObjectSetInteger(0,prefix+"m_"+SymbolsArray[SymbolIdx],OBJPROP_STATE,newstate);
+            UseSymbol[SymbolIdx]=newstate;
+           }
+           ObjectSetInteger(0,name,OBJPROP_STATE,0);
+         }
       name=prefix+"m_equity";
       if(ObjectFind(0,name)==-1)
         {
@@ -674,7 +684,7 @@ bool CDashBoard::Refresh(void)
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
             UseSymbol[SymbolIdx]=true;
-            NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),(string)(fannExperts[SymbolIdx].OutputVector[0]));
+            NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),"");
 //            if(fannExperts[SymbolIdx].GetVector())
 //              {
 //               fannExperts[SymbolIdx].run();
