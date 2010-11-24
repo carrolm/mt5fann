@@ -15,7 +15,7 @@ string VectorFunctions[21]={"Fractals","Easy","RSI","HL","High","Low","","","","
 bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
-   int shift_history=20;//
+   int shift_history=30;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
@@ -92,7 +92,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
             else
               {
                if(S>Low[i]){S=Low[i];is=i;}
-               //ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
+               ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
               }
            }
          if(0==mB)
@@ -105,7 +105,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
             else
               {
                if(B<High[i]) {B=High[i];ib=i;}
-               //ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
+               ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
               }
            }
 
@@ -406,7 +406,7 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
       if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
          prl=UpperBuffer[j];
       else  prl=LowerBuffer[j];
-      res=(prf-prl)/1000/SymbolInfoDouble(smbl,SYMBOL_POINT);
+      res=(prf-prl);///SymbolInfoDouble(smbl,SYMBOL_POINT);
       res=res/(SymbolInfoInteger(smbl,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smbl,SYMBOL_POINT));
       res=2*(1/(1+MathExp(-res/5))-0.5);
       InputVector[i]=res;      prf=prl;fp=j;

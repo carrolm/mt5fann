@@ -19,7 +19,7 @@ void OnStart()
    mt5fann.debug=true;
    string fn_name="Fractals";
    if(!mt5fann.Init(fn_name)) Print("Init error");
-   mt5fann.ExportFANNDataWithTest(1000,100,fn_name+"_"+_Symbol);
+   mt5fann.ExportFANNDataWithTest(10000,100,fn_name+"_"+_Symbol);
    //for (int i=0;i<10;i++)      Print(_Symbol," ",mt5fann.forecast());
   }
 //+------------------------------------------------------------------+
