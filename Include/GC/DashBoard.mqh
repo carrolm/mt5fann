@@ -39,7 +39,7 @@ input bool _NZDUSD_=true;//New Zealand Dollar vs US Dollar
                           // crosses
 /////input bool _AUDNZD_=true;//Australian Dollar vs New Zealand Dollar
 /////input bool _AUDCAD_=true;//Australian Dollar vs Canadian Dollar
-input bool _AUDCHF_=true;//Australian Dollar vs Swiss Franc
+//input bool _AUDCHF_=true;//Australian Dollar vs Swiss Franc
 input bool _AUDJPY_=true;//Australian Dollar vs Japanese Yen
 //input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
 input bool _EURGBP_=true;//Euro vs Great Britain Pound 
@@ -105,7 +105,7 @@ int CreateSymbolList() // QC
 //   if(_USDSEK_) SymbolsArray[MaxSymbols++]="USDSEK";//Euro vs US Dollar
 /////   if(_AUDNZD_) SymbolsArray[MaxSymbols++]="AUDNZD";//Euro vs US Dollar
 /////   if(_AUDCAD_) SymbolsArray[MaxSymbols++]="AUDCAD";//Euro vs US Dollar
-   if(_AUDCHF_) SymbolsArray[MaxSymbols++]="AUDCHF";//Euro vs US Dollar
+//   if(_AUDCHF_) SymbolsArray[MaxSymbols++]="AUDCHF";//Euro vs US Dollar
    if(_AUDJPY_) SymbolsArray[MaxSymbols++]="AUDJPY";//Euro vs US Dollar
 //   if(_CHFJPY_) SymbolsArray[MaxSymbols++]="CHFJPY";//Euro vs US Dollar
    if(_EURGBP_) SymbolsArray[MaxSymbols++]="EURGBP";//Euro vs US Dollar
