@@ -60,11 +60,6 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    double High[]; ArraySetAsSeries(High,true);
    double Low[]; ArraySetAsSeries(Low,true);
    datetime Time[]; ArraySetAsSeries(Time,true);
-//if(num_outputvectors!=2 ||num_inputvectors%3!=0)
-//  {
-//   Print("Output vectors only 2!");
-//   return(false);
-//  }
 // копируем историю
    if(""==smb) smb=_Symbol;
    if(0==tf) tf=_Period;
@@ -115,13 +110,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
       if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);}
       else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);}
       res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT));
-      res=2*(1/(1+MathExp(-res/5))-0.5);
-      //if(rat>1) res=0.25;
-      //if(rat>5)  res=0.50;
-      //if(rat>10) res=0.95;
-      //if(rat<-1) res=-0.25;
-      //if(rat<-5) res=-0.50;
-      //if(rat<-10) res=-0.95;
+      res=1*(1/(1+MathExp(-1.5*res/5))-0.5);
      }
    return(res);
 
@@ -408,7 +397,7 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
       else  prl=LowerBuffer[j];
       res=(prf-prl);///SymbolInfoDouble(smbl,SYMBOL_POINT);
       res=res/(SymbolInfoInteger(smbl,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-      res=2*(1/(1+MathExp(-res/5))-0.5);
+      res=1*(1/(1+MathExp(-1.5*res/5))-0.5);
       InputVector[i]=res;      prf=prl;fp=j;
      }
 

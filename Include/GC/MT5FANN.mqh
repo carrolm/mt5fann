@@ -216,8 +216,8 @@ bool CMT5FANN::ini_load(string path="")
      }
    TimeFrame=(ENUM_TIMEFRAMES)MyIniFile.ReadInteger("Settings","TimeFrame",_Period);
    WithNews=MyIniFile.ReadBool("Settings","WithNews",false);
-   WithHours=MyIniFile.WriteBool("Settings","WithHours",false);
-   WithDayOfWeek=MyIniFile.WriteBool("Settings","WithDayOfWeek",false);
+   WithHours=MyIniFile.ReadBool("Settings","WithHours",false);
+   WithDayOfWeek=MyIniFile.ReadBool("Settings","WithDayOfWeek",false);
    if(TimeFrame!= _Period) Print("TimeFrame not equals! Need ",TimeFrame);
    if(-1==(ann=ann_load()))
      {
@@ -444,8 +444,8 @@ bool CMT5FANN::GetVector(int shift,bool train)
    int n_vectors=num_in_vectors;
    int n_o_vectors=num_out_vectors;
    int pos_in=0,pos_out=0,i;
-   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
-   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
+   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7)-0.5;
+   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24)-0.5;
    n_vectors=(n_vectors-pos_in)/Max_Symbols;
    n_o_vectors=(n_o_vectors)/Max_Symbols;
    if(!train)n_o_vectors=0;
