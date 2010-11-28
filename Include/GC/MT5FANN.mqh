@@ -101,12 +101,13 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
 
    if(FileHandle!=INVALID_HANDLE)
      {// записываем в файл шапку
-      FileWrite(FileHandle,needcopy,num_in_vectors,num_out_vectors);
+      FileWrite(FileHandle,needcopy*2,num_in_vectors,num_out_vectors);
       for(i=0;i<needcopy;shift++)
         {
          if(GetVector(shift,true))
            {
             i++;
+            
             outstr="";
             for(int ibj=0;ibj<num_in_vectors;ibj++)
               {
@@ -119,11 +120,25 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
                outstr=outstr+(string)(OutputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
+            // сделаем еще и симметричный дубль
+            outstr="";
+            for(int ibj=0;ibj<num_in_vectors;ibj++)
+              {
+               outstr=outstr+(string)(0.5-InputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
+            outstr="";
+            for(int ibj=0;ibj<num_out_vectors;ibj++)
+              {
+               outstr=outstr+(string)(0.5-OutputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
+
            }
         }
      }
    FileClose(FileHandle);
-   Print("Create file "+FileName);
+   Print("Created file "+FileName);
    return(shift);
   }
 //+------------------------------------------------------------------+
@@ -218,7 +233,7 @@ bool CMT5FANN::ini_load(string path="")
    WithNews=MyIniFile.ReadBool("Settings","WithNews",false);
    WithHours=MyIniFile.ReadBool("Settings","WithHours",false);
    WithDayOfWeek=MyIniFile.ReadBool("Settings","WithDayOfWeek",false);
-   if(TimeFrame!= _Period) Print("TimeFrame not equals! Need ",TimeFrame);
+   //if(TimeFrame!= _Period) Print("TimeFrame not equals! Need ",TimeFrame);
    if(-1==(ann=ann_load()))
      {
       //File_Name="";
@@ -444,8 +459,8 @@ bool CMT5FANN::GetVector(int shift,bool train)
    int n_vectors=num_in_vectors;
    int n_o_vectors=num_out_vectors;
    int pos_in=0,pos_out=0,i;
-   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7)-0.5;
-   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24)-0.5;
+   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
+   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
    n_vectors=(n_vectors-pos_in)/Max_Symbols;
    n_o_vectors=(n_o_vectors)/Max_Symbols;
    if(!train)n_o_vectors=0;
@@ -477,7 +492,7 @@ double  CMT5FANN::forecast(int shift,bool train)
       run();
       get_output();
       forecast=OutputVector[0];
-      return(forecast);
+      return(forecast-0.5);
      }
    else return(0);
   }

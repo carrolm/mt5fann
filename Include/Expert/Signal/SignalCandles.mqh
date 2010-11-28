@@ -37,6 +37,10 @@ protected:
    CiClose          *m_close;
    //---
    double            m_size;
+   double            m_open_composite;
+   double            m_high_composite;
+   double            m_low_composite;
+   double            m_close_composite;
    //--- input parameters
    int               m_range;
    int               m_minimum;
@@ -61,6 +65,11 @@ public:
    void              Expiration(int expiration)         { m_expiration=expiration;       }
    virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
+   //---
+   double            OpenComposite()                    { return(m_open_composite);      }
+   double            HighComposite()                    { return(m_high_composite);      }
+   double            LowComposite()                     { return(m_low_composite);       }
+   double            CloseComposite()                   { return(m_close_composite);     }
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
    virtual bool      CheckCloseLong(double& price);
@@ -92,20 +101,24 @@ protected:
 void CSignalCandles::CSignalCandles()
   {
 //--- initialize protected data
-   m_open         =NULL;
-   m_high         =NULL;
-   m_low          =NULL;
-   m_close        =NULL;
-   m_size         =0.0;
+   m_open           =NULL;
+   m_high           =NULL;
+   m_low            =NULL;
+   m_close          =NULL;
+   m_size           =0.0;
+   m_open_composite =EMPTY_VALUE;
+   m_high_composite =EMPTY_VALUE;
+   m_low_composite  =EMPTY_VALUE;
+   m_close_composite=EMPTY_VALUE;
 //--- set default inputs
-   m_range        =6;
-   m_minimum      =25;
-   m_shadow_big   =0.5;
-   m_shadow_little=0.2;
-   m_limit        =0.0;
-   m_stop_loss    =2.0;
-   m_take_profit  =1.0;
-   m_expiration   =4;
+   m_range          =6;
+   m_minimum        =25;
+   m_shadow_big     =0.5;
+   m_shadow_little  =0.2;
+   m_limit          =0.0;
+   m_stop_loss      =2.0;
+   m_take_profit    =1.0;
+   m_expiration     =4;
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalCandles.                                       |
@@ -294,10 +307,11 @@ bool CSignalCandles::InitClose(CIndicators* indicators)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
+   double size=m_high_composite-m_low_composite;
 //---
-   price=m_symbol.NormalizePrice(m_symbol.Ask()-m_limit*m_size);
-   sl   =m_symbol.NormalizePrice(m_symbol.Ask()-m_stop_loss*m_size);
-   tp   =m_symbol.NormalizePrice(m_symbol.Ask()+m_take_profit*m_size);
+   price=m_symbol.NormalizePrice(m_symbol.Ask()-m_limit*size);
+   sl   =m_symbol.NormalizePrice(price-m_stop_loss*size);
+   tp   =m_symbol.NormalizePrice(price+m_take_profit*size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
    return(Candle(1)>0);
@@ -325,10 +339,11 @@ bool CSignalCandles::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
+   double size=m_high_composite-m_low_composite;
 //---
-   price=m_symbol.NormalizePrice(m_symbol.Bid()+m_limit*m_size);
-   sl   =m_symbol.NormalizePrice(m_symbol.Bid()+m_stop_loss*m_size);
-   tp   =m_symbol.NormalizePrice(m_symbol.Bid()-m_take_profit*m_size);
+   price=m_symbol.NormalizePrice(m_symbol.Bid()+m_limit*size);
+   sl   =m_symbol.NormalizePrice(price+m_stop_loss*size);
+   tp   =m_symbol.NormalizePrice(price-m_take_profit*size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
    return(Candle(1)<0);
@@ -377,6 +392,10 @@ int CSignalCandles::Candle(int ind)
       if(CandleBull(open,high,low,close)) return(i);
       if(CandleBear(open,high,low,close)) return(-i);
      }
+   m_open_composite =EMPTY_VALUE;
+   m_high_composite =EMPTY_VALUE;
+   m_low_composite  =EMPTY_VALUE;
+   m_close_composite=EMPTY_VALUE;
 //---
    return(0);
   }
@@ -396,7 +415,13 @@ bool CSignalCandles::CandleBull(double open,double high,double low,double close)
    double shadow_l=((open<close)?open:close)-low;
 //---
    if(shadow_h<m_shadow_little*size && shadow_l>m_shadow_big*size)
+     {
+      m_open_composite =open;
+      m_high_composite =high;
+      m_low_composite  =low;
+      m_close_composite=close;
       return(true);
+     }
 //---
    return(false);
   }
@@ -416,7 +441,13 @@ bool CSignalCandles::CandleBear(double open,double high,double low,double close)
    double shadow_l=((open<close)?open:close)-low;
 //---
    if(shadow_l<m_shadow_little*size && shadow_h>m_shadow_big*size)
+     {
+      m_open_composite =open;
+      m_high_composite =high;
+      m_low_composite  =low;
+      m_close_composite=close;
       return(true);
+     }
 //---
    return(false);
   }

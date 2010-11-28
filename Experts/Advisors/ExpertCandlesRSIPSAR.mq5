@@ -31,7 +31,7 @@ input double             Inp_Signal_CandlesRSI_StopLoss    =2.0;
 input int                Inp_Signal_CandlesRSI_Expiration  =4;
 input int                Inp_Signal_CandlesRSI_PeriodRSI   =12;
 input ENUM_APPLIED_PRICE Inp_Signal_CandlesRSI_AppliedRSI  =PRICE_CLOSE;
-input int                Inp_Signal_CandlesRSI_ExtrMapp    =149796;
+input int                Inp_Signal_CandlesRSI_ExtrMap     =149796;
 //--- inputs for trailing
 input double             Inp_Trailing_ParabolicSAR_Step    =0.02;
 input double             Inp_Trailing_ParabolicSAR_Maximum =0.2;
@@ -80,7 +80,7 @@ int OnInit()
    signal.Expiration(Inp_Signal_CandlesRSI_Expiration);
    signal.PeriodRSI(Inp_Signal_CandlesRSI_PeriodRSI);
    signal.AppliedRSI(Inp_Signal_CandlesRSI_AppliedRSI);
-   signal.ExtrMapp(Inp_Signal_CandlesRSI_ExtrMapp);
+   signal.ExtrMap(Inp_Signal_CandlesRSI_ExtrMap);
 //--- Check signal parameters
    if(!signal.ValidationSettings())
      {

@@ -53,8 +53,9 @@ void DelTrash()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0)
+double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0,bool draw=false)
   {
+   
    double mS=0,mB=0,S=0,B=0;
    double Close[]; ArraySetAsSeries(Close,true);
    double High[]; ArraySetAsSeries(High,true);
@@ -63,6 +64,8 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
 // копируем историю
    if(""==smb) smb=_Symbol;
    if(0==tf) tf=_Period;
+   // TF всегда минутка!
+   tf=PERIOD_M1;
    int maxcount=CopyHigh(smb,tf,shift,shift_history+3,High);
    maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
    maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
@@ -71,46 +74,48 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    int is,ib;
    if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
-      S=Close[shift_history]; B=Close[shift_history];
+      S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
-      double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(3*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
 
       for(int i=shift_history-1;i>0;i--)
         {
          if(0==mS)
            {
-            if(Close[i]<(High[i]-TS))
+            if(Close[i]>(Low[i]+TS) || S<(High[i]-TS))
               {
+               if(S>Low[i]){S=Low[i];is=i;}
                mS=Close[shift_history]-S;
                //S=0;
               }
             else
               {
                if(S>Low[i]){S=Low[i];is=i;}
-               ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
               }
            }
          if(0==mB)
            {
-            if(Close[i]>(Low[i]+TS))
+            if(Close[i]<(High[i]-TS) || B>(Low[i]+TS))
               {
+               if(B<High[i]) {B=High[i];ib=i;}
                mB=B-Close[shift_history];
                //B=0;
               }
             else
               {
                if(B<High[i]) {B=High[i];ib=i;}
-               ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
               }
            }
 
         }
-      mB=B-Close[shift_history];mS=Close[shift_history]-S;
+      //mB=B-Close[shift_history];mS=Close[shift_history]-S;
       //=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-      if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);}
-      else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);}
+      if(draw)ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
+      if(draw)ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
+      if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);if(2*TS>-res) ObjectDelete(0,"GV_S_"+(string)shift);}
+      else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);if(2*TS>res) ObjectDelete(0,"GV_B_"+(string)shift);}
       res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT));
-      res=1*(1/(1+MathExp(-1.5*res/5))-0.5);
+      res=1*(1/(1+MathExp(-1*res/5)));//-0.5);
      }
    return(res);
 
@@ -397,7 +402,7 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
       else  prl=LowerBuffer[j];
       res=(prf-prl);///SymbolInfoDouble(smbl,SYMBOL_POINT);
       res=res/(SymbolInfoInteger(smbl,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smbl,SYMBOL_POINT));
-      res=1*(1/(1+MathExp(-1.5*res/5))-0.5);
+      res=1*(1/(1+MathExp(-1*res/5)));//-0.5);
       InputVector[i]=res;      prf=prl;fp=j;
      }
 
@@ -436,16 +441,18 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
       //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
-      res=(rsi_buffer[i]-50.0)/50.0;
-      if(MathAbs(res)>1)
+      res=(rsi_buffer[i])/100.0;
+      if(MathAbs(res)>0.5)
         {
          if(res>0)
            {
-            InputVector[i]=1.0;
+            InputVector[i]=0.5;
               } else {
-            InputVector[i]=-1.0;
+            InputVector[i]=-0.5;
            }
-           } else {
+        }
+      else
+        {
          InputVector[i]=res;
         }
      }

@@ -64,7 +64,7 @@ int OnInit()
 
 //   if(!mt5fannHigh.Init("High")) Print("Init error");
 //   if(!mt5fannLow.Init("Low")) Print("Init error");
-   Print("SYMBOL_SPREAD=",SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)," SYMBOL_TRADE_STOPS_LEVEL =",SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL));
+   //Print("SYMBOL_SPREAD=",SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)," SYMBOL_TRADE_STOPS_LEVEL =",SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL));
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -89,6 +89,7 @@ int OnCalculate(const int rates_total,
 //---
    if(rates_total<1)
       return(0);
+      if(prev_calculated==rates_total)return(rates_total);
 //---
    if(prev_calculated<1)
      {
@@ -98,17 +99,15 @@ int OnCalculate(const int rates_total,
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
    else limit=rates_total-prev_calculated;
-   limit=10;
+   limit=300;
    double res;
 
-
-   for(i=ObjectsTotal(0);i>=0;i--)
-      if(StringSubstr(ObjectName(0,i),0,3)=="GV_") ObjectDelete(0,ObjectName(0,i));
+   DelTrash();
 
    for(i=1;i<limit;i++)
      {
-      res=GetTrend(20,_Symbol,0,i);
-      if(0!=res)Print(res);
+      res=GetTrend(20,_Symbol,0,i,true);
+      //if(0!=res)Print(res);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
       //ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;
