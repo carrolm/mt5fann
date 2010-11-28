@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-#include <icq_mql5.mqh>
+//#include <icq_mql5.mqh>
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 int TrailingStop=3;
@@ -20,7 +20,7 @@ enum NewOrder_Type
    NewOrderWaitSell=4,
    NewOrderSell=5
   };
-COscarClient client;
+//COscarClient client;
 // ask
 // bid
 //+------------------------------------------------------------------+
@@ -152,11 +152,11 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 bool Trailing()
   {
 //if(AccountInfoDouble(ACCOUNT_FREEMARGIN)<4000) return(false);
-   client.autocon=true;
-   client.login="645990858";     //<- логин
-   client.password="Odnako7952";      //<- пароль
-   client.server     = "login.icq.com";
-   client.port       = 80;
+   //client.autocon=true;
+   //client.login="645990858";     //<- логин
+   //client.password="Odnako7952";      //<- пароль
+   //client.server     = "login.icq.com";
+   //client.port       = 80;
 //client.Connect();
 
    int PosTotal=PositionsTotal();// открытых позицый
@@ -192,8 +192,8 @@ bool Trailing()
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      //if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -225,7 +225,7 @@ bool Trailing()
               }
             else
               { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
-               double newtp=lasttick.bid-1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               double newtp=lasttick.bid-1.1*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT);
                if(OrderGetDouble(ORDER_TP)<newtp)
                  {
                   trReq.order=ticket;
@@ -272,7 +272,7 @@ bool Trailing()
               }
             else
               { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
-               double newtp=lasttick.ask+1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               double newtp=lasttick.ask+1.1*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT);
                if(OrderGetDouble(ORDER_TP)>newtp)
                  {
                   trReq.order=ticket;
@@ -362,8 +362,8 @@ bool Trailing()
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_SPREAD));
-      if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      //if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL))

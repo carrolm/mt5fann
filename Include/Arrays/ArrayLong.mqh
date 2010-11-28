@@ -399,7 +399,7 @@ bool CArrayLong::Shift(int index,int shift)
 //--- moving
    tmp_long=m_data[index];
    if(shift>0) MemMove(index,index+1,shift);
-   else        MemMove(index,index-1,-shift);
+   else        MemMove(index+shift+1,index+shift,-shift);
    m_data[index+shift]=tmp_long;
    m_sort_mode=-1;
 //---

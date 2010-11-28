@@ -33,7 +33,7 @@ input int            Inp_Signal_CandlesStoch_PeriodK     =8;
 input int            Inp_Signal_CandlesStoch_PeriodD     =3;
 input int            Inp_Signal_CandlesStoch_PeriodSlow  =3;
 input ENUM_STO_PRICE Inp_Signal_CandlesStoch_Applied     =STO_LOWHIGH;
-input int            Inp_Signal_CandlesStoch_ExtrMapp    =149796;
+input int            Inp_Signal_CandlesStoch_ExtrMap     =149796;
 //--- inputs for trailing
 input double         Inp_Trailing_ParabolicSAR_Step      =0.02;
 input double         Inp_Trailing_ParabolicSAR_Maximum   =0.2;
@@ -84,7 +84,7 @@ int OnInit()
    signal.PeriodD(Inp_Signal_CandlesStoch_PeriodD);
    signal.PeriodSlow(Inp_Signal_CandlesStoch_PeriodSlow);
    signal.Applied(Inp_Signal_CandlesStoch_Applied);
-   signal.ExtrMapp(Inp_Signal_CandlesStoch_ExtrMapp);
+   signal.ExtrMap(Inp_Signal_CandlesStoch_ExtrMap);
 //--- Check signal parameters
    if(!signal.ValidationSettings())
      {

@@ -25,7 +25,7 @@
 //| Parameter=PeriodD,int,3                                          |
 //| Parameter=PeriodSlow,int,3                                       |
 //| Parameter=Applied,ENUM_STO_PRICE,STO_LOWHIGH                     |
-//| Parameter=ExtrMapp,int,11184810                                  |
+//| Parameter=ExtrMap,int,11184810                                   |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
@@ -45,7 +45,7 @@ protected:
    int               m_periodD;
    int               m_period_slow;
    ENUM_STO_PRICE    m_applied;
-   int               m_extr_mapp;
+   int               m_extr_map;
 
 public:
                      CSignalCandlesStoch();
@@ -55,7 +55,7 @@ public:
    void              PeriodD(int period)             { m_periodD=period;            }
    void              PeriodSlow(int period)          { m_period_slow=period;        }
    void              Applied(ENUM_STO_PRICE applied) { m_applied=applied;           }
-   void              ExtrMapp(int mapp)              { m_extr_mapp=mapp;            }
+   void              ExtrMap(int map)                { m_extr_map=map;              }
    virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
@@ -71,7 +71,7 @@ protected:
    double            StochSignal(int ind)            { return(m_stoch.Signal(ind)); }
    int               StateStoch(int ind);
    bool              ExtStateStoch(int ind);
-   bool              ComapareMapps(int mapp);
+   bool              ComapareMaps(int map);
   };
 //+------------------------------------------------------------------+
 //| Constructor CSignalCandlesStoch.                                 |
@@ -88,7 +88,7 @@ void CSignalCandlesStoch::CSignalCandlesStoch()
    m_periodD    =3;
    m_period_slow=3;
    m_applied    =STO_LOWHIGH;
-   m_extr_mapp  =11184810;   // 101010101010101010101010b
+   m_extr_map  =11184810;   // 101010101010101010101010b
   }
 //+------------------------------------------------------------------+
 //| Destructor CSignalCandlesStoch.                                  |
@@ -233,7 +233,7 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
    double extr_pr[8];
    int    extr_pos[8];
    int    pos=ind,off,index;
-   int    extr_mapp=0,mapp;
+   int    extr_map=0,map;
 //---
    for(int i=0;i<8;i++)
      {
@@ -245,10 +245,10 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
          if(i>1)
            {
             extr_pr[i]=m_app_price_low.MinValue(pos-2,5,index);
-            mapp=0;
-            if(extr_pr[i-2]<extr_pr[i])   mapp+=1;  // set bit 0
-            if(extr_osc[i-2]<extr_osc[i]) mapp+=4;  // set bit 2
-            extr_mapp+=mapp<<(4*(i-2));
+            map=0;
+            if(extr_pr[i-2]<extr_pr[i])   map+=1;  // set bit 0
+            if(extr_osc[i-2]<extr_osc[i]) map+=4;  // set bit 2
+            extr_map+=map<<(4*(i-2));
            }
          else
             extr_pr[i]=m_app_price_low.MinValue(pos-1,4,index);
@@ -260,10 +260,10 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
          if(i>1)
            {
             extr_pr[i]=m_app_price_high.MaxValue(pos-2,5,index);
-            mapp=0;
-            if(extr_pr[i-2]>extr_pr[i])   mapp+=1;  // set bit 0
-            if(extr_osc[i-2]>extr_osc[i]) mapp+=4;  // set bit 2
-            extr_mapp+=mapp<<(4*(i-2));
+            map=0;
+            if(extr_pr[i-2]>extr_pr[i])   map+=1;  // set bit 0
+            if(extr_osc[i-2]>extr_osc[i]) map+=4;  // set bit 2
+            extr_map+=map<<(4*(i-2));
            }
          else
             extr_pr[i]=m_app_price_high.MaxValue(pos-1,4,index);
@@ -271,26 +271,26 @@ bool CSignalCandlesStoch::ExtStateStoch(int ind)
       extr_pos[i]=pos;
       extr_osc[i]=StochMain(pos);
      }
-   if(!ComapareMapps(extr_mapp)) return(false);
+   if(!ComapareMaps(extr_map)) return(false);
 //---
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Check extended mapp.                                             |
-//| INPUT:  mapp - checked mapp.                                     |
+//| Check extended map.                                              |
+//| INPUT:  map - checked map.                                       |
 //| OUTPUT: true if map similar to the sample, else false.           |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCandlesStoch::ComapareMapps(int mapp)
+bool CSignalCandlesStoch::ComapareMaps(int map)
   {
-   int inp_mapp,check_mapp;
+   int inp_map,check_map;
 //---
    for(int i=0;i<12;i++)
      {
-      inp_mapp=(m_extr_mapp>>(2*i))&3;
-      if(inp_mapp>=4) continue;
-      check_mapp=(mapp>>(2*i))&3;
-      if(inp_mapp!=check_mapp) return(false);
+      inp_map=(m_extr_map>>(2*i))&3;
+      if(inp_map>=4) continue;
+      check_map=(map>>(2*i))&3;
+      if(inp_map!=check_map) return(false);
      }
 //---
    return(true);

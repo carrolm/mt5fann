@@ -1085,18 +1085,20 @@ string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,co
       break;
 
       case TRADE_RETCODE_DONE:
-         if(symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_REQUEST ||
+         if(request.action==TRADE_ACTION_DEAL &&
+           (symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_REQUEST ||
             symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_INSTANT ||
-            symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_MARKET)
+            symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_MARKET))
             str=StringFormat("done at %s",DoubleToString(result.price,digits));
          else
             str="done";
       break;
 
       case TRADE_RETCODE_DONE_PARTIAL:
-         if(symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_REQUEST ||
+         if(request.action==TRADE_ACTION_DEAL &&
+           (symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_REQUEST ||
             symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_INSTANT ||
-            symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_MARKET)
+            symbol.TradeExecution()==SYMBOL_TRADE_EXECUTION_MARKET))
             str=StringFormat("done partially %s at %s",
                              DoubleToString(result.volume,2),
                              DoubleToString(result.price,digits));
