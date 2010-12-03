@@ -16,16 +16,16 @@
 //---
 enum ENUM_TRADE_EVENTS
   {
-   TRADE_EVENT_NO_EVENT          =0,
-   TRADE_EVENT_POSITION_OPEN     =0x1,
-   TRADE_EVENT_POSITION_ADD      =0x2,
-   TRADE_EVENT_POSITION_MODIFY   =0x4,
-   TRADE_EVENT_POSITION_CLOSE    =0x8,
-   TRADE_EVENT_POSITION_STOP_TAKE=0x10,
-   TRADE_EVENT_ORDER_PLACE       =0x20,
-   TRADE_EVENT_ORDER_MODIFY      =0x40,
-   TRADE_EVENT_ORDER_DELETE      =0x80,
-   TRADE_EVENT_ORDER_TRIGGER     =0x100
+   TRADE_EVENT_NO_EVENT              =0,
+   TRADE_EVENT_POSITION_OPEN         =0x1,
+   TRADE_EVENT_POSITION_VOLUME_CHANGE=0x2,
+   TRADE_EVENT_POSITION_MODIFY       =0x4,
+   TRADE_EVENT_POSITION_CLOSE        =0x8,
+   TRADE_EVENT_POSITION_STOP_TAKE    =0x10,
+   TRADE_EVENT_ORDER_PLACE           =0x20,
+   TRADE_EVENT_ORDER_MODIFY          =0x40,
+   TRADE_EVENT_ORDER_DELETE          =0x80,
+   TRADE_EVENT_ORDER_TRIGGER         =0x100
   };
 //+------------------------------------------------------------------+
 //| Class CExpert.                                                   |
@@ -54,7 +54,7 @@ protected:
    CExpertMoney     *m_money;                    // money manager object
    CExpertTrailing  *m_trailing;                 // trailing stops object
    //--- indicators
-   CIndicators      *m_indicators;               // indicator collection to fast recalculations
+   CIndicators       m_indicators;               // indicator collection to fast recalculations
    //--- symbol info
    CSymbolInfo       m_symbol;                   // symbol info object
    CAccountInfo      m_account;                  // account info wrapper
@@ -63,7 +63,7 @@ protected:
 
 public:
                      CExpert();
-                    ~CExpert()                            { Deinit();                                               }
+                    ~CExpert()                              { Deinit    ();                                               }
    bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long magic=0);
    //---
    virtual bool      InitSignal(CExpertSignal* signal=NULL);
@@ -72,8 +72,8 @@ public:
    //---
    virtual void      Deinit();
    //---
-   int               MaxOrders()                    const { return(m_max_orders);                                   }
-   void              MaxOrders(int max_orders)            { m_max_orders=max_orders;                                }
+   int               MaxOrders()                      const { return(m_max_orders);                                       }
+   void              MaxOrders(int max_orders)              { m_max_orders=max_orders;                                    }
    //--- event handlers
    virtual void      OnTick();
    virtual void      OnTrade();
@@ -81,7 +81,7 @@ public:
 
 protected:
    //--- initialization
-   virtual bool      InitParameters()                     { return(true);                                           }
+   virtual bool      InitParameters()                       { return(true);                                               }
    virtual bool      InitIndicators();
    virtual bool      InitTrade(long magic);
    //--- deinitialization
@@ -139,29 +139,29 @@ protected:
    void              HistoryPoint(bool from_check_trade=false);
    bool              CheckTradeState();
    //--- set/reset waiting events
-   void              WaitEvent(ENUM_TRADE_EVENTS event)   { m_waiting_event|=event;                                 }
-   void              NoWaitEvent(ENUM_TRADE_EVENTS event) { m_waiting_event&=~event;                                }
+   void              WaitEvent(ENUM_TRADE_EVENTS event)     { m_waiting_event|=event;                                     }
+   void              NoWaitEvent(ENUM_TRADE_EVENTS event)   { m_waiting_event&=~event;                                    }
    //--- check waiting events
-   bool              IsWaitingPositionOpen()        const { return(m_waiting_event&TRADE_EVENT_POSITION_OPEN);      }
-   bool              IsWaitingPositionAddSub()      const { return(m_waiting_event&TRADE_EVENT_POSITION_ADD);       }
-   bool              IsWaitingPositionModify()      const { return(m_waiting_event&TRADE_EVENT_POSITION_MODIFY);    }
-   bool              IsWaitingPositionClose()       const { return(m_waiting_event&TRADE_EVENT_POSITION_CLOSE);     }
-   bool              IsWaitingPositionStopTake()    const { return(m_waiting_event&TRADE_EVENT_POSITION_STOP_TAKE); }
-   bool              IsWaitingOrderPlace()          const { return(m_waiting_event&TRADE_EVENT_ORDER_PLACE);        }
-   bool              IsWaitingOrderModify()         const { return(m_waiting_event&TRADE_EVENT_ORDER_MODIFY);       }
-   bool              IsWaitingOrderDelete()         const { return(m_waiting_event&TRADE_EVENT_ORDER_DELETE);       }
-   bool              IsWaitingOrderTrigger()        const { return(m_waiting_event&TRADE_EVENT_ORDER_TRIGGER);      }
+   bool              IsWaitingPositionOpened()        const { return(m_waiting_event&TRADE_EVENT_POSITION_OPEN);          }
+   bool              IsWaitingPositionVolumeChanged() const { return(m_waiting_event&TRADE_EVENT_POSITION_VOLUME_CHANGE); }
+   bool              IsWaitingPositionModified()      const { return(m_waiting_event&TRADE_EVENT_POSITION_MODIFY);        }
+   bool              IsWaitingPositionClosed()        const { return(m_waiting_event&TRADE_EVENT_POSITION_CLOSE);         }
+   bool              IsWaitingPositionStopTake()      const { return(m_waiting_event&TRADE_EVENT_POSITION_STOP_TAKE);     }
+   bool              IsWaitingOrderPlaced()           const { return(m_waiting_event&TRADE_EVENT_ORDER_PLACE);            }
+   bool              IsWaitingOrderModified()         const { return(m_waiting_event&TRADE_EVENT_ORDER_MODIFY);           }
+   bool              IsWaitingOrderDeleted()          const { return(m_waiting_event&TRADE_EVENT_ORDER_DELETE);           }
+   bool              IsWaitingOrderTriggered()        const { return(m_waiting_event&TRADE_EVENT_ORDER_TRIGGER);          }
    //--- trade events
-   virtual bool      TradeEventStopTakeTrigger()          { return(true);                                           }
-   virtual bool      TradeEventOrderTrigger()             { return(true);                                           }
-   virtual bool      TradeEventPositionOpen()             { return(true);                                           }
-   virtual bool      TradeEventPositionAddSub()           { return(true);                                           }
-   virtual bool      TradeEventPositionModify()           { return(true);                                           }
-   virtual bool      TradeEventPositionClose()            { return(true);                                           }
-   virtual bool      TradeEventOrderPlace()               { return(true);                                           }
-   virtual bool      TradeEventOrderModify()              { return(true);                                           }
-   virtual bool      TradeEventOrderDelete()              { return(true);                                           }
-   virtual bool      TradeEventNotIdentified()            { return(true);                                           }
+   virtual bool      TradeEventPositionStopTake()           { return(true);                                               }
+   virtual bool      TradeEventOrderTriggered()             { return(true);                                               }
+   virtual bool      TradeEventPositionOpened()             { return(true);                                               }
+   virtual bool      TradeEventPositionVolumeChanged()      { return(true);                                               }
+   virtual bool      TradeEventPositionModified()           { return(true);                                               }
+   virtual bool      TradeEventPositionClosed()             { return(true);                                               }
+   virtual bool      TradeEventOrderPlaced()                { return(true);                                               }
+   virtual bool      TradeEventOrderModified()              { return(true);                                               }
+   virtual bool      TradeEventOrderDeleted()               { return(true);                                               }
+   virtual bool      TradeEventNotIdentified()              { return(true);                                               }
    //--- timeframe functions
    void              TimeframeAdd(ENUM_TIMEFRAMES period);
    int               TimeframesFlags(MqlDateTime& time);
@@ -188,7 +188,6 @@ CExpert::CExpert()
    m_hist_ord_tot       =0;
    m_beg_date           =0;
 //---
-   m_indicators         =NULL;
    m_trade              =NULL;
    m_signal             =NULL;
    m_money              =NULL;
@@ -217,11 +216,31 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long mag
    if(m_symbol.Digits()==3 || m_symbol.Digits()==5) digits_adjust=10;
    m_adjusted_point=m_symbol.Point()*digits_adjust;
 //--- initializing objects expert
-   if(!InitTrade(magic))  return(false);
-   if(!InitSignal())      return(false);
-   if(!InitTrailing())    return(false);
-   if(!InitMoney())       return(false);
-   if(!InitParameters())  return(false);
+   if(!InitTrade(magic))
+     {
+      printf(__FUNCTION__+": error initialization trade object");
+      return(false);
+     }
+   if(!InitSignal())
+     {
+      printf(__FUNCTION__+": error initialization signal object");
+      return(false);
+     }
+   if(!InitTrailing())
+     {
+      printf(__FUNCTION__+": error initialization trailing object");
+      return(false);
+     }
+   if(!InitMoney())
+     {
+      printf(__FUNCTION__+": error initialization money object");
+      return(false);
+     }
+   if(!InitParameters())
+     {
+      printf(__FUNCTION__+": error initialization parameters");
+      return(false);
+     }
 //---
    PrepareHistoryDate();
    HistoryPoint();
@@ -230,7 +249,7 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long mag
   }
 //+------------------------------------------------------------------+
 //| Initialization trade object                                      |
-//| INPUT:  magic  -magic number for trade.                          |
+//| INPUT:  magic - magic number for trade.                          |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -249,11 +268,11 @@ bool CExpert::InitTrade(long magic)
   }
 //+------------------------------------------------------------------+
 //| Initialization signal object                                     |
-//| INPUT:  no.                                                      |
+//| INPUT:  signal - pointer of signal object.                       |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitSignal(CExpertSignal *signal)
+bool CExpert::InitSignal(CExpertSignal* signal)
   {
    if(m_signal!=NULL) delete m_signal;
 //---
@@ -270,11 +289,11 @@ bool CExpert::InitSignal(CExpertSignal *signal)
   }
 //+------------------------------------------------------------------+
 //| Initialization trailing object                                   |
-//| INPUT:  no.                                                      |
+//| INPUT:  trailing - pointer of trailing object.                   |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitTrailing(CExpertTrailing *trailing)
+bool CExpert::InitTrailing(CExpertTrailing* trailing)
   {
    if(m_trailing!=NULL) delete m_trailing;
 //---
@@ -291,7 +310,7 @@ bool CExpert::InitTrailing(CExpertTrailing *trailing)
   }
 //+------------------------------------------------------------------+
 //| Initialization money object                                      |
-//| INPUT:  no.                                                      |
+//| INPUT:  money - pointer of money object.                         |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -318,16 +337,21 @@ bool CExpert::InitMoney(CExpertMoney *money)
 //+------------------------------------------------------------------+
 bool CExpert::InitIndicators()
   {
-//--- create indicators collection
-   if(m_indicators==NULL)
-      if((m_indicators=new CIndicators)==NULL)
-        {
-         printf("CExpert::InitIndicators: Error creating indicators collection");
-         return(false);
-        }
-   if(!m_signal.InitIndicators(m_indicators))   return(false);
-   if(!m_trailing.InitIndicators(m_indicators)) return(false);
-   if(!m_money.InitIndicators(m_indicators))    return(false);
+   if(!m_signal.InitIndicators(GetPointer(m_indicators)))
+     {
+      printf(__FUNCTION__+": error initialization indicators of signal object");
+      return(false);
+     }
+   if(!m_trailing.InitIndicators(GetPointer(m_indicators)))
+     {
+      printf(__FUNCTION__+": error initialization indicators of trailing object");
+      return(false);
+     }
+   if(!m_money.InitIndicators(GetPointer(m_indicators)))
+     {
+      printf(__FUNCTION__+": error initialization indicators of money object");
+      return(false);
+     }
 //--- ok
    return(true);
   }
@@ -415,11 +439,6 @@ void CExpert::DeinitMoney()
 //+------------------------------------------------------------------+
 void CExpert::DeinitIndicators()
   {
-   if(m_indicators!=NULL)
-     {
-      delete m_indicators;
-      m_indicators=NULL;
-     }
   }
 //+------------------------------------------------------------------+
 //| Refreshing data for processing                                   |
@@ -582,7 +601,9 @@ bool CExpert::CheckOpenShort()
   }
 //+------------------------------------------------------------------+
 //| Long position open or limit/stop order set                       |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss,                                       |
+//|         tp    - take profit.                                     |
 //| OUTPUT: true-if trade operation processed, false otherwise.      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -597,7 +618,9 @@ bool CExpert::OpenLong(double price,double sl,double tp)
   }
 //+------------------------------------------------------------------+
 //| Short position open or limit/stop order set                      |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss,                                       |
+//|         tp    - take profit.                                     |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -676,7 +699,7 @@ bool CExpert::CheckCloseShort()
   }
 //+------------------------------------------------------------------+
 //| Position close and orders delete                                 |
-//| INPUT:  no.                                                      |
+//| INPUT:  lot - volume for close.                                  |
 //| OUTPUT: true-if trade operation processed, false otherwise.      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -702,7 +725,7 @@ bool CExpert::Close()
   }
 //+------------------------------------------------------------------+
 //| Long position close                                              |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price for close.                                 |
 //| OUTPUT: true-if trade operation processed, false otherwise.      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -712,7 +735,7 @@ bool CExpert::CloseLong(double price)
   }
 //+------------------------------------------------------------------+
 //| Short position close                                             |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price for close.                                 |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -786,7 +809,8 @@ bool CExpert::CheckTrailingStopShort()
   }
 //+------------------------------------------------------------------+
 //| Trailing stop/profit long position                               |
-//| INPUT:  no.                                                      |
+//| INPUT:  sl - new stop loss,                                      |
+//|         tp - new take profit.                                    |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -796,7 +820,8 @@ bool CExpert::TrailingStopLong(double sl,double tp)
   }
 //+------------------------------------------------------------------+
 //| Trailing stop/profit short position                              |
-//| INPUT:  no.                                                      |
+//| INPUT:  sl - new stop loss,                                      |
+//|         tp - new take profit.                                    |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -836,7 +861,7 @@ bool CExpert::CheckTrailingOrderShort()
   }
 //+------------------------------------------------------------------+
 //| Trailing long limit/stop order                                   |
-//| INPUT:  no.                                                      |
+//| INPUT:  delta - price change.                                    |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -851,7 +876,7 @@ bool CExpert::TrailingOrderLong(double delta)
   }
 //+------------------------------------------------------------------+
 //| Trailing short limit/stop order                                  |
-//| INPUT:  no.                                                      |
+//| INPUT:  delta - price change.                                    |
 //| OUTPUT: true-if trade operation successful, false otherwise.     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -958,7 +983,8 @@ bool CExpert::DeleteOrderShort()
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for open long position.                |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss.                                       |
 //| OUTPUT: lot for open.                                            |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -970,7 +996,8 @@ double CExpert::LotOpenLong(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for open short position.               |
-//| INPUT:  no.                                                      |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss.                                       |
 //| OUTPUT: lot for open.                                            |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -1052,14 +1079,14 @@ bool CExpert::CheckTradeState()
    if(hist_ord_tot==m_hist_ord_tot && ord_tot==m_ord_tot && deal_tot==m_deal_tot && pos_tot==m_pos_tot)
      {
       //--- no quantitative changes
-      if(IsWaitingPositionModify())
+      if(IsWaitingPositionModified())
         {
-         res=TradeEventPositionModify();
+         res=TradeEventPositionModified();
          NoWaitEvent(TRADE_EVENT_POSITION_MODIFY);
         }
-      if(IsWaitingPositionModify())
+      if(IsWaitingPositionModified())
         {
-         res=TradeEventOrderModify();
+         res=TradeEventOrderModified();
          NoWaitEvent(TRADE_EVENT_ORDER_MODIFY);
         }
       return(true);
@@ -1068,7 +1095,7 @@ bool CExpert::CheckTradeState()
    if(hist_ord_tot==m_hist_ord_tot && ord_tot==m_ord_tot+1 && deal_tot==m_deal_tot && pos_tot==m_pos_tot)
      {
       //--- was added a pending order
-      res=TradeEventOrderPlace();
+      res=TradeEventOrderPlaced();
       //--- establishment of the checkpoint history of the trade
       HistoryPoint(true);
       return(true);
@@ -1084,10 +1111,10 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot)
            {
             //--- position update/subtracting
-            if(IsWaitingPositionAddSub())
+            if(IsWaitingPositionVolumeChanged())
               {
-               res=TradeEventPositionAddSub();
-               NoWaitEvent(TRADE_EVENT_POSITION_ADD);
+               res=TradeEventPositionVolumeChanged();
+               NoWaitEvent(TRADE_EVENT_POSITION_VOLUME_CHANGE);
               }
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
@@ -1097,9 +1124,9 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot+1)
            {
             //--- position open
-            if(IsWaitingPositionOpen())
+            if(IsWaitingPositionOpened())
               {
-               res=TradeEventPositionOpen();
+               res=TradeEventPositionOpened();
                NoWaitEvent(TRADE_EVENT_POSITION_OPEN);
               }
             //--- establishment of the checkpoint history of the trade
@@ -1111,13 +1138,13 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot-1)
            {
             //--- position is closed (including the stoploss/takeprofit)
-            if(IsWaitingPositionClose())
+            if(IsWaitingPositionClosed())
               {
-               res=TradeEventPositionClose();
+               res=TradeEventPositionClosed();
                NoWaitEvent(TRADE_EVENT_POSITION_CLOSE);
               }
             else
-               res=TradeEventStopTakeTrigger();
+               res=TradeEventPositionStopTake();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1136,7 +1163,7 @@ bool CExpert::CheckTradeState()
    if(hist_ord_tot==m_hist_ord_tot+1 && ord_tot==m_ord_tot-1 && deal_tot==m_deal_tot && pos_tot==m_pos_tot)
      {
       //--- delete pending order
-      res=TradeEventOrderDelete();
+      res=TradeEventOrderDeleted();
       //--- establishment of the checkpoint history of the trade
       HistoryPoint(true);
       //---
@@ -1153,7 +1180,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot)
            {
             //--- position update/subtracting
-            res=TradeEventOrderTrigger();
+            res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1163,7 +1190,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot+1)
            {
             //--- position open
-            res=TradeEventOrderTrigger();
+            res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1173,7 +1200,7 @@ bool CExpert::CheckTradeState()
          if(pos_tot==m_pos_tot-1)
            {
             //--- position is closed
-            res=TradeEventOrderTrigger();
+            res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
             //---
@@ -1197,7 +1224,7 @@ bool CExpert::CheckTradeState()
   }
 //+------------------------------------------------------------------+
 //| Add timeframe for checked                                        |
-//| INPUT:  no.                                                      |
+//| INPUT:  period - timeframe for check.                            |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+

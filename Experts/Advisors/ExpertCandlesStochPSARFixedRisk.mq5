@@ -24,7 +24,7 @@ bool                 Expert_EveryTick                    =false;
 input int            Inp_Signal_CandlesStoch_Range       =6;
 input int            Inp_Signal_CandlesStoch_Minimum     =25;
 input double         Inp_Signal_CandlesStoch_ShadowBig   =0.5;
-input double         Inp_Signal_CandlesStoch_ShadowLittle=0.2;
+input double         Inp_Signal_CandlesStoch_ShadowSmall =0.2;
 input double         Inp_Signal_CandlesStoch_Limit       =0.0;
 input double         Inp_Signal_CandlesStoch_TakeProfit  =1.0;
 input double         Inp_Signal_CandlesStoch_StopLoss    =2.0;
@@ -33,7 +33,7 @@ input int            Inp_Signal_CandlesStoch_PeriodK     =8;
 input int            Inp_Signal_CandlesStoch_PeriodD     =3;
 input int            Inp_Signal_CandlesStoch_PeriodSlow  =3;
 input ENUM_STO_PRICE Inp_Signal_CandlesStoch_Applied     =STO_LOWHIGH;
-input int            Inp_Signal_CandlesStoch_ExtrMap     =149796;
+input int            Inp_Signal_CandlesStoch_ExtrMap     =11184810;
 //--- inputs for trailing
 input double         Inp_Trailing_ParabolicSAR_Step      =0.02;
 input double         Inp_Trailing_ParabolicSAR_Maximum   =0.2;
@@ -77,7 +77,7 @@ int OnInit()
    signal.Range(Inp_Signal_CandlesStoch_Range);
    signal.Minimum(Inp_Signal_CandlesStoch_Minimum);
    signal.ShadowBig(Inp_Signal_CandlesStoch_ShadowBig);
-   signal.ShadowLittle(Inp_Signal_CandlesStoch_ShadowLittle);
+   signal.ShadowSmall(Inp_Signal_CandlesStoch_ShadowSmall);
    signal.Limit(Inp_Signal_CandlesStoch_Limit);
    signal.TakeProfit(Inp_Signal_CandlesStoch_TakeProfit);
    signal.StopLoss(Inp_Signal_CandlesStoch_StopLoss);

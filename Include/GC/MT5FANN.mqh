@@ -67,7 +67,7 @@ public:
    void              DeInit();
    bool              GetVector(int shift=0,bool train=false);
    int               ExportFANNDataWithTest(int train_qty,int test_qty,string FileName="");
-   int               ExportFANNData(int qty,int shift,string FileName);
+   int               ExportFANNData(int qty,int shift,string FileName,bool test=false);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -77,8 +77,8 @@ int CMT5FANN::ExportFANNDataWithTest(int train_qty,int test_qty,string FileName=
    if(""==FileName) FileName=File_Name;
    int shift=0;
 // test
-   shift=ExportFANNData(test_qty,shift,FileName+"_test.test");
-   shift=ExportFANNData(train_qty,shift,FileName+"_train.train");
+   shift=ExportFANNData(test_qty,shift,FileName+"_test.test",true);
+   shift=ExportFANNData(train_qty,shift,FileName+"_train.train",false);
 // чето ниже не работает :(
    FileCopy(FileName+"_test.test",FILE_COMMON,FileName+"_test.dat",FILE_REWRITE);
    FileCopy(FileName+"_train.train",FILE_COMMON,FileName+"_train.dat",FILE_REWRITE);
@@ -88,7 +88,7 @@ int CMT5FANN::ExportFANNDataWithTest(int train_qty,int test_qty,string FileName=
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
+int CMT5FANN::ExportFANNData(int qty,int shift,string FileName,bool test)
   {
    int i;
    int FileHandle=0;
@@ -101,7 +101,7 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
 
    if(FileHandle!=INVALID_HANDLE)
      {// записываем в файл шапку
-      FileWrite(FileHandle,needcopy*2,num_in_vectors,num_out_vectors);
+      FileWrite(FileHandle,needcopy*((test)?1:2),num_in_vectors,num_out_vectors);
       for(i=0;i<needcopy;shift++)
         {
          if(GetVector(shift,true))
@@ -120,6 +120,7 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName)
                outstr=outstr+(string)(OutputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
+            if(test) continue;
             // сделаем еще и симметричный дубль
             outstr="";
             for(int ibj=0;ibj<num_in_vectors;ibj++)
@@ -471,8 +472,17 @@ bool CMT5FANN::GetVector(int shift,bool train)
         {
          if(GetVectors(IB,OB,n_vectors,n_o_vectors,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],TimeFrame,shift))
            {
-            for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i];
-            for(i=0;i<n_o_vectors;i++) OutputVector[i]=OB[i];
+            // приведем к общему знаменателю
+            double si=0;
+            for(i=0;i<n_vectors;i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
+            for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i]/si;
+            for(i=0;i<n_o_vectors;i++) 
+            {
+             OutputVector[i]=0;
+             if(OB[i]<-3) OutputVector[i]=-0.5;
+             if(OB[i]>3) OutputVector[i]=0.5;
+             //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
+             }
            }
          else return(false);
         }

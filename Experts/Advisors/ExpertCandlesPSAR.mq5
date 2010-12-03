@@ -24,7 +24,7 @@ bool         Expert_EveryTick                 =false;
 input int    Inp_Signal_Candles_Range         =6;
 input int    Inp_Signal_Candles_Minimum       =25;
 input double Inp_Signal_Candles_ShadowBig     =0.5;
-input double Inp_Signal_Candles_ShadowLittle  =0.2;
+input double Inp_Signal_Candles_ShadowSmall   =0.2;
 input double Inp_Signal_Candles_Limit         =0.0;
 input double Inp_Signal_Candles_TakeProfit    =1.0;
 input double Inp_Signal_Candles_StopLoss      =2.0;
@@ -70,7 +70,7 @@ int OnInit()
    signal.Range(Inp_Signal_Candles_Range);
    signal.Minimum(Inp_Signal_Candles_Minimum);
    signal.ShadowBig(Inp_Signal_Candles_ShadowBig);
-   signal.ShadowLittle(Inp_Signal_Candles_ShadowLittle);
+   signal.ShadowSmall(Inp_Signal_Candles_ShadowSmall);
    signal.Limit(Inp_Signal_Candles_Limit);
    signal.TakeProfit(Inp_Signal_Candles_TakeProfit);
    signal.StopLoss(Inp_Signal_Candles_StopLoss);

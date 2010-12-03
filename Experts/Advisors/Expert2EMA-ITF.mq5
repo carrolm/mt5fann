@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                            ExpertCandlesStochPSARFixedMargin.mq5 |
+//|                                               Expert2EMA-ITF.mq5 |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -10,35 +10,33 @@
 //| Include                                                          |
 //+------------------------------------------------------------------+
 #include <Expert\Expert.mqh>
-#include <Expert\Signal\SignalCandlesStoch.mqh>
-#include <Expert\Trailing\TrailingParabolicSAR.mqh>
-#include <Expert\Money\MoneyFixedMargin.mqh>
+#include <Expert\Signal\Signal2EMA-ITF.mqh>
+#include <Expert\Trailing\TrailingNone.mqh>
+#include <Expert\Money\MoneyFixedLot.mqh>
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
 //--- inputs for expert
-input string         Inp_Expert_Title                    ="ExpertCandlesStochPSARFixedMargin";
-int                  Expert_MagicNumber                  =13663;
-bool                 Expert_EveryTick                    =false;
+input string Inp_Expert_Title                         ="Expert2EMA-ITF";
+int          Expert_MagicNumber                       =17702;
+bool         Expert_EveryTick                         =false;
 //--- inputs for signal
-input int            Inp_Signal_CandlesStoch_Range       =6;
-input int            Inp_Signal_CandlesStoch_Minimum     =25;
-input double         Inp_Signal_CandlesStoch_ShadowBig   =0.5;
-input double         Inp_Signal_CandlesStoch_ShadowSmall =0.2;
-input double         Inp_Signal_CandlesStoch_Limit       =0.0;
-input double         Inp_Signal_CandlesStoch_TakeProfit  =1.0;
-input double         Inp_Signal_CandlesStoch_StopLoss    =2.0;
-input int            Inp_Signal_CandlesStoch_Expiration  =4;
-input int            Inp_Signal_CandlesStoch_PeriodK     =8;
-input int            Inp_Signal_CandlesStoch_PeriodD     =3;
-input int            Inp_Signal_CandlesStoch_PeriodSlow  =3;
-input ENUM_STO_PRICE Inp_Signal_CandlesStoch_Applied     =STO_LOWHIGH;
-input int            Inp_Signal_CandlesStoch_ExtrMap     =11184810;
-//--- inputs for trailing
-input double         Inp_Trailing_ParabolicSAR_Step      =0.02;
-input double         Inp_Trailing_ParabolicSAR_Maximum   =0.2;
+input int    Inp_Signal_TwoEMAwithITF_PeriodFastEMA   =21;
+input int    Inp_Signal_TwoEMAwithITF_PeriodSlowEMA   =34;
+input int    Inp_Signal_TwoEMAwithITF_PeriodATR       =24;
+input double Inp_Signal_TwoEMAwithITF_Limit           =1.0;
+input double Inp_Signal_TwoEMAwithITF_StopLoss        =2.0;
+input double Inp_Signal_TwoEMAwithITF_TakeProfit      =1.0;
+input int    Inp_Signal_TwoEMAwithITF_Expiration      =4;
+input int    Inp_Signal_TwoEMAwithITF_GoodMinuteOfHour=-1;
+input int    Inp_Signal_TwoEMAwithITF_BadMinutesOfHour=0;
+input int    Inp_Signal_TwoEMAwithITF_GoodHourOfDay   =-1;
+input int    Inp_Signal_TwoEMAwithITF_BadHoursOfDay   =0;
+input int    Inp_Signal_TwoEMAwithITF_GoodDayOfWeek   =-1;
+input int    Inp_Signal_TwoEMAwithITF_BadDaysOfWeek   =0;
 //--- inputs for money
-input double         Inp_Money_FixMargin_Percent=10.0;
+input double Inp_Money_FixLot_Percent                 =10.0;
+input double Inp_Money_FixLot_Lots                    =0.1;
 //+------------------------------------------------------------------+
 //| Global expert object                                             |
 //+------------------------------------------------------------------+
@@ -57,7 +55,7 @@ int OnInit()
       return(-1);
      }
 //--- Creation of signal object
-   CSignalCandlesStoch *signal=new CSignalCandlesStoch;
+   CSignal2EMA_ITF *signal=new CSignal2EMA_ITF;
    if(signal==NULL)
      {
       //--- failed
@@ -74,19 +72,19 @@ int OnInit()
       return(-3);
      }
 //--- Set signal parameters
-   signal.Range(Inp_Signal_CandlesStoch_Range);
-   signal.Minimum(Inp_Signal_CandlesStoch_Minimum);
-   signal.ShadowBig(Inp_Signal_CandlesStoch_ShadowBig);
-   signal.ShadowSmall(Inp_Signal_CandlesStoch_ShadowSmall);
-   signal.Limit(Inp_Signal_CandlesStoch_Limit);
-   signal.TakeProfit(Inp_Signal_CandlesStoch_TakeProfit);
-   signal.StopLoss(Inp_Signal_CandlesStoch_StopLoss);
-   signal.Expiration(Inp_Signal_CandlesStoch_Expiration);
-   signal.PeriodK(Inp_Signal_CandlesStoch_PeriodK);
-   signal.PeriodD(Inp_Signal_CandlesStoch_PeriodD);
-   signal.PeriodSlow(Inp_Signal_CandlesStoch_PeriodSlow);
-   signal.Applied(Inp_Signal_CandlesStoch_Applied);
-   signal.ExtrMap(Inp_Signal_CandlesStoch_ExtrMap);
+   signal.PeriodFastEMA(Inp_Signal_TwoEMAwithITF_PeriodFastEMA);
+   signal.PeriodSlowEMA(Inp_Signal_TwoEMAwithITF_PeriodSlowEMA);
+   signal.PeriodATR(Inp_Signal_TwoEMAwithITF_PeriodATR);
+   signal.Limit(Inp_Signal_TwoEMAwithITF_Limit);
+   signal.StopLoss(Inp_Signal_TwoEMAwithITF_StopLoss);
+   signal.TakeProfit(Inp_Signal_TwoEMAwithITF_TakeProfit);
+   signal.Expiration(Inp_Signal_TwoEMAwithITF_Expiration);
+   signal.GoodMinuteOfHour(Inp_Signal_TwoEMAwithITF_GoodMinuteOfHour);
+   signal.BadMinutesOfHour(Inp_Signal_TwoEMAwithITF_BadMinutesOfHour);
+   signal.GoodHourOfDay(Inp_Signal_TwoEMAwithITF_GoodHourOfDay);
+   signal.BadHoursOfDay(Inp_Signal_TwoEMAwithITF_BadHoursOfDay);
+   signal.GoodDayOfWeek(Inp_Signal_TwoEMAwithITF_GoodDayOfWeek);
+   signal.BadDaysOfWeek(Inp_Signal_TwoEMAwithITF_BadDaysOfWeek);
 //--- Check signal parameters
    if(!signal.ValidationSettings())
      {
@@ -96,7 +94,7 @@ int OnInit()
       return(-4);
      }
 //--- Creation of trailing object
-   CTrailingPSAR *trailing=new CTrailingPSAR;
+   CTrailingNone *trailing=new CTrailingNone;
    if(trailing==NULL)
      {
       //--- failed
@@ -113,8 +111,6 @@ int OnInit()
       return(-6);
      }
 //--- Set trailing parameters
-   trailing.Step(Inp_Trailing_ParabolicSAR_Step);
-   trailing.Maximum(Inp_Trailing_ParabolicSAR_Maximum);
 //--- Check trailing parameters
    if(!trailing.ValidationSettings())
      {
@@ -124,7 +120,7 @@ int OnInit()
       return(-7);
      }
 //--- Creation of money object
-   CMoneyFixedMargin *money=new CMoneyFixedMargin;
+   CMoneyFixedLot *money=new CMoneyFixedLot;
    if(money==NULL)
      {
       //--- failed
@@ -141,7 +137,8 @@ int OnInit()
       return(-9);
      }
 //--- Set money parameters
-   money.Percent(Inp_Money_FixMargin_Percent);
+   money.Percent(Inp_Money_FixLot_Percent);
+   money.Lots(Inp_Money_FixLot_Lots);
 //--- Check money parameters
    if(!money.ValidationSettings())
      {
