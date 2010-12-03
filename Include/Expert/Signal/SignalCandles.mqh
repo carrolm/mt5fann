@@ -16,7 +16,7 @@
 //| Parameter=Range,int,6                                            |
 //| Parameter=Minimum,int,25                                         |
 //| Parameter=ShadowBig,double,0.5                                   |
-//| Parameter=ShadowLittle,double,0.2                                |
+//| Parameter=ShadowSmall,double,0.2                                 |
 //| Parameter=Limit,double,0.0                                       |
 //| Parameter=StopLoss,double,2.0                                    |
 //| Parameter=TakeProfit,double,1.0                                  |
@@ -45,7 +45,7 @@ protected:
    int               m_range;
    int               m_minimum;
    double            m_shadow_big;
-   double            m_shadow_little;
+   double            m_shadow_small;
    double            m_limit;
    double            m_stop_loss;
    double            m_take_profit;
@@ -55,21 +55,26 @@ public:
                      CSignalCandles();
                     ~CSignalCandles();
    //--- methods initialize protected data
-   void              Range(int range)                   { m_range=range;                 }
-   void              Minimum(int minimum)               { m_minimum=minimum;             }
-   void              ShadowBig(double shadow_big)       { m_shadow_big=shadow_big;       }
-   void              ShadowLittle(double shadow_little) { m_shadow_little=shadow_little; }
-   void              Limit(double limit)                { m_limit=limit;                 }
-   void              StopLoss(double stop_loss)         { m_stop_loss=stop_loss;         }
-   void              TakeProfit(double take_profit)     { m_take_profit=take_profit;     }
-   void              Expiration(int expiration)         { m_expiration=expiration;       }
+   void              Range(int range)                 { m_range=range;                }
+   void              Minimum(int minimum)             { m_minimum=minimum;            }
+   void              ShadowBig(double shadow_big)     { m_shadow_big=shadow_big;      }
+   void              ShadowSmall(double shadow_small) { m_shadow_small=shadow_small;  }
+   void              Limit(double limit)              { m_limit=limit;                }
+   void              StopLoss(double stop_loss)       { m_stop_loss=stop_loss;        }
+   void              TakeProfit(double take_profit)   { m_take_profit=take_profit;    }
+   void              Expiration(int expiration)       { m_expiration=expiration;      }
    virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
-   double            OpenComposite()                    { return(m_open_composite);      }
-   double            HighComposite()                    { return(m_high_composite);      }
-   double            LowComposite()                     { return(m_low_composite);       }
-   double            CloseComposite()                   { return(m_close_composite);     }
+   double            Open(int ind)              const { return(m_open.GetData(ind));  }
+   double            High(int ind)              const { return(m_high.GetData(ind));  }
+   double            Low(int ind)               const { return(m_low.GetData(ind));   }
+   double            Close(int ind)             const { return(m_close.GetData(ind)); }
+   //---
+   double            OpenComposite()            const { return(m_open_composite);     }
+   double            HighComposite()            const { return(m_high_composite);     }
+   double            LowComposite()             const { return(m_low_composite);      }
+   double            CloseComposite()           const { return(m_close_composite);    }
    //---
    virtual bool      CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration);
    virtual bool      CheckCloseLong(double& price);
@@ -83,11 +88,6 @@ protected:
    bool              InitHigh(CIndicators* indicators);
    bool              InitLow(CIndicators* indicators);
    bool              InitClose(CIndicators* indicators);
-   //---
-   double            Open(int ind)                      { return(m_open.GetData(ind));   }
-   double            High(int ind)                      { return(m_high.GetData(ind));   }
-   double            Low(int ind)                       { return(m_low.GetData(ind));    }
-   double            Close(int ind)                     { return(m_close.GetData(ind));  }
    //---
    bool              CandleBull(double open,double high,double low,double close);
    bool              CandleBear(double open,double high,double low,double close);
@@ -114,7 +114,7 @@ void CSignalCandles::CSignalCandles()
    m_range          =6;
    m_minimum        =25;
    m_shadow_big     =0.5;
-   m_shadow_little  =0.2;
+   m_shadow_small   =0.2;
    m_limit          =0.0;
    m_stop_loss      =2.0;
    m_take_profit    =1.0;
@@ -414,7 +414,7 @@ bool CSignalCandles::CandleBull(double open,double high,double low,double close)
    double shadow_h=high-((open>close)?open:close);
    double shadow_l=((open<close)?open:close)-low;
 //---
-   if(shadow_h<m_shadow_little*size && shadow_l>m_shadow_big*size)
+   if(shadow_h<m_shadow_small*size && shadow_l>m_shadow_big*size)
      {
       m_open_composite =open;
       m_high_composite =high;
@@ -440,7 +440,7 @@ bool CSignalCandles::CandleBear(double open,double high,double low,double close)
    double shadow_h=high-((open>close)?open:close);
    double shadow_l=((open<close)?open:close)-low;
 //---
-   if(shadow_l<m_shadow_little*size && shadow_h>m_shadow_big*size)
+   if(shadow_l<m_shadow_small*size && shadow_h>m_shadow_big*size)
      {
       m_open_composite =open;
       m_high_composite =high;

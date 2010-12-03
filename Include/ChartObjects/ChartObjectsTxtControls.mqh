@@ -323,7 +323,7 @@ bool CChartObjectLabel::Y_Distance(int Y)
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE,Y));
   }
 //+------------------------------------------------------------------+
-//| Get the X-size.                                                      |
+//| Get the X-size.                                                  |
 //| INPUT:  no.                                                      |
 //| OUTPUT: X-size.                                                  |
 //| REMARK: no.                                                      |
@@ -336,7 +336,7 @@ int CChartObjectLabel::X_Size() const
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE));
   }
 //+------------------------------------------------------------------+
-//| Get the Y-size.                                                      |
+//| Get the Y-size.                                                  |
 //| INPUT:  no.                                                      |
 //| OUTPUT: Y-size.                                                  |
 //| REMARK: no.                                                      |

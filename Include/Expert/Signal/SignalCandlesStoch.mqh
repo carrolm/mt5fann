@@ -16,7 +16,7 @@
 //| Parameter=Range,int,6                                            |
 //| Parameter=Minimum,int,25                                         |
 //| Parameter=ShadowBig,double,0.5                                   |
-//| Parameter=ShadowLittle,double,0.2                                |
+//| Parameter=ShadowSmall,double,0.2                                 |
 //| Parameter=Limit,double,0.0                                       |
 //| Parameter=StopLoss,double,2.0                                    |
 //| Parameter=TakeProfit,double,1.0                                  |
@@ -288,7 +288,7 @@ bool CSignalCandlesStoch::ComapareMaps(int map)
    for(int i=0;i<12;i++)
      {
       inp_map=(m_extr_map>>(2*i))&3;
-      if(inp_map>=4) continue;
+      if(inp_map>=2) continue;
       check_map=(map>>(2*i))&3;
       if(inp_map!=check_map) return(false);
      }

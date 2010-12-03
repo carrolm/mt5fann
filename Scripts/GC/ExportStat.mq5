@@ -77,15 +77,18 @@ void OnStart()
 //+------------------------------------------------------------------+
 int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
   {
-   int shift=0,i;
+   int shift=0,i,pp;
    double SumBuy,SumSell,SumWait;
    int QtyBuy,QtySell,QtyWait;
+   int ProfQty[200];
    double res;
    int FileHandle=0;
    int SymbolIdx;
    string outstr;
+   int maxprof=200;
    MqlRates rates[];
    MqlDateTime tm;
+  
    ArraySetAsSeries(rates,true);
    FileHandle=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
    if(FileHandle!=INVALID_HANDLE)
@@ -98,17 +101,25 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
         {
          SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
          int k=SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_TRADE_STOPS_LEVEL);
+         for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
             res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
             if(0==res) continue;
             if((res<0&&res>-2)||(res>0&&res<2)) res=0;
-            if(0==res) {outstr= "Wait";QtyWait++;}
+            if((res<0&&(res*k/10+1)>-10)||(res>0&&(res*k/10-1)<10)) res=0;
+            if(0==res) {outstr= "Wait";QtyWait++; continue;}
             if(0<res){res= res;outstr= "Buy"; QtyBuy++;SumBuy+=+res*k/10-1;}
             if(0>res){res=-res;outstr= "Sell";QtySell++;SumSell+=res*k/10-1;}
+            pp = (int)((res*k/10-1));
+            if(pp>(maxprof-1)) maxprof=maxprof-1;
+            ProfQty[pp]++;
             //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);
            }
-          FileWrite(FileHandle, SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell);
+         FileWrite(FileHandle, SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell);
+         outstr="";
+         for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
+         FileWrite(FileHandle,outstr);
         }
       FileClose(FileHandle);
      }
