@@ -12,10 +12,17 @@ string VectorFunctions[21]={"Fractals","Easy","RSI","HL","High","Low","","","","
 //| входных веторов может быть много                                    |
 //| выходной веторвсегда один - сигнал на покупку/продажу               |
 //+---------------------------------------------------------------------+
+double Sigmoid(double x)// вычисление логистической функции активации
+  {
+   return(1/(1+exp(-x)));
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
-   int shift_history=30;//
+   int shift_history=30,i;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
@@ -38,6 +45,19 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("Low"==fn_name) ret=GetVectors_Low(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
       if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
+      // нормируем в гиперкуб -1...1
+      double sq=0;
+      
+      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
+      for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
+//      for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq;
+      //double min=InputVector[0];
+      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]<min) min=InputVector[i];
+      //for(i=0;i<num_inputvectors;i++) InputVector[i]-=min;
+      //double max=InputVector[0];
+      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];
+      //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
+
      }
    return(ret);
   }
@@ -55,7 +75,7 @@ void DelTrash()
 //+------------------------------------------------------------------+
 double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0,bool draw=false)
   {
-   
+
    double mS=0,mB=0,S=0,B=0;
    double Close[]; ArraySetAsSeries(Close,true);
    double High[]; ArraySetAsSeries(High,true);
@@ -64,7 +84,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
 // копируем историю
    if(""==smb) smb=_Symbol;
    if(0==tf) tf=_Period;
-   // TF всегда минутка!
+// TF всегда минутка!
    tf=PERIOD_M1;
    int maxcount=CopyHigh(smb,tf,shift,shift_history+3,High);
    maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
