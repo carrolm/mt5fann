@@ -70,6 +70,7 @@ void OnStart()
    if(_EURCHF_) SymbolsArray[MaxSymbols++]="EURCHF";//Euro vs US Dollar
    if(_EURJPY_) SymbolsArray[MaxSymbols++]="EURJPY";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
+//  Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
    Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
 //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
