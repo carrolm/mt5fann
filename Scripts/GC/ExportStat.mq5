@@ -70,7 +70,8 @@ void OnStart()
    if(_EURCHF_) SymbolsArray[MaxSymbols++]="EURCHF";//Euro vs US Dollar
    if(_EURJPY_) SymbolsArray[MaxSymbols++]="EURJPY";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
-  Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
+//  Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
 //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
@@ -81,12 +82,12 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
    int shift=0,i,pp;
    double SumBuy,SumSell,SumWait;
    int QtyBuy,QtySell,QtyWait;
-   int ProfQty[200];
+   int ProfQty[11];
    double res;
    int FileHandle=0,TrainFile=0;
    int SymbolIdx;
    string outstr;
-   int maxprof=200;
+   int maxprof=11;
    MqlRates rates[];
    MqlDateTime tm;
    double IV[10],OV[2];
@@ -107,7 +108,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
          for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
-            if(GetVectors(IV,OV,2,1,"Easy",SymbolsArray[SymbolIdx],0,i))
+            if(GetVectors(IV,OV,2,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
               {
                res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
                if(0==res) continue;
@@ -116,12 +117,12 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
                if(0==res) {outstr="Wait";QtyWait++; continue;}
                if(0<res){res= res;outstr= "Buy"; QtyBuy++;SumBuy+=+res*k/10-1;}
                if(0>res){res=-res;outstr= "Sell";QtySell++;SumSell+=res*k/10-1;}
-               pp=(int)((res*k/10-1));
+               pp=(int)((res*k/100)); if(pp>(maxprof-1)) pp=maxprof-1;
                if(pp>(maxprof-1)) maxprof=maxprof-1;
                ProfQty[pp]++;
                //           if(GetVectors_Easy(IV,2,SymbolsArray[SymbolIdx],0,i+30))
                  {
-                  FileWrite(TrainFile,IV[0],IV[1],res);
+                  //FileWrite(TrainFile,IV[0],IV[1],res);
                  }
               }
             //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);

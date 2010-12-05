@@ -125,13 +125,13 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName,bool test)
             outstr="";
             for(int ibj=0;ibj<num_in_vectors;ibj++)
               {
-               outstr=outstr+(string)(0.5-InputVector[ibj])+" ";
+               outstr=outstr+(string)(InputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
             outstr="";
             for(int ibj=0;ibj<num_out_vectors;ibj++)
               {
-               outstr=outstr+(string)(0.5-OutputVector[ibj])+" ";
+               outstr=outstr+(string)(OutputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
 
