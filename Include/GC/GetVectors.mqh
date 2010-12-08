@@ -92,7 +92,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
    double res=0;
    int is,ib;
-   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
+//   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;

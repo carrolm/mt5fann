@@ -126,10 +126,10 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
               }
             //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);
            }
-         FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell);
          outstr="";
          for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
-         FileWrite(FileHandle,outstr);
+//         FileWrite(FileHandle,outstr);
+         FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell,outstr);
         }
       FileClose(FileHandle);FileClose(TrainFile);
      }
