@@ -9,6 +9,7 @@
 #property script_show_inputs
 
 #include <GNG/GNG.mqh>
+#include <GC\GetVectors.mqh>
 
 //--- количество входных векторов, используемых для обучения
 input int      samples=1000;
@@ -20,15 +21,15 @@ input double alpha=0.5;
 input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
-input int max_nodes=100;
-
+input int max_nodes=1000;
+double OV[];
 //---глобальные переменные
 CGNGAlgorithm *GNGAlgorithm;
 int window;
-int rsi_handle;
+//int rsi_handle;
 int input_dimension;
 int _samples;
-double RSI_buffer[];
+//double RSI_buffer[];
 datetime time[];
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
@@ -37,7 +38,6 @@ void OnStart()
   {
    int i,j;
    window=ChartWindowFind(0,"GNG_dummy");
-   Print("window=",window);
    input_dimension=24;
 
 //--- чтобы функция CopyBuffer() работала правильно, количество векторов 
@@ -45,20 +45,20 @@ void OnStart()
    _samples=samples+input_dimension*10;
    if(_samples>Bars(_Symbol,_Period)) _samples=Bars(_Symbol,_Period);
 
-//--- получаем входные данные для алгоритма
-   rsi_handle=iRSI(NULL,0,8,PRICE_CLOSE);
-   int bars=0;
-   while((bars=BarsCalculated(rsi_handle))<=0) Sleep(50);
-
-   int copied=CopyBuffer(rsi_handle,0,1,_samples,RSI_buffer);
-   if(copied<=0) PrintFormat(" Не удалось скопировать данные индикатора RSI, BarsCalculated=%d. Ошибка %d",bars,GetLastError());
-
-//--- возвращаем заданное пользователем значение
-   _samples=_samples-input_dimension-10;
-   PrintFormat("copied=%d     _samples=%d",copied,_samples);
+////--- получаем входные данные для алгоритма
+//   rsi_handle=iRSI(NULL,0,8,PRICE_CLOSE);
+//   int bars=0;
+//   while((bars=BarsCalculated(rsi_handle))<=0) Sleep(50);
+//
+//   int copied=CopyBuffer(rsi_handle,0,1,_samples,RSI_buffer);
+//   if(copied<=0) PrintFormat(" Не удалось скопировать данные индикатора RSI, BarsCalculated=%d. Ошибка %d",bars,GetLastError());
+//
+////--- возвращаем заданное пользователем значение
+   _samples=_samples-input_dimension*10;
+//   PrintFormat("copied=%d     _samples=%d",copied,_samples);
 
 //--- запоминаем времена открытия первых 100 баров
-   CopyTime(_Symbol,_Period,0,100,time);
+//   CopyTime(_Symbol,_Period,0,100,time);
 
 //--- создать экземпляр алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGNGAlgorithm;
@@ -69,12 +69,12 @@ void OnStart()
    ArrayResize(v1,input_dimension);
    ArrayResize(v2,input_dimension);
 
-   for(i=0;i<input_dimension;i++)
-     {
-      v1[i] = RSI_buffer[i];
-      v2[i] = RSI_buffer[i+3];
-     }
-
+//   for(i=0;i<input_dimension;i++)
+//     {
+//      v1[i] = RSI_buffer[i];
+//      v2[i] = RSI_buffer[i+3];
+//     }
+//
 //--- инициализация алгоритма
    GNGAlgorithm.Init(input_dimension,v1,v2,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes);
    if(window>0)
@@ -106,8 +106,10 @@ void OnStart()
      {
       //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
       //--- на 3 бара - они меньше скоррелированы)
-      for(j=0;j<input_dimension;j++)
-         v[j]=RSI_buffer[i+j*3];
+       if(!GetVectors(v,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,i)) continue;
+//              {
+//     for(j=0;j<input_dimension;j++)
+  //       v[j]=RSI_buffer[i+j*3];
 
       if(window>0)
         {
@@ -200,9 +202,9 @@ void OnStart()
      }
 
 //--- удаляем из памяти экземпляр алгоритма
+   Print("Completed! Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
    delete GNGAlgorithm;
 
-   Print("Completed!");
 //--- пауза перед очисткой графика
    while(!IsStopped())Sleep(100);
 

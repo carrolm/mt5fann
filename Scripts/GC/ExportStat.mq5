@@ -103,7 +103,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
-         int k=SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_TRADE_STOPS_LEVEL);
+         long k=SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_TRADE_STOPS_LEVEL);
          for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
@@ -112,6 +112,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
                 res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
                   //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
                  {
+//                  FileWrite(TrainFile,IV[0],IV[1],res);
                   FileWrite(TrainFile,IV[0],IV[1],IV[2],res);
                  }
                if(0==res) continue;
