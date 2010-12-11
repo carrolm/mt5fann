@@ -44,10 +44,10 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("High"==fn_name) ret=GetVectors_High(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Low"==fn_name) ret=GetVectors_Low(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
-      if(shift_history>0) OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5;
+//      if(shift_history>0) OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5;
+      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
       double sq=0;
-      
       for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) sq=1;
       for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
  //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
@@ -93,7 +93,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
    double res=0;
    int is,ib;
-   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
+//   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
