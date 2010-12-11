@@ -42,7 +42,7 @@ input bool _EURCAD_=false;//Euro vs Canadian Dollar
 input bool _GBPCHF_=false;//Great Britain Pound vs Swiss Franc
 input bool _GBPJPY_=false;//Great Britain Pound vs Japanese Yen
 input bool _CADCHF_=false;//Canadian Dollar vs Swiss Franc
-input int _Pers_=5;//Период анализа
+input int _Pers_=24;//Период анализа
 input int _Shift_=5;//на сколько периодов вперед прогноз
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -107,7 +107,7 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
    int needcopy=0;
    int copied=0;
    MqlRates rates[];
-   MqlDateTime tm;
+   //MqlDateTime tm;
    ArraySetAsSeries(rates,true);
    string outstr;
    int SymbolIdx;
@@ -119,29 +119,25 @@ int Write_File_fann_data(string FileName,string &SymbolsArray[],int MaxSymbols,i
       FileWrite(FileHandle,// записываем в файл шапку
                 needcopy,// 
  //               2+(1+Pers)*MaxSymbols,
-                2+Pers*MaxSymbols,
+                Pers*MaxSymbols,
                 MaxSymbols);
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          int bars=Bars(SymbolsArray[SymbolIdx],_Period);
          //Print("Баров в истории = ",bars);
          for(i=0;i<needcopy&&shift<bars;shift++)
-            if(GetVectors(IB,OB,Pers,1,"Fractals",SymbolsArray[SymbolIdx],_Period,shift))
+            if(GetVectors(IB,OB,Pers,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,shift))
+            //if(GetVectors(IB,OB,3,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
               {
                i++;
-               copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
-               TimeToStruct(rates[2].time,tm);
+               //copied=CopyRates(SymbolsArray[SymbolIdx],_Period,shift,3,rates);
+               //TimeToStruct(rates[2].time,tm);
                //               outstr=""+(string)tm.mon+" "+(string)tm.day+" "+(string)tm.day_of_week+" "+(string)tm.hour+" "+(string)tm.min;
-               outstr=(string)tm.day_of_week+" "+(string)tm.hour;
-               //// news
-               //for(int ibj=0;ibj<MaxSymbols;ibj++)
-               //  {
-               //   outstr=outstr+" 0";
-               //  }
-               //// data
+               outstr="";//(string)tm.day_of_week+" "+(string)tm.hour;
+
                for(int ibj=0;ibj<Pers;ibj++)
                  {
-                  outstr=outstr+" "+(string)(IB[ibj]);
+                  outstr=outstr+(string)(IB[ibj])+" ";
                  }
 
                FileWrite(FileHandle,outstr);       // 
