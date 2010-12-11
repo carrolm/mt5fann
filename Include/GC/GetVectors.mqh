@@ -49,13 +49,14 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       double sq=0;
       
       for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) sq=1;
-      for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
-//      for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq;
+      for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+ //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
+     //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
       //double min=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]<min) min=InputVector[i];
       //for(i=0;i<num_inputvectors;i++) InputVector[i]-=min;
       //double max=InputVector[0];
-      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];
+      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];if(max==0) max=1;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
 
      }
@@ -140,9 +141,7 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    return(res);
 
   }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -166,7 +165,7 @@ bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl="",E
    for(i=0;i<num_inputvectors;i++,j++)
      {
       // вычислим и отнормируем
-      InputVector[i]=100*(Close[j]-Close[j+1]);
+      InputVector[i]=MathLog(Close[j]/Close[j+1]);
      }
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);
