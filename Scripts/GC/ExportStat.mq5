@@ -70,8 +70,7 @@ void OnStart()
    if(_EURCHF_) SymbolsArray[MaxSymbols++]="EURCHF";//Euro vs US Dollar
    if(_EURJPY_) SymbolsArray[MaxSymbols++]="EURJPY";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
-//  Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
-   Write_File(SymbolsArray,MaxSymbols,100000,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,10000,_Pers_); //
 //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
@@ -100,7 +99,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
       TimeToStruct(rates[2].time,tm);
       FileWrite(FileHandle,// записываем в файл шапку
                 "Symbol","TotalProfit","QtyWait","QtyBuy","SumBuy","QtySell","SumSell",(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
-      FileWrite(TrainFile,"X","Y","Z");
+      FileWrite(TrainFile,"X","Y","Z","Rez");
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
@@ -108,9 +107,13 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
          for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
-            if(GetVectors(IV,OV,2,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
+            if(GetVectors(IV,OV,3,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
               {
-               res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+                res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+                  //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
+                 {
+                  FileWrite(TrainFile,IV[0],IV[1],IV[2],res);
+                 }
                if(0==res) continue;
                if((res<0 && res>-2) || (res>0 && res<2)) res=0;
                if((res<0 && (res*k/10+1)>-10) || (res>0 && (res*k/10-1)<10)) res=0;
@@ -120,17 +123,13 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
                pp=(int)((res*k/100)); if(pp>(maxprof-1)) pp=maxprof-1;
                if(pp>(maxprof-1)) maxprof=maxprof-1;
                ProfQty[pp]++;
-               //           if(GetVectors_Easy(IV,2,SymbolsArray[SymbolIdx],0,i+30))
-                 {
-                  //FileWrite(TrainFile,IV[0],IV[1],res);
-                 }
               }
             //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);
            }
-         FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell);
          outstr="";
          for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
-         FileWrite(FileHandle,outstr);
+//         FileWrite(FileHandle,outstr);
+         FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell,outstr);
         }
       FileClose(FileHandle);FileClose(TrainFile);
      }
