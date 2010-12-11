@@ -439,8 +439,8 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
      }
 
    tmp=Neurons.GetFirstNode();
-   double max_error;
-   double min_U;
+   double max_error=0;
+   double min_U=0;
    CGNGNeuron *useless;
 
    if(CheckPointer(tmp))
