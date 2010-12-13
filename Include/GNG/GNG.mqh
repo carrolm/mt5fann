@@ -49,7 +49,7 @@ CGNGAlgorithm::CGNGAlgorithm(void)
   {
    Neurons=new CGNGNeuronList();
    Connections=new CGNGConnectionList();
-   
+
    Neurons.FreeMode(true);
    Connections.FreeMode(true);
   }
@@ -461,6 +461,7 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
          useless=tmp;
         }
      }
+
    if(min_U!=0 && max_error/min_U>k) Neurons.Delete(Neurons.IndexOf(tmp));
 
 //--- Если номер текущей итерации кратен lambda, и предельный размер   
