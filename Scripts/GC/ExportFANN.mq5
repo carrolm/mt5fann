@@ -77,7 +77,7 @@ void OnStart()
    if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
    if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
-   Write_File(SymbolsArray,MaxSymbols,5000,50,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,5000,20,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
   }
