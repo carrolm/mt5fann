@@ -12,7 +12,7 @@
 #include <GC\GetVectors.mqh>
 
 //--- количество входных векторов, используемых дл€ обучени€
-input int      samples=1000;
+input int      samples=10000;
 
 //--- параметры алгоритма
 input int lambda=20;
@@ -25,6 +25,7 @@ input int max_nodes=1000;
 double OV[];
 //---глобальные переменные
 CGNGUAlgorithm *GNGAlgorithm;
+//CGNGAlgorithm *GNGAlgorithm;
 int window;
 //int rsi_handle;
 int input_dimension;
@@ -62,12 +63,15 @@ void OnStart()
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGNGUAlgorithm;
+//   GNGAlgorithm=new CGNGAlgorithm;
 
 //--- векторы данных
    double v[],v1[],v2[];
    ArrayResize(v,input_dimension);
    ArrayResize(v1,input_dimension);
    ArrayResize(v2,input_dimension);
+   GetVectors(v1,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,0);
+   GetVectors(v2,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,3);
 
 //   for(i=0;i<input_dimension;i++)
 //     {
@@ -177,7 +181,7 @@ void OnStart()
       tmpc=GNGAlgorithm.Connections.GetFirstNode();
       while(CheckPointer(tmpc))
         {
-         int x1,x2,y1,y2;
+         int x1=0,x2,y1=0,y2;
 
          tmp=GNGAlgorithm.Neurons.Find(tmpc.uid1);
          if(tmp!=NULL)
