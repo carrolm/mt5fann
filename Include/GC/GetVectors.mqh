@@ -153,7 +153,7 @@ bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl="",E
    double Close[];
    ArraySetAsSeries(Close,true);
 // копируем историю
-   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
+   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+5,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
 
    if(maxcount<num_inputvectors+2)

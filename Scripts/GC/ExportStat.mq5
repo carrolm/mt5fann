@@ -70,7 +70,7 @@ void OnStart()
    if(_EURCHF_) SymbolsArray[MaxSymbols++]="EURCHF";//Euro vs US Dollar
    if(_EURJPY_) SymbolsArray[MaxSymbols++]="EURJPY";//Euro vs US Dollar
                                                     //WriteFile( 1,5,2010); // день, мес€ц, год 
-   Write_File(SymbolsArray,MaxSymbols,10000,_Pers_); //
+   Write_File(SymbolsArray,MaxSymbols,1000,_Pers_); //
 //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
@@ -78,18 +78,19 @@ void OnStart()
 //+------------------------------------------------------------------+
 int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
   {
-   int shift=0,i,pp;
+   int shift=0,i,pp,j;
    double SumBuy,SumSell,SumWait;
    int QtyBuy,QtySell,QtyWait;
    int ProfQty[11];
    double res;
+   int ni=24,no=1;
    int FileHandle=0,TrainFile=0;
    int SymbolIdx;
    string outstr;
    int maxprof=11;
    MqlRates rates[];
    MqlDateTime tm;
-   double IV[10],OV[2];
+   double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    FileHandle=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
    TrainFile=FileOpen("train.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
@@ -99,7 +100,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
       TimeToStruct(rates[2].time,tm);
       FileWrite(FileHandle,// записываем в файл шапку
                 "Symbol","TotalProfit","QtyWait","QtyBuy","SumBuy","QtySell","SumSell",(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
-      FileWrite(TrainFile,"X","Y","Z","Rez");
+      //FileWrite(TrainFile,"X","Y","Z","Rez");
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
@@ -107,13 +108,17 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
          for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
-            if(GetVectors(IV,OV,3,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
+            if(GetVectors(IV,OV,ni,no,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i))
               {
+                outstr="";
                 res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+                for(j=0;j<ni;j++) outstr+=(string)IV[j]+";";
+                for(j=0;j<no;j++) outstr+=(string)OV[j]+";";
+                 
                   //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
                  {
 //                  FileWrite(TrainFile,IV[0],IV[1],res);
-                  FileWrite(TrainFile,IV[0],IV[1],IV[2],res);
+                  FileWrite(TrainFile,outstr);
                  }
                if(0==res) continue;
                if((res<0 && res>-2) || (res>0 && res<2)) res=0;
