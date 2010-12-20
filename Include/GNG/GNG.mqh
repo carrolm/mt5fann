@@ -26,7 +26,8 @@ public:
    double            eps_w;
    double            eps_n;
    int               max_nodes;
-
+   double            max_E;
+   double            maximun_E;
                      CGNGAlgorithm();
                     ~CGNGAlgorithm();
    virtual void      Init(int __input_dimension,
@@ -38,7 +39,9 @@ public:
                           double __beta,
                           double __eps_w,
                           double __eps_n,
-                          int __max_nodes);
+                          int __max_nodes,
+                          double __max_E
+                          );
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
   };
@@ -81,7 +84,9 @@ void CGNGAlgorithm::Init(int __input_dimension,
                          double __beta,
                          double __eps_w,
                          double __eps_n,
-                         int __max_nodes)
+                         int __max_nodes,
+                         double __max_E
+                         )
   {
    iteration_number=0;
    input_dimension=__input_dimension;
@@ -92,6 +97,7 @@ void CGNGAlgorithm::Init(int __input_dimension,
    eps_w = __eps_w;
    eps_n = __eps_n;
    max_nodes=__max_nodes;
+   max_E=__max_E;
    Neurons.Init(v1,v2);
 
    CGNGNeuron *tmp;
@@ -214,53 +220,57 @@ bool CGNGAlgorithm::ProcessVector(double &in[],bool train=true)
             u=tmp;
         }
 
-      //--- 2.Среди соседей u найти узел u с наибольшей локальной ошибкой. 
-      tmpc=Connections.FindFirstConnection(u.uid);
-      if(tmpc.uid1==u.uid) v=Neurons.Find(tmpc.uid2);
-      else v=Neurons.Find(tmpc.uid1);
-      while(CheckPointer(tmpc=Connections.FindNextConnection(u.uid)))
+      if(max_E<u.E)
         {
-         if(tmpc.uid1==u.uid) tmp=Neurons.Find(tmpc.uid2);
-         else tmp=Neurons.Find(tmpc.uid1);
-         if(tmp.E>v.E)
-            v=tmp;
+         //--- 2.Среди соседей u найти узел u с наибольшей локальной ошибкой. 
+         tmpc=Connections.FindFirstConnection(u.uid);
+         if(tmpc.uid1==u.uid) v=Neurons.Find(tmpc.uid2);
+         else v=Neurons.Find(tmpc.uid1);
+         while(CheckPointer(tmpc=Connections.FindNextConnection(u.uid)))
+           {
+            if(tmpc.uid1==u.uid) tmp=Neurons.Find(tmpc.uid2);
+            else tmp=Neurons.Find(tmpc.uid1);
+            if(tmp.E>v.E)
+               v=tmp;
+           }
+
+         //--- 3.Создать узел r "посредине" между u и v.                      
+         double wr[],wu[],wv[];
+
+         u.Weights(wu);
+         v.Weights(wv);
+         ArrayResize(wr,input_dimension);
+         for(i=0;i<input_dimension;i++) wr[i]=(wu[i]+wv[i])/2;
+
+         CGNGNeuron *r=Neurons.Append();
+         r.Init(wr);
+         //--- 4.Заменить связь между u и v на связи между u и r, v и r       
+         tmpc=Connections.Append();
+         tmpc.uid1=u.uid;
+         tmpc.uid2=r.uid;
+
+         tmpc=Connections.Append();
+         tmpc.uid1=v.uid;
+         tmpc.uid2=r.uid;
+
+         Connections.Find(u.uid,v.uid);
+         Connections.DeleteCurrent();
+
+         //--- 5.Уменьшить ошибки нейронов u и v, установить значение ошибки  
+         //---   нейрона r таким же, как у u.                                 
+
+         u.E*=alpha;
+         v.E*=alpha;
+         r.E = u.E;
         }
-
-      //--- 3.Создать узел r "посредине" между u и v.                      
-      double wr[],wu[],wv[];
-
-      u.Weights(wu);
-      v.Weights(wv);
-      ArrayResize(wr,input_dimension);
-      for(i=0;i<input_dimension;i++) wr[i]=(wu[i]+wv[i])/2;
-
-      CGNGNeuron *r=Neurons.Append();
-      r.Init(wr);
-      //--- 4.Заменить связь между u и v на связи между u и r, v и r       
-      tmpc=Connections.Append();
-      tmpc.uid1=u.uid;
-      tmpc.uid2=r.uid;
-
-      tmpc=Connections.Append();
-      tmpc.uid1=v.uid;
-      tmpc.uid2=r.uid;
-
-      Connections.Find(u.uid,v.uid);
-      Connections.DeleteCurrent();
-
-      //--- 5.Уменьшить ошибки нейронов u и v, установить значение ошибки  
-      //---   нейрона r таким же, как у u.                                 
-
-      u.E*=alpha;
-      v.E*=alpha;
-      r.E = u.E;
      }
-
 //--- Уменьшить ошибки всех нейронов на долю beta                     
    tmp=Neurons.GetFirstNode();
+   maximun_E=0;
    while(CheckPointer(tmp))
      {
       tmp.E*=(1-beta);
+      if(maximun_E<tmp.E) maximun_E=tmp.E;
       tmp=Neurons.GetNextNode();
      }
 
@@ -480,63 +490,66 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
          if(tmp.E>u.E)
             u=tmp;
         }
-
-      //--- 2.Среди соседей u найти узел u с наибольшей локальной ошибкой. 
-
-      tmpc=Connections.FindFirstConnection(u.uid);
-      if(tmpc.uid1==u.uid) v=Neurons.Find(tmpc.uid2);
-      else v=Neurons.Find(tmpc.uid1);
-      while(CheckPointer(tmpc=Connections.FindNextConnection(u.uid)))
+      if(u.E>max_E)
         {
-         if(tmpc.uid1==u.uid) tmp=Neurons.Find(tmpc.uid2);
-         else tmp=Neurons.Find(tmpc.uid1);
-         if(tmp.E>v.E)
-            v=tmp;
+         //--- 2.Среди соседей u найти узел u с наибольшей локальной ошибкой. 
+
+         tmpc=Connections.FindFirstConnection(u.uid);
+         if(tmpc.uid1==u.uid) v=Neurons.Find(tmpc.uid2);
+         else v=Neurons.Find(tmpc.uid1);
+         while(CheckPointer(tmpc=Connections.FindNextConnection(u.uid)))
+           {
+            if(tmpc.uid1==u.uid) tmp=Neurons.Find(tmpc.uid2);
+            else tmp=Neurons.Find(tmpc.uid1);
+            if(tmp.E>v.E)
+               v=tmp;
+           }
+
+         //--- 3.Создать узел r "посредине" между u и v.                      
+         //---   Вычислить его фактор полезности                              
+
+         double wr[],wu[],wv[];
+
+         u.Weights(wu);
+         v.Weights(wv);
+         ArrayResize(wr,input_dimension);
+         for(i=0;i<input_dimension;i++) wr[i]=(wu[i]+wv[i])/2;
+
+         CGNGNeuron *r=Neurons.Append();
+         r.Init(wr);
+
+         r.U=(u.U+v.U)/2;
+
+         //--- 4.Заменить связь между u и v на связи между u и r, v и r       
+
+         tmpc=Connections.Append();
+         tmpc.uid1=u.uid;
+         tmpc.uid2=r.uid;
+
+         tmpc=Connections.Append();
+         tmpc.uid1=v.uid;
+         tmpc.uid2=r.uid;
+
+         Connections.Find(u.uid,v.uid);
+         Connections.DeleteCurrent();
+
+         //--- 5.Уменьшить ошибки нейронов u и v, установить значение ошибки  
+         //---   нейрона r таким же, как у u.                                 
+
+         u.E*=alpha;
+         v.E*=alpha;
+         r.E = u.E;
         }
-
-      //--- 3.Создать узел r "посредине" между u и v.                      
-      //---   Вычислить его фактор полезности                              
-
-      double wr[],wu[],wv[];
-
-      u.Weights(wu);
-      v.Weights(wv);
-      ArrayResize(wr,input_dimension);
-      for(i=0;i<input_dimension;i++) wr[i]=(wu[i]+wv[i])/2;
-
-      CGNGNeuron *r=Neurons.Append();
-      r.Init(wr);
-
-      r.U=(u.U+v.U)/2;
-
-      //--- 4.Заменить связь между u и v на связи между u и r, v и r       
-
-      tmpc=Connections.Append();
-      tmpc.uid1=u.uid;
-      tmpc.uid2=r.uid;
-
-      tmpc=Connections.Append();
-      tmpc.uid1=v.uid;
-      tmpc.uid2=r.uid;
-
-      Connections.Find(u.uid,v.uid);
-      Connections.DeleteCurrent();
-
-      //--- 5.Уменьшить ошибки нейронов u и v, установить значение ошибки  
-      //---   нейрона r таким же, как у u.                                 
-
-      u.E*=alpha;
-      v.E*=alpha;
-      r.E = u.E;
      }
-
 //--- Уменьшить ошибки и полезность всех нейронов на долю beta 	     
 
    tmp=Neurons.GetFirstNode();
+   maximun_E=0;
    while(CheckPointer(tmp))
      {
       tmp.E*=(1-beta);
       tmp.U*=(1-beta);
+      if(maximun_E<tmp.E) maximun_E=tmp.E;
       tmp=Neurons.GetNextNode();
      }
 

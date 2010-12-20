@@ -83,7 +83,7 @@ int Write_File(string &SymbolsArray[],int MaxSymbols,int qty,int Pers)
    int QtyBuy,QtySell,QtyWait;
    int ProfQty[11];
    double res;
-   int ni=24,no=1;
+   int ni=3,no=1;
    int FileHandle=0,TrainFile=0;
    int SymbolIdx;
    string outstr;
