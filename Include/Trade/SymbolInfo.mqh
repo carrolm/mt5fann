@@ -44,95 +44,95 @@ protected:
 public:
                      CSymbolInfo();
    //--- methods of access to protected data
-   string            Name() const                     { return(m_name);                          }
-   void              Name(string name)                { m_name=name; Refresh();                  }
+   string            Name()                         const { return(m_name);               }
+   void              Name(string name)                    { m_name=name; Refresh();       }
    void              Refresh();
    bool              RefreshRates();
    //--- fast access methods to the integer symbol propertyes
-   bool              Select() const;
+   bool              Select()                       const;
    bool              Select(bool select);
-   bool              IsSynchronized() const;
+   bool              IsSynchronized()               const;
    //--- volumes
-   long              Volume() const                   { return(m_tick.volume);                   }
-   long              VolumeHigh() const;
-   long              VolumeLow() const;
-   long              VolumeBid() const;
-   long              VolumeAsk() const;
+   long              Volume()                       const { return(m_tick.volume);        }
+   long              VolumeHigh()                   const;
+   long              VolumeLow()                    const;
+   long              VolumeBid()                    const;
+   long              VolumeAsk()                    const;
    //--- miscellaneous
-   datetime          Time() const                     { return(m_tick.time);                     }
-   int               Spread() const;
-   bool              SpreadFloat() const;
-   int               TicksBookDepth() const;
+   datetime          Time()                         const { return(m_tick.time);          }
+   int               Spread()                       const;
+   bool              SpreadFloat()                  const;
+   int               TicksBookDepth()               const;
    //--- trade levels
-   int               StopsLevel() const;
-   int               FreezeLevel() const;
+   int               StopsLevel()                   const;
+   int               FreezeLevel()                  const;
    //--- fast access methods to the double symbol propertyes
    //--- bid parameters
-   double            Bid() const                      { return(m_tick.bid);                      }
-   double            BidHigh() const;
-   double            BidLow() const;
+   double            Bid()                          const { return(m_tick.bid);           }
+   double            BidHigh()                      const;
+   double            BidLow()                       const;
    //--- ask parameters
-   double            Ask() const                      { return(m_tick.ask);                      }
-   double            AskHigh() const;
-   double            AskLow() const;
+   double            Ask()                          const { return(m_tick.ask);           }
+   double            AskHigh()                      const;
+   double            AskLow()                       const;
    //--- last parameters
-   double            Last() const                     { return(m_tick.last);                     }
-   double            LastHigh() const;
-   double            LastLow() const;
+   double            Last()                         const { return(m_tick.last);          }
+   double            LastHigh()                     const;
+   double            LastLow()                      const;
    //--- fast access methods to the mix symbol propertyes
    //--- terms of trade
-   ENUM_SYMBOL_CALC_MODE  TradeCalcMode() const       { return(m_trade_calcmode);                }
-   string                 TradeCalcModeDescription() const;
-   ENUM_SYMBOL_TRADE_MODE TradeMode() const           { return(m_trade_mode);                    }
-   string                 TradeModeDescription() const;
+   ENUM_SYMBOL_CALC_MODE TradeCalcMode()            const { return(m_trade_calcmode);     }
+   string            TradeCalcModeDescription()     const;
+   ENUM_SYMBOL_TRADE_MODE TradeMode()               const { return(m_trade_mode);         }
+   string            TradeModeDescription()         const;
    //--- execution terms of trade
-   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution() const { return(m_trade_execution);               }
-   string                      TradeExecutionDescription() const;
+   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution()     const { return(m_trade_execution);    }
+   string            TradeExecutionDescription()    const;
    //--- swap terms of trade
-   ENUM_SYMBOL_SWAP_MODE SwapMode() const             { return(m_swap_mode);                     }
-   string                SwapModeDescription() const;
-   ENUM_DAY_OF_WEEK      SwapRollover3days() const    { return(m_swap3);                         }
-   string                SwapRollover3daysDescription() const;
+   ENUM_SYMBOL_SWAP_MODE SwapMode()                 const { return(m_swap_mode);          }
+   string            SwapModeDescription()          const;
+   ENUM_DAY_OF_WEEK  SwapRollover3days()            const { return(m_swap3);              }
+   string            SwapRollover3daysDescription() const;
    //--- margin parameters
-   double            MarginInitial() const            { return(m_margin_initial);                }
-   double            MarginMaintenance() const        { return(m_margin_maintenance);            }
-   double            MarginLong() const               { return(m_margin_long);                   }
-   double            MarginShort() const              { return(m_margin_short);                  }
-   double            MarginLimit() const              { return(m_margin_limit);                  }
-   double            MarginStop() const               { return(m_margin_stop);                   }
-   double            MarginStopLimit() const          { return(m_margin_stoplimit);              }
+   double            MarginInitial()                const { return(m_margin_initial);     }
+   double            MarginMaintenance()            const { return(m_margin_maintenance); }
+   double            MarginLong()                   const { return(m_margin_long);        }
+   double            MarginShort()                  const { return(m_margin_short);       }
+   double            MarginLimit()                  const { return(m_margin_limit);       }
+   double            MarginStop()                   const { return(m_margin_stop);        }
+   double            MarginStopLimit()              const { return(m_margin_stoplimit);   }
    //--- trade flags parameters
-   int               TradeTimeFlags() const           { return(m_trade_time_flags);              }
-   int               TradeFillFlags() const           { return(m_trade_fill_flags);              }
+   int               TradeTimeFlags()               const { return(m_trade_time_flags);   }
+   int               TradeFillFlags()               const { return(m_trade_fill_flags);   }
    //--- tick parameters
-   int               Digits() const                   { return(m_digits);                        }
-   double            Point() const                    { return(m_point);                         }
-   double            TickValue() const                { return(m_tick_value);                    }
-   double            TickValueProfit() const          { return(m_tick_value_profit);             }
-   double            TickValueLoss() const            { return(m_tick_value_loss);               }
-   double            TickSize() const                 { return(m_tick_size);                     }
+   int               Digits()                       const { return(m_digits);             }
+   double            Point()                        const { return(m_point);              }
+   double            TickValue()                    const { return(m_tick_value);         }
+   double            TickValueProfit()              const { return(m_tick_value_profit);  }
+   double            TickValueLoss()                const { return(m_tick_value_loss);    }
+   double            TickSize()                     const { return(m_tick_size);          }
    //--- lots parameters
-   double            ContractSize() const             { return(m_contract_size);                 }
-   double            LotsMin() const                  { return(m_lots_min);                      }
-   double            LotsMax() const                  { return(m_lots_max);                      }
-   double            LotsStep() const                 { return(m_lots_step);                     }
-   double            LotsLimit() const                { return(m_lots_limit);                    }
+   double            ContractSize()                 const { return(m_contract_size);      }
+   double            LotsMin()                      const { return(m_lots_min);           }
+   double            LotsMax()                      const { return(m_lots_max);           }
+   double            LotsStep()                     const { return(m_lots_step);          }
+   double            LotsLimit()                    const { return(m_lots_limit);         }
    //--- swaps
-   double            SwapLong() const                 { return(m_swap_long);                     }
-   double            SwapShort() const                { return(m_swap_short);                    }
+   double            SwapLong()                     const { return(m_swap_long);          }
+   double            SwapShort()                    const { return(m_swap_short);         }
    //--- fast access methods to the string symbol propertyes
-   string            CurrencyBase() const;
-   string            CurrencyProfit() const;
-   string            CurrencyMargin() const;
-   string            Bank() const;
-   string            Description() const;
-   string            Path() const;
+   string            CurrencyBase()                 const;
+   string            CurrencyProfit()               const;
+   string            CurrencyMargin()               const;
+   string            Bank()                         const;
+   string            Description()                  const;
+   string            Path()                         const;
    //--- access methods to the API MQL5 functions
    bool              InfoInteger(ENUM_SYMBOL_INFO_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_SYMBOL_INFO_DOUBLE prop_id,double& var) const;
    bool              InfoString(ENUM_SYMBOL_INFO_STRING prop_id,string& var) const;
    //--- service methods
-   double            NormalizePrice(double price) const;
+   double            NormalizePrice(double price)   const;
   };
 //+------------------------------------------------------------------+
 //| Constructor CSymbolInfo.                                         |

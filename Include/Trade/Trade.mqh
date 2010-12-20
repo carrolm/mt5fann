@@ -9,6 +9,13 @@
 #include "HistoryOrderInfo.mqh"
 #include "PositionInfo.mqh"
 #include "DealInfo.mqh"
+//--- enumerations
+enum ENUM_LOG_LEVELS
+  {
+   LOG_LEVEL_NO    =0,
+   LOG_LEVEL_ERRORS=1,
+   LOG_LEVEL_ALL   =2
+  };
 //+------------------------------------------------------------------+
 //| Class CTrade.                                                    |
 //| Appointment: Class trade operations.                             |
@@ -23,12 +30,12 @@ protected:
    ulong             m_deviation;       // deviation default
    ENUM_ORDER_TYPE_FILLING m_type_filling;
    //---
-   int               m_log_level;
+   ENUM_LOG_LEVELS   m_log_level;
 
 public:
                      CTrade();
    //--- methods of access to protected data
-   void              LogLevel(int log_level)                 { m_log_level=log_level;               }
+   void              LogLevel(ENUM_LOG_LEVELS log_level)     { m_log_level=log_level;               }
    void              Request(MqlTradeRequest &request) const;
    ENUM_TRADE_REQUEST_ACTIONS RequestAction()          const { return(m_request.action);            }
    string            RequestActionDescription()        const;
@@ -130,10 +137,10 @@ void CTrade::CTrade()
    m_magic       =0;
    m_deviation   =10;
    m_type_filling=ORDER_FILLING_AON;
-   m_log_level   =1;                                      // only errors logged
+   m_log_level   =LOG_LEVEL_ERRORS;
 //--- check programm mode
-   if(MQL5InfoInteger(MQL5_OPTIMIZATION)) m_log_level=0;  // no message logged
-   if(MQL5InfoInteger(MQL5_TESTING))      m_log_level=2;  // all message logged
+   if(MQL5InfoInteger(MQL5_OPTIMIZATION)) m_log_level=LOG_LEVEL_NO;
+   if(MQL5InfoInteger(MQL5_TESTING))      m_log_level=LOG_LEVEL_ALL;
   }
 //+------------------------------------------------------------------+
 //| Get the request structure.                                       |
@@ -321,17 +328,20 @@ bool CTrade::PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double 
    if(!OrderCheck(m_request,m_check_result))
      {
       m_result.retcode=m_check_result.retcode;
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       //--- copy return code
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -358,16 +368,19 @@ bool CTrade::PositionModify(const string symbol,double sl,double tp)
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -430,7 +443,8 @@ bool CTrade::PositionClose(const string symbol,ulong deviation)
         {
          //--- copy return code
          m_result.retcode=m_check_result.retcode;
-         if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+         if(m_log_level>LOG_LEVEL_NO)
+            printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
          return(false);
         }
       //--- order send
@@ -439,14 +453,16 @@ bool CTrade::PositionClose(const string symbol,ulong deviation)
          if(--retry_count!=0) continue;
          if(retcode==TRADE_RETCODE_DONE_PARTIAL)
             m_result.retcode=retcode;
-         if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+         if(m_log_level>LOG_LEVEL_NO)
+            printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
          return(false);
         }
       retcode=TRADE_RETCODE_DONE_PARTIAL;
       if(partial_close) Sleep(1000);
      }
    while(partial_close);
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -498,16 +514,19 @@ bool CTrade::OrderOpen(const string symbol,ENUM_ORDER_TYPE order_type,double vol
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -540,16 +559,19 @@ bool CTrade::OrderModify(ulong ticket,double price,double sl,double tp,ENUM_ORDE
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -572,16 +594,19 @@ bool CTrade::OrderDelete(ulong ticket)
      {
       //--- copy return code
       m_result.retcode=m_check_result.retcode;
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
 //--- order send
    if(!OrderSend(m_request,m_result))
      {
-      if(m_log_level>0) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+      if(m_log_level>LOG_LEVEL_NO)
+         printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
       return(false);
      }
-   if(m_log_level>1) printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
+   if(m_log_level>LOG_LEVEL_ERRORS)
+      printf(__FUNCTION__+": %s [%s]",FormatRequest(action,m_request),FormatRequestResult(result,m_request,m_result));
 //--- ok
    return(true);
   }
@@ -593,7 +618,7 @@ bool CTrade::OrderDelete(ulong ticket)
 //+------------------------------------------------------------------+
 void CTrade::PrintRequest() const
   {
-   if(m_log_level<2) return;
+   if(m_log_level<LOG_LEVEL_ALL) return;
 //---
    string str;
    printf("%s",FormatRequest(str,m_request));
@@ -606,7 +631,7 @@ void CTrade::PrintRequest() const
 //+------------------------------------------------------------------+
 void CTrade::PrintResult() const
   {
-   if(m_log_level<2) return;
+   if(m_log_level<LOG_LEVEL_ALL) return;
 //---
    string str;
    printf("%s",FormatRequestResult(str,m_request,m_result));

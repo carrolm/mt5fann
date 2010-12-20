@@ -96,11 +96,18 @@ protected:
    virtual bool      Processing();
    //--- trade open positions check
    virtual bool      CheckOpen();
-   virtual bool      CheckOpenShort();
    virtual bool      CheckOpenLong();
+   virtual bool      CheckOpenShort();
    //--- trade open positions processing
    virtual bool      OpenLong(double price,double sl,double tp);
    virtual bool      OpenShort(double price,double sl,double tp);
+   //--- trade reverse positions check
+   virtual bool      CheckReverse();
+   virtual bool      CheckReverseLong();
+   virtual bool      CheckReverseShort();
+   //--- trade reverse positions processing
+   virtual bool      ReverseLong(double price,double sl,double tp);
+   virtual bool      ReverseShort(double price,double sl,double tp);
    //--- trade close positions check
    virtual bool      CheckClose();
    virtual bool      CheckCloseLong();
@@ -134,6 +141,7 @@ protected:
    //--- lot for trade
    double            LotOpenLong(double price,double sl);
    double            LotOpenShort(double price,double sl);
+   double            LotReverse(double sl);
    //---
    void              PrepareHistoryDate();
    void              HistoryPoint(bool from_check_trade=false);
@@ -474,15 +482,17 @@ bool CExpert::Processing()
    if(m_position.Select(m_symbol.Name()))
      {
       //--- open position is available
+      //--- check the possibility of reverse the position
+      if(CheckReverse()) return(true);
       //--- check the possibility of closing the position/delete pending orders
       if(!CheckClose())
         {
          //--- check the possibility of modifying the position
          if(CheckTrailingStop()) return(true);
+         //--- return without operations
+         return(false);
         }
      }
-//--- check the possibility of opening a position/setting pending order
-   if(CheckOpen()) return(true);
 //--- check if plased pending orders
    int total=OrdersTotal();
    if(total!=0)
@@ -505,8 +515,12 @@ bool CExpert::Processing()
             //--- check the possibility of modifying a pending order to sell
             if(CheckTrailingOrderShort()) return(true);
            }
+         //--- return without operations
+         return(false);
         }
      }
+//--- check the possibility of opening a position/setting pending order
+   if(CheckOpen()) return(true);
 //--- return without operations
    return(false);
   }
@@ -632,6 +646,89 @@ bool CExpert::OpenShort(double price,double sl,double tp)
    if(lot==0.0) return(false);
 //---
    return(m_trade.Sell(lot,price,sl,tp));
+  }
+//+------------------------------------------------------------------+
+//| Check for position reverse                                       |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if trade operation processed, false otherwise.      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CExpert::CheckReverse()
+  {
+   if(m_position.Type()==POSITION_TYPE_BUY)
+     {
+      //--- check the possibility of reverse the long position
+      if(CheckReverseLong())  return(true);
+     }
+   else
+      //--- check the possibility of reverse the short position
+      if(CheckReverseShort()) return(true);
+//--- return without operations
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Check for long position reverse                                  |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if trade operation processed, false otherwise.      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CExpert::CheckReverseLong()
+  {
+   double   price,sl,tp;
+   datetime expiration=TimeCurrent();
+//--- check signal for long reverse operations
+   if(m_signal.CheckReverseLong(price,sl,tp,expiration)) return(ReverseLong(price,sl,tp));
+//--- return without operations
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Check for short position reverse                                 |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if trade operation processed, false otherwise.      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CExpert::CheckReverseShort()
+  {
+   double   price,sl,tp;
+   datetime expiration=TimeCurrent();
+//--- check signal for short reverse operations
+   if(m_signal.CheckReverseShort(price,sl,tp,expiration)) return(ReverseShort(price,sl,tp));
+//--- return without operations
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Long position reverse                                            |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss,                                       |
+//|         tp    - take profit.                                     |
+//| OUTPUT: true-if trade operation processed, false otherwise.      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CExpert::ReverseLong(double price,double sl,double tp)
+  {
+//--- get lot for reverse
+   double lot=LotReverse(sl);
+//--- check lot
+   if(lot==0.0) return(false);
+//---
+   return(m_trade.Sell(lot,price,sl,tp));
+  }
+//+------------------------------------------------------------------+
+//| Short position reverse                                           |
+//| INPUT:  price - price,                                           |
+//|         sl    - stop loss,                                       |
+//|         tp    - take profit.                                     |
+//| OUTPUT: true-if trade operation processed, false otherwise.      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CExpert::ReverseShort(double price,double sl,double tp)
+  {
+//--- get lot for reverse
+   double lot=LotReverse(sl);
+//--- check lot
+   if(lot==0.0) return(false);
+//---
+   return(m_trade.Buy(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+
 //| Check for position close or limit/stop order delete              |
@@ -990,9 +1087,7 @@ bool CExpert::DeleteOrderShort()
 //+------------------------------------------------------------------+
 double CExpert::LotOpenLong(double price,double sl)
   {
-   double lot=m_money.CheckOpenLong(price,sl);
-//---
-   return(lot);
+   return(m_money.CheckOpenLong(price,sl));
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for open short position.               |
@@ -1003,9 +1098,17 @@ double CExpert::LotOpenLong(double price,double sl)
 //+------------------------------------------------------------------+
 double CExpert::LotOpenShort(double price,double sl)
   {
-   double lot=m_money.CheckOpenShort(price,sl);
-//---
-   return(lot);
+   return(m_money.CheckOpenShort(price,sl));
+  }
+//+------------------------------------------------------------------+
+//| Method of getting the lot for reverse position.                  |
+//| INPUT:  sl - stop loss.                                          |
+//| OUTPUT: lot for open.                                            |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+double CExpert::LotReverse(double sl)
+  {
+   return(m_money.CheckReverse(GetPointer(m_position),sl));
   }
 //+------------------------------------------------------------------+
 //| Method of setting the start date for the history.                |

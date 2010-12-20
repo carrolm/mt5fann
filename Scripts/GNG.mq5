@@ -22,6 +22,7 @@ input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
+input double max_E=0.01;
 double OV[];
 //---глобальные переменные
 CGNGUAlgorithm *GNGAlgorithm;
@@ -59,7 +60,7 @@ void OnStart()
 //   PrintFormat("copied=%d     _samples=%d",copied,_samples);
 
 //--- запоминаем времена открыти€ первых 100 баров
-//   CopyTime(_Symbol,_Period,0,100,time);
+ CopyTime(_Symbol,_Period,0,100,time);
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGNGUAlgorithm;
@@ -80,7 +81,7 @@ void OnStart()
 //     }
 //
 //--- инициализаци€ алгоритма
-   GNGAlgorithm.Init(input_dimension,v1,v2,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes);
+   GNGAlgorithm.Init(input_dimension,v1,v2,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes,max_E);
    if(window>0)
      {
       //-- рисуем пр€моугольное поле и информационные метки
@@ -126,7 +127,7 @@ void OnStart()
          //--- мен€ем информационную метку
          ObjectSetString(0,"Label_samples",OBJPROP_TEXT,"Total samples: "+string(i+1));
         }
-      else Comment("Total samples: "+string(i+1));
+      else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
       //--- передаем входной вектор алгоритму дл€ расчета
       GNGAlgorithm.ProcessVector(v);
 
@@ -176,7 +177,7 @@ void OnStart()
         {
          ObjectSetString(0,"Label_neurons",OBJPROP_TEXT,"Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
         }
-      else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
+      else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
       //--- отрисовка св€зей
       tmpc=GNGAlgorithm.Connections.GetFirstNode();
       while(CheckPointer(tmpc))
