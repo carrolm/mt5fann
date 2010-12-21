@@ -27,8 +27,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
 // работаем только если есть фарктал! только на экстремумах!
-   ArrayInitialize(InputVector,EMPTY_VALUE);
-   ArrayInitialize(OutputVector,EMPTY_VALUE);
+   ArrayInitialize(InputVector,0);
+   ArrayInitialize(OutputVector,0);
    double Low[],High[];
    ArraySetAsSeries(Low,true); ArraySetAsSeries(High,true);
 // копируем историю

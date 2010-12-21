@@ -293,7 +293,7 @@ bool CGNGAlgorithm::StoppingCriterion()
 class CGNGUAlgorithm:public CGNGAlgorithm
   {
 public:
-   double            k;
+   double            koeff;
    virtual void      Init(int __input_dimension,
                           double &v1[],
                           double &v2[],
@@ -304,7 +304,8 @@ public:
                           double __eps_w,
                           double __eps_n,
                           int __max_nodes,
-                          double __k);
+                         double __max_E,
+                          double __k=2);
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
   };
@@ -330,6 +331,7 @@ void CGNGUAlgorithm::Init(int __input_dimension,
                           double __eps_w,
                           double __eps_n,
                           int __max_nodes,
+                         double __max_E,
                           double __k)
   {
    iteration_number=0;
@@ -341,7 +343,7 @@ void CGNGUAlgorithm::Init(int __input_dimension,
    eps_w = __eps_w;
    eps_n = __eps_n;
    max_nodes=__max_nodes;
-   k=__k;
+   koeff=__k;
    Neurons.Init(v1,v2);
 
    CGNGNeuron *tmp;
@@ -472,7 +474,7 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
         }
      }
 
-   if(min_U!=0 && max_error/min_U>k) Neurons.Delete(Neurons.IndexOf(tmp));
+   if(min_U!=0 && max_error/min_U>koeff&&Neurons.Total()>2) Neurons.Delete(Neurons.IndexOf(tmp));
 
 //--- Если номер текущей итерации кратен lambda, и предельный размер   
 //--- сети не достигнут, создать новый нейрон r по следующим правилам  
