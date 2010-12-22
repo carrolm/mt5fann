@@ -25,8 +25,9 @@
 //---- indicator buffers
 double ExtUpperBuffer[];
 double ExtLowerBuffer[];
-//CMT5FANN mt5fannHigh;
-//CMT5FANN mt5fannLow;
+input int _TREND_=20;// на сколько смотреть вперед
+input int  _limit_=300;// на сколько баров уходить назад
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -93,20 +94,19 @@ int OnCalculate(const int rates_total,
 //---
    if(prev_calculated<1)
      {
-      limit=100;
+      limit=_limit_;
       //--- clean up arrays
       ArrayInitialize(ExtUpperBuffer,EMPTY_VALUE);
       ArrayInitialize(ExtLowerBuffer,EMPTY_VALUE);
      }
-   else limit=rates_total-prev_calculated;
-   limit=300;
+   else limit=100;
    double res;
 
    DelTrash();
 
-   for(i=1;i<limit;i++)
+   for(i=1;i<_limit_;i++)
      {
-      res=GetTrend(20,_Symbol,0,i,true);
+      res=GetTrend(_TREND_,_Symbol,0,i,true);
       //if(0!=res)Print(res);
       //---- Price Hi
       //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])

@@ -23,7 +23,7 @@ input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
-input double max_E=0.01;
+input double max_E=0.1;
 double OV[];
 //---глобальные переменные
 CGNGUAlgorithm *GNGAlgorithm;
