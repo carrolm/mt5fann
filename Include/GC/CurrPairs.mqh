@@ -1,21 +1,29 @@
 input bool _EURUSD_=true;//Euro vs US Dollar
-input bool _GBPUSD_=false;//Great Britain Pound vs US Dollar
-input bool _USDCHF_=false;//US Dollar vs Swiss Franc
-input bool _USDJPY_=false;//US Dollar vs Japanese Yen
-input bool _USDCAD_=false;//US Dollar vs Canadian Dollar
-input bool _AUDUSD_=false;//Australian Dollar vs US Dollar
-input bool _NZDUSD_=false;//New Zealand Dollar vs US Dollar
+input bool _GBPUSD_=true;//Great Britain Pound vs US Dollar
+input bool _USDCHF_=true;//US Dollar vs Swiss Franc
+input bool _USDJPY_=true;//US Dollar vs Japanese Yen
+input bool _USDCAD_=true;//US Dollar vs Canadian Dollar
+input bool _AUDUSD_=true;//Australian Dollar vs US Dollar
+input bool _NZDUSD_=true;//New Zealand Dollar vs US Dollar
+                         //input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
+// crosses
+/////input bool _AUDNZD_=true;//Australian Dollar vs New Zealand Dollar
+/////input bool _AUDCAD_=true;//Australian Dollar vs Canadian Dollar
+//input bool _AUDCHF_=true;//Australian Dollar vs Swiss Franc
+input bool _AUDJPY_=true;//Australian Dollar vs Japanese Yen
+                         //input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
+input bool _EURGBP_=true;//Euro vs Great Britain Pound 
+                         //input bool _EURAUD_=false;//Euro vs Australian Dollar
+input bool _EURCHF_=true;//Euro vs Swiss Franc
+input bool _EURJPY_=true;//Euro vs Japanese Yen
+
 input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
                           // crosses
 input bool _AUDNZD_=false;//Australian Dollar vs New Zealand Dollar
 input bool _AUDCAD_=false;//Australian Dollar vs Canadian Dollar
 input bool _AUDCHF_=false;//Australian Dollar vs Swiss Franc
-input bool _AUDJPY_=false;//Australian Dollar vs Japanese Yen
 input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
-input bool _EURGBP_=false;//Euro vs Great Britain Pound 
 input bool _EURAUD_=false;//Euro vs Australian Dollar
-input bool _EURCHF_=false;//Euro vs Swiss Franc
-input bool _EURJPY_=false;//Euro vs Japanese Yen
 input bool _EURNZD_=false;//Euro vs New Zealand Dollar
 input bool _EURCAD_=false;//Euro vs Canadian Dollar
 input bool _GBPCHF_=false;//Great Britain Pound vs Swiss Franc
@@ -23,6 +31,7 @@ input bool _GBPJPY_=false;//Great Britain Pound vs Japanese Yen
 input bool _CADCHF_=false;//Canadian Dollar vs Swiss Franc
  string SymbolsArray[30];
  int MaxSymbols=0;
+
 void CPInit()
   {
    if(_EURUSD_) SymbolsArray[MaxSymbols++]="EURUSD";//Euro vs US Dollar

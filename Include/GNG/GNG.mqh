@@ -198,7 +198,7 @@ bool CGNGAlgorithm::ProcessVector(double &in[],bool train=true)
    tmp=Neurons.GetFirstNode();
    while(CheckPointer(tmp))
      {
-      if(!Connections.FindFirstConnection(tmp.uid))
+      if(!Connections.FindFirstConnection(tmp.uid)&&Neurons.Total()>2)
         {
          Neurons.DeleteCurrent();
          tmp=Neurons.GetCurrentNode();
@@ -305,7 +305,7 @@ public:
                           double __eps_n,
                           int __max_nodes,
                          double __max_E,
-                          double __k=2);
+                          double __k=5);
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
   };
