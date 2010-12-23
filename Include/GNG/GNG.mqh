@@ -305,7 +305,7 @@ public:
                           double __eps_n,
                           int __max_nodes,
                          double __max_E,
-                          double __k=5);
+                          double __k=2);
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
   };
@@ -411,6 +411,7 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
       if(tmpc.uid1==Winner.uid) tmp = Neurons.Find(tmpc.uid2);
       if(tmpc.uid2==Winner.uid) tmp = Neurons.Find(tmpc.uid1);
 
+      if(!CheckPointer(tmp)) continue;
       tmp.Weights(weights);
       for(i=0;i<input_dimension;i++) delta[i]=eps_n*(in[i]-weights[i]);
       tmp.AdaptWeights(delta);
