@@ -13,10 +13,10 @@
 
 //--- количество входных векторов, используемых для обучения
 input int      samples=1000;
-
+input string AlgoStr="Easy";
 //--- параметры алгоритма
 input int lambda=20;
-input int age_max=50;
+input int age_max=30;
 input int ages=5;
 input double alpha=0.5;
 input double beta=0.0005;
@@ -24,7 +24,7 @@ input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
 input double max_E=0.1;
-double OV[];
+//double OV[];
 //---глобальные переменные
 CGNGUAlgorithm *GNGAlgorithm;
 //CGNGAlgorithm *GNGAlgorithm;
@@ -68,12 +68,13 @@ void OnStart()
 //   GNGAlgorithm=new CGNGAlgorithm;
 
 //--- векторы данных
-   double v[],v1[],v2[];
-   ArrayResize(v,input_dimension);
+   double v[],v1[],v2[],ov[];
+    ArrayResize(ov,1);
+ ArrayResize(v,input_dimension);
    ArrayResize(v1,input_dimension);
    ArrayResize(v2,input_dimension);i=2;
-   while(!GetVectors(v1,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,i++));
-   while(!GetVectors(v2,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,++i));
+   while(!GetVectors(v1,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i++));
+   while(!GetVectors(v2,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,++i));
 
 //   for(i=0;i<input_dimension;i++)
 //     {
@@ -118,12 +119,13 @@ void OnStart()
 //--- главный цикл агоритма начинаем с i=2 т.к. 2 векора уже использовали
    for(int ma=0;ma<ages;ma++)
      {
-      if(window>0)ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+ma+"  ME="+GNGAlgorithm.maximun_E);
+      //if(window>0)ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+(string)ma+"  ME="+(string)GNGAlgorithm.maximun_E);
       for(i=1;i<samples;i++)
         {
-         //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
+        if(window>0)ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+(string)ma+"  ME="+(string)GNGAlgorithm.maximun_E);
+        //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
          //--- на 3 бара - они меньше скоррелированы)
-         if(!GetVectors(v,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,i)) continue;
+         if(!GetVectors(v,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i)) continue;
          //              {
          //     for(j=0;j<input_dimension;j++)
          //       v[j]=RSI_buffer[i+j*3];
@@ -134,6 +136,8 @@ void OnStart()
             ObjectCreate(0,"Sample_"+(string)i,OBJ_ARROW,window,time[v[0]*400+500],v[1]*45+50);
             ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_ARROWCODE,158);
             ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Blue);
+            if(ov[0]>0.1) ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Green);
+            if(ov[0]<-0.1) ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Red);
             ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_BACK,true);
 
             //--- меняем информационную метку
