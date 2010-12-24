@@ -48,17 +48,8 @@ void OnStart()
    _samples=samples+input_dimension*10;
    if(_samples>Bars(_Symbol,_Period)) _samples=Bars(_Symbol,_Period);
 
-////--- получаем входные данные для алгоритма
-//   rsi_handle=iRSI(NULL,0,8,PRICE_CLOSE);
-//   int bars=0;
-//   while((bars=BarsCalculated(rsi_handle))<=0) Sleep(50);
-//
-//   int copied=CopyBuffer(rsi_handle,0,1,_samples,RSI_buffer);
-//   if(copied<=0) PrintFormat(" Не удалось скопировать данные индикатора RSI, BarsCalculated=%d. Ошибка %d",bars,GetLastError());
-//
 ////--- возвращаем заданное пользователем значение
    _samples=_samples-input_dimension*10;
-//   PrintFormat("copied=%d     _samples=%d",copied,_samples);
 
 //--- запоминаем времена открытия первых 100 баров
    CopyTime(_Symbol,_Period,0,1000,time);
@@ -76,12 +67,6 @@ void OnStart()
    while(!GetVectors(v1,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i++));
    while(!GetVectors(v2,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,++i));
 
-//   for(i=0;i<input_dimension;i++)
-//     {
-//      v1[i] = RSI_buffer[i];
-//      v2[i] = RSI_buffer[i+3];
-//     }
-//
 //--- инициализация алгоритма
    GNGAlgorithm.Init(input_dimension,v1,v2,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes,max_E);
    if(window>0)
