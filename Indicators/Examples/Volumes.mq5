@@ -68,14 +68,14 @@ void CalculateVolume(const int nPosition,
                      const int nRatesCount,
                      const long &SrcBuffer[])
   {
-   ExtVolumesBuffer[0]=SrcBuffer[0];
+   ExtVolumesBuffer[0]=(double)SrcBuffer[0];
    ExtColorsBuffer[0]=0.0;
 //---
    for(int i=nPosition;i<nRatesCount;i++)
      {
       //--- get some data from src buffer
-      double dCurrVolume=SrcBuffer[i];
-      double dPrevVolume=SrcBuffer[i-1];
+      double dCurrVolume=(double)SrcBuffer[i];
+      double dPrevVolume=(double)SrcBuffer[i-1];
       //--- calculate indicator
       ExtVolumesBuffer[i]=dCurrVolume;
       if(dCurrVolume>dPrevVolume)

@@ -53,8 +53,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
      {
       pos=1;
       if(InpVolumeType==VOLUME_TICK)
-         ExtOBVBuffer[0]=TickVolume[0];
-      else ExtOBVBuffer[0]=Volume[0];
+         ExtOBVBuffer[0]=(double)TickVolume[0];
+      else ExtOBVBuffer[0]=(double)Volume[0];
      }
 //--- main cycle
    if(InpVolumeType==VOLUME_TICK)
@@ -75,7 +75,7 @@ void CalculateOBV(int StartPosition,
    for(int i=StartPosition;i<RatesCount;i++)
      {
       //--- get some data
-      double Volume=VolBuffer[i];
+      double Volume=(double)VolBuffer[i];
       double PrevClose=ClBuffer[i-1];
       double CurrClose=ClBuffer[i];
       //--- fill ExtOBVBuffer

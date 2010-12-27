@@ -5,10 +5,15 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, alsu"
 #property link      "alsufx@gmail.com"
-
+#include <GC\IniFile.mqh>
 #include "Neurons.mqh"
 //+------------------------------------------------------------------+
 //| основной класс, представляющий собственно алгоритм РНГ           |
+//+------------------------------------------------------------------+
+CIniFile          MyIniFile;                   // Создаем экземпляр класса
+CArrayString      MyIniStrings;                     // Необходим для работы с массивами данных
+//+------------------------------------------------------------------+
+//|                                                                  |
 //+------------------------------------------------------------------+
 class CGNGAlgorithm
   {
@@ -28,6 +33,7 @@ public:
    int               max_nodes;
    double            max_E;
    double            maximun_E;
+   double            average_E;
                      CGNGAlgorithm();
                     ~CGNGAlgorithm();
    virtual void      Init(int __input_dimension,
@@ -42,8 +48,11 @@ public:
                           int __max_nodes,
                           double __max_E
                           );
+   virtual bool      Save(string file_name);
+
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
+   virtual string    Type() const          { return("CGNGAlgorithm");}
   };
 //+------------------------------------------------------------------+
 //| конструктор                                                      |
@@ -63,6 +72,45 @@ CGNGAlgorithm::~CGNGAlgorithm(void)
   {
    delete Neurons;
    delete Connections;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool      CGNGAlgorithm::Save(string file_name)
+  {
+   bool     resb=false;
+   string outstr="";
+   int i=0;
+//int FileHandle=0;
+   file_name=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+file_name+".gc_ann";
+   MyIniFile.Init(file_name);// Пишем 
+   resb=MyIniFile.Write("Common","Type",Type());
+   resb=MyIniFile.Write("Common","input_dimension",input_dimension);
+   double weights[];
+   CGNGNeuron *tmp;//,*W1,*W2;
+                   //CGNGConnection *tmpc;
+   tmp=Neurons.GetFirstNode();
+
+   while(CheckPointer(tmp))
+     {
+      tmp.Weights(weights);
+      outstr="";
+      for(i=0;i<input_dimension;i++) outstr+=(string)weights[i]+" ";
+      outstr += (string)tmp.E+" "+(string)tmp.U;
+      resb=MyIniFile.Write("Neurons",(string)tmp.uid,outstr);
+      tmp=Neurons.GetNextNode();
+     }
+
+//FileHandle=FileOpen(file_name,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
+//   if(FileHandle!=INVALID_HANDLE)
+//     {
+//      FileWrite(FileHandle,"Type=",Type());
+//      FileWrite(FileHandle,"input_dimension"=input_dimension);
+//                
+//     }
+//   else return(false);
+//FileClose(FileHandle);
+   return(resb);
   }
 //+------------------------------------------------------------------+
 //| инициализирует алгоритм с помощью двух векторов входных данных   |
@@ -198,7 +246,7 @@ bool CGNGAlgorithm::ProcessVector(double &in[],bool train=true)
    tmp=Neurons.GetFirstNode();
    while(CheckPointer(tmp))
      {
-      if(!Connections.FindFirstConnection(tmp.uid)&&Neurons.Total()>2)
+      if(!Connections.FindFirstConnection(tmp.uid) && Neurons.Total()>2)
         {
          Neurons.DeleteCurrent();
          tmp=Neurons.GetCurrentNode();
@@ -266,14 +314,15 @@ bool CGNGAlgorithm::ProcessVector(double &in[],bool train=true)
      }
 //--- Уменьшить ошибки всех нейронов на долю beta                     
    tmp=Neurons.GetFirstNode();
-   maximun_E=0;
+   maximun_E=0;average_E=0;
    while(CheckPointer(tmp))
      {
       tmp.E*=(1-beta);
+      average_E+=tmp.E*tmp.E;
       if(maximun_E<tmp.E) maximun_E=tmp.E;
       tmp=Neurons.GetNextNode();
      }
-
+   average_E=MathSqrt(average_E)/Neurons.Total();
 //--- Проверить критерий останова                                      
    return(StoppingCriterion());
   }
@@ -304,7 +353,7 @@ public:
                           double __eps_w,
                           double __eps_n,
                           int __max_nodes,
-                         double __max_E,
+                          double __max_E,
                           double __k=2);
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
@@ -331,7 +380,7 @@ void CGNGUAlgorithm::Init(int __input_dimension,
                           double __eps_w,
                           double __eps_n,
                           int __max_nodes,
-                         double __max_E,
+                          double __max_E,
                           double __k)
   {
    iteration_number=0;
@@ -450,11 +499,21 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
         }
       else tmpc=Connections.GetNextNode();
      }
+   tmp=Neurons.GetFirstNode();
+   while(CheckPointer(tmp))
+     {
+      if(!Connections.FindFirstConnection(tmp.uid) && Neurons.Total()>2)
+        {
+         Neurons.DeleteCurrent();
+         tmp=Neurons.GetCurrentNode();
+        }
+      else tmp=Neurons.GetNextNode();
+     }
 
    tmp=Neurons.GetFirstNode();
    double max_error=0;
    double min_U=0;
-   CGNGNeuron *useless;
+   CGNGNeuron *useless=NULL;
 
    if(CheckPointer(tmp))
      {
@@ -475,7 +534,11 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
         }
      }
 
-   if(min_U!=0 && max_error/min_U>koeff&&Neurons.Total()>2) Neurons.Delete(Neurons.IndexOf(tmp));
+   if(min_U!=0 && max_error/min_U>koeff && Neurons.Total()>2)
+     {
+      Print("Delete...");
+      Neurons.Delete(Neurons.IndexOf(useless));
+     }
 
 //--- Если номер текущей итерации кратен lambda, и предельный размер   
 //--- сети не достигнут, создать новый нейрон r по следующим правилам  
@@ -547,15 +610,16 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
 //--- Уменьшить ошибки и полезность всех нейронов на долю beta 	     
 
    tmp=Neurons.GetFirstNode();
-   maximun_E=0;
+   maximun_E=0;average_E=0;
    while(CheckPointer(tmp))
      {
       tmp.E*=(1-beta);
       tmp.U*=(1-beta);
+      average_E+=tmp.E*tmp.E;
       if(maximun_E<tmp.E) maximun_E=tmp.E;
       tmp=Neurons.GetNextNode();
      }
-
+   average_E=MathSqrt(average_E)/Neurons.Total();
 //--- Проверить критерий останова                                      
 
    return(StoppingCriterion());

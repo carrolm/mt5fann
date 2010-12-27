@@ -48,7 +48,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
       double sq=0;
-      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) sq=1;
+      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
       for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
  //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
      //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);

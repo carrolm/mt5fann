@@ -123,6 +123,7 @@ public:
 
 protected:
    void              ClearStructures();
+   bool              IsStopped(string function);
   };
 //+------------------------------------------------------------------+
 //| Constructor CTrade.                                              |
@@ -302,8 +303,9 @@ string CTrade::CheckResultRetcodeDescription() const
 bool CTrade::PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double volume,
                           double price,double sl,double tp,const string comment)
   {
-   string action,result;
-//---
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- clean
    ClearStructures();
 //--- checking
    if(order_type!=ORDER_TYPE_BUY && order_type!=ORDER_TYPE_SELL)
@@ -324,6 +326,8 @@ bool CTrade::PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double 
    m_request.deviation   =m_deviation;
    m_request.type_filling=m_type_filling;
    m_request.comment     =comment;
+//--- variables
+   string action,result;
 //--- order check
    if(!OrderCheck(m_request,m_check_result))
      {
@@ -355,14 +359,17 @@ bool CTrade::PositionOpen(const string symbol,ENUM_ORDER_TYPE order_type,double 
 //+------------------------------------------------------------------+
 bool CTrade::PositionModify(const string symbol,double sl,double tp)
   {
-   string action,result;
-//---
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- clean
    ClearStructures();
 //--- setting request
    m_request.action=TRADE_ACTION_SLTP;
    m_request.symbol=symbol;
    m_request.sl    =sl;
    m_request.tp    =tp;
+//--- variables
+   string action,result;
 //--- order check
    if(!OrderCheck(m_request,m_check_result))
      {
@@ -396,8 +403,11 @@ bool CTrade::PositionClose(const string symbol,ulong deviation)
    bool   partial_close=false;
    int    retry_count  =10;
    uint   retcode      =TRADE_RETCODE_REJECT;
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- variables
    string action,result;
-//---
+//--- clean
    ClearStructures();
    do
      {
@@ -485,8 +495,9 @@ bool CTrade::OrderOpen(const string symbol,ENUM_ORDER_TYPE order_type,double vol
                        double price,double sl,double tp,
                        ENUM_ORDER_TYPE_TIME type_time,datetime expiration,const string comment)
   {
-   string action,result;
-//---
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- clean
    ClearStructures();
 //--- checking
    if(order_type==ORDER_TYPE_BUY || order_type==ORDER_TYPE_SELL)
@@ -509,6 +520,8 @@ bool CTrade::OrderOpen(const string symbol,ENUM_ORDER_TYPE order_type,double vol
    m_request.type_time   =type_time;
    m_request.expiration  =expiration;
    m_request.comment     =comment;
+//--- variables
+   string action,result;
 //--- order check
    if(!OrderCheck(m_request,m_check_result))
      {
@@ -543,8 +556,9 @@ bool CTrade::OrderOpen(const string symbol,ENUM_ORDER_TYPE order_type,double vol
 //+------------------------------------------------------------------+
 bool CTrade::OrderModify(ulong ticket,double price,double sl,double tp,ENUM_ORDER_TYPE_TIME type_time,datetime expiration)
   {
-   string action,result;
-//---
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- clean
    ClearStructures();
 //--- setting request
    m_request.action      =TRADE_ACTION_MODIFY;
@@ -554,6 +568,8 @@ bool CTrade::OrderModify(ulong ticket,double price,double sl,double tp,ENUM_ORDE
    m_request.tp          =tp;
    m_request.type_time   =type_time;
    m_request.expiration  =expiration;
+//--- variables
+   string action,result;
 //--- order check
    if(!OrderCheck(m_request,m_check_result))
      {
@@ -583,8 +599,11 @@ bool CTrade::OrderModify(ulong ticket,double price,double sl,double tp,ENUM_ORDE
 //+------------------------------------------------------------------+
 bool CTrade::OrderDelete(ulong ticket)
   {
+//--- variables
    string action,result;
-//---
+//--- check stopped
+   if(IsStopped(__FUNCTION__)) return(false);
+//--- clean
    ClearStructures();
 //--- setting request
    m_request.action    =TRADE_ACTION_REMOVE;
@@ -647,6 +666,20 @@ void CTrade::ClearStructures()
    ZeroMemory(m_request);
    ZeroMemory(m_result);
    ZeroMemory(m_check_result);
+  }
+//+------------------------------------------------------------------+
+//| Checks forced shutdown of MQL5-program.                          |
+//| INPUT:  function - name of the caller.                           |
+//| OUTPUT: no.                                                      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CTrade::IsStopped(string function)
+  {
+   if(!IsStopped()) return(false);
+//--- MQL5 program is stopped
+   printf("%s: MQL5 program is stopped. Trading is disabled");
+   m_result.retcode=TRADE_RETCODE_CLIENT_DISABLES_AT;
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Buy operation.                                                   |

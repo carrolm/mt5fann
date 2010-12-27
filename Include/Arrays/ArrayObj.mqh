@@ -439,7 +439,8 @@ bool CArrayObj::DeleteRange(int from,int to)
 //--- deleting
    if(to>=m_data_total-1) to=m_data_total-1;
    MemMove(from,to+1,m_data_total-to);
-   m_data_total-=to-from+1;
+   for(int i=to-from+1;i>0;i--,m_data_total--)
+      if(m_free_mode && CheckPointer(m_data[m_data_total-1])==POINTER_DYNAMIC) delete m_data[m_data_total-1];
 //---
    return(true);
   }

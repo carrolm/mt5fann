@@ -36,7 +36,6 @@ protected:
    CiLow            *m_low;
    CiClose          *m_close;
    //---
-   double            m_size;
    double            m_open_composite;
    double            m_high_composite;
    double            m_low_composite;
@@ -105,7 +104,6 @@ void CSignalCandles::CSignalCandles()
    m_high           =NULL;
    m_low            =NULL;
    m_close          =NULL;
-   m_size           =0.0;
    m_open_composite =EMPTY_VALUE;
    m_high_composite =EMPTY_VALUE;
    m_low_composite  =EMPTY_VALUE;
@@ -143,7 +141,6 @@ bool CSignalCandles::ValidationSettings()
       printf(__FUNCTION__+": candles range must be greater than 0");
       return(false);
      }
-   m_size=m_minimum*m_adjusted_point;
 //--- ok
    return(true);
   }
@@ -196,7 +193,6 @@ bool CSignalCandles::InitOpen(CIndicators* indicators)
       printf(__FUNCTION__+": error initializing object");
       return(false);
      }
-   m_open.BufferResize(100);
 //--- ok
    return(true);
   }
@@ -228,7 +224,6 @@ bool CSignalCandles::InitHigh(CIndicators* indicators)
       printf(__FUNCTION__+": error initializing object");
       return(false);
      }
-   m_high.BufferResize(100);
 //--- ok
    return(true);
   }
@@ -260,7 +255,6 @@ bool CSignalCandles::InitLow(CIndicators* indicators)
       printf(__FUNCTION__+": error initializing object");
       return(false);
      }
-   m_low.BufferResize(100);
 //--- ok
    return(true);
   }
@@ -292,7 +286,6 @@ bool CSignalCandles::InitClose(CIndicators* indicators)
       printf(__FUNCTION__+": error initializing object");
       return(false);
      }
-   m_close.BufferResize(100);
 //--- ok
    return(true);
   }
@@ -307,6 +300,8 @@ bool CSignalCandles::InitClose(CIndicators* indicators)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(Candle(1)<=0) return(false);
+//---
    double size=m_high_composite-m_low_composite;
 //---
    price=m_symbol.NormalizePrice(m_symbol.Ask()-m_limit*size);
@@ -314,7 +309,7 @@ bool CSignalCandles::CheckOpenLong(double& price,double& sl,double& tp,datetime&
    tp   =m_symbol.NormalizePrice(price+m_take_profit*size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
-   return(Candle(1)>0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for long position close.                        |
@@ -324,9 +319,11 @@ bool CSignalCandles::CheckOpenLong(double& price,double& sl,double& tp,datetime&
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckCloseLong(double& price)
   {
+   if(Candle(1)>=0) return(false);
+//---
    price=0.0;
 //---
-   return(Candle(1)<0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position open.                        |
@@ -339,6 +336,8 @@ bool CSignalCandles::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(Candle(1)>=0) return(false);
+//---
    double size=m_high_composite-m_low_composite;
 //---
    price=m_symbol.NormalizePrice(m_symbol.Bid()+m_limit*size);
@@ -346,7 +345,7 @@ bool CSignalCandles::CheckOpenShort(double& price,double& sl,double& tp,datetime
    tp   =m_symbol.NormalizePrice(price-m_take_profit*size);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
-   return(Candle(1)<0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position close.                       |
@@ -356,9 +355,11 @@ bool CSignalCandles::CheckOpenShort(double& price,double& sl,double& tp,datetime
 //+------------------------------------------------------------------+
 bool CSignalCandles::CheckCloseShort(double& price)
   {
+   if(Candle(1)<=0) return(false);
+//---
    price=0.0;
 //---
-   return(Candle(1)>0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Formation of composite candles                                   |
@@ -372,22 +373,23 @@ int CSignalCandles::Candle(int ind)
    if(ind<0) return(0);
 //---
    int    i    =0;
+   double size =m_minimum*PriceLevelUnit();
    double open =Open(ind);
    double high =High(ind);
    double low  =Low(ind);
    double close=Close(ind);
 //---
-   if(high-low<m_size)
+   if(high-low<size)
      {
       for(i=1;i<m_range;i++)
         {
          open=Open(i+ind);
          if(high<High(i+ind)) high=High(i+ind);
          if(low>Low(i+ind))   low =Low(i+ind);
-         if(high-low>m_size)  break;
+         if(high-low>size)  break;
         }
      }
-   if(high-low>m_size)
+   if(high-low>size)
      {
       if(CandleBull(open,high,low,close)) return(i);
       if(CandleBear(open,high,low,close)) return(-i);
@@ -410,9 +412,25 @@ int CSignalCandles::Candle(int ind)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CandleBull(double open,double high,double low,double close)
   {
-   double size    =high-low;
-   double shadow_h=high-((open>close)?open:close);
-   double shadow_l=((open<close)?open:close)-low;
+   int    shadow_mode=1;
+   double size=high-low;
+   double shadow_h,shadow_l;
+//---
+   switch(shadow_mode)
+     {
+      case 0:  // classic
+         shadow_h=high-((open>close)?open:close);
+         shadow_l=((open<close)?open:close)-low;
+         break;
+      case 1:  // modern 1
+         shadow_h=high-((open>close)?open:close);
+         shadow_l=close-low;
+         break;
+      case 2:  // modern 2
+         shadow_h=high-open;
+         shadow_l=close-low;
+         break;
+     }
 //---
    if(shadow_h<m_shadow_small*size && shadow_l>m_shadow_big*size)
      {
@@ -436,9 +454,25 @@ bool CSignalCandles::CandleBull(double open,double high,double low,double close)
 //+------------------------------------------------------------------+
 bool CSignalCandles::CandleBear(double open,double high,double low,double close)
   {
-   double size    =high-low;
-   double shadow_h=high-((open>close)?open:close);
-   double shadow_l=((open<close)?open:close)-low;
+   int    shadow_mode=1;
+   double size=high-low;
+   double shadow_h,shadow_l;
+//---
+   switch(shadow_mode)
+     {
+      case 0:  // classic
+         shadow_h=high-((open>close)?open:close);
+         shadow_l=((open<close)?open:close)-low;
+         break;
+      case 1:  // modern 1
+         shadow_h=high-close;
+         shadow_l=((open<close)?open:close)-low;
+         break;
+      case 2:  // modern 2
+         shadow_h=high-close;
+         shadow_l=open-low;
+         break;
+     }
 //---
    if(shadow_l<m_shadow_small*size && shadow_h>m_shadow_big*size)
      {

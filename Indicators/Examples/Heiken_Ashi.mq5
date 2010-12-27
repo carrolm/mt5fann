@@ -53,7 +53,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
   {
    int i,limit;
 //--- preliminary calculations
-   if(prev_calculated<=1)
+   if(prev_calculated==0)
      {
       //--- set first candle
       ExtLBuffer[0]=Low[0];

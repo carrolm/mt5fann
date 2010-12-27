@@ -84,6 +84,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
                 const long &Volume[],
                 const int &Spread[])
   {
+   int i,limit=0;
 //--- check for rates count
    if(rates_total<100)
      {
@@ -97,7 +98,6 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       return(0);
      }
 //--- preliminary calculations
-   int i,limit;
    int counterZ=0,whatlookfor=0;
    int shift,back=0,lasthighpos=0,lastlowpos=0;
    double val=0,res=0;
@@ -112,7 +112,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       //--- start calculation from bar number ExtDepth
       limit=ExtDepth-1;
      }
-   else
+//---
+   if(prev_calculated>0)
      {
       i=rates_total-1;
       while(counterZ<level && i>rates_total -100)
@@ -236,7 +237,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
            }
          break;
          // look for peak
-         case 1: if(LowMapBuffer[shift]!=0.0 && LowMapBuffer[shift]<lastlow &&
+         case 1: if(LowMapBuffer[shift]!=0.0 && LowMapBuffer[shift]<lastlow && 
                     HighMapBuffer[shift]==0.0)
            {
             ZigzagLawnBuffer[lastlowpos]=0.0;
