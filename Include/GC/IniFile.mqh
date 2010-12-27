@@ -32,9 +32,9 @@ public:
 
    // Функции для чтения и записи конкретного значения
    virtual string       ReadString(string Section, string Ident, string Default);
-   virtual bool         WriteString(string Section, string Ident, string Value);
+   virtual bool         Write(string Section, string Ident, string Value);
    virtual long         ReadInteger(string Section, string Ident, long Default);
-   virtual bool         WriteInteger(string Section, string Ident, long Value);
+   virtual bool         Write(string Section, string Ident, long Value);
    virtual bool         ReadBool(string Section, string Ident, bool Default);
    virtual bool         WriteBool(string Section, string Ident, bool Value);
    virtual datetime     ReadDateTime(string Section, string Ident, datetime Default);
@@ -81,7 +81,7 @@ string CIniFile::ReadString(string Section, string Ident, string Default)
    return(str_res);
   }
 
-bool CIniFile::WriteString(string Section, string Ident, string Value)
+bool CIniFile::Write(string Section, string Ident, string Value)
   {
    return(WritePrivateProfileStringW(Section, Ident, Value, m_file_name) != 0);
   }
@@ -102,9 +102,9 @@ long CIniFile::ReadInteger(string Section, string Ident, long Default)
      }
   }
 
-bool CIniFile::WriteInteger(string Section, string Ident, long Value)
+bool CIniFile::Write(string Section, string Ident, long Value)
   {
-   return(WriteString(Section, Ident, IntegerToString(Value)));
+   return(Write(Section, Ident, IntegerToString(Value)));
   }
 
 bool CIniFile::ReadBool(string Section, string Ident, bool Default)
@@ -114,7 +114,7 @@ bool CIniFile::ReadBool(string Section, string Ident, bool Default)
 
 bool CIniFile::WriteBool(string Section, string Ident, bool Value)
   {
-   return(WriteInteger(Section, Ident, (int)Value));
+   return(Write(Section, Ident, (int)Value));
   }
 
 datetime CIniFile::ReadDateTime(string Section, string Ident, datetime Default)
@@ -128,7 +128,7 @@ datetime CIniFile::ReadDateTime(string Section, string Ident, datetime Default)
 
 bool CIniFile::WriteDateTime(string Section, string Ident, datetime Value, int Mode=TIME_DATE|TIME_SECONDS)
   {
-   return(WriteString(Section, Ident, TimeToString(Value, Mode)));
+   return(Write(Section, Ident, TimeToString(Value, Mode)));
   }
 
 double CIniFile::ReadFloat(string Section, string Ident, double Default)
@@ -149,7 +149,7 @@ double CIniFile::ReadFloat(string Section, string Ident, double Default)
 
 bool CIniFile::WriteFloat(string Section, string Ident, double Value)
   {
-   return(WriteString(Section, Ident, DoubleToString(Value)));
+   return(Write(Section, Ident, DoubleToString(Value)));
   }
 
 void CIniFile::ReadSection(string Section, CArrayString &Strings)

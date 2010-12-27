@@ -47,7 +47,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
                 const int &Spread[])
   {
 //--- variables
-   int    pos;
+   int pos;
 //--- check for bars count
    if(rates_total<2)
       return(0);

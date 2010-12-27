@@ -85,8 +85,8 @@ void CalculateVROC(const int nPosition,
    for(int i=nPosition;i<nRatesCount;i++)
      {
       //--- getting some data
-      double PrevVolume=VolBuffer[i-(ExtPeriodVROC-1)];
-      double CurrVolume=VolBuffer[i];
+      double PrevVolume=(double)(VolBuffer[i-(ExtPeriodVROC-1)]);
+      double CurrVolume=(double)VolBuffer[i];
       //--- fill ExtVROCBuffer
       if(PrevVolume!=0.0)
          ExtVROCBuffer[i]=100.0*(CurrVolume-PrevVolume)/PrevVolume;

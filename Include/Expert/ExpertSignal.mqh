@@ -38,6 +38,9 @@ public:
    //---
    virtual bool      CheckTrailingOrderLong(COrderInfo* order,double& price)                  { return(false); }
    virtual bool      CheckTrailingOrderShort(COrderInfo* order,double& price)                 { return(false); }
+
+protected:
+   virtual double    PriceLevelUnit()                                              { return(m_adjusted_point); }
   };
 //+------------------------------------------------------------------+
 //| Constructor CExpertSignal.                                       |

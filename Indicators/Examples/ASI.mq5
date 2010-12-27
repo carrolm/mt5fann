@@ -90,15 +90,18 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       //--- fill TR buffer
       ExtTRBuffer[i]=MathMax(dHigh,dPrevClose)-MathMin(dLow,dPrevClose);
       double ER=0.0;
-      if(dPrevClose>dHigh) ER=MathAbs(dHigh-dPrevClose);
-      if(dPrevClose<dLow) ER=MathAbs(dLow-dPrevClose);
+      if(!(dPrevClose>=dLow && dPrevClose<=dHigh))
+        {
+         if(dPrevClose>dHigh) ER=MathAbs(dHigh-dPrevClose);
+         if(dPrevClose<dLow)  ER=MathAbs(dLow-dPrevClose);
+        }
       double K=MathMax(MathAbs(dHigh-dPrevClose),MathAbs(dLow-dPrevClose));
       double SH=MathAbs(dPrevClose-dPrevOpen);
       double R=ExtTRBuffer[i]-0.5*ER+0.25*SH;
       //--- calculate SI value
       if(R==0.0 || ExtTpoints==0.0) ExtSIBuffer[i]=0.0;
       else     ExtSIBuffer[i]=50*(dClose-dPrevClose+0.5*(dClose-Open[i])+
-         0.25*(dPrevClose-dPrevOpen))*(K/ExtTpoints)/R;
+                              0.25*(dPrevClose-dPrevOpen))*(K/ExtTpoints)/R;
       //--- write down ASI buffer value
       ExtASIBuffer[i]=ExtASIBuffer[i-1]+ExtSIBuffer[i];
      }

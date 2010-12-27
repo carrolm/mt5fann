@@ -16,7 +16,7 @@ input int      samples=1000;
 input string AlgoStr="Easy";
 //--- параметры алгоритма
 input int lambda=20;
-input int age_max=30;
+input int age_max=5;
 input int ages=5;
 input double alpha=0.5;
 input double beta=0.0005;
@@ -60,8 +60,8 @@ void OnStart()
 
 //--- векторы данных
    double v[],v1[],v2[],ov[];
-    ArrayResize(ov,1);
- ArrayResize(v,input_dimension);
+   ArrayResize(ov,1);
+   ArrayResize(v,input_dimension);
    ArrayResize(v1,input_dimension);
    ArrayResize(v2,input_dimension);i=2;
    while(!GetVectors(v1,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i++));
@@ -69,6 +69,7 @@ void OnStart()
 
 //--- инициализация алгоритма
    GNGAlgorithm.Init(input_dimension,v1,v2,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes,max_E);
+
    if(window>0)
      {
       //-- рисуем прямоугольное поле и информационные метки
@@ -100,20 +101,26 @@ void OnStart()
       ObjectSetInteger(0,"Label_age",OBJPROP_YDISTANCE,40);
       ObjectSetInteger(0,"Label_age",OBJPROP_COLOR,Red);
       ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: 0");
-     }
+       
+      ObjectCreate(0,"Label_ae",OBJ_LABEL,window,0,0);
+      ObjectSetInteger(0,"Label_ae",OBJPROP_ANCHOR,ANCHOR_RIGHT_UPPER);
+      ObjectSetInteger(0,"Label_ae",OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+      ObjectSetInteger(0,"Label_ae",OBJPROP_XDISTANCE,10);
+      ObjectSetInteger(0,"Label_ae",OBJPROP_YDISTANCE,55);
+      ObjectSetInteger(0,"Label_ae",OBJPROP_COLOR,Red);
+      ObjectSetString(0,"Label_ae",OBJPROP_TEXT,"Age: 0");
+    }
 //--- главный цикл агоритма начинаем с i=2 т.к. 2 векора уже использовали
    for(int ma=0;ma<ages;ma++)
      {
-      //if(window>0)ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+(string)ma+"  ME="+(string)GNGAlgorithm.maximun_E);
       for(i=1;i<samples;i++)
         {
-        if(window>0)ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+(string)ma+"  ME="+(string)GNGAlgorithm.maximun_E);
-        //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
+          //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
          //--- на 3 бара - они меньше скоррелированы)
          if(!GetVectors(v,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i)) continue;
-         //              {
-         //     for(j=0;j<input_dimension;j++)
-         //       v[j]=RSI_buffer[i+j*3];
+
+         //--- передаем входной вектор алгоритму для расчета
+         GNGAlgorithm.ProcessVector(v);
 
          if(window>0)
            {
@@ -125,15 +132,6 @@ void OnStart()
             if(ov[0]<-0.1) ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Red);
             ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_BACK,true);
 
-            //--- меняем информационную метку
-            ObjectSetString(0,"Label_samples",OBJPROP_TEXT,"Total samples: "+string(i+1));
-           }
-         else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
-         //--- передаем входной вектор алгоритму для расчета
-         GNGAlgorithm.ProcessVector(v);
-
-         if(window>0)
-           {
             //--- на графике необходимо удалить старые нейроны и связи, чтобы потом нарисовать новые
             for(j=ObjectsTotal(0)-1;j>=0;j--)
               {
@@ -147,21 +145,18 @@ void OnStart()
                   ObjectDelete(0,name);
                  }
               }
-           }
-         double weights[];
-         CGNGNeuron *tmp,*W1,*W2;
-         CGNGConnection *tmpc;
+            double weights[];
+            CGNGNeuron *tmp,*W1,*W2;
+            CGNGConnection *tmpc;
 
-         GNGAlgorithm.Neurons.FindWinners(W1,W2);
+            GNGAlgorithm.Neurons.FindWinners(W1,W2);
 
-         //--- отрисовка нейронов
-         tmp=GNGAlgorithm.Neurons.GetFirstNode();
-         while(CheckPointer(tmp)!=POINTER_INVALID)
-           {
-            tmp.Weights(weights);
-
-            if(window>0)
+            //--- отрисовка нейронов
+            tmp=GNGAlgorithm.Neurons.GetFirstNode();
+            while(CheckPointer(tmp)!=POINTER_INVALID)
               {
+               tmp.Weights(weights);
+
                ObjectCreate(0,"Neuron_"+(string)tmp.uid,OBJ_ARROW,window,time[weights[0]*400+500],weights[1]*45+50);
                ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_ARROWCODE,159);
 
@@ -171,47 +166,48 @@ void OnStart()
                else ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Red);
 
                ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_BACK,false);
+               tmp=GNGAlgorithm.Neurons.GetNextNode();
               }
-            tmp=GNGAlgorithm.Neurons.GetNextNode();
-           }
-         if(window>0)
-           {
-            ObjectSetString(0,"Label_neurons",OBJPROP_TEXT,"Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
-           }
-         else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
-         //--- отрисовка связей
-         tmpc=GNGAlgorithm.Connections.GetFirstNode();
-         while(CheckPointer(tmpc))
-           {
-            int x1=0,x2;
-            double y1=0,y2;
-
-            tmp=GNGAlgorithm.Neurons.Find(tmpc.uid1);
-            if(tmp!=NULL)
+            //--- отрисовка связей
+            tmpc=GNGAlgorithm.Connections.GetFirstNode();
+            while(CheckPointer(tmpc))
               {
+               int x1=0,x2;
+               double y1=0,y2;
+
+               tmp=GNGAlgorithm.Neurons.Find(tmpc.uid1);
+               if(tmp!=NULL)
+                 {
+                  tmp.Weights(weights);
+                  x1=(int)(weights[0]*400+500);y1=weights[1];
+                 }
+               tmp=GNGAlgorithm.Neurons.Find(tmpc.uid2);
                tmp.Weights(weights);
-               x1=(int)(weights[0]*400+500);y1=weights[1];
-              }
-            tmp=GNGAlgorithm.Neurons.Find(tmpc.uid2);
-            tmp.Weights(weights);
-            x2=(int)(weights[0]*400+500);y2=weights[1];
+               x2=(int)(weights[0]*400+500);y2=weights[1];
 
-            if(window>0)
-              {
-               ObjectCreate(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJ_TREND,window,time[x1],y1*45+50,time[x2],y2*45+50);
+               ObjectCreate(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJ_TREND,window,time[x1],y1*45+49,time[x2],y2*45+49);
                ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_WIDTH,1);
                ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_STYLE,STYLE_DOT);
                ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_COLOR,Yellow);
                ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_BACK,false);
+               tmpc=GNGAlgorithm.Connections.GetNextNode();
               }
-            tmpc=GNGAlgorithm.Connections.GetNextNode();
+            //--- меняем информационную метку
+            ObjectSetString(0,"Label_samples",OBJPROP_TEXT,"Total samples: "+string(i+1));
+            ObjectSetString(0,"Label_neurons",OBJPROP_TEXT,"Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
+            ObjectSetString(0,"Label_age",OBJPROP_TEXT,"Age: "+(string)ma+"  ME="+(string)GNGAlgorithm.maximun_E);
+             ObjectSetString(0,"Label_ae",OBJPROP_TEXT,"Average E="+(string)GNGAlgorithm.average_E);
+           
+
            }
+         else Comment("Total samples: "+string(i+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
 
          ChartRedraw();
         }
      }
 //--- удаляем из памяти экземпляр алгоритма
    Print("Completed! Total neurons: "+string(GNGAlgorithm.Neurons.Total()));
+   GNGAlgorithm.Save("GNGAlgorithm");
    delete GNGAlgorithm;
 
 //--- пауза перед очисткой графика

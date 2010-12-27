@@ -24,7 +24,7 @@ protected:
 public:
    double            NET;
                      CCustomNeuron();
-   void              ZeroInit(int synapses);
+   void              Init(int synapses);
    int               Synapses();
    void              Init(double &weights[]);
    void              Weights(double &weights[]);
@@ -54,7 +54,7 @@ int CCustomNeuron::Synapses()
 //| INPUT: synapses - количество синапсов (входных весов)	     |
 //| OUTPUT: нет                                                      |
 //+------------------------------------------------------------------+
-void CCustomNeuron::ZeroInit(int synapses)
+void CCustomNeuron::Init(int synapses)
   {
    if(synapses<1) return;
    m_synapses=synapses;

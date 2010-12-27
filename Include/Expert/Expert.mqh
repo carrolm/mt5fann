@@ -937,7 +937,7 @@ bool CExpert::CheckTrailingOrderLong()
    double price;
 //--- check the possibility of modifying the long order
    if(m_signal.CheckTrailingOrderLong(GetPointer(m_order),price))
-      return(TrailingOrderLong(price));
+      return(TrailingOrderLong(m_order.PriceOpen()-price));
 //--- return without operations
    return(false);
   }
@@ -952,7 +952,7 @@ bool CExpert::CheckTrailingOrderShort()
    double price;
 //--- check the possibility of modifying the short order
    if(m_signal.CheckTrailingOrderShort(GetPointer(m_order),price))
-      return(TrailingOrderShort(price));
+      return(TrailingOrderShort(m_order.PriceOpen()-price));
 //--- return without operations
    return(false);
   }
