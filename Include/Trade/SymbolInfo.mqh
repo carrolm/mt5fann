@@ -53,11 +53,11 @@ public:
    bool              Select(bool select);
    bool              IsSynchronized()               const;
    //--- volumes
-   long              Volume()                       const { return(m_tick.volume);        }
-   long              VolumeHigh()                   const;
-   long              VolumeLow()                    const;
-   long              VolumeBid()                    const;
-   long              VolumeAsk()                    const;
+   ulong             Volume()                       const { return(m_tick.volume);        }
+   ulong             VolumeHigh()                   const;
+   ulong             VolumeLow()                    const;
+   ulong             VolumeBid()                    const;
+   ulong             VolumeAsk()                    const;
    //--- miscellaneous
    datetime          Time()                         const { return(m_tick.time);          }
    int               Spread()                       const;
@@ -252,7 +252,7 @@ bool CSymbolInfo::IsSynchronized() const
 //| OUTPUT: the property value "SYMBOL_VOLUMEHIGH".                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-long CSymbolInfo::VolumeHigh() const
+ulong CSymbolInfo::VolumeHigh() const
   {
    return(SymbolInfoInteger(m_name,SYMBOL_VOLUMEHIGH));
   }
@@ -262,7 +262,7 @@ long CSymbolInfo::VolumeHigh() const
 //| OUTPUT: the property value "SYMBOL_VOLUMELOW".                   |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-long CSymbolInfo::VolumeLow() const
+ulong CSymbolInfo::VolumeLow() const
   {
    return(SymbolInfoInteger(m_name,SYMBOL_VOLUMELOW));
   }
@@ -272,7 +272,7 @@ long CSymbolInfo::VolumeLow() const
 //| OUTPUT: the property value "SYMBOL_VOLUMEBID".                   |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-long CSymbolInfo::VolumeBid() const
+ulong CSymbolInfo::VolumeBid() const
   {
    return(SymbolInfoInteger(m_name,SYMBOL_VOLUMEBID));
   }
@@ -282,7 +282,7 @@ long CSymbolInfo::VolumeBid() const
 //| OUTPUT: the property value "SYMBOL_VOLUMEASK".                   |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-long CSymbolInfo::VolumeAsk() const
+ulong CSymbolInfo::VolumeAsk() const
   {
    return(SymbolInfoInteger(m_name,SYMBOL_VOLUMEASK));
   }
