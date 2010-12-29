@@ -354,7 +354,7 @@ public:
                           double __eps_n,
                           int __max_nodes,
                           double __max_E,
-                          double __k=2);
+                          double __k=500);
    virtual bool      ProcessVector(double &in[],bool train=true);
    virtual bool      StoppingCriterion();
   };

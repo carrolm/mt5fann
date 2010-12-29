@@ -161,7 +161,7 @@ void CIniFile::ReadSection(string Section, CArrayString &Strings)
    string str_res = "";
 
    Strings.Clear();
-   char_count = GetPrivateProfileStringW(Section, ident, value, buffer, ArraySize(buffer), m_file_name);
+   char_count = (int)GetPrivateProfileStringW(Section, ident, value, buffer, ArraySize(buffer), m_file_name);
    for (int i=0; i<char_count; i++)
      {
       if ((buffer[i] == 0))
