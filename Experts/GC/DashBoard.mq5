@@ -190,7 +190,7 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
-   if(_TrailingPosition_) Trailing();;//DashBoard.Trailing();
+   if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
    DashBoard.Refresh();
   }
 //+------------------------------------------------------------------+
