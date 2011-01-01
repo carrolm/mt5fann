@@ -34,8 +34,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 // копируем историю
    int ncl=CopyLow(smbl,tf,shift+shift_history,4,Low);
    int nch=CopyHigh(smbl,tf,shift+shift_history,4,High);
-   if((High[1]>High[0] && High[1]>High[2])
-      || (Low[1]<Low[0] && Low[1]<Low[2]))
+   //if((High[1]>High[0] && High[1]>High[2])
+   //   || (Low[1]<Low[0] && Low[1]<Low[2]))
      {// Есть фрактал!
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);

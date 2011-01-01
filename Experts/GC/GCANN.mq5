@@ -15,10 +15,10 @@ CGCANN *MyExpert;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-  MyExpert=new CGCANN;
-  MyExpert.Load("GCANN");
-  MyExpert.ini_save("GCANN_new");
-  Print("Ready!");
+   MyExpert=new CGCANN;
+   MyExpert.Load("GCANN");
+   MyExpert.Save("GCANN_new");
+   Print("Ready!");
 
    return(0);
   }
@@ -27,9 +27,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-  delete MyExpert;
-//---
-   
+   delete MyExpert;
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -38,7 +36,5 @@ void OnTick()
   {
    if(_TrailingPosition_) Trailing();
    NewOrder(_Symbol,MyExpert.forecast()*10,"");
-//---
-   
   }
 //+------------------------------------------------------------------+

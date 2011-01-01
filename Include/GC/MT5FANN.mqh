@@ -45,7 +45,7 @@ public:
    double            forecast(int shift=0,bool train=false);
    double            InputVector[];
    double            OutputVector[];
-   int               CMT5FANN::ann_create();
+   int               ann_create();
    int               ann_load(string path="");
    bool              ann_save(string path="");
    bool              ini_load(string path="");
