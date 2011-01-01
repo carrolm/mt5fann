@@ -13,8 +13,8 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых дл€ обучени€
-input int     samples=10;//00;
-input string AlgoStr="Easy";
+input int     samples=10;
+input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
 input int age_max=10;
@@ -24,7 +24,7 @@ input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
-input double max_E=0.00001f;
+input double max_E=0.001f;
 
 //---глобальные переменные
 CGCANN *GNGAlgorithm;
@@ -43,7 +43,7 @@ void OnStart()
    int i,j;
    CPInit();
    window=ChartWindowFind(0,"GNG_dummy");
-   input_dimension=2;
+   input_dimension=4;
 
 //--- чтобы функци€ CopyBuffer() работала правильно, количество векторов 
 //--- должно укладыватьс€ в количество баров с запасом на длину вектора 
@@ -53,8 +53,6 @@ void OnStart()
 ////--- возвращаем заданное пользователем значение
    _samples=_samples-input_dimension*10;
 
-//--- запоминаем времена открыти€ первых 100 баров
-   CopyTime(_Symbol,_Period,0,1000,time);
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
@@ -70,10 +68,13 @@ void OnStart()
 //   while(!GetVectors(v2,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,++i));
 
 //--- инициализаци€ алгоритма
-   if(!GNGAlgorithm.Load("GCANN"))GNGAlgorithm.Init(input_dimension,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes,max_E);
-   //GNGAlgorithm.Load("GCANN");
-   if(window>0)
+   //if(!GNGAlgorithm.Load("GCANN"))
+   GNGAlgorithm.Init(input_dimension,lambda,age_max,alpha,beta,eps_w,eps_n,max_nodes,max_E);
+//GNGAlgorithm.Load("GCANN");
+   if(window>0 && input_dimension==2)
      {
+      //--- запоминаем времена открыти€ первых 100 баров
+      CopyTime(_Symbol,_Period,0,1000,time);
       //--- удал€ем с экрана все рисунки
       ObjectsDeleteAll(0,window);
       //-- рисуем пр€моугольное поле и информационные метки
@@ -137,7 +138,7 @@ void OnStart()
          //--- передаем входной вектор алгоритму дл€ расчета
          GNGAlgorithm.ProcessVector(v,ov[0]);
         }
-      if(window>0)
+      if(window>0 && input_dimension==2)
         {
          //--- на графике необходимо удалить старые нейроны и св€зи, чтобы потом нарисовать новые
          for(j=ObjectsTotal(0)-1;j>=0;j--)
@@ -211,7 +212,7 @@ void OnStart()
          ObjectSetString(0,"Label_ae",OBJPROP_TEXT,"Average E="+(string)GNGAlgorithm.average_E);
 
         }
-      else Comment("Total samples: "+string(samples+1),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
+      else Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
 
       ChartRedraw();
      }
@@ -219,6 +220,7 @@ void OnStart()
 //--- удал€ем из пам€ти экземпл€р алгоритма
    Print("Completed! Total neurons: "+string(GNGAlgorithm.Neurons.Total())+" from "+(string)ts+" samples");
    GNGAlgorithm.ini_save("GCANN");
+   GNGAlgorithm.Save("GCANN");
    delete GNGAlgorithm;
 
 //--- пауза перед очисткой графика

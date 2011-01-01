@@ -9,6 +9,7 @@
 #include <Arrays\List.mqh>
 #include <GC\IniFile.mqh>
 #include <GC\GetVectors.mqh>
+#include <GC\Oracle.mqh>
 //--- идентификаторы типов данных для определяемых классов
 #define TYPE_CUSTOM_NEURON 0xF001
 #define TYPE_GNG_NEURON 0xF002
@@ -391,7 +392,7 @@ CArrayString      MyIniStrings;                     // Необходим для работы с ма
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CGCANN
+class CGCANN:public COracle
   {
 public:
    //--- связные списки объектов-нейронов и связей между ними
@@ -420,8 +421,6 @@ public:
                      CGCANN();
                     ~CGCANN();
    virtual void      Init(int __input_dimension,
-                          //                        double &v1[],
-                          //                        double &v2[],
                           int __lambda,
                           int __age_max,
                           double __alpha,
@@ -432,8 +431,8 @@ public:
                           double __max_E,
                           double __k=1000);
 
-   virtual bool      Load(string file_name);
-   virtual bool      Save(string file_name);
+   virtual bool      CustomLoad(int file_handle);
+   virtual bool      CustomSave(int file_handle);
    virtual bool      ini_load(string file_name);
    virtual bool      ini_save(string file_name);
    CGCANNNeuron     *ProcessVector(double &in[],double train=NULL);
@@ -548,13 +547,13 @@ bool CGCANN::ini_load(string file_name)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool CGCANN::Load(string file_name)
+bool CGCANN::CustomLoad(int fileid)
   {
    bool     resb=false;
    string outstr="";
    int i=0,sp,ep;
-   int fileid;
-   fileid=FileOpen(file_name+".gc_ann",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
+   //int fileid;
+   //fileid=FileOpen(file_name+".gc_ann",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
    if(fileid!=INVALID_HANDLE)
      {
       outstr=FileReadString(fileid);//   [Common]
@@ -587,7 +586,7 @@ bool CGCANN::Load(string file_name)
 //         Print("tmp.Stat="+tmp.Stat+" tmp.cnt="+tmp.cnt+" '"+StringSubstr(outstr,sp)+"'");
          outstr=FileReadString(fileid);
         }
-      FileClose(fileid);
+      //FileClose(fileid);
       resb=true;
      }
    else resb=false;
@@ -617,7 +616,7 @@ bool CGCANN::Load(string file_name)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool CGCANN::Save(string file_name)
+bool CGCANN::CustomSave(int file_handle)
   {
    return(false);
   }
