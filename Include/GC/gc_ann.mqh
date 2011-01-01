@@ -457,6 +457,7 @@ CGCANN::CGCANN(void)
 //+------------------------------------------------------------------+
 CGCANN::~CGCANN(void)
   {
+//Neurons.
    delete Neurons;
    delete Connections;
   }
@@ -580,9 +581,10 @@ bool CGCANN::Load(string file_name)
            }
          tmp.Init(weights);
          ep=StringFind(outstr," ",sp+1);
-         tmp.cnt=(int)StringToInteger(StringSubstr(outstr,sp,ep-sp));
-         sp=ep;ep=StringLen(outstr);
          tmp.Stat=StringToDouble(StringSubstr(outstr,sp,ep-sp));
+         sp=ep;//ep=StringLen(outstr);
+         tmp.cnt=(int)StringToInteger(StringSubstr(outstr,sp));
+//         Print("tmp.Stat="+tmp.Stat+" tmp.cnt="+tmp.cnt+" '"+StringSubstr(outstr,sp)+"'");
          outstr=FileReadString(fileid);
         }
       FileClose(fileid);
@@ -643,7 +645,7 @@ bool CGCANN::ini_save(string file_name)
       tmp.Weights(weights);
       outstr="";
       for(i=0;i<input_dimension;i++) outstr+=(string)weights[i]+" ";
-      outstr+=(string)tmp.cnt+" "+(string)tmp.Stat;
+      outstr+=(string)tmp.Stat+" "+(string)tmp.cnt;
       resb=MyIniFile.Write("Neurons",(string)tmp.uid,outstr);
       tmp=Neurons.GetNextNode();
      }
@@ -749,12 +751,12 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
    Neurons.FindWinners(Winner,SecondWinner);
 
    if((train==NULL)) return(Winner);
-   //if(train>0.1)train=1;
-   //else
-   //  {
-   //   if(train<-0.1)train=-1;
-   //   else train=0;
-   //  }
+//if(train>0.1)train=1;
+//else
+//  {
+//   if(train<-0.1)train=-1;
+//   else train=0;
+//  }
    if(Winner.error<max_E)
      {
       Winner.cnt++;
@@ -768,7 +770,7 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
 
       //--- Обновить локальную ошибку и полезность нейрона-победителя        
       Winner.E+=Winner.error;
-      //return(Winner);
+
      }
    else
      {
@@ -776,7 +778,7 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
       Winner.Init(in);
       Winner.cnt++;
       Winner.Stat+=train;
-      //return(nn);
+
      }
 
 //   iteration_number++;
