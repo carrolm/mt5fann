@@ -22,6 +22,7 @@ double Sigmoid(double x)// вычисление логистической функции активации
 bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (дл€ индикатора полезно)
    bool ret=false;
+   if(0==num_inputvectors && 0==num_outputvectors) return(false);
    int shift_history=30,i;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
@@ -34,8 +35,10 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 // копируем историю
    int ncl=CopyLow(smbl,tf,shift+shift_history,4,Low);
    int nch=CopyHigh(smbl,tf,shift+shift_history,4,High);
-   //if((High[1]>High[0] && High[1]>High[2])
-   //   || (Low[1]<Low[0] && Low[1]<Low[2]))
+//if((High[1]>High[0] && High[1]>High[2])
+//   || (Low[1]<Low[0] && Low[1]<Low[2]))
+   if(shift_history>0) OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5;
+   if(num_inputvectors>0)
      {// ≈сть фрактал!
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -44,14 +47,14 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("High"==fn_name) ret=GetVectors_High(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Low"==fn_name) ret=GetVectors_Low(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
-      if(shift_history>0) OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5;
-//      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
+
+      //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
       double sq=0;
       for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
       for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
- //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
-     //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
+      //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
+      //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
       //double min=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]<min) min=InputVector[i];
       //for(i=0;i<num_inputvectors;i++) InputVector[i]-=min;
@@ -141,7 +144,6 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
    return(res);
 
   }
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
