@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 //--- используем связные списки из стандартной библиотеки MQL5
 #include <Arrays\List.mqh>
-#include <GC\IniFile.mqh>
+//#include <GC\IniFile.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\Oracle.mqh>
 //--- идентификаторы типов данных для определяемых классов
@@ -387,8 +387,6 @@ CGCANNConnection   *CGCANNConnectionList::FindNextConnection(int uid)
 //+------------------------------------------------------------------+
 //| основной класс, представляющий собственно алгоритм РНГ           |
 //+------------------------------------------------------------------+
-CIniFile          MyIniFile;                   // Создаем экземпляр класса
-CArrayString      MyIniStrings;                     // Необходим для работы с массивами данных
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -399,11 +397,10 @@ public:
    CGCANNNeuronList *Neurons;
    CGCANNConnectionList *Connections;
    //--- параметры алгоритма
-   bool              GetVector(int shift=0,bool train=false);
+
    string            Functions_Array[10];
    int               Functions_Count[10];
    int               Max_Functions;
-   int               input_dimension;
    int               iteration_number;
    int               lambda;
    int               age_max;
@@ -416,10 +413,10 @@ public:
    double            maximun_E;
    double            average_E;
    double            koeff;
-   double            InputVector[];
-   double            OutputVector[];
+
                      CGCANN();
                     ~CGCANN();
+   virtual bool      Draw(int window,datetime &time[],int w,int h);
    virtual void      Init(int __input_dimension,
                           int __lambda,
                           int __age_max,
@@ -433,13 +430,29 @@ public:
 
    virtual bool      CustomLoad(int file_handle);
    virtual bool      CustomSave(int file_handle);
-   virtual bool      ini_load(string file_name);
-   virtual bool      ini_save(string file_name);
+   double            forecast(string smbl="",int shift=0,bool train=false);
+
    CGCANNNeuron     *ProcessVector(double &in[],double train=NULL);
    virtual bool      StoppingCriterion();
    virtual string    Type() const          { return("CGCANN");}
-   virtual double    forecast(int shift=0,bool train=false);
+   //  virtual double    forecast(int shift=0,bool train=false);
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CGCANN::forecast(string smbl="",int shift=0,bool train=false)
+  {
+   if(GetVector(smbl,shift,train))
+     {
+      CGCANNNeuron     *r;
+      if(train) r=ProcessVector(InputVector,OutputVector[0]);
+      else r=ProcessVector(InputVector);
+      if(0==r.cnt) return(0);
+      return(r.Stat/r.cnt);
+     }
+   else return(0);
+
+  }
 //+------------------------------------------------------------------+
 //| конструктор                                                      |
 //+------------------------------------------------------------------+
@@ -460,90 +473,7 @@ CGCANN::~CGCANN(void)
    delete Neurons;
    delete Connections;
   }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-bool CGCANN::GetVector(int shift,bool train)
-  {// пара, период, смещение назад (для индикатора полезно)
-//double IB[],OB[];
-//ArrayResize(IB,input_dimension+2);
-//ArrayResize(OB,1+2);
-//int SymbolIdx,FunctionsIdx;
-//MqlRates rates[];
-//ArraySetAsSeries(rates,true);
-//MqlDateTime tm;
-//CopyRates(_Symbol,PERIOD_M1,shift,3,rates);
-//TimeToStruct(rates[1].time,tm);
-//int n_vectors=input_dimension;
-//int n_o_vectors=1;
-//int pos_in=0,pos_out=0,i;
-////if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
-//if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
-//   n_vectors=(n_vectors-pos_in)/Max_Symbols;
-//   n_o_vectors=(n_o_vectors)/Max_Symbols;
-//   if(!train)n_o_vectors=0;
-////   if(train) n_o_vectors=1;
-//   for(SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
-//     {
-//      for(FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
-//        {
-//         if(GetVectors(IB,OB,n_vectors,n_o_vectors,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],PERIOD_M1,shift))
-//           {
-//            // приведем к общему знаменателю
-//            double si=0;
-//            for(i=0;i<n_vectors;i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
-//            for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i]/si;
-//            for(i=0;i<n_o_vectors;i++) 
-//            {
-//             OutputVector[i]=0;
-//             if(OB[i]<-3) OutputVector[i]=-0.5;
-//             if(OB[i]>3) OutputVector[i]=0.5;
-//             //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
-//             }
-//           }
-//         else return(false);
-//        }
-//     }
 
-//GetVectors(mt5fann.InputVector,mt5fann.OutputVector,5,1,"Fractals")
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CGCANN::forecast(int shift=0,bool train=false)
-  {
-   double IB[],OB[];
-   ArrayResize(IB,input_dimension+2);
-   ArrayResize(OB,1+2);
-   if(GetVectors(IB,OB,input_dimension,0,"Easy",_Symbol,PERIOD_M1,shift))
-      //  if(GetVector(shift,train))
-     {
-      CGCANNNeuron     *r=ProcessVector(IB);
-      if(0==r.cnt) return(0);
-      return(r.Stat/r.cnt);
-      //run();
-      //get_output();
-      //forecast=OutputVector[0];
-      //return(forecast-0.5);
-     }
-   else return(0);
-
-  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-bool CGCANN::ini_load(string file_name)
-  {
-   bool     resb=false;
-   string outstr="";
-   file_name=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+file_name+".gc_ann";
-   MyIniFile.Init(file_name);// Читаем
-   outstr=MyIniFile.ReadString("Common","AnnType","");
-   input_dimension=(int)MyIniFile.ReadInteger("Common","input_dimension",0);
-   Print(input_dimension);
-   return(resb);
-  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -552,65 +482,48 @@ bool CGCANN::CustomLoad(int fileid)
    bool     resb=false;
    string outstr="";
    int i=0,sp,ep;
-   //int fileid;
-   //fileid=FileOpen(file_name+".gc_ann",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
+//int fileid;
+//fileid=FileOpen(file_name+".gc_ann",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
    if(fileid!=INVALID_HANDLE)
      {
       outstr=FileReadString(fileid);//   [Common]
       while(outstr!="[Neurons]")
         {
          //     if("AnnType=CGCANN"!=FileReadString(fileid)){FileClose(fileid);return(false);};//AnnType=CGCANN
-         if(StringFind(outstr,"input_dimension")==0)input_dimension=(int)StringToInteger(StringSubstr(outstr,StringLen("input_dimension=")));
+         //        if(StringFind(outstr,"input_dimension")==0)input_dimension=(int)StringToInteger(StringSubstr(outstr,StringLen("input_dimension=")));
+         sp=1+StringFind(outstr,"=");ep=StringFind(outstr," ",sp+1);
+         if("max_E"==StringSubstr(outstr,0,sp-1)) max_E=StringToDouble(StringSubstr(outstr,sp,ep-sp));
          outstr=FileReadString(fileid);
+         if(""==outstr) return(false);
         }
+
       outstr=FileReadString(fileid);
-      double weights[];  ArrayResize(weights,input_dimension);
+      double weights[];  ArrayResize(weights,num_input());
       CGCANNNeuron *tmp;
       while(outstr!="")
         {
          tmp=Neurons.Append();
-         sp=1+StringFind(outstr,"=");
-         //Print(outstr);
-         for(i=0;i<input_dimension;i++)
+         sp=1+StringFind(outstr,"=");ep=StringFind(outstr," ",sp+1);
+         tmp.cnt=(int)StringToInteger(StringSubstr(outstr,sp,ep-sp));
+         sp=ep;ep=StringFind(outstr," ",sp+1);
+         tmp.Stat=StringToDouble(StringSubstr(outstr,sp,ep-sp));
+         sp=ep;//ep=StringLen(outstr);
+         for(i=0;i<num_input();i++)
            {
             ep=StringFind(outstr," ",sp+1);
-            //Print(StringSubstr(outstr,sp,ep-sp));
+            if(-1==ep) ep=sp-1;//Print(StringSubstr(outstr,sp,ep-sp));
             weights[i]=StringToDouble(StringSubstr(outstr,sp,ep-sp));
             sp=ep;
            }
          tmp.Init(weights);
-         ep=StringFind(outstr," ",sp+1);
-         tmp.Stat=StringToDouble(StringSubstr(outstr,sp,ep-sp));
-         sp=ep;//ep=StringLen(outstr);
-         tmp.cnt=(int)StringToInteger(StringSubstr(outstr,sp));
-//         Print("tmp.Stat="+tmp.Stat+" tmp.cnt="+tmp.cnt+" '"+StringSubstr(outstr,sp)+"'");
+         //         Print("tmp.Stat="+tmp.Stat+" tmp.cnt="+tmp.cnt+" '"+StringSubstr(outstr,sp)+"'");
          outstr=FileReadString(fileid);
         }
       //FileClose(fileid);
       resb=true;
      }
    else resb=false;
-//   tmp=Neurons.GetFirstNode();
-//
-//   while(CheckPointer(tmp))
-//     {
-//      tmp.Weights(weights);
-//      outstr="";
-//      for(i=0;i<input_dimension;i++) outstr+=(string)weights[i]+" ";
-//      outstr+=(string)tmp.cnt+" "+(string)tmp.Stat;
-//      resb=MyIniFile.Write("Neurons",(string)tmp.uid,outstr);
-//      tmp=Neurons.GetNextNode();
-//     }
 
-//FileHandle=FileOpen(file_name,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
-//   if(FileHandle!=INVALID_HANDLE)
-//     {
-//      FileWrite(FileHandle,"Type=",Type());
-//      FileWrite(FileHandle,"input_dimension"=input_dimension);
-//                
-//     }
-//   else return(false);
-//FileClose(FileHandle);
    return(resb);
   }
 //+------------------------------------------------------------------+
@@ -618,22 +531,11 @@ bool CGCANN::CustomLoad(int fileid)
 //+------------------------------------------------------------------+
 bool CGCANN::CustomSave(int file_handle)
   {
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-bool CGCANN::ini_save(string file_name)
-  {
-   bool     resb=false;
-   string outstr="";
-   int i=0;
-//int FileHandle=0;
-   file_name=TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\"+file_name+".gc_ann";
-   MyIniFile.Init(file_name);// Пишем 
-   MyIniFile.EraseSection("Neurons");
-   resb=MyIniFile.Write("Common","AnnType",Type());
-   resb=MyIniFile.Write("Common","input_dimension",input_dimension);
+
+   string outstr="";int i;
+   FileWriteString(file_handle,"AnnType="+(string)Type()+"\n");
+   FileWriteString(file_handle,"max_E="+(string)max_E+" // maximum error\n");
+   FileWriteString(file_handle,"[Neurons]\n");
    double weights[];
    CGCANNNeuron *tmp;//,*W1,*W2;
                      //CGCANNConnection *tmpc;
@@ -643,22 +545,13 @@ bool CGCANN::ini_save(string file_name)
      {
       tmp.Weights(weights);
       outstr="";
-      for(i=0;i<input_dimension;i++) outstr+=(string)weights[i]+" ";
-      outstr+=(string)tmp.Stat+" "+(string)tmp.cnt;
-      resb=MyIniFile.Write("Neurons",(string)tmp.uid,outstr);
+      outstr+=(string)tmp.cnt+" "+(string)tmp.Stat;
+      for(i=0;i<num_input();i++) outstr+=" "+(string)weights[i];
+      FileWriteString(file_handle,(string)tmp.uid+"="+outstr+"\n");
       tmp=Neurons.GetNextNode();
      }
 
-//FileHandle=FileOpen(file_name,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
-//   if(FileHandle!=INVALID_HANDLE)
-//     {
-//      FileWrite(FileHandle,"Type=",Type());
-//      FileWrite(FileHandle,"input_dimension"=input_dimension);
-//                
-//     }
-//   else return(false);
-//FileClose(FileHandle);
-   return(resb);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| инициализирует алгоритм с помощью двух векторов входных данных   |
@@ -707,7 +600,7 @@ void CGCANN::Init(int __input_dimension,
                   double __k)
   {
    iteration_number=0;
-   input_dimension=__input_dimension;
+//input_dimension=__input_dimension;
    lambda=__lambda;
    age_max=__age_max;
    alpha= __alpha;
@@ -728,7 +621,7 @@ void CGCANN::Init(int __input_dimension,
 //+------------------------------------------------------------------+
 CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
   {
-   if(ArraySize(in)!=input_dimension) return(NULL);
+   if(ArraySize(in)!=num_input()) return(NULL);
 
    int i;
 
@@ -762,9 +655,9 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
       Winner.Stat+=train;
       double delta[],weights[];
       Winner.Weights(weights);
-      ArrayResize(delta,input_dimension);
+      ArrayResize(delta,num_input());
 
-      for(i=0;i<input_dimension;i++) delta[i]=(in[i]-weights[i])/Winner.cnt;
+      for(i=0;i<num_input();i++) delta[i]=(in[i]-weights[i])/Winner.cnt;
       Winner.AdaptWeights(delta);
 
       //--- Обновить локальную ошибку и полезность нейрона-победителя        
@@ -983,5 +876,82 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
 //--- Проверить критерий останова                                      
    Neurons.FindWinners(Winner,SecondWinner);
    return(Winner);
+  }
+//+------------------------------------------------------------------+
+bool CGCANN::Draw(int window,datetime &time[],int w,int h)
+  {
+   //Print("Draw "+w+" "+h);
+   int j;
+//--- на графике необходимо удалить старые нейроны и связи, чтобы потом нарисовать новые
+   for(j=ObjectsTotal(0)-1;j>=0;j--)
+     {
+      string name=ObjectName(0,j);
+      if(StringFind(name,"Neuron_")>=0)
+        {
+         ObjectDelete(0,name);
+        }
+      else if(StringFind(name,"Connection_")>=0)
+        {
+         ObjectDelete(0,name);
+        }
+     }
+   double weights[];
+   CGCANNNeuron *tmp,*W1,*W2;
+//CGCANNConnection *tmpc;
+
+   Neurons.FindWinners(W1,W2);
+
+//--- отрисовка нейронов
+   tmp=Neurons.GetFirstNode();
+   while(CheckPointer(tmp)!=POINTER_INVALID)
+     {
+      tmp.Weights(weights);
+
+      ObjectCreate(0,"Neuron_"+(string)tmp.uid,OBJ_ARROW,window,time[weights[0]*w/2.1+w/2.05],weights[1]*h/2.1+h/2);
+      ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_ARROWCODE,158);
+
+      ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Blue);
+      if(tmp.Stat>0.1) ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Green);
+      if(tmp.Stat<-0.1) ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Red);
+      //--- победитель цветом Lime, второй лучший Green, остальные Red
+      //if(tmp==W1) ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Lime);
+      //else if(tmp==W2) ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Green);
+      //else ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,White);
+
+      ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_BACK,false);
+      tmp=Neurons.GetNextNode();
+     }
+//            //--- отрисовка связей
+//            tmpc=GNGAlgorithm.Connections.GetFirstNode();
+//            while(CheckPointer(tmpc))
+//              {
+//               int x1=0,x2=0;
+//               double y1=0,y2=0;
+//
+//               tmp=GNGAlgorithm.Neurons.Find(tmpc.uid1);
+//               if(tmp!=NULL)
+//                 {
+//                  tmp.Weights(weights);
+//                  x1=(int)(weights[0]*400+500);y1=weights[1];
+//                 }
+//               tmp=GNGAlgorithm.Neurons.Find(tmpc.uid2);
+//               if(tmp!=NULL)
+//                 {
+//                  tmp.Weights(weights);
+//                  x2=(int)(weights[0]*400+500);y2=weights[1];
+//                 }
+//               ObjectCreate(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJ_TREND,window,time[x1],y1*45+49,time[x2],y2*45+49);
+//               ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_WIDTH,1);
+//               ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_STYLE,STYLE_DOT);
+//               ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_COLOR,Yellow);
+//               ObjectSetInteger(0,"Connection_"+(string)tmpc.uid1+"_"+(string)tmpc.uid2,OBJPROP_BACK,false);
+//               tmpc=GNGAlgorithm.Connections.GetNextNode();
+//              }
+//--- меняем информационную метку
+//ObjectSetString(0,"Label_samples",OBJPROP_TEXT,"Total samples: "+string(ts+1));
+   ObjectSetString(0,"Label_neurons",OBJPROP_TEXT,"Total neurons: "+string(Neurons.Total()));
+   ObjectSetString(0,"Label_age",OBJPROP_TEXT,"  ME="+(string)maximun_E);
+   ObjectSetString(0,"Label_ae",OBJPROP_TEXT,"Average E="+(string)average_E);
+   return(true);
   }
 //+------------------------------------------------------------------+
