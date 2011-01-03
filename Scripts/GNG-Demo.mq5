@@ -13,8 +13,8 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых дл€ обучени€
-input int     samples=1000;
-input string AlgoStr="RSI";
+input int     samples=100;
+//input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
 input int age_max=10;
@@ -49,6 +49,7 @@ void OnStart()
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
+   GNGAlgorithm.ClearTraning=true;
 //   GNGAlgorithm=new CGNGAlgorithm;
 
 //   while(!GetVectors(v1,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i++));
@@ -68,7 +69,7 @@ void OnStart()
       delete GNGAlgorithm;
       return;
      }
-   GNGAlgorithm.Save("GCANN_new");  
+   //GNGAlgorithm.Save("GCANN_new");  
 //--- векторы данных
    //double v[],v1[],v2[],ov[];
    //ArrayResize(ov,1);
@@ -142,7 +143,7 @@ void OnStart()
    int ts=0,i=0;
    for(int ma=0;ma<MaxSymbols;ma++)
      {
-      for(i=1;i<samples;i++)
+      for(i=0;i<samples;i++)
         {
         //--- передаем входной вектор алгоритму дл€ расчета
          GNGAlgorithm.forecast(SymbolsArray[ma],i,true);

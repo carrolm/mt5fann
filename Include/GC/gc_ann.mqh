@@ -482,8 +482,7 @@ bool CGCANN::CustomLoad(int fileid)
    bool     resb=false;
    string outstr="";
    int i=0,sp,ep;
-//int fileid;
-//fileid=FileOpen(file_name+".gc_ann",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
+
    if(fileid!=INVALID_HANDLE)
      {
       outstr=FileReadString(fileid);//   [Common]
@@ -496,7 +495,7 @@ bool CGCANN::CustomLoad(int fileid)
          outstr=FileReadString(fileid);
          if(""==outstr) return(false);
         }
-
+      if(ClearTraning) return(true);
       outstr=FileReadString(fileid);
       double weights[];  ArrayResize(weights,num_input());
       CGCANNNeuron *tmp;
@@ -642,7 +641,7 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
      }
    Neurons.FindWinners(Winner,SecondWinner);
 
-   if((train==NULL)) return(Winner);
+   if(train==NULL) return(Winner);
 //if(train>0.1)train=1;
 //else
 //  {
