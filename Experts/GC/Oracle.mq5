@@ -1,26 +1,27 @@
-//+------------------------------------------------------------------+
-//|                                                        GCANN.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                              http://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
-#include <GC\gc_ann.mqh>
-#include <GC\GetVectors.mqh>
+#include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
-CGCANN *MyExpert;
+COracleEasy *Oracles[];
+int nOracles;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   MyExpert=new CGCANN;
-   MyExpert.Load("GCANN");
-   MyExpert.Save("GCANN_new");
+   ArrayResize(Oracles,10);
+   nOracles=0;
+   Oracles[nOracles++]=new CiStochastic;
+   Oracles[nOracles++]=new CiMACD;
+   Oracles[nOracles++]=new CiMA;
+   Oracles[nOracles++]=new CPriceChanel;
+   Oracles[nOracles++]=new CiRSI;
+   Oracles[nOracles++]=new CiCGI;
+   Oracles[nOracles++]=new CiWPR;
+   Oracles[nOracles++]=new CiBands;
+   Oracles[nOracles++]=new CNRTR;
    Print("Ready!");
-   double f=MyExpert.forecast();
-   Print("f="+f);
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -28,7 +29,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   delete MyExpert;
+   for(int i=0;i<nOracles;i++) delete Oracles[i];
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -36,8 +37,12 @@ void OnDeinit(const int reason)
 void OnTick()
   {
    if(_TrailingPosition_) Trailing();
-   double f=MyExpert.forecast();
-   Print("f="+f*10);
-   NewOrder(_Symbol,f*10,"");
+   int io; 
+    double   res=0;
+      for(io=0;io<nOracles;io++)
+        {
+         res+=Oracles[io].forecast(Symbol());
+        }
+   NewOrder(_Symbol,res,"");
   }
 //+------------------------------------------------------------------+
