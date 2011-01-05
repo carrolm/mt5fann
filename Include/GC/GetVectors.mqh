@@ -12,9 +12,204 @@ string VectorFunctions[21]={"Fractals","Easy","RSI","IMA","Stochastic","HL","Hig
 //| входных веторов может быть много                                    |
 //| выходной веторвсегда один - сигнал на покупку/продажу               |
 //+---------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| Гиперболический тангенс                                          |
+//+------------------------------------------------------------------+
+double th(double x)
+  {
+   double x_=MathExp(x);
+   double _x=MathExp(-x);
+   return((x_-_x)/(x_+_x));
+  }
+//+------------------------------------------------------------------+
+//| Сигмоидальная логистическая функция                                          |
+//+------------------------------------------------------------------+
+
 double Sigmoid(double x)// вычисление логистической функции активации
   {
    return(1/(1+exp(-x)));
+  }
+//+------------------------------------------------------------------+
+//| Предобработка сигнала                                            |
+//+------------------------------------------------------------------+
+void InNormalize(double &aa[],int typ=1)
+  {
+   double sum_sqrt,rmax,rmin;
+   int i,n=ArraySize(aa);
+//---
+   switch(typ)
+     {
+      case 1:
+         rmax=aa[ArrayMaximum(aa)];
+         rmin=aa[ArrayMinimum(aa)];
+         for(i=0;i<=n-1;i++)
+           {
+            aa[i]=2*(aa[i]-rmin)/(rmax-rmin)-1;
+           }
+         break;
+      case 2:
+         sum_sqrt=0;
+         for(i=0; i<=n-1; i++)
+           {
+            sum_sqrt+=MathPow(aa[i],2);
+           }
+         sum_sqrt=MathSqrt(sum_sqrt);
+         //---
+         if(sum_sqrt!=0)
+           {
+            for(i=0; i<=n-1; i++)
+              {
+               aa[i]=aa[i]/sum_sqrt;
+              }
+           }
+         break;
+      case 3:
+         for(i=0; i<=n-1; i++)
+           {
+            aa[i]=th(aa[i]);
+           }
+         break;
+      case 4:
+         for(i=0; i<=n-1; i++)
+           {
+            aa[i]=Sigmoid(aa[i]);
+           }
+         break;
+
+      default: break;
+     }
+
+//---
+   return;
+  }
+//+-------------------------------------------------------------------+
+//| Масштабирование входящих сигналов                                              |
+//| aa[]  - числовой массив подлежащий нормализации        |
+//| scale - диаппазон нормализации                                                                      |
+//|              +1 -1 ->>  scale=11;   +1  0  ->> scale==10              |
+//| Return - 0 и нормализоваанный массив, в случае успеха|
+//|                     или код последней  ошибки                                                          |
+//+------------------------------------------------------------------+
+int GetScale(int scale,double &aa[])
+  {
+   int sign=0;
+   int I,i,Err;
+   //double range;
+   double sum[],nn[];
+
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+
+
+   if(rmax>0 && rmin>=0) sign= 1;
+   if(rmin<0 && rmax<=0) sign=-1;
+
+   I=ArraySize(aa);
+   ArrayResize(sum,I);
+   ArrayResize(nn,I);
+
+   if(scale==11) // приводим к +1 -1 
+     {
+      if(sign==0) // для массивов с положительными и отрицательными значениями
+        {
+         for(i=0;i<=I-1;i++)
+           {
+            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
+           }
+         Scale01(sum);
+
+         for(i=0;i<=I-1;i++)
+           {
+            if(nn[i]== 1) aa[i]= sum[i];
+            if(nn[i]==-1) aa[i]=-sum[i];
+           }
+        }
+      else                   // для массивов только с положительными или отрицательными значениями
+        {
+         if(sign==-1) for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
+         Scale11(aa);
+         if(sign==-1) aa[i]=-aa[i];// recover sign
+        }
+      Err=err();
+      return(Err);
+     }
+
+   if(scale==10) // приводим к 0 +1 
+     {
+      if(sign==0) // для массивов с положительными и отрицательными значениями
+        {
+         for(i=0;i<=I-1;i++)
+           {
+            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
+           }
+         Scale01(sum);
+
+         for(i=0;i<=I-1;i++)
+           {
+            if(nn[i]== 1) aa[i]= (sum[i]+1)/2;
+            if(nn[i]==-1) aa[i]=(-sum[i]+1)/2;
+           }
+        }
+      else                   // для массивов только с положительными или отрицательными значениями
+        {
+         if(sign==1) Scale01(aa);
+         else
+           {
+            for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
+            Scale01(aa);
+            aa[i]=-aa[i];// recover sign
+           }
+        }
+      Err=err();
+      return(Err);
+
+     }
+      return(Err);
+  }
+//+-------------------------------------------------------------------------------------+
+//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1 -1 |
+//+-------------------------------------------------------------------------------------+
+void Scale11(double &aa[])
+  {
+   int I=ArraySize(aa);
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+   double range=(rmax-rmin);
+   if( range==0 ) range=0.5;
+   for(int i=0;i<=I-1;i++)
+     {
+      aa[i]=2*(aa[i]-rmin)/range-1;
+     }
+   return;
+  }
+//+-------------------------------------------------------------------------------------+
+//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1  0 |
+//+-------------------------------------------------------------------------------------+
+void Scale01(double &aa[])
+  {
+   int I=ArraySize(aa);
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+   double range=rmax-rmin;
+   for(int i=0;i<=I-1;i++)
+     {
+      if( range!=0 ) aa[i]=(aa[i]-rmin)/range;
+      else aa[i]=0;
+     }
+   return;
+
+  }
+//+------------------------------------------------------------------+
+//|       Обработка ошибок                                                                                                |
+//+------------------------------------------------------------------+
+int err()
+  {
+   int err=GetLastError();
+   if(err!=0)
+     {
+      Print("error(",err,"): ");///,ErrorDescription(err));
+     }
+   return(err);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -460,7 +655,7 @@ bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smb
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
-      IndicatorRelease(h_ind);  
+   IndicatorRelease(h_ind);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -490,7 +685,7 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
-   IndicatorRelease(h_ind);  
+   IndicatorRelease(h_ind);
    return(true);
   }
 //+------------------------------------------------------------------+

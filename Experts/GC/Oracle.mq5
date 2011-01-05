@@ -1,3 +1,8 @@
+//+------------------------------------------------------------------+
+//|                                                      ProjectName |
+//|                                      Copyright 2010, CompanyName |
+//|                                       http://www.companyname.net |
+//+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
@@ -20,7 +25,11 @@ int OnInit()
    Oracles[nOracles++]=new CiCGI;
    Oracles[nOracles++]=new CiWPR;
    Oracles[nOracles++]=new CiBands;
-   Oracles[nOracles++]=new CNRTR;
+   Oracles[nOracles++]=new CiAlligator;
+   Oracles[nOracles++]=new CiAO;
+   Oracles[nOracles++]=new CiIchimoku;
+   Oracles[nOracles++]=new CiEnvelopes;
+//  Oracles[nOracles++]=new CNRTR;
    Print("Ready!");
    return(0);
   }
@@ -37,12 +46,12 @@ void OnDeinit(const int reason)
 void OnTick()
   {
    if(_TrailingPosition_) Trailing();
-   int io; 
-    double   res=0;
-      for(io=0;io<nOracles;io++)
-        {
-         res+=Oracles[io].forecast(Symbol());
-        }
+   int io;
+   double   res=0;
+   for(io=0;io<nOracles;io++)
+     {
+      res+=Oracles[io].forecast(Symbol());
+     }
    NewOrder(_Symbol,res,"");
   }
 //+------------------------------------------------------------------+

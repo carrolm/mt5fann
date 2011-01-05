@@ -49,8 +49,12 @@ int OnInit()
    Oracles[nOracles++]=new CiWPR;
    Oracles[nOracles++]=new CiBands;
    Oracles[nOracles++]=new CNRTR;
+   Oracles[nOracles++]=new CiAlligator;
+   Oracles[nOracles++]=new CiAO;
+   Oracles[nOracles++]=new CiIchimoku;
+   Oracles[nOracles++]=new CiEnvelopes;
    IndicatorSetString(INDICATOR_SHORTNAME,"GC Oracles "+(string)nOracles);
- //  for(int i=0;i<nOracles;i++) Print(Oracles[i].Name());
+//  for(int i=0;i<nOracles;i++) Print(Oracles[i].Name());
    refresh();
    return(0);
   }
