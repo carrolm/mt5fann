@@ -281,7 +281,7 @@ double CiBands::forecast(string smbl="",int shift=0,bool train=false)
 //--- возвращаем торговый сигнал
    return(sig);
   }
-  //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 class CNRTR:public COracleEasy
@@ -306,14 +306,178 @@ double CNRTR::forecast(string smbl="",int shift=0,bool train=false)
    if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
    if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
 
-   if(ind1_buffer[1]>0)      sig=1;
-   else if(ind2_buffer[1]>0)                     sig=-1;
+   if(ind1_buffer[1]>0) sig=1;
+   else if(ind2_buffer[1]>0) sig=-1;
    else sig=0;
    IndicatorRelease(h_ind1);
 //--- возвращаем торговый сигнал
    return(sig);
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAlligator:public COracleEasy
+  {
+   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual string    Name(){return("iAlligator");};
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiAlligator::forecast(string smbl="",int shift=0,bool train=false)
+  {
 
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double ind3_buffer[];
+   int   h_ind1=iAlligator(smbl,PERIOD_M1,13,0,8,0,5,0,MODE_SMMA,PRICE_MEDIAN);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,2,shift,3,ind3_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind3_buffer,true))         return(0);
+
+   if(ind3_buffer[1]>ind2_buffer[1] && ind2_buffer[1]>ind1_buffer[1])
+      sig=1;
+   else if(ind3_buffer[1]<ind2_buffer[1] && ind2_buffer[1]<ind1_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAMA:public COracleEasy
+  {
+   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual string    Name(){return("iAMA");};
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiAMA::forecast(string smbl="",int shift=0,bool train=false)
+  {
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iAMA(smbl,PERIOD_M1,9,2,30,0,PRICE_CLOSE);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<ind1_buffer[1])
+      sig=1;
+   else if(ind1_buffer[2]>ind1_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAO:public COracleEasy
+  {
+   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual string    Name(){return("iAO");};
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiAO::forecast(string smbl="",int shift=0,bool train=false)
+  {
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iAO(smbl,PERIOD_M1);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[1]==0)
+      sig=1;
+   else if(ind1_buffer[1]==1)
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiIchimoku:public COracleEasy
+  {
+   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual string    Name(){return("iIchimoku");};
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiIchimoku::forecast(string smbl="",int shift=0,bool train=false)
+  {
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   int   h_ind1=iIchimoku(smbl,PERIOD_M1,9,26,52);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true)) return(0);
+
+   if(ind1_buffer[1]>ind2_buffer[1])
+      sig=1;
+   else if(ind1_buffer[1]<ind2_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiEnvelopes:public COracleEasy
+  {
+   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual string    Name(){return("iEnvelopes");};
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiEnvelopes::forecast(string smbl="",int shift=0,bool train=false)
+  {
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double Close[];
+   int   h_ind1=iEnvelopes(smbl,PERIOD_M1,28,0,MODE_SMA,PRICE_CLOSE,0.1);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(CopyClose(Symbol(),Period(),0,3,Close)<2) return(0);
+   if(!ArraySetAsSeries(Close,true)) return(0);
+
+   if(Close[2]<=ind2_buffer[1] && Close[1]>ind2_buffer[1])
+      sig=1;
+   else if(Close[2]>=ind1_buffer[1] && Close[1]<ind1_buffer[1])
+                     sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
