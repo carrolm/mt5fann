@@ -12,17 +12,12 @@ int TrailingStop=3;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0) 
+bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
   {
    static datetime lastTime=0;
    if(""==smbl)smbl=_Symbol;
    datetime lastbarTime=(datetime)SeriesInfoInteger(smbl,tf,SERIES_LASTBAR_DATE);
-   if(lastTime==0) 
-     {
-      lastTime=lastbarTime;
-      return(false);
-     }
-   if(lastTime!=lastbarTime) 
+   if(lastTime==0 || lastTime!=lastbarTime)
      {
       lastTime=lastbarTime;
       return(true);
@@ -66,6 +61,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    int i;
 // есть такой-же отложенный ордер
    for(i=0;i<OrdersTotal();i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       OrderGetTicket(i);
       if(OrderGetString(ORDER_SYMBOL)==smb)
@@ -78,6 +76,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
      }
 // есть открытая позиция
    for(i=0;i<PositionsTotal();i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       if(smb==PositionGetSymbol(i))
         {
@@ -94,6 +95,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
      }
    MqlTick lasttick;
    SymbolInfoTick(smb,lasttick);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(price==0)
      {
       if(ticket!=0)
@@ -149,11 +153,17 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.comment=comment;
 //Print(smb," ",type," ",comment);
    trReq.expiration=expiration;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(type==NewOrderBuy || type==NewOrderWaitBuy)
      {
       trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    else
 //   if(type==NewOrderSell||type==NewOrderWaitSell)
      {
@@ -199,6 +209,9 @@ bool Trailing()
    ulong  ticket;
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {// есть "заказы" и открытие разрешено
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -369,6 +382,9 @@ bool Trailing()
 /// traling open           
    double newsl=0;
    for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       smb=PositionGetSymbol(i);
       newsl=0;

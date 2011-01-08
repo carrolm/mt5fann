@@ -94,7 +94,7 @@ int GetScale(int scale,double &aa[])
   {
    int sign=0;
    int I,i=0,Err=0;
-   //double range;
+//double range;
    double sum[],nn[];
 
    double rmax=aa[ArrayMaximum(aa)];
@@ -164,7 +164,7 @@ int GetScale(int scale,double &aa[])
       return(Err);
 
      }
-      return(Err);
+   return(Err);
   }
 //+-------------------------------------------------------------------------------------+
 //| Масштабирование входящих сигналов > 0 приводим в диаппазон +1 -1 |
@@ -218,7 +218,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
-   int shift_history=30,i;//
+   int shift_history=30;//,i;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
@@ -233,9 +233,10 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 //if((High[1]>High[0] && High[1]>High[2])
 //   || (Low[1]<Low[0] && Low[1]<Low[2]))
 //   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
-  if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift); ret=true;}
+   if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift); ret=true;}
    if(num_inputvectors>0)
      {// Есть фрактал!
+      //Print("shift="+shift+" shift_history="+shift_history);
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("IMA"==fn_name) ret=GetVectors_IMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -245,12 +246,15 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("Low"==fn_name) ret=GetVectors_Low(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Stochastic"==fn_name) ret=GetVectors_Stochastic(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+      //string outstr="";
+      //for(i=0;i<num_inputvectors;i++) outstr+=(string)InputVector[i]+" ";
+      //Print(fn_name+" "+outstr);
 
       //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
-      double sq=0;
-      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
-      for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+      //double sq=0;
+      //for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
+      //for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
       //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
       //double min=InputVector[0];
@@ -337,9 +341,9 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
       if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);if(2*TS>-res) ObjectDelete(0,"GV_S_"+(string)shift);}
       else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);if(2*TS>res) ObjectDelete(0,"GV_B_"+(string)shift);}
       res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5;
- //     if(res>0.5) res=1;
- //     else if(res<-.05) res=-1;
- //     else res=0;
+      //     if(res>0.5) res=1;
+      //     else if(res<-.05) res=-1;
+      //     else res=0;
       //res=1*(1/(1+MathExp(-1*res/5))-0.5);
      }
    return(res);
@@ -668,19 +672,23 @@ bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smb
 bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iRSI(smbl,tf,14,PRICE_CLOSE);
-   double rsi_buffer[];
+   double rsi_buffer[];ArrayResize(rsi_buffer,num_inputvectors+6);
    if(!ArraySetAsSeries(rsi_buffer,true)) return(false);
-   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,rsi_buffer)<(num_inputvectors+1)) return(false);
-   double Close[];
-   ArraySetAsSeries(Close,true);
-// копируем историю
-   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
-
-   if(maxcount<num_inputvectors+2)
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,rsi_buffer)<(num_inputvectors+1))
      {
-      Print("Shift = ",shift," maxcount = ",maxcount);
+      Print("RSI not copy= "+(string)h_ind+" "+(string)num_inputvectors+" shift="+(string)shift);
       return(false);
      }
+//   double Close[];
+//   ArraySetAsSeries(Close,true);
+//// копируем историю
+//   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
+//
+//   if(maxcount<num_inputvectors+2)
+//     {
+//      Print("Shift = ",shift," maxcount = ",maxcount);
+//      return(false);
+//     }
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
      {
@@ -689,7 +697,7 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
-   IndicatorRelease(h_ind);
+   //IndicatorRelease(h_ind);
    return(true);
   }
 //+------------------------------------------------------------------+
