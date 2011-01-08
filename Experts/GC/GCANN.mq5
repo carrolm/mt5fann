@@ -10,6 +10,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
 CGCANN *MyExpert;
+int bars;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -20,7 +21,8 @@ int OnInit()
    MyExpert.Save("GCANN_new");
    Print("Ready!");
    double f=MyExpert.forecast();
-   Print("f="+f);
+   Print("f="+(string)f);
+   bars=0;
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -35,9 +37,13 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
-   if(_TrailingPosition_) Trailing();
-   double f=MyExpert.forecast();
-   Print("f="+f*10);
-   NewOrder(_Symbol,f*10,"");
+   if(_TrailingPosition_) Trailing(); 
+   if(isNewBar())
+     {
+      bars=Bars(_Symbol,_Period);
+      double f=MyExpert.forecast();
+      Print("f="+(string)f);
+      NewOrder(_Symbol,f,"");
+     }
   }
 //+------------------------------------------------------------------+

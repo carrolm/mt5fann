@@ -15,7 +15,7 @@ string VectorFunctions[21]={"Fractals","Easy","RSI","IMA","Stochastic","HL","Hig
 //+------------------------------------------------------------------+
 //| Гиперболический тангенс                                          |
 //+------------------------------------------------------------------+
-double th(double x)
+double tanh(double x)
   {
    double x_=MathExp(x);
    double _x=MathExp(-x);
@@ -66,7 +66,7 @@ void InNormalize(double &aa[],int typ=1)
       case 3:
          for(i=0; i<=n-1; i++)
            {
-            aa[i]=th(aa[i]);
+            aa[i]=tanh(aa[i]);
            }
          break;
       case 4:
@@ -93,7 +93,7 @@ void InNormalize(double &aa[],int typ=1)
 int GetScale(int scale,double &aa[])
   {
    int sign=0;
-   int I,i,Err;
+   int I,i=0,Err=0;
    //double range;
    double sum[],nn[];
 
@@ -232,7 +232,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
    int nch=CopyHigh(smbl,tf,shift+shift_history,4,High);
 //if((High[1]>High[0] && High[1]>High[2])
 //   || (Low[1]<Low[0] && Low[1]<Low[2]))
-   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
+//   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
+  if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift); ret=true;}
    if(num_inputvectors>0)
      {// Есть фрактал!
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -336,6 +337,9 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
       if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);if(2*TS>-res) ObjectDelete(0,"GV_S_"+(string)shift);}
       else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);if(2*TS>res) ObjectDelete(0,"GV_B_"+(string)shift);}
       res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5;
+ //     if(res>0.5) res=1;
+ //     else if(res<-.05) res=-1;
+ //     else res=0;
       //res=1*(1/(1+MathExp(-1*res/5))-0.5);
      }
    return(res);
