@@ -390,14 +390,14 @@ CGCANNConnection   *CGCANNConnectionList::FindNextConnection(int uid)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CGCANN:public COracle
+class CGCANN:public COracleANN
   {
 public:
    //--- связные списки объектов-нейронов и связей между ними
    CGCANNNeuronList *Neurons;
    CGCANNConnectionList *Connections;
    //--- параметры алгоритма
-
+bool ClearTraning;
    string            Functions_Array[10];
    int               Functions_Count[10];
    int               Max_Functions;
@@ -447,6 +447,7 @@ double CGCANN::forecast(string smbl="",int shift=0,bool train=false)
       CGCANNNeuron     *r;
       if(train) r=ProcessVector(InputVector,OutputVector[0]);
       else r=ProcessVector(InputVector);
+      //if(r.error> max_E) return(0);
       if(0==r.cnt) return(0);
       return(r.Stat/r.cnt);
      }
@@ -504,7 +505,7 @@ bool CGCANN::CustomLoad(int fileid)
          tmp=Neurons.Append();
          sp=1+StringFind(outstr,"=");ep=StringFind(outstr," ",sp+1);
          tmp.cnt=(int)StringToInteger(StringSubstr(outstr,sp,ep-sp));
-         sp=ep;ep=StringFind(outstr," ",sp+1);
+         sp=1+ep;ep=StringFind(outstr," ",sp+1);
          tmp.Stat=StringToDouble(StringSubstr(outstr,sp,ep-sp));
          sp=ep;//ep=StringLen(outstr);
          for(i=0;i<num_input();i++)

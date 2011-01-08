@@ -22,6 +22,7 @@ protected:
    int               m_synapses;
    double            m_weights[];
 public:
+   int               Layer;
    double            NET;
                      CCustomNeuron();
    void              Init(int synapses);
@@ -39,6 +40,7 @@ void CCustomNeuron::CCustomNeuron()
   {
    m_synapses=0;
    NET=0;
+   Layer=-1;
   }
 //+------------------------------------------------------------------+
 //| возвращает размерность входного вектора нейрона    		     |

@@ -543,7 +543,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
    n_vectors=(n_vectors-pos_in);
    for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
      {
-      if(GetVectors(IB,OB,Functions_Count[FunctionsIdx],n_o_vectors,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
+      if(GetVectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
         {
          // приведем к общему знаменателю
          double si=1;

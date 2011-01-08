@@ -13,7 +13,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых для обучения
-input int     samples=100;
+input int     samples=10000;
 //input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
@@ -24,7 +24,7 @@ input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
-input double max_E=0.001f;
+input double max_E=1.0f;
 
 //---глобальные переменные
 CGCANN *GNGAlgorithm;
