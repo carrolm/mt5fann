@@ -13,11 +13,12 @@ class COracleEasy
   {
 private:
 public:
+   bool              debug;
                      COracleEasy(){Init();};
                     ~COracleEasy(){DeInit();};
-   virtual void              Init(){};
+   virtual void              Init(){debug=false;};
    virtual void              DeInit(){};
-   virtual double    forecast(string smbl="",int shift=0,bool train=false){return(0.0);};
+   virtual double    forecast(string smbl,int shift,bool train){return(0.0);};
    virtual string    Name(){return("Prpototype");};
   };
 //+------------------------------------------------------------------+
@@ -524,7 +525,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
    ArrayResize(InputVector,num_input());
    ArrayResize(OutputVector,3);
    int FunctionsIdx;
-   int n_vectors=num_input();
+   //int n_vectors=num_input();
    int n_o_vectors=1;
    int pos_in=0,pos_out=0,i;
    if(""==smbl) smbl=_Symbol;
@@ -540,14 +541,14 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
      }
    if(!train)n_o_vectors=0;
 
-   n_vectors=(n_vectors-pos_in);
+   //n_vectors=(n_vectors-pos_in);
    for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
      {
       if(GetVectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
         {
          // приведем к общему знаменателю
          double si=1;
-         //            for(i=0;i<n_vectors;i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
+         //            for(i=0;i<Functions_Count[FunctionsIdx];i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
          for(i=0;i<Functions_Count[FunctionsIdx];i++) InputVector[pos_in++]=IB[i]/si;
 
          // for(i=0;i<n_o_vectors;i++)
@@ -559,7 +560,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
          //   }
         }
      }
-   if(GetVectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
+   if(train&&GetVectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
      {
       for(i=0;i<n_o_vectors;i++)
         {
@@ -619,6 +620,7 @@ bool COracleANN::Load(string file_name)
    int file_handle;  string outstr="";   int i=0,sp;
    File_Name=file_name;
    file_handle=FileOpen(file_name+".gc_oracle",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
+
    if(file_handle!=INVALID_HANDLE)
      {
       outstr=FileReadString(file_handle);//   [Common]
@@ -638,7 +640,11 @@ bool COracleANN::Load(string file_name)
       FileClose(file_handle);
       return(true);
      }
-   else return(false);
+   else
+     {
+      Print("Файл не найден в папке "+TerminalInfoString(TERMINAL_DATA_PATH));
+      return(false);
+     }
   };
 //+------------------------------------------------------------------+
 void COracleANN::Init()

@@ -15,7 +15,7 @@ int nOracles;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   ArrayResize(Oracles,10);
+   ArrayResize(Oracles,20);
    nOracles=0;
    Oracles[nOracles++]=new CiStochastic;
    Oracles[nOracles++]=new CiMACD;
@@ -50,7 +50,7 @@ void OnTick()
    double   res=0;
    for(io=0;io<nOracles;io++)
      {
-      res+=Oracles[io].forecast(Symbol());
+      res+=Oracles[io].forecast(Symbol(),0,false);
      }
    NewOrder(_Symbol,res,"");
   }

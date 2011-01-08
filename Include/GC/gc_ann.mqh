@@ -430,7 +430,7 @@ bool ClearTraning;
 
    virtual bool      CustomLoad(int file_handle);
    virtual bool      CustomSave(int file_handle);
-   double            forecast(string smbl="",int shift=0,bool train=false);
+   double            forecast(string smbl,int shift,bool train);
 
    CGCANNNeuron     *ProcessVector(double &in[],double train=NULL);
    virtual bool      StoppingCriterion();
@@ -440,7 +440,7 @@ bool ClearTraning;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CGCANN::forecast(string smbl="",int shift=0,bool train=false)
+double CGCANN::forecast(string smbl,int shift,bool train)
   {
    if(GetVector(smbl,shift,train))
      {
@@ -448,6 +448,12 @@ double CGCANN::forecast(string smbl="",int shift=0,bool train=false)
       if(train) r=ProcessVector(InputVector,OutputVector[0]);
       else r=ProcessVector(InputVector);
       //if(r.error> max_E) return(0);
+      if(debug) 
+      {
+        string outstr="shift="+(string)shift+" ";
+        for(int i=0;i<num_input();i++) outstr+=(string)InputVector[i]+" ";
+      Print((string)r.uid+" error="+(string)r.error+outstr);
+      }
       if(0==r.cnt) return(0);
       return(r.Stat/r.cnt);
      }
