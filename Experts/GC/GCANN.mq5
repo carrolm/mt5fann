@@ -47,7 +47,7 @@ void OnTick()
          lastf=f;
          //Print((string)SeriesInfoInteger(_Symbol,0,SERIES_LASTBAR_DATE)+" f="+(string)f);
         }
-      NewOrder(_Symbol,f*1.5,(string)f);
+      NewOrder(_Symbol,f*1.1,(string)f);
      }
   }
 //+------------------------------------------------------------------+

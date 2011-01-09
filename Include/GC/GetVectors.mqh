@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"Fractals","Easy","RSI","IMA","Stochastic","HL","High","Low","","","","",""};
+string VectorFunctions[21]={"Fractals","Easy","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -218,7 +218,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
-   int shift_history=30;//,i;//
+   int shift_history=30,i;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
@@ -245,16 +245,25 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("High"==fn_name) ret=GetVectors_High(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Low"==fn_name) ret=GetVectors_Low(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Stochastic"==fn_name) ret=GetVectors_Stochastic(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("MACD"==fn_name) ret=GetVectors_MACD(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("CCI"==fn_name) ret=GetVectors_CCI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("WPR"==fn_name) ret=GetVectors_WPR(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("AMA"==fn_name) ret=GetVectors_AMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("AO"==fn_name) ret=GetVectors_AO(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      if("Envelopes"==fn_name) ret=GetVectors_Envelopes(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+
       //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
+      if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       //string outstr="";
       //for(i=0;i<num_inputvectors;i++) outstr+=(string)InputVector[i]+" ";
       //Print(fn_name+" "+outstr);
 
       //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
-      //double sq=0;
-      //for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
-      //for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+      double sq=0;
+      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
+      for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
       //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
       //double min=InputVector[0];
@@ -340,7 +349,13 @@ double GetTrend(int shift_history,string smb="",ENUM_TIMEFRAMES tf=0,int shift=0
       if(draw)ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
       if(mS>mB) {res=-mS;ObjectDelete(0,"GV_B_"+(string)shift);if(2*TS>-res) ObjectDelete(0,"GV_S_"+(string)shift);}
       else      { res=mB;ObjectDelete(0,"GV_S_"+(string)shift);if(2*TS>res) ObjectDelete(0,"GV_B_"+(string)shift);}
-      res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5;
+      if((SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))>0)
+         res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5;
+      else
+        {
+         Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
+         res=0;
+        }
       //     if(res>0.5) res=1;
       //     else if(res<-.05) res=-1;
       //     else res=0;
@@ -642,24 +657,14 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
 bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iStochastic(smbl,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
-   double rsi_buffer[];
-   if(!ArraySetAsSeries(rsi_buffer,true)) return(false);
-   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,rsi_buffer)<(num_inputvectors+1)) return(false);
-   double Close[];
-   ArraySetAsSeries(Close,true);
-// копируем историю
-   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
-
-   if(maxcount<num_inputvectors+2)
-     {
-      Print("Shift = ",shift," maxcount = ",maxcount);
-      return(false);
-     }
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
      {
       // вычислим и отнормируем
-      res=(rsi_buffer[i+1]/100);
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
@@ -672,32 +677,22 @@ bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smb
 bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iRSI(smbl,tf,14,PRICE_CLOSE);
-   double rsi_buffer[];ArrayResize(rsi_buffer,num_inputvectors+6);
-   if(!ArraySetAsSeries(rsi_buffer,true)) return(false);
-   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,rsi_buffer)<(num_inputvectors+1))
+   double ind_buffer[];ArrayResize(ind_buffer,num_inputvectors+6);
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1))
      {
       Print("RSI not copy= "+(string)h_ind+" "+(string)num_inputvectors+" shift="+(string)shift);
       return(false);
      }
-//   double Close[];
-//   ArraySetAsSeries(Close,true);
-//// копируем историю
-//   int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
-//
-//   if(maxcount<num_inputvectors+2)
-//     {
-//      Print("Shift = ",shift," maxcount = ",maxcount);
-//      return(false);
-//     }
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
      {
       // вычислим и отнормируем
-      res=(rsi_buffer[i+1]/100);
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
-   //IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -706,6 +701,154 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
 bool GetVectors_IMA(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iMA(smbl,tf,6,0,MODE_LWMA,PRICE_WEIGHTED);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool GetVectors_MACD(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iMACD(smbl,tf,12,26,9,PRICE_CLOSE);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+bool GetVectors_CCI(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iCCI(smbl,tf,14,PRICE_TYPICAL);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+
+bool GetVectors_WPR(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iWPR(smbl,tf,14);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+
+bool GetVectors_AMA(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iAMA(smbl,tf,9,2,30,0,PRICE_CLOSE);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool GetVectors_AO(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iAO(smbl,tf);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool GetVectors_Ichimoku(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iIchimoku(smbl,tf,9,26,52);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+   if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
+
+   int i;   double res=0;
+   for(i=0;i<num_inputvectors;i++)
+     {
+      // вычислим и отнормируем
+      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      InputVector[i]=res;
+     }
+   IndicatorRelease(h_ind);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+bool GetVectors_Envelopes(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iEnvelopes(smbl,tf,28,0,MODE_SMA,PRICE_CLOSE,0.1);
    if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(false);
