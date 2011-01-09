@@ -397,7 +397,7 @@ public:
    CGCANNNeuronList *Neurons;
    CGCANNConnectionList *Connections;
    //--- параметры алгоритма
-bool ClearTraning;
+   bool              ClearTraning;
    string            Functions_Array[10];
    int               Functions_Count[10];
    int               Max_Functions;
@@ -434,7 +434,7 @@ bool ClearTraning;
 
    CGCANNNeuron     *ProcessVector(double &in[],double train=NULL);
    virtual bool      StoppingCriterion();
-   virtual string    Type() const          { return("CGCANN");}
+   virtual string    Type() const          { return("CGGNGCANN");}
    //  virtual double    forecast(int shift=0,bool train=false);
   };
 //+------------------------------------------------------------------+
@@ -448,12 +448,12 @@ double CGCANN::forecast(string smbl,int shift,bool train)
       if(train) r=ProcessVector(InputVector,OutputVector[0]);
       else r=ProcessVector(InputVector);
       //if(r.error> max_E) return(0);
-      if(debug) 
-      {
-        string outstr="shift="+(string)shift+" ";
-        for(int i=0;i<num_input();i++) outstr+=(string)InputVector[i]+" ";
-      Print((string)r.uid+" error="+(string)r.error+outstr);
-      }
+      if(debug)
+        {
+         string outstr="shift="+(string)shift+" ";
+         for(int i=0;i<num_input();i++) outstr+=(string)InputVector[i]+" ";
+         Print((string)r.uid+" error="+(string)r.error+outstr);
+        }
       if(0==r.cnt) return(0);
       return(r.Stat/r.cnt);
      }
@@ -480,7 +480,6 @@ CGCANN::~CGCANN(void)
    delete Neurons;
    delete Connections;
   }
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -886,7 +885,7 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
 //+------------------------------------------------------------------+
 bool CGCANN::Draw(int window,datetime &time[],int w,int h)
   {
-   //Print("Draw "+w+" "+h);
+//Print("Draw "+w+" "+h);
    int j;
 //--- на графике необходимо удалить старые нейроны и связи, чтобы потом нарисовать новые
    for(j=ObjectsTotal(0)-1;j>=0;j--)

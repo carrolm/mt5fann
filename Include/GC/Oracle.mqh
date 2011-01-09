@@ -486,8 +486,8 @@ class COracleANN:public COracleEasy
   {
 private:
    string            Symbol;
-   string            Functions_Array[10];
-   int               Functions_Count[10];
+   string            Functions_Array[50];
+   int               Functions_Count[50];
    //int               Max_Functions;
    ENUM_TIMEFRAMES   TimeFrame;
    string            File_Name;
@@ -508,6 +508,10 @@ public:
    //   virtual double    forecast(string smbl="",int shift=0,bool train=false);
    bool              Load(string file_name);
    bool              Save(string file_name="");
+   int               ExportFANNDataWithTest(int train_qty,int test_qty,string &SymbolsArray[],string FileName="");
+   int               ExportFANNData(int qty,int shift,string &SymbolsArray[],string FileName,bool test=false);
+   int               ExportDataWithTest(int train_qty,int test_qty,string &SymbolsArray[],string FileName="");
+   int               ExportData(int qty,int shift,string &SymbolsArray[],string FileName,bool test=false);
    virtual bool      CustomLoad(int file_handle){return(false);};
    virtual bool      CustomSave(int file_handle){return(false);};
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
@@ -516,7 +520,160 @@ public:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+int COracleANN::ExportFANNDataWithTest(int train_qty,int test_qty,string &Symbols_Array[],string FileName="")
+  {
+   if(""==FileName) FileName=File_Name;
+   int shift=0;
+// test
+   shift=ExportFANNData(test_qty,shift,Symbols_Array,FileName+"_test.test",true);
+   shift=ExportFANNData(train_qty,shift,Symbols_Array,FileName+"_train.train",false);
+// чето ниже не работает :(
+//   FileCopy(FileName+"_test.test",FILE_COMMON,FileName+"_test.dat",FILE_REWRITE);
+//   FileCopy(FileName+"_train.train",FILE_COMMON,FileName+"_train.dat",FILE_REWRITE);
+//\
+   return(shift);
+  }
+int COracleANN::ExportDataWithTest(int train_qty,int test_qty,string &Symbols_Array[],string FileName="")
+  {
+   if(""==FileName) FileName=File_Name;
+   int shift=0;
+// test
+   shift=ExportData(test_qty,shift,Symbols_Array,FileName+"_test.csv",true);
+   shift=ExportData(train_qty,shift,Symbols_Array,FileName+"_train.csv",false);
+// чето ниже не работает :(
+//   FileCopy(FileName+"_test.test",FILE_COMMON,FileName+"_test.dat",FILE_REWRITE);
+//   FileCopy(FileName+"_train.train",FILE_COMMON,FileName+"_train.dat",FILE_REWRITE);
+//\
+   return(shift);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int COracleANN::ExportFANNData(int qty,int shift,string &Symbols_Array[],string FileName,bool test)
+  {
+   int i,ma;
+   int FileHandle=0;
+   int needcopy=0;
+   int copied=0;
 
+// временно!
+   test=false;
+//\
+
+   string outstr;
+   FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
+   needcopy=qty;int Max_Symbols=0;
+   for(ma=0;ma<ArraySize(Symbols_Array);ma++) if(StringLen(Symbols_Array[ma])!=0)Max_Symbols++;
+   //GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+
+   if(FileHandle!=INVALID_HANDLE)
+     {// записываем в файл шапку
+      FileWrite(FileHandle,Max_Symbols*needcopy*((test)?1:2),num_input(),1);
+      for(ma=0;ma<Max_Symbols;ma++)
+      for(i=0;i<needcopy;shift++)
+        {
+         if(GetVector(Symbols_Array[ma],shift,true))
+           {
+            i++;
+
+            outstr="";
+            for(int ibj=0;ibj<num_input();ibj++)
+              {
+               outstr=outstr+(string)(InputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
+            outstr="";
+            for(int ibj=0;ibj<1;ibj++)
+              {
+               outstr=outstr+(string)(OutputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
+            //if(test) continue;
+            //// сделаем еще и симметричный дубль
+            //outstr="";
+            //for(int ibj=0;ibj<num_input();ibj++)
+            //  {
+            //   outstr=outstr+(string)(InputVector[ibj])+" ";
+            //  }
+            //FileWrite(FileHandle,outstr);       // 
+            //outstr="";
+            //for(int ibj=0;ibj<1;ibj++)
+            //  {
+            //   outstr=outstr+(string)(OutputVector[ibj])+" ";
+            //  }
+            //FileWrite(FileHandle,outstr);       // 
+
+           }
+        }
+     }
+   FileClose(FileHandle);
+   Print("Created file "+FileName);
+   return(shift);
+  }
+int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string FileName,bool test)
+  {
+   int i,ma;
+   int FileHandle=0;
+   int needcopy=0;
+   int copied=0;
+
+// временно!
+   test=false;
+//\
+
+   string outstr;
+   FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_CSV,' ');
+   needcopy=qty;int Max_Symbols=0;
+   for(ma=0;ma<ArraySize(Symbols_Array);ma++) if(StringLen(Symbols_Array[ma])!=0)Max_Symbols++;
+   //GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+
+   if(FileHandle!=INVALID_HANDLE)
+     {// записываем в файл шапку
+ //     FileWrite(FileHandle,Max_Symbols*needcopy*((test)?1:2),num_input(),1);
+      for(ma=0;ma<Max_Symbols;ma++)
+      for(i=0;i<needcopy;shift++)
+        {
+         if(GetVector(Symbols_Array[ma],shift,true))
+           {
+            i++;
+
+            outstr="";
+            for(int ibj=0;ibj<num_input();ibj++)
+              {
+               outstr=outstr+(string)(InputVector[ibj])+" ";
+              }
+            //FileWrite(FileHandle,outstr);       // 
+            //outstr="";
+            for(int ibj=0;ibj<1;ibj++)
+              {
+               outstr=outstr+(string)(OutputVector[ibj])+" ";
+              }
+            FileWrite(FileHandle,outstr);       // 
+            //if(test) continue;
+            //// сделаем еще и симметричный дубль
+            //outstr="";
+            //for(int ibj=0;ibj<num_input();ibj++)
+            //  {
+            //   outstr=outstr+(string)(InputVector[ibj])+" ";
+            //  }
+            ////FileWrite(FileHandle,outstr);       // 
+            ////outstr="";
+            //for(int ibj=0;ibj<1;ibj++)
+            //  {
+            //   outstr=outstr+(string)(OutputVector[ibj])+" ";
+            //  }
+            //FileWrite(FileHandle,outstr);       // 
+
+           }
+        }
+     }
+   FileClose(FileHandle);
+   Print("Created file "+FileName);
+   return(shift);
+  }  
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
   {// пара, период, смещение назад (для индикатора полезно)
    double IB[],OB[];
@@ -525,7 +682,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
    ArrayResize(InputVector,num_input());
    ArrayResize(OutputVector,3);
    int FunctionsIdx;
-   //int n_vectors=num_input();
+//int n_vectors=num_input();
    int n_o_vectors=1;
    int pos_in=0,pos_out=0,i;
    if(""==smbl) smbl=_Symbol;
@@ -541,7 +698,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
      }
    if(!train)n_o_vectors=0;
 
-   //n_vectors=(n_vectors-pos_in);
+//n_vectors=(n_vectors-pos_in);
    for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
      {
       if(GetVectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
@@ -560,7 +717,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
          //   }
         }
      }
-   if(train&&GetVectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
+   if(train && GetVectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
      {
       for(i=0;i<n_o_vectors;i++)
         {

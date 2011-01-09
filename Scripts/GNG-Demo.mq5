@@ -13,7 +13,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых для обучения
-input int     samples=10000;
+input int     samples=10;
 //input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
@@ -65,10 +65,13 @@ void OnStart()
      }
    if(0==GNGAlgorithm.num_input())
      {
-      Print("Sett Oracle");
+      Print("Set Oracle");
       delete GNGAlgorithm;
       return;
      }
+  GNGAlgorithm.ExportFANNDataWithTest(100,10,SymbolsArray);
+   GNGAlgorithm.ExportDataWithTest(100,10,SymbolsArray);
+
    //GNGAlgorithm.Save("GCANN_new");  
 //--- векторы данных
    //double v[],v1[],v2[],ov[];
