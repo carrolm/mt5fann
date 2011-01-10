@@ -13,7 +13,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых дл€ обучени€
-input int     samples=10;
+input int     samples=10000;
 //input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
@@ -46,7 +46,6 @@ void OnStart()
    window=ChartWindowFind(0,"GNG_dummy");
 //input_dimension=2;
 
-
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
    GNGAlgorithm.ClearTraning=true;
@@ -69,16 +68,16 @@ void OnStart()
       delete GNGAlgorithm;
       return;
      }
-  GNGAlgorithm.ExportFANNDataWithTest(100,10,SymbolsArray);
-   GNGAlgorithm.ExportDataWithTest(100,10,SymbolsArray);
+//   GNGAlgorithm.ExportFANNDataWithTest(10000,10,SymbolsArray);
+   GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
 
-   //GNGAlgorithm.Save("GCANN_new");  
+//GNGAlgorithm.Save("GCANN_new");  
 //--- векторы данных
-   //double v[],v1[],v2[],ov[];
-   //ArrayResize(ov,1);
-   //ArrayResize(v,GNGAlgorithm.num_input());
-   //ArrayResize(v1,GNGAlgorithm.num_input());
-   //ArrayResize(v2,GNGAlgorithm.num_input());
+//double v[],v1[],v2[],ov[];
+//ArrayResize(ov,1);
+//ArrayResize(v,GNGAlgorithm.num_input());
+//ArrayResize(v1,GNGAlgorithm.num_input());
+//ArrayResize(v2,GNGAlgorithm.num_input());
 //--- чтобы функци€ CopyBuffer() работала правильно, количество векторов 
 //--- должно укладыватьс€ в количество баров с запасом на длину вектора 
    _samples=samples+GNGAlgorithm.num_input()*10;
@@ -148,7 +147,7 @@ void OnStart()
      {
       for(i=0;i<samples;i++)
         {
-        //--- передаем входной вектор алгоритму дл€ расчета
+         //--- передаем входной вектор алгоритму дл€ расчета
          GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
          ts++;
         }
@@ -163,7 +162,7 @@ void OnStart()
 //}
 //--- удал€ем из пам€ти экземпл€р алгоритма
    Print("Completed! Total neurons: "+string(GNGAlgorithm.Neurons.Total())+" from "+(string)ts+" samples");
-   //GNGAlgorithm.ini_save("GCANN");
+//GNGAlgorithm.ini_save("GCANN");
    GNGAlgorithm.Save("GCANN");
    delete GNGAlgorithm;
 
