@@ -25,7 +25,7 @@
 //---- indicator buffers
 double ExtUpperBuffer[];
 double ExtLowerBuffer[];
-input int _TREND_=20;// на сколько смотреть вперед
+input int _TREND_=10;// на сколько смотреть вперед
 input int  _limit_=300;// на сколько баров уходить назад
 
 //+------------------------------------------------------------------+
@@ -34,10 +34,7 @@ input int  _limit_=300;// на сколько баров уходить назад
 void OnDeinit(const int)
 
   {
-   int i=0;
-
-   for(i=ObjectsTotal(0);i>=0;i--)
-      if(StringSubstr(ObjectName(0,i),0,3)=="GV_") ObjectDelete(0,ObjectName(0,i));
+  DelTrash();
 
   }
 //+------------------------------------------------------------------+
@@ -107,34 +104,7 @@ int OnCalculate(const int rates_total,
    for(i=1;i<_limit_;i++)
      {
       res=GetTrend(_TREND_,_Symbol,0,i,true);
-      //if(0!=res)Print(res);
-      //---- Price Hi
-      //      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
-      //ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.forecast(i)/100;
-      //      if(mt5fannHigh.GetVector(i))
-      //        {
-      //         mt5fannHigh.run();
-      //         mt5fannHigh.get_output();
-      //
-      //         ExtUpperBuffer[i]=high[i+1]+mt5fannHigh.OutputVector[0]/100;
-      //        }
-      //      else ExtUpperBuffer[i]=EMPTY_VALUE;
-      //ExtLowerBuffer[i]=low[i+1]+mt5fannLow.forecast(i,true)/100;
-      //      if(mt5fannLow.GetVector(i))
-      //        {
-      //         mt5fannLow.run();
-      //         mt5fannLow.get_output();
-      //
-      //         ExtLowerBuffer[i]=low[i+1]+mt5fannLow.OutputVector[0]/100;
-      //        }
-      //      else ExtLowerBuffer[i]=EMPTY_VALUE;
-
-      //---- Lower Fractal
-      //     if(Low[i]<Low[i+1] && Low[i]<Low[i+2] && Low[i]<=Low[i-1] && Low[i]<=Low[i-2])
-      //      if(low[i]<low[i+1] && low[i]<=low[i-1])
-      //         ExtLowerBuffer[i]=low[i];
-      //      else ExtLowerBuffer[i]=EMPTY_VALUE;
-     }
+    }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);
   }
