@@ -218,7 +218,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
-   int shift_history=30,i;//
+   int shift_history=10,i;//
    if(""==smbl) smbl=_Symbol;
    if(0==tf) tf=_Period;
    if(0==num_outputvectors) shift_history=0;
@@ -664,7 +664,8 @@ bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smb
    for(i=0;i<num_inputvectors;i++)
      {
       // вычислим и отнормируем
-      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      if(ind_buffer[i+2]==0) res=0;
+      else res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
