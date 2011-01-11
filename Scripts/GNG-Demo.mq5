@@ -28,12 +28,8 @@ input double max_E=1.0f;
 
 //---глобальные переменные
 CGCANN *GNGAlgorithm;
-//CGNGAlgorithm *GNGAlgorithm;
 
-//int rsi_handle;
-//int input_dimension;
 int _samples;
-//double RSI_buffer[];
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
@@ -44,15 +40,12 @@ void OnStart()
 
    CPInit();
    window=ChartWindowFind(0,"GNG_dummy");
-//input_dimension=2;
+
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
    GNGAlgorithm.ClearTraning=true;
-//   GNGAlgorithm=new CGNGAlgorithm;
 
-//   while(!GetVectors(v1,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,i++));
-//   while(!GetVectors(v2,ov,input_dimension,1,AlgoStr,_Symbol,PERIOD_M1,++i));
 
 //--- инициализаци€ алгоритма
    if(!GNGAlgorithm.Load("GCANN"))
@@ -68,18 +61,10 @@ void OnStart()
       delete GNGAlgorithm;
       return;
      }
-//   GNGAlgorithm.ExportFANNDataWithTest(10000,10,SymbolsArray);
-   GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
+
+ //  GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
 
 //GNGAlgorithm.Save("GCANN_new");  
-//--- векторы данных
-//double v[],v1[],v2[],ov[];
-//ArrayResize(ov,1);
-//ArrayResize(v,GNGAlgorithm.num_input());
-//ArrayResize(v1,GNGAlgorithm.num_input());
-//ArrayResize(v2,GNGAlgorithm.num_input());
-//--- чтобы функци€ CopyBuffer() работала правильно, количество векторов 
-//--- должно укладыватьс€ в количество баров с запасом на длину вектора 
    _samples=samples+GNGAlgorithm.num_input()*10;
    if(_samples>Bars(_Symbol,_Period)) _samples=Bars(_Symbol,_Period);
 
@@ -97,14 +82,6 @@ void OnStart()
       ObjectSetInteger(0,"GNG_rect",OBJPROP_BACK,true);
       ObjectSetInteger(0,"GNG_rect",OBJPROP_COLOR,DarkGray);
       ObjectSetInteger(0,"GNG_rect",OBJPROP_BGCOLOR,DarkGray);
-
-      //ObjectCreate(0,"Label_samples",OBJ_LABEL,window,0,0);
-      //ObjectSetInteger(0,"Label_samples",OBJPROP_ANCHOR,ANCHOR_RIGHT_UPPER);
-      //ObjectSetInteger(0,"Label_samples",OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-      //ObjectSetInteger(0,"Label_samples",OBJPROP_XDISTANCE,10);
-      //ObjectSetInteger(0,"Label_samples",OBJPROP_YDISTANCE,10);
-      //ObjectSetInteger(0,"Label_samples",OBJPROP_COLOR,Red);
-      //ObjectSetString(0,"Label_samples",OBJPROP_TEXT,"Total samples: 2");
 
       ObjectCreate(0,"Label_neurons",OBJ_LABEL,window,0,0);
       ObjectSetInteger(0,"Label_neurons",OBJPROP_ANCHOR,ANCHOR_RIGHT_UPPER);
