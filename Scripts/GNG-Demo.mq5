@@ -13,7 +13,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых для обучения
-input int     samples=10000;
+input int     samples=100;
 //input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
@@ -62,7 +62,7 @@ void OnStart()
       return;
      }
 
- //  GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
+ //GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
 
 //GNGAlgorithm.Save("GCANN_new");  
    _samples=samples+GNGAlgorithm.num_input()*10;
@@ -119,13 +119,14 @@ void OnStart()
       //   ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_BACK,true);
       //  }
      }
-   int ts=0,i=0;
+   int ts=0,i=0;MaxSymbols=1;
    for(int ma=0;ma<MaxSymbols;ma++)
      {
       for(i=0;i<samples;i++)
         {
          //--- передаем входной вектор алгоритму для расчета
-         GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+//         GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+         GNGAlgorithm.forecast("EURUSD",i,true);
          ts++;
          if(0==ts%100)Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
         }
