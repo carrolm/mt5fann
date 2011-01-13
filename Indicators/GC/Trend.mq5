@@ -27,7 +27,7 @@ double ExtUpperBuffer[];
 double ExtLowerBuffer[];
 input int _TREND_=10;// на сколько смотреть вперед
 input int  _limit_=3000;// на сколько баров уходить назад
-
+input int _ts_ = 2;// 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -103,7 +103,7 @@ int OnCalculate(const int rates_total,
 
    for(i=1;i<_limit_;i++)
      {
-      res=GetTrend(_TREND_,_Symbol,0,i,true);
+      res=GetTrend(_TREND_,_Symbol,0,i,true,_ts_);
     }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);
