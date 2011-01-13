@@ -260,7 +260,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
       // нормируем в гиперкуб -0.5...0.5
       double sq=0;
-      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); if(0==sq) return(false);
+      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); 
+      if(0<sq);else return(false);
       for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
       //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
@@ -286,14 +287,14 @@ void DelTrash()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
+double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,int _ts=2)
   {
-
    double mS=0,mB=0,S=0,B=0;
    double Close[]; ArraySetAsSeries(Close,true);
    double High[]; ArraySetAsSeries(High,true);
    double Low[]; ArraySetAsSeries(Low,true);
    datetime Time[]; ArraySetAsSeries(Time,true);
+   int RatioTP_SL=4;
 // копируем историю
    if(""==smb) smb=_Symbol;
    if(0==tf) tf=_Period;
@@ -309,7 +310,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
      {
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
-      double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_ts*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
 
       for(int i=shift_history-1;i>0;i--)
         {
@@ -341,24 +342,16 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
            }
 
         }
-      //mB=B-Close[shift_history];mS=Close[shift_history]-S;
-      //=(prf-prl)/(SymbolInfoInteger(smbl,SYMBOL_SPREAD)*SymbolInfoDouble(smbl,SYMBOL_POINT));
- //     if(draw)ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
- //     if(draw)ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
-      if(mS>mB) {res=-mS;if(2*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
-      else      { res=mB;if(2*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift,OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
+      if(mS>mB) {res=-mS;if(RatioTP_SL*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
+      else      { res=mB;if(RatioTP_SL*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
       if((SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))>0)
-         res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5;
+         res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/RatioTP_SL;
       else
         {
          Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
          res=0;
         }
-      //     if(res>0.5) res=1;
-      //     else if(res<-.05) res=-1;
-      //     else res=0;
-      //res=1*(1/(1+MathExp(-1*res/5))-0.5);
-     }
+      }
    return(res);
 
   }

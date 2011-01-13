@@ -127,6 +127,7 @@ void OnStart()
          //--- передаем входной вектор алгоритму для расчета
          GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
          ts++;
+         if(0==ts%100)Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
         }
       if(window>0 && GNGAlgorithm.num_input()==2)
         {
