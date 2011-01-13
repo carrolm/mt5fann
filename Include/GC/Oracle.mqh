@@ -517,22 +517,7 @@ public:
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
    int               num_input();
   };
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-//int COracleANN::ExportFANNDataWithTest(int train_qty,int test_qty,string &Symbols_Array[],string FileName="")
-//  {
-//   if(""==FileName) FileName=File_Name;
-//   int shift=0;
-//// test
-//   shift=ExportFANNData(test_qty,shift,Symbols_Array,FileName+"_test.test",true);
-//   shift=ExportFANNData(train_qty,shift,Symbols_Array,FileName+"_train.train",false);
-//// чето ниже не работает :(
-////   FileCopy(FileName+"_test.test",FILE_COMMON,FileName+"_test.dat",FILE_REWRITE);
-////   FileCopy(FileName+"_train.train",FILE_COMMON,FileName+"_train.dat",FILE_REWRITE);
-////\
-//   return(shift);
-//  }
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -637,6 +622,9 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
    needcopy=qty;int Max_Symbols=0;
    for(ma=0;ma<ArraySize(Symbols_Array);ma++) if(StringLen(Symbols_Array[ma])!=0)Max_Symbols++;
 //GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+  MqlRates rates[];
+   ArraySetAsSeries(rates,true);
+
 
    if(FileHandle!=INVALID_HANDLE && FileHandleFANN!=INVALID_HANDLE)
      {// записываем в файл шапку
@@ -649,8 +637,10 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
            {
             if(GetVector(Symbols_Array[ma],shift,true))
               {
+ //              CopyRates(_Symbol,_Period,shift+10,3,rates);
                i++;
                outstr="";
+ //              outstr+=(string)rates[0].time+" ";
                for(int ibj=0;ibj<num_input();ibj++)
                  {
                   outstr=outstr+(string)(InputVector[ibj])+" ";
@@ -773,7 +763,7 @@ bool COracleANN::Save(string file_name)
       FileWriteString(file_handle,"[FunctionsArray]\n");
       int i;
       i=0;
-      while(Functions_Array[i]!="")
+      while(i<ArraySize(Functions_Array)&&Functions_Array[i]!=""&&Functions_Array[i]!=NULL)
         {
          FileWriteString(file_handle,Functions_Array[i]+"="+(string)Functions_Count[i]+"\n");
          i++;

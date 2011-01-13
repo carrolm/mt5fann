@@ -294,7 +294,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
    double High[]; ArraySetAsSeries(High,true);
    double Low[]; ArraySetAsSeries(Low,true);
    datetime Time[]; ArraySetAsSeries(Time,true);
-   int RatioTP_SL=4;
+   int RatioTP_SL=5;
 // копируем историю
    if(""==smb) smb=_Symbol;
    if(0==tf) tf=_Period;
@@ -311,7 +311,8 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
       double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_ts*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-
+      if(Close[shift_history]<Close[shift_history-1]) mS=Close[shift_history]-S;
+      if(Close[shift_history]>Close[shift_history-1]) mB=Close[shift_history]-B;
       for(int i=shift_history-1;i>0;i--)
         {
          if(0==mS)

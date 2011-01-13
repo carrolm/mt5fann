@@ -9,7 +9,7 @@
 //+------------------------------------------------------------------+
 #include <GC\GetVectors.mqh>
 input int _CNT_=500;//Сколько сигналов
-input int _SHIFT_=2000;//Сколько сигналов
+input int _SHIFT_=1000;//Сколько сигналов
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -33,7 +33,7 @@ int Write_File(int qty)
    int FileHandle=FileOpen("stat.txt",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
      {
-      int copied=CopyRates(_Symbol,_Period,10+_SHIFT_,qty,rates);
+      int copied=CopyRates(_Symbol,_Period,10+_SHIFT_-1,qty+1,rates);
       //FileWrite(TrainFile,"X","Y","Z","Rez");
     FileWrite(FileHandle,"if(_Symbol!=\""+_Symbol+"\") return(0);");
       for(i=0; i<qty;i++)
