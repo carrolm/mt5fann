@@ -13,7 +13,7 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //--- количество входных векторов, используемых дл€ обучени€
-input int     samples=100;
+input int     samples=10;
 //input string AlgoStr="RSI";
 //--- параметры алгоритма
 input int lambda=20;
@@ -44,7 +44,7 @@ void OnStart()
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
-   GNGAlgorithm.ClearTraning=true;
+   //GNGAlgorithm.ClearTraning=true;
 
 
 //--- инициализаци€ алгоритма
@@ -119,14 +119,14 @@ void OnStart()
       //   ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_BACK,true);
       //  }
      }
-   int ts=0,i=0;MaxSymbols=1;
+   int ts=0,i=0;//MaxSymbols=1;
    for(int ma=0;ma<MaxSymbols;ma++)
      {
       for(i=0;i<samples;i++)
         {
          //--- передаем входной вектор алгоритму дл€ расчета
-//         GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
-         GNGAlgorithm.forecast("EURUSD",i,true);
+         GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
+//         GNGAlgorithm.forecast("EURUSD",i,true);
          ts++;
          if(0==ts%100)Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
         }
@@ -135,7 +135,7 @@ void OnStart()
          GNGAlgorithm.Draw(window,time,1000,100);
         }
       else Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
-
+      GNGAlgorithm.Save("GCANN");
       ChartRedraw();
      }
 //}
