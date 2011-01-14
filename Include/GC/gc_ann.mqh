@@ -648,12 +648,6 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
    Neurons.FindWinners(Winner,SecondWinner);
 
    if(train==NULL) return(Winner);
-//if(train>0.1)train=1;
-//else
-//  {
-//   if(train<-0.1)train=-1;
-//   else train=0;
-//  }
    if(Winner.error<max_E)
      {
       Winner.cnt++;
