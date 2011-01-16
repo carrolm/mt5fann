@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, alsu"
 #property link      "alsufx@gmail.com"
 #property version   "1.00"
-#property script_show_inputs
+//#property script_show_inputs
 
 //#include <GNG/GNG.mqh>
 #include <GC\gc_ann.mqh>
@@ -24,7 +24,7 @@ input double beta=0.0005;
 input double eps_w=0.05;
 input double eps_n=0.0006;
 input int max_nodes=1000;
-input double max_E=1.0f;
+input double max_E=0.1f;
 
 //---глобальные переменные
 CGCANN *GNGAlgorithm;
@@ -44,7 +44,8 @@ void OnStart()
 
 //--- создать экземпл€р алгоритма и установить размерность входных данных
    GNGAlgorithm=new CGCANN;
-   //GNGAlgorithm.ClearTraning=true;
+   GNGAlgorithm.debug = true;
+   GNGAlgorithm.ClearTraning=true;
 
 
 //--- инициализаци€ алгоритма
@@ -62,7 +63,7 @@ void OnStart()
       return;
      }
 
- //GNGAlgorithm.ExportDataWithTest(10000,10,SymbolsArray);
+ GNGAlgorithm.ExportDataWithTest(10,10,SymbolsArray);
 
 //GNGAlgorithm.Save("GCANN_new");  
    _samples=samples+GNGAlgorithm.num_input()*10;
@@ -128,7 +129,7 @@ void OnStart()
          GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
 //         GNGAlgorithm.forecast("EURUSD",i,true);
          ts++;
-         if(0==ts%100)Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
+         if(samples<10||0==ts%100)Comment("Total samples: "+string(ts),"  Total neurons: "+string(GNGAlgorithm.Neurons.Total())," ME=",GNGAlgorithm.maximun_E);
         }
       if(window>0 && GNGAlgorithm.num_input()==2)
         {

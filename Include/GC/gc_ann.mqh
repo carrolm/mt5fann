@@ -445,19 +445,24 @@ double CGCANN::forecast(string smbl,int shift,bool train)
    if(GetVector(smbl,shift,train))
      {
       CGCANNNeuron     *r;
+//      if(debug) Print("ov0= ",OutputVector[0]);
       if(train) r=ProcessVector(InputVector,OutputVector[0]);
       else r=ProcessVector(InputVector);
       //if(r.error> max_E) return(0);
-      if(debug)
-        {
-         string outstr="shift="+(string)shift+" ";
-         for(int i=0;i<num_input();i++) outstr+=(string)InputVector[i]+" ";
-         Print((string)r.uid+" error="+(string)r.error+outstr);
-        }
+      //if(debug)
+      //  {
+      //   string outstr="shift="+(string)shift+" ";
+      //   for(int i=0;i<num_input();i++) outstr+=(string)InputVector[i]+" ";
+      //   Print((string)r.uid+" error="+(string)r.error+outstr);
+      //  }
       if(0==r.cnt) return(0);
       return(r.Stat/r.cnt);
      }
-   else return(0);
+   else
+     {
+      if(debug) Print("GV ret false sft=",shift);
+      return(0);
+     }
 
   }
 //+------------------------------------------------------------------+
@@ -550,7 +555,7 @@ bool CGCANN::CustomSave(int file_handle)
      {
       tmp.Weights(weights);
       outstr="";
-      outstr+=(string)tmp.cnt+" "+(string)tmp.Stat;
+      outstr+=(string)(tmp.cnt)+" "+(string)(MathRound(tmp.Stat*1000)/1000);
       for(i=0;i<num_input();i++) outstr+=" "+(string)weights[i];
       FileWriteString(file_handle,(string)tmp.uid+"="+outstr+"\n");
       tmp=Neurons.GetNextNode();
@@ -647,7 +652,11 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
      }
    Neurons.FindWinners(Winner,SecondWinner);
 
-   if(train==NULL) return(Winner);
+   if(train==NULL)
+     {
+ //     if(debug) Print("tr=null");
+      return(Winner);
+     }
    if(Winner.error<max_E)
      {
       Winner.cnt++;
@@ -658,13 +667,14 @@ CGCANNNeuron*CGCANN::ProcessVector(double &in[],double train=NULL)
 
       for(i=0;i<num_input();i++) delta[i]=(in[i]-weights[i])/Winner.cnt;
       Winner.AdaptWeights(delta);
-
+//      if(debug) Print(Winner.uid," ",Winner.cnt);
       //--- Обновить локальную ошибку и полезность нейрона-победителя        
       Winner.E+=Winner.error;
 
      }
    else
      {
+//      if(debug) Print("Winner.error=",Winner.error);
       Winner=Neurons.Append();
       Winner.Init(in);
       Winner.cnt++;

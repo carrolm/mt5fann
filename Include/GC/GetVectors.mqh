@@ -236,6 +236,11 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
      {// Есть фрактал!
       //Print("shift="+shift+" shift_history="+shift_history);
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
+      // нормируем в гиперкуб -0.5...0.5
+      double sq=0;
+      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); 
+      if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("IMA"==fn_name) ret=GetVectors_IMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -250,20 +255,8 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("AO"==fn_name) ret=GetVectors_AO(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Envelopes"==fn_name) ret=GetVectors_Envelopes(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
-
-      //   if("sinex"==fn_name) return(GetVectors_Sinex(InputVector,OutputVector,num_inputvectors,num_outputvectors,shift,params));
       if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
-      //string outstr="";
-      //for(i=0;i<num_inputvectors;i++) outstr+=(string)InputVector[i]+" ";
-      //Print(fn_name+" "+outstr);
-
-      //      if(shift_history>0) OutputVector[0]=GetTrend(shift_history,smbl,tf,shift);
-      // нормируем в гиперкуб -0.5...0.5
-      double sq=0;
-      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq); 
-      if(0<sq);else return(false);
-      for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
-      //     for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
+      // for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
       //double min=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]<min) min=InputVector[i];
@@ -271,6 +264,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //double max=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];if(max==0) max=1;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
+      for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
 
      }
    return(ret);
@@ -296,10 +290,8 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
    datetime Time[]; ArraySetAsSeries(Time,true);
    int RatioTP_SL=5;
 // копируем историю
-   if(""==smb) smb=_Symbol;
-   if(0==tf) tf=_Period;
 // TF всегда минутка!
-   tf=PERIOD_M1;
+//   tf=PERIOD_M1;
    int maxcount=CopyHigh(smb,tf,shift,shift_history+3,High);
    maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
    maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
@@ -353,6 +345,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
          res=0;
         }
       }
+   if(NULL==res) res=0.00001;
    return(res);
 
   }
@@ -681,7 +674,8 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
    for(i=0;i<num_inputvectors;i++)
      {
       // вычислим и отнормируем
-      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+      res=ind_buffer[i+1]/100-0.5;
+//      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
       //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
       InputVector[i]=res;
      }
