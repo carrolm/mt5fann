@@ -8,27 +8,27 @@
 #property version   "1.00"
 #include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
-COracleEasy *Oracles[];
+//COracleTemplate *Oracles[];
 int nOracles;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   ArrayResize(Oracles,20);
-   nOracles=0;
-   Oracles[nOracles++]=new CiStochastic;
-   Oracles[nOracles++]=new CiMACD;
-   Oracles[nOracles++]=new CiMA;
-   Oracles[nOracles++]=new CPriceChanel;
-   Oracles[nOracles++]=new CiRSI;
-   Oracles[nOracles++]=new CiCGI;
-   Oracles[nOracles++]=new CiWPR;
-   Oracles[nOracles++]=new CiBands;
-   Oracles[nOracles++]=new CiAlligator;
-   Oracles[nOracles++]=new CiAO;
-   Oracles[nOracles++]=new CiIchimoku;
-   Oracles[nOracles++]=new CiEnvelopes;
+//ArrayResize(Oracles,20);
+   nOracles=AllOracles();
+//Oracles[nOracles++]=new CiStochastic;
+//Oracles[nOracles++]=new CiMACD;
+//Oracles[nOracles++]=new CiMA;
+//Oracles[nOracles++]=new CPriceChanel;
+//Oracles[nOracles++]=new CiRSI;
+//Oracles[nOracles++]=new CiCGI;
+//Oracles[nOracles++]=new CiWPR;
+//Oracles[nOracles++]=new CiBands;
+//Oracles[nOracles++]=new CiAlligator;
+//Oracles[nOracles++]=new CiAO;
+//Oracles[nOracles++]=new CiIchimoku;
+//Oracles[nOracles++]=new CiEnvelopes;
 //  Oracles[nOracles++]=new CNRTR;
    Print("Ready!");
    return(0);
@@ -38,7 +38,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   for(int i=0;i<nOracles;i++) delete Oracles[i];
+   for(int i=0;i<nOracles;i++) delete AllOracles[i];
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -50,8 +50,36 @@ void OnTick()
    double   res=0;
    for(io=0;io<nOracles;io++)
      {
-      res+=Oracles[io].forecast(Symbol(),0,false);
+      res+=AllOracles[io].forecast(_Symbol,0,false);
      }
    NewOrder(_Symbol,res,"");
+  }
+//+------------------------------------------------------------------+
+void OnChartEvent(const int id,         // идентификатор события  
+                  const long& lparam,   // параметр события типа long
+                  const double& dparam, // параметр события типа double
+                  const string& sparam  // параметр события типа string
+                  )
+  {
+//if(id==(int)CHARTEVENT_CLICK)
+//  {
+//   Print("Координаты щелчка мышки на графике: x=",lparam,"  y=",dparam);
+//  };
+   if(id==(int)CHARTEVENT_OBJECT_CLICK)
+     {
+      datetime dt=(datetime)ObjectGetInteger(0,sparam,OBJPROP_TIME);
+      //Print("Координаты щелчка мышки на объекте: x=",lparam,"  y=",dparam," ",sparam," ",dt);
+      int io;
+      double   res=0,tres=0;
+      Print("For ",dt);
+      for(io=0;io<nOracles;io++)
+        {
+         res=AllOracles[io].forecast(Symbol(),dt,false);
+         tres+=res;
+         if(0!=res) Print(AllOracles[io].Name()," ",res);
+        }
+
+     };
+
   }
 //+------------------------------------------------------------------+

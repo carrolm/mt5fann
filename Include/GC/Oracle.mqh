@@ -9,34 +9,36 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class COracleEasy
+class COracleTemplate
   {
 private:
 public:
    bool              debug;
-                     COracleEasy(){Init();};
-                    ~COracleEasy(){DeInit();};
+                     COracleTemplate(){Init();};
+                    ~COracleTemplate(){DeInit();};
    virtual void              Init(){debug=false;};
    virtual void              DeInit(){};
-   virtual double    forecast(string smbl,int shift,bool train){return(0.0);};
+   virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return("Prpototype");};
   };
+COracleTemplate *AllOracles[];
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiMA:public COracleEasy
+class CiMA:public COracleTemplate
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMA");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiMA::forecast(string smbl="",int shift=0,bool train=false)
+double CiMA::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
-   if(""==smbl) smbl=Symbol();
    double ind1_buffer[];
    double ind2_buffer[];
    int   h_ind1=iMA(smbl,PERIOD_M1,8,0,MODE_SMA,PRICE_CLOSE);
@@ -57,15 +59,42 @@ double CiMA::forecast(string smbl="",int shift=0,bool train=false)
    return(sig);
   }
 //+------------------------------------------------------------------+
-class CiMACD:public COracleEasy
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiMA::forecast(string smbl,datetime startdt,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   double ind1_buffer[];
+   double ind2_buffer[];
+   int   h_ind1=iMA(smbl,PERIOD_M1,8,0,MODE_SMA,PRICE_CLOSE);
+   if(CopyBuffer(h_ind1,0,startdt,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+   int   h_ind2=iMA(smbl,PERIOD_M1,16,0,MODE_SMA,PRICE_CLOSE);
+   if(CopyBuffer(h_ind2,0,startdt,2,ind2_buffer)<2) return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))return(0);
+
+//--- проводим проверку условия и устанавливаем значение для sig
+   if(ind1_buffer[2]<ind2_buffer[1] && ind1_buffer[1]>ind2_buffer[1])
+      sig=1;
+   else if(ind1_buffer[2]>ind2_buffer[1] && ind1_buffer[1]<ind2_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);   IndicatorRelease(h_ind2);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+class CiMACD:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMACD");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiMACD::forecast(string smbl="",int shift=0,bool train=false)
+double CiMACD::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -90,15 +119,43 @@ double CiMACD::forecast(string smbl="",int shift=0,bool train=false)
    return(sig);
   }
 //+------------------------------------------------------------------+
-class CPriceChanel:public COracleEasy
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CiMACD::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];double ind2_buffer[];
+   int   h_ind1=iMACD(smbl,PERIOD_M1,12,26,9,PRICE_CLOSE);
+
+   if(CopyBuffer(h_ind1,0,shift,2,ind1_buffer)<2) return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+
+//--- проводим проверку условия и устанавливаем значение для sig
+   if(ind2_buffer[2]>ind1_buffer[1] && ind2_buffer[1]<ind1_buffer[1])
+      sig=1;
+   else if(ind2_buffer[2]<ind1_buffer[1] && ind2_buffer[1]>ind1_buffer[1])
+      sig=-1;
+   else sig=0;
+
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+class CPriceChanel:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("Price Chanel");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CPriceChanel::forecast(string smbl="",int shift=0,bool train=false)
+double CPriceChanel::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -125,15 +182,45 @@ double CPriceChanel::forecast(string smbl="",int shift=0,bool train=false)
    return(sig);
   }
 //+------------------------------------------------------------------+
-class CiStochastic:public COracleEasy
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CPriceChanel::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double Close[];
+   int   h_ind1=iCustom(smbl,PERIOD_M1,"Price Channel",22);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(CopyClose(Symbol(),Period(),0,2,Close)<2) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(!ArraySetAsSeries(Close,true)) return(0);
+
+//--- проводим проверку условия и устанавливаем значение для sig
+   if(Close[1]>ind1_buffer[2])
+      sig=1;
+   else if(Close[1]<ind2_buffer[2])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+class CiStochastic:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iStochastic");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiStochastic::forecast(string smbl="",int shift=0,bool train=false)
+double CiStochastic::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -156,9 +243,33 @@ double CiStochastic::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiRSI:public COracleEasy
+double CiStochastic::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iStochastic(smbl,PERIOD_M1,5,3,3,MODE_SMA,STO_LOWHIGH);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<20 && ind1_buffer[1]>20)
+      sig=1;
+   else if(ind1_buffer[2]>80 && ind1_buffer[1]<80)
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiRSI:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iRSI");};
   };
 //+------------------------------------------------------------------+
@@ -187,15 +298,39 @@ double CiRSI::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiCGI:public COracleEasy
+double CiRSI::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iRSI(smbl,PERIOD_M1,14,PRICE_CLOSE);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<30 && ind1_buffer[1]>30)
+      sig=1;
+   else if(ind1_buffer[2]>70 && ind1_buffer[1]<70)
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiCGI:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iCGI");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiCGI::forecast(string smbl="",int shift=0,bool train=false)
+double CiCGI::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -218,15 +353,39 @@ double CiCGI::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiWPR:public COracleEasy
+double CiCGI::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iCCI(smbl,PERIOD_M1,14,PRICE_TYPICAL);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<-100 && ind1_buffer[1]>-100)
+      sig=1;
+   else if(ind1_buffer[2]>100 && ind1_buffer[1]<100)
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiWPR:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iWPR");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiWPR::forecast(string smbl="",int shift=0,bool train=false)
+double CiWPR::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -250,15 +409,40 @@ double CiWPR::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiBands:public COracleEasy
+double CiWPR::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iWPR(smbl,PERIOD_M1,14);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<-80 && ind1_buffer[1]>-80)
+      sig=1;
+   else if(ind1_buffer[2]>-20 && ind1_buffer[1]<-20)
+      sig=-1;
+
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiBands:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iBands");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiBands::forecast(string smbl="",int shift=0,bool train=false)
+double CiBands::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -285,15 +469,43 @@ double CiBands::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CNRTR:public COracleEasy
+double CiBands::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double Close[];
+   int   h_ind1=iBands(smbl,PERIOD_M1,20,0,2,PRICE_CLOSE);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(CopyClose(Symbol(),Period(),0,3,Close)<2) return(0);
+   if(!ArraySetAsSeries(Close,true)) return(0);
+   if(Close[2]<=ind2_buffer[1] && Close[1]>ind2_buffer[1])
+      sig=1;
+   else if(Close[2]>=ind1_buffer[1] && Close[1]<ind1_buffer[1])
+                     sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CNRTR:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("NRTR");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CNRTR::forecast(string smbl="",int shift=0,bool train=false)
+double CNRTR::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -317,15 +529,40 @@ double CNRTR::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiAlligator:public COracleEasy
+double CNRTR::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+
+   int   h_ind1=iCustom(smbl,PERIOD_M1,"NRTR",40,2.0);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+
+   if(ind1_buffer[1]>0) sig=1;
+   else if(ind2_buffer[1]>0) sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAlligator:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iAlligator");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiAlligator::forecast(string smbl="",int shift=0,bool train=false)
+double CiAlligator::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -353,15 +590,44 @@ double CiAlligator::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiAMA:public COracleEasy
+double CiAlligator::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double ind3_buffer[];
+   int   h_ind1=iAlligator(smbl,PERIOD_M1,13,0,8,0,5,0,MODE_SMMA,PRICE_MEDIAN);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,2,shift,3,ind3_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind3_buffer,true))         return(0);
+
+   if(ind3_buffer[1]>ind2_buffer[1] && ind2_buffer[1]>ind1_buffer[1])
+      sig=1;
+   else if(ind3_buffer[1]<ind2_buffer[1] && ind2_buffer[1]<ind1_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAMA:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iAMA");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiAMA::forecast(string smbl="",int shift=0,bool train=false)
+double CiAMA::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -383,15 +649,38 @@ double CiAMA::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiAO:public COracleEasy
+double CiAMA::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iAMA(smbl,PERIOD_M1,9,2,30,0,PRICE_CLOSE);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[2]<ind1_buffer[1])
+      sig=1;
+   else if(ind1_buffer[2]>ind1_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiAO:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iAO");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiAO::forecast(string smbl="",int shift=0,bool train=false)
+double CiAO::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -413,15 +702,38 @@ double CiAO::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiIchimoku:public COracleEasy
+double CiAO::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   int   h_ind1=iAO(smbl,PERIOD_M1);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+
+   if(ind1_buffer[1]==0)
+      sig=1;
+   else if(ind1_buffer[1]==1)
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiIchimoku:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iIchimoku");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiIchimoku::forecast(string smbl="",int shift=0,bool train=false)
+double CiIchimoku::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -446,15 +758,41 @@ double CiIchimoku::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CiEnvelopes:public COracleEasy
+double CiIchimoku::forecast(string smbl,datetime shift,bool train)
   {
-   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   int   h_ind1=iIchimoku(smbl,PERIOD_M1,9,26,52);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3) return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true)) return(0);
+
+   if(ind1_buffer[1]>ind2_buffer[1])
+      sig=1;
+   else if(ind1_buffer[1]<ind2_buffer[1])
+      sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CiEnvelopes:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iEnvelopes");};
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CiEnvelopes::forecast(string smbl="",int shift=0,bool train=false)
+double CiEnvelopes::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
@@ -482,7 +820,107 @@ double CiEnvelopes::forecast(string smbl="",int shift=0,bool train=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class COracleANN:public COracleEasy
+double CiEnvelopes::forecast(string smbl,datetime shift,bool train)
+  {
+
+   double sig=0;
+   if(""==smbl) smbl=Symbol();
+   double ind1_buffer[];
+   double ind2_buffer[];
+   double Close[];
+   int   h_ind1=iEnvelopes(smbl,PERIOD_M1,28,0,MODE_SMA,PRICE_CLOSE,0.1);
+   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+   if(CopyClose(Symbol(),Period(),0,3,Close)<2) return(0);
+   if(!ArraySetAsSeries(Close,true)) return(0);
+
+   if(Close[2]<=ind2_buffer[1] && Close[1]>ind2_buffer[1])
+      sig=1;
+   else if(Close[2]>=ind1_buffer[1] && Close[1]<ind1_buffer[1])
+                     sig=-1;
+   else sig=0;
+   IndicatorRelease(h_ind1);
+//--- возвращаем торговый сигнал
+   return(sig);
+  }
+class CMA_Crossover_ADX:public COracleTemplate
+  {
+//   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
+   virtual string    Name(){return("MA_Crossover_ADX");};
+  };
+double CMA_Crossover_ADX::forecast(string smbl,datetime shift,bool train)
+  {
+
+   double sig=0;
+   
+//   double ind1_buffer[];
+//   double ind2_buffer[];
+//   double Close[];
+//   int   h_ind1=iEnvelopes(smbl,PERIOD_M1,28,0,MODE_SMA,PRICE_CLOSE,0.1);
+//   if(CopyBuffer(h_ind1,0,shift,3,ind1_buffer)<3)         return(0);
+//   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3)         return(0);
+//   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+//   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+//   if(CopyClose(Symbol(),Period(),0,3,Close)<2) return(0);
+//   if(!ArraySetAsSeries(Close,true)) return(0);
+//
+////--- условие 1: скользящая средняя возрастает на текущем и предыдущем баре 
+//   bool Buy_Condition_1=(StateEMA(0)>0 && StateEMA(1)>0);
+////--- условие 2: цена закрытия завершенного бара выше скользящей средней 
+//   bool Buy_Condition_2=(StateClose(1)>0);
+////--- условие 3: значение ADX на текущем баре больше минимально заданного 
+//   bool Buy_Condition_3=(MainADX(0)>m_minimum_ADX);
+////--- условие 4: на текущем баре значение DI+ больше, чем DI-
+//   bool Buy_Condition_4=(StateADX(0)>0);
+////--- условие 1: скользящая средняя убывает на текущем и предыдущем баре 
+//   bool Sell_Condition_1=(StateEMA(0)<0 && StateEMA(1)<0);
+////--- условие 2: цена закрытия завершенного бара ниже скользящей средней 
+//   bool Sell_Condition_2=(StateClose(1)<0);
+////--- условие 3: значение ADX на текущем баре больше минимально заданного 
+//   bool Sell_Condition_3=(MainADX(0)>m_minimum_ADX);
+////--- условие 4: на текущем баре DI- больше, чем DI+
+//   bool Sell_Condition_4=(StateADX(0)<0);
+//
+//
+//   if((Buy_Condition_1 && Buy_Condition_2 && Buy_Condition_3 && Buy_Condition_4)
+//      sig=1;
+//   else if(Sell_Condition_1 && Sell_Condition_2 && Sell_Condition_3 && Sell_Condition_4)
+//                     sig=-1;
+//   else sig=0;
+//   IndicatorRelease(h_ind1);
+////--- возвращаем торговый сигнал
+   return(sig);
+  }
+
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int AllOracles()
+  {
+   ArrayResize(AllOracles,20);
+   int nAllOracles=0;
+   AllOracles[nAllOracles++]=new CiStochastic;
+   AllOracles[nAllOracles++]=new CiMACD;
+   AllOracles[nAllOracles++]=new CiMA;
+   AllOracles[nAllOracles++]=new CPriceChanel;
+   AllOracles[nAllOracles++]=new CiRSI;
+   AllOracles[nAllOracles++]=new CiCGI;
+   AllOracles[nAllOracles++]=new CiWPR;
+   AllOracles[nAllOracles++]=new CiBands;
+   AllOracles[nAllOracles++]=new CiAlligator;
+   AllOracles[nAllOracles++]=new CiAO;
+   AllOracles[nAllOracles++]=new CiIchimoku;
+   AllOracles[nAllOracles++]=new CiEnvelopes;
+   return(nAllOracles);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class COracleANN:public COracleTemplate
   {
 private:
    string            Symbol;
@@ -517,7 +955,6 @@ public:
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
    int               num_input();
   };
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -537,73 +974,6 @@ int COracleANN::ExportDataWithTest(int train_qty,int test_qty,string &Symbols_Ar
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//int COracleANN::ExportFANNData(int qty,int shift,string &Symbols_Array[],string FileName,bool test)
-//  {
-//   int i,ma;
-//   int FileHandle=0;
-//   int needcopy=0;
-//   int copied=0;
-//
-//// временно!
-//   test=false;
-////\
-//
-//   string outstr;
-//   FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
-//   needcopy=qty;int Max_Symbols=0;
-//   for(ma=0;ma<ArraySize(Symbols_Array);ma++) if(StringLen(Symbols_Array[ma])!=0)Max_Symbols++;
-////GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
-//
-//   if(FileHandle!=INVALID_HANDLE)
-//     {// записываем в файл шапку
-//      FileWrite(FileHandle,Max_Symbols*needcopy*((test)?1:2),num_input(),1);
-//      for(ma=0;ma<Max_Symbols;ma++)
-//        {
-//         Comment("Export ..."+FileName+" "+(string)((int)(100*((double)(1+ma)/Max_Symbols)))+"%");
-//         for(i=0;i<needcopy;shift++)
-//           {
-//            if(GetVector(Symbols_Array[ma],shift,true))
-//              {
-//               i++;
-//
-//               outstr="";
-//               for(int ibj=0;ibj<num_input();ibj++)
-//                 {
-//                  outstr=outstr+(string)(InputVector[ibj])+" ";
-//                 }
-//               FileWrite(FileHandle,outstr);       // 
-//               outstr="";
-//               for(int ibj=0;ibj<1;ibj++)
-//                 {
-//                  outstr=outstr+(string)(OutputVector[ibj])+" ";
-//                 }
-//               FileWrite(FileHandle,outstr);       // 
-//                                                   //if(test) continue;
-//               //// сделаем еще и симметричный дубль
-//               //outstr="";
-//               //for(int ibj=0;ibj<num_input();ibj++)
-//               //  {
-//               //   outstr=outstr+(string)(InputVector[ibj])+" ";
-//               //  }
-//               //FileWrite(FileHandle,outstr);       // 
-//               //outstr="";
-//               //for(int ibj=0;ibj<1;ibj++)
-//               //  {
-//               //   outstr=outstr+(string)(OutputVector[ibj])+" ";
-//               //  }
-//               //FileWrite(FileHandle,outstr);       // 
-//
-//              }
-//           }
-//        }
-//     }
-//   FileClose(FileHandle);
-//   Print("Created file "+FileName);
-//   return(shift);
-//  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string FileName,bool test)
   {
    int i,ma;
@@ -613,7 +983,7 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
    int copied=0;
 
 // временно!
-   test=false;
+   test=true;
 //\
 
    string outstr,trainstrstr;
@@ -622,9 +992,8 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
    needcopy=qty;int Max_Symbols=0;
    for(ma=0;ma<ArraySize(Symbols_Array);ma++) if(StringLen(Symbols_Array[ma])!=0)Max_Symbols++;
 //GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
-  MqlRates rates[];
+   MqlRates rates[];
    ArraySetAsSeries(rates,true);
-
 
    if(FileHandle!=INVALID_HANDLE && FileHandleFANN!=INVALID_HANDLE)
      {// записываем в файл шапку
@@ -637,10 +1006,10 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
            {
             if(GetVector(Symbols_Array[ma],shift,true))
               {
- //              CopyRates(_Symbol,_Period,shift+10,3,rates);
+               //              CopyRates(_Symbol,_Period,shift+10,3,rates);
                i++;
                outstr="";
- //              outstr+=(string)rates[0].time+" ";
+               //              outstr+=(string)rates[0].time+" ";
                for(int ibj=0;ibj<num_input();ibj++)
                  {
                   outstr=outstr+(string)(InputVector[ibj])+" ";
@@ -763,7 +1132,7 @@ bool COracleANN::Save(string file_name)
       FileWriteString(file_handle,"[FunctionsArray]\n");
       int i;
       i=0;
-      while(i<ArraySize(Functions_Array)&&Functions_Array[i]!=""&&Functions_Array[i]!=NULL)
+      while(i<ArraySize(Functions_Array) && Functions_Array[i]!="" && Functions_Array[i]!=NULL)
         {
          FileWriteString(file_handle,Functions_Array[i]+"="+(string)Functions_Count[i]+"\n");
          i++;
@@ -826,4 +1195,3 @@ void COracleANN::Init()
    TimeFrame=_Period;
   }
 //+------------------------------------------------------------------+
-
