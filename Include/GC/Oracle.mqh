@@ -1187,7 +1187,7 @@ void COracleANN::Init()
    WithHours= false;
    WithDayOfWeek=false;
    int i;
-   for(i=0;i<10;i++)
+   for(i=0;i<ArraySize(VectorFunctions)&&VectorFunctions[i]!=NULL&&VectorFunctions[i]!="";i++)
      {
       Functions_Array[i]=VectorFunctions[i];
       Functions_Count[i]=0;
