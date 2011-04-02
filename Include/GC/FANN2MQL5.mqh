@@ -1,6 +1,5 @@
-//#import "Fann2MQL114b2.dll"
-#import "fanndouble.dll"
-//#import "Fann2MQL113.dll"
+//#import "fanndouble32.dll"
+#import "fanndouble64.dll"
 
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M5_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);

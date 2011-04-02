@@ -166,7 +166,7 @@ bool CMT5FANN::ini_save(string path="")
    else
    for(int SymbolIdx=0; SymbolIdx<Max_Symbols;SymbolIdx++)
      {
-      resb=MyIniFile.WriteString("SymbolsArray",Symbols_Array[SymbolIdx],"True");
+      resb=MyIniFile.Write("SymbolsArray",Symbols_Array[SymbolIdx],"True");
       if(!resb)
         {
          //         if(debug) Print("Ok write string");
@@ -178,7 +178,7 @@ bool CMT5FANN::ini_save(string path="")
      }
    for(int FunctionsIdx=0; FunctionsIdx<Max_Functions;FunctionsIdx++)
      {
-      resb=MyIniFile.WriteInteger("FunctionsArray",Functions_Array[FunctionsIdx],Functions_Count[FunctionsIdx]);
+      resb=MyIniFile.Write("FunctionsArray",Functions_Array[FunctionsIdx],Functions_Count[FunctionsIdx]);
       if(!resb)
         {
          //if(debug) Print("Ok write string");
@@ -188,7 +188,7 @@ bool CMT5FANN::ini_save(string path="")
          //         if(debug) Print("Error on write string ",Functions_Array[FunctionsIdx]);//return(false);
         }
      }
-   resb=MyIniFile.WriteInteger("Settings","TimeFrame",TimeFrame);
+   resb=MyIniFile.Write("Settings","TimeFrame",(int)TimeFrame);
    resb=MyIniFile.WriteBool("Settings","WithNews",WithNews);
    resb=MyIniFile.WriteBool("Settings","WithHours",WithHours);
    resb=MyIniFile.WriteBool("Settings","WithDayOfWeek",WithDayOfWeek);
