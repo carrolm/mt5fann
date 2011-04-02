@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the intersection of two MA                       |
+//| Title=Signals based on crossover of two MA                       |
 //| Type=Signal                                                      |
 //| Name=CrossMA                                                     |
 //| Class=CSignalCrossMA                                             |

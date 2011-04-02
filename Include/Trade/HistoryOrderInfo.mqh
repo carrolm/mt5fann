@@ -4,12 +4,14 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.05.14 |
 //+------------------------------------------------------------------+
-#include <Trade\SymbolInfo.mqh>
+#include <Object.mqh>
+#include "SymbolInfo.mqh"
 //+------------------------------------------------------------------+
 //| Class CHistoryOrderInfo.                                         |
 //| Appointment: Class for access to history order info.             |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CHistoryOrderInfo
+class CHistoryOrderInfo : public CObject
   {
 protected:
    ulong             m_ticket;             // ticket of history order
@@ -19,7 +21,7 @@ public:
    ulong             Ticket() const       { return(m_ticket); }
    //--- fast access methods to the integer order propertyes
    datetime          TimeSetup() const;
-   ENUM_ORDER_TYPE   Type() const;
+   ENUM_ORDER_TYPE   OrderType() const;
    string            TypeDescription() const;
    ENUM_ORDER_STATE  State() const;
    string            StateDescription() const;
@@ -72,7 +74,7 @@ datetime CHistoryOrderInfo::TimeSetup() const
 //| OUTPUT: the property value "ORDER_TYPE".                         |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-ENUM_ORDER_TYPE CHistoryOrderInfo::Type() const
+ENUM_ORDER_TYPE CHistoryOrderInfo::OrderType() const
   {
    return((ENUM_ORDER_TYPE)HistoryOrderGetInteger(m_ticket,ORDER_TYPE));
   }

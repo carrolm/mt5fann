@@ -27,8 +27,7 @@ public:
    virtual bool      Load(int file_handle) { return(true);   }
    //--- method of identifying the object
    virtual int       Type() const          { return(0);      }
-
-protected:
+   //--- method of comparing the objects
    virtual int       Compare(const CObject *node,int mode=0) const { return(0); }
   };
 //+------------------------------------------------------------------+

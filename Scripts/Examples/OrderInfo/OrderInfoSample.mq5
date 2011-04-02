@@ -65,7 +65,7 @@ bool COrderInfoSample::Init()
    color color_info;
 //--- tuning colors
    color_info =(color)(ChartGetInteger(0,CHART_COLOR_BACKGROUND)^0xFFFFFF);
-   color_label=color_info^0x202020;
+   color_label=(color)(color_info^0x202020);
 //---
    if(ChartGetInteger(0,CHART_SHOW_OHLC)) sy+=16;
 //--- creation Buttons
@@ -116,7 +116,7 @@ void COrderInfoSample::Deinit()
 //+------------------------------------------------------------------+
 void COrderInfoSample::Processing(void)
   {
-   long ticket;
+   ulong ticket;
 //---
    if(m_total_ord!=OrdersTotal())
      {

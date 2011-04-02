@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the intersection of two EMA                      |
+//| Title=Signals based on crossover of two EMA                      |
 //| Type=Signal                                                      |
 //| Name=CrossEMA                                                    |
 //| Class=CSignalCrossEMA                                            |
@@ -188,11 +188,13 @@ bool CSignalCrossEMA::InitSlowEMA(CIndicators* indicators)
 //+------------------------------------------------------------------+
 bool CSignalCrossEMA::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(!(StateEMA(2)<0 && StateEMA(1)>0)) return(false);
+//---
    price=0.0;
    sl   =0.0;
    tp   =0.0;
 //---
-   return(StateEMA(1)>0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for long position close.                        |
@@ -202,9 +204,11 @@ bool CSignalCrossEMA::CheckOpenLong(double& price,double& sl,double& tp,datetime
 //+------------------------------------------------------------------+
 bool CSignalCrossEMA::CheckCloseLong(double& price)
   {
+   if(!(StateEMA(2)>0 && StateEMA(1)<0)) return(false);
+//---
    price=0.0;
 //---
-   return(StateEMA(1)<0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position open.                        |
@@ -217,11 +221,13 @@ bool CSignalCrossEMA::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignalCrossEMA::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(!(StateEMA(2)>0 && StateEMA(1)<0)) return(false);
+//---
    price=0.0;
    sl   =0.0;
    tp   =0.0;
 //---
-   return(StateEMA(1)<0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position close.                       |
@@ -231,8 +237,10 @@ bool CSignalCrossEMA::CheckOpenShort(double& price,double& sl,double& tp,datetim
 //+------------------------------------------------------------------+
 bool CSignalCrossEMA::CheckCloseShort(double& price)
   {
+   if(!(StateEMA(2)<0 && StateEMA(1)>0)) return(false);
+//---
    price=0.0;
 //---
-   return(StateEMA(1)>0);
+   return(true);
   }
 //+------------------------------------------------------------------+

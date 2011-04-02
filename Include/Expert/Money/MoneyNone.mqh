@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trading minimum lot                                        |
+//| Title=Trading with minimal allowed trade volume                  |
 //| Type=Money                                                       |
 //| Name=MinLot                                                      |
 //| Class=CMoneyNone                                                 |

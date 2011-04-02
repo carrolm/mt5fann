@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trading fixed lot                                          |
+//| Title=Trading with fixed trade volume                            |
 //| Type=Money                                                       |
 //| Name=FixLot                                                      |
 //| Class=CMoneyFixedLot                                             |

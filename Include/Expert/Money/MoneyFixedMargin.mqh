@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trading fixed margin                                       |
+//| Title=Trading with fixed margin                                  |
 //| Type=Money                                                       |
 //| Name=FixMargin                                                   |
 //| Class=CMoneyFixedMargin                                          |

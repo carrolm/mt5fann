@@ -4,46 +4,48 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.02.22 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 //+------------------------------------------------------------------+
 //| Class CAccountInfo.                                              |
 //| Appointment: Class for access to account info.                   |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CAccountInfo
+class CAccountInfo : public CObject
   {
 public:
    //--- fast access methods to the integer account propertyes
-   long              Login() const;
-   ENUM_ACCOUNT_TRADE_MODE TradeMode() const;
-   string            TradeModeDescription() const;
-   long              Leverage() const;
-   ENUM_ACCOUNT_STOPOUT_MODE MarginMode() const;
+   long              Login()                 const;
+   ENUM_ACCOUNT_TRADE_MODE TradeMode()       const;
+   string            TradeModeDescription()  const;
+   long              Leverage()              const;
+   ENUM_ACCOUNT_STOPOUT_MODE MarginMode()    const;
    string            MarginModeDescription() const;
-   bool              TradeAllowed() const;
-   bool              TradeExpert() const;
-   int               LimitOrders() const;
+   bool              TradeAllowed()          const;
+   bool              TradeExpert()           const;
+   int               LimitOrders()           const;
    //--- fast access methods to the double account propertyes
-   double            Balance() const;
-   double            Credit() const;
-   double            Profit() const;
-   double            Equity() const;
-   double            Margin() const;
-   double            FreeMargin() const;
-   double            MarginLevel() const;
-   double            MarginCall() const;
-   double            MarginStopOut() const;
+   double            Balance()               const;
+   double            Credit()                const;
+   double            Profit()                const;
+   double            Equity()                const;
+   double            Margin()                const;
+   double            FreeMargin()            const;
+   double            MarginLevel()           const;
+   double            MarginCall()            const;
+   double            MarginStopOut()         const;
    //--- fast access methods to the string account propertyes
-   string            Name() const;
-   string            Server() const;
-   string            Currency() const;
-   string            Company() const;
+   string            Name()                  const;
+   string            Server()                const;
+   string            Currency()              const;
+   string            Company()               const;
    //--- access methods to the API MQL5 functions
    long              InfoInteger(ENUM_ACCOUNT_INFO_INTEGER prop_id) const;
-   double            InfoDouble(ENUM_ACCOUNT_INFO_DOUBLE prop_id) const;
-   string            InfoString(ENUM_ACCOUNT_INFO_STRING prop_id) const;
+   double            InfoDouble(ENUM_ACCOUNT_INFO_DOUBLE prop_id)   const;
+   string            InfoString(ENUM_ACCOUNT_INFO_STRING prop_id)   const;
    //---
    double            OrderProfitCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price_open,double price_close) const;
-   double            MarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price) const;
-   double            FreeMarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price) const;
+   double            MarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price)      const;
+   double            FreeMarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price)  const;
    double            MaxLotCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double price,double percent=100) const;
   };
 //+------------------------------------------------------------------+

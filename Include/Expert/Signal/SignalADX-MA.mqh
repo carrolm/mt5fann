@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the cross price and MA with ADX                  |
+//| Title=Signals based on price crossover with MA confirmed by ADX  |
 //| Type=Signal                                                      |
 //| Name=ADX_MA                                                      |
 //| Class=CSignalADX_MA                                              |

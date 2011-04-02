@@ -4,12 +4,15 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.02.08 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 #include "SymbolInfo.mqh"
 #include "OrderInfo.mqh"
 #include "HistoryOrderInfo.mqh"
 #include "PositionInfo.mqh"
 #include "DealInfo.mqh"
-//--- enumerations
+//+------------------------------------------------------------------+
+//| enumerations                                                     |
+//+------------------------------------------------------------------+
 enum ENUM_LOG_LEVELS
   {
    LOG_LEVEL_NO    =0,
@@ -19,8 +22,9 @@ enum ENUM_LOG_LEVELS
 //+------------------------------------------------------------------+
 //| Class CTrade.                                                    |
 //| Appointment: Class trade operations.                             |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CTrade
+class CTrade : public CObject
   {
 protected:
    MqlTradeRequest   m_request;         // request data
@@ -677,7 +681,7 @@ bool CTrade::IsStopped(string function)
   {
    if(!IsStopped()) return(false);
 //--- MQL5 program is stopped
-   printf("%s: MQL5 program is stopped. Trading is disabled");
+   printf("MQL5 program is stopped. Trading is disabled");
    m_result.retcode=TRADE_RETCODE_CLIENT_DISABLES_AT;
    return(true);
   }
@@ -1022,8 +1026,12 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
 //--- clean
    str="";
 //--- set up
-   symbol.Name(request.symbol);
-   int digits=symbol.Digits();
+   int digits=5;
+   if(request.symbol!=NULL)
+     {
+      if(symbol.Name(request.symbol))
+         digits=symbol.Digits();
+     }
 //--- see what is wanted
    switch(request.action)
      {
@@ -1065,7 +1073,7 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
             break;
            }
          break;
-         //--- setting a pending order
+      //--- setting a pending order
       case TRADE_ACTION_PENDING:
          str=StringFormat("%s %s %s at %s",
                           FormatOrderType(type,request.type),
@@ -1079,9 +1087,7 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
 
       //--- Setting SL/TP
       case TRADE_ACTION_SLTP:
-         str=StringFormat("modify %s %s %s (sl: %s, tp: %s)",
-                          FormatOrderType(type,request.type),
-                          DoubleToString(request.volume,2),
+         str=StringFormat("modify %s (sl: %s, tp: %s)",
                           request.symbol,
                           DoubleToString(request.sl,digits),
                           DoubleToString(request.tp,digits));
@@ -1089,11 +1095,8 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
 
       //--- modifying a pending order
       case TRADE_ACTION_MODIFY:
-         str=StringFormat("modify #%I64u %s %s %s at %s (sl: %s tp: %s)",
+         str=StringFormat("modify #%I64u at %s (sl: %s tp: %s)",
                           request.order,
-                          FormatOrderType(type,request.type),
-                          DoubleToString(request.volume,2),
-                          request.symbol,
                           FormatOrderPrice(price_new,request.price,request.stoplimit,digits),
                           DoubleToString(request.sl,digits),
                           DoubleToString(request.tp,digits));
@@ -1101,12 +1104,7 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
 
       //--- deleting a pending order
       case TRADE_ACTION_REMOVE:
-         str=StringFormat("cancel #%I64u %s %s %s at %s",
-                          request.order,
-                          FormatOrderType(type,request.type),
-                          DoubleToString(request.volume,2),
-                          request.symbol,
-                          FormatOrderPrice(price_new,request.price,request.stoplimit,digits));
+         str=StringFormat("cancel #%I64u",request.order);
       break;
 
       default:
@@ -1131,8 +1129,12 @@ string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,co
 //--- clean
    str="";
 //--- set up
-   symbol.Name(request.symbol);
-   int digits=symbol.Digits();
+   int digits=5;
+   if(request.symbol!=NULL)
+     {
+      if(symbol.Name(request.symbol))
+         digits=symbol.Digits();
+     }
 //--- see the response code
    switch(result.retcode)
      {
@@ -1165,33 +1167,33 @@ string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,co
                              DoubleToString(result.volume,2));
       break;
 
-      case TRADE_RETCODE_REJECT            : str="rejected";           break;
-      case TRADE_RETCODE_CANCEL            : str="canceled";           break;
-      case TRADE_RETCODE_PLACED            : str="placed";             break;
-      case TRADE_RETCODE_ERROR             : str="common error";       break;
-      case TRADE_RETCODE_TIMEOUT           : str="timeout";            break;
-      case TRADE_RETCODE_INVALID           : str="invalid request";    break;
-      case TRADE_RETCODE_INVALID_VOLUME    : str="invalid volume";     break;
-      case TRADE_RETCODE_INVALID_PRICE     : str="invalid price";      break;
-      case TRADE_RETCODE_INVALID_STOPS     : str="invalid stops";      break;
-      case TRADE_RETCODE_TRADE_DISABLED    : str="trade disabled";     break;
-      case TRADE_RETCODE_MARKET_CLOSED     : str="market closed";      break;
-      case TRADE_RETCODE_NO_MONEY          : str="not enough money";   break;
-      case TRADE_RETCODE_PRICE_CHANGED     : str="price changed";      break;
-      case TRADE_RETCODE_PRICE_OFF         : str="off quotes";         break;
-      case TRADE_RETCODE_INVALID_EXPIRATION: str="invalid expiration"; break;
-      case TRADE_RETCODE_ORDER_CHANGED     : str="order changed";      break;
-      case TRADE_RETCODE_TOO_MANY_REQUESTS : str="too many requests";  break;
-      case TRADE_RETCODE_NO_CHANGES        : str="no changes";         break;
-      case TRADE_RETCODE_SERVER_DISABLES_AT: str="server disabled";    break;
-      case TRADE_RETCODE_CLIENT_DISABLES_AT: str="client disabled";    break;
-      case TRADE_RETCODE_LOCKED            : str="locked";             break;
-      case TRADE_RETCODE_FROZEN            : str="frozen";             break;
-      case TRADE_RETCODE_INVALID_FILL      : str="invalid fill";       break;
-      case TRADE_RETCODE_CONNECTION        : str="no connection";      break;
-      case TRADE_RETCODE_ONLY_REAL         : str="only real";          break;
-      case TRADE_RETCODE_LIMIT_ORDERS      : str="limit orders";       break;
-      case TRADE_RETCODE_LIMIT_VOLUME      : str="limit volume";       break;
+      case TRADE_RETCODE_REJECT            : str="rejected";                        break;
+      case TRADE_RETCODE_CANCEL            : str="canceled";                        break;
+      case TRADE_RETCODE_PLACED            : str="placed";                          break;
+      case TRADE_RETCODE_ERROR             : str="common error";                    break;
+      case TRADE_RETCODE_TIMEOUT           : str="timeout";                         break;
+      case TRADE_RETCODE_INVALID           : str="invalid request";                 break;
+      case TRADE_RETCODE_INVALID_VOLUME    : str="invalid volume";                  break;
+      case TRADE_RETCODE_INVALID_PRICE     : str="invalid price";                   break;
+      case TRADE_RETCODE_INVALID_STOPS     : str="invalid stops";                   break;
+      case TRADE_RETCODE_TRADE_DISABLED    : str="trade disabled";                  break;
+      case TRADE_RETCODE_MARKET_CLOSED     : str="market closed";                   break;
+      case TRADE_RETCODE_NO_MONEY          : str="not enough money";                break;
+      case TRADE_RETCODE_PRICE_CHANGED     : str="price changed";                   break;
+      case TRADE_RETCODE_PRICE_OFF         : str="off quotes";                      break;
+      case TRADE_RETCODE_INVALID_EXPIRATION: str="invalid expiration";              break;
+      case TRADE_RETCODE_ORDER_CHANGED     : str="order changed";                   break;
+      case TRADE_RETCODE_TOO_MANY_REQUESTS : str="too many requests";               break;
+      case TRADE_RETCODE_NO_CHANGES        : str="no changes";                      break;
+      case TRADE_RETCODE_SERVER_DISABLES_AT: str="auto trading disabled by server"; break;
+      case TRADE_RETCODE_CLIENT_DISABLES_AT: str="auto trading disabled by client"; break;
+      case TRADE_RETCODE_LOCKED            : str="locked";                          break;
+      case TRADE_RETCODE_FROZEN            : str="frozen";                          break;
+      case TRADE_RETCODE_INVALID_FILL      : str="invalid fill";                    break;
+      case TRADE_RETCODE_CONNECTION        : str="no connection";                   break;
+      case TRADE_RETCODE_ONLY_REAL         : str="only real";                       break;
+      case TRADE_RETCODE_LIMIT_ORDERS      : str="limit orders";                    break;
+      case TRADE_RETCODE_LIMIT_VOLUME      : str="limit volume";                    break;
 
       default:
          str="unknown retcode "+(string)result.retcode;

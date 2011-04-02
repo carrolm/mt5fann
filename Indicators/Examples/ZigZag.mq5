@@ -137,6 +137,8 @@ int OnCalculate(const int rates_total,
       ArrayInitialize(HighMapBuffer,0.0);
       ArrayInitialize(LowMapBuffer,0.0);
      }
+//--- 
+   if(rates_total<100) return(0);
 //--- set start position for calculations
    if(prev_calculated==0) limit=ExtDepth;
 

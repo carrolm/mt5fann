@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   ArrayFloat.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.29 |
+//|                                              Revision 2011.03.03 |
 //+------------------------------------------------------------------+
 #include "Array.mqh"
 //+------------------------------------------------------------------+
@@ -159,7 +159,7 @@ bool CArrayFloat::Resize(int size)
 //--- checking
    if(size<0) return(false);
 //--- resizing array
-   new_size=m_step_resize*(1+(size-Available())/m_step_resize);
+   new_size=m_step_resize*(1+size/m_step_resize);
    if(m_data_max!=new_size) m_data_max=ArrayResize(m_data,new_size);
    if(m_data_total>size) m_data_total=size;
 //---

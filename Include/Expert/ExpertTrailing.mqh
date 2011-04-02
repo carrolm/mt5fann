@@ -4,6 +4,7 @@
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2010.10.08 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 #include <Trade\SymbolInfo.mqh>
 #include <Trade\AccountInfo.mqh>
 #include <Trade\PositionInfo.mqh>
@@ -11,8 +12,9 @@
 //+------------------------------------------------------------------+
 //| Class CExpertTrailing.                                           |
 //| Appointment: Base class traling stops.                           |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CExpertTrailing
+class CExpertTrailing : public CObject
   {
 protected:
    CSymbolInfo      *m_symbol;                   // symbol object

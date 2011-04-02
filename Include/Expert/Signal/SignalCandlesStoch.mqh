@@ -8,7 +8,8 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the candlestick patterns with Stochastic         |
+//| Title=Signals based on reversal candlestick patterns             |
+//| confirmed by Stochastic                                          |
 //| Type=Signal                                                      |
 //| Name=CandlesStoch                                                |
 //| Class=CSignalCandlesStoch                                        |

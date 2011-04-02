@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the candlestick patterns                         |
+//| Title=Signals based on reversal candlestick patterns             |
 //| Type=Signal                                                      |
 //| Name=Candles                                                     |
 //| Class=CSignalCandles                                             |

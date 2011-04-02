@@ -9,7 +9,8 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the cross two EMA with intraday time filter      |
+//| Title=Signals based on crossover of two EMA                      |
+//| with intraday time filter                                        |
 //| Type=Signal                                                      |
 //| Name=TwoEMAwithITF                                               |
 //| Class=CSignal2EMA_ITF                                            |
@@ -246,18 +247,18 @@ bool CSignal2EMA_ITF::InitATR(CIndicators* indicators)
 //+------------------------------------------------------------------+
 bool CSignal2EMA_ITF::CheckOpenLong(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(!(StateEMA(1)>0 && StateEMA(2)<0))                    return(false);
    if(!m_time_filter.CheckOpenLong(price,sl,tp,expiration)) return(false);
 //---
-   double ema=SlowEMA(1);
    double atr=ATR(1);
    double spread=m_symbol.Ask()-m_symbol.Bid();
 //---
-   price=m_symbol.NormalizePrice(ema-m_limit*atr+spread);
-   sl   =m_symbol.NormalizePrice(price+m_stop_loss*atr);
-   tp   =m_symbol.NormalizePrice(price-m_take_profit*atr);
+   price=m_symbol.NormalizePrice(SlowEMA(1)-m_limit*atr+spread);
+   sl   =m_symbol.NormalizePrice(price-m_stop_loss*atr);
+   tp   =m_symbol.NormalizePrice(price+m_take_profit*atr);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
-   return(StateEMA(1)>0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for long position close.                        |
@@ -280,17 +281,17 @@ bool CSignal2EMA_ITF::CheckCloseLong(double& price)
 //+------------------------------------------------------------------+
 bool CSignal2EMA_ITF::CheckOpenShort(double& price,double& sl,double& tp,datetime& expiration)
   {
+   if(!(StateEMA(1)<0 && StateEMA(2)>0))                     return(false);
    if(!m_time_filter.CheckOpenShort(price,sl,tp,expiration)) return(false);
 //---
-   double ema=SlowEMA(1);
    double atr=ATR(1);
 //---
-   price      =m_symbol.NormalizePrice(ema+m_limit*atr);
+   price      =m_symbol.NormalizePrice(SlowEMA(1)+m_limit*atr);
    sl         =m_symbol.NormalizePrice(price+m_stop_loss*atr);
    tp         =m_symbol.NormalizePrice(price-m_take_profit*atr);
    expiration+=m_expiration*PeriodSeconds(m_period);
 //---
-   return(StateEMA(1)<0);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Check conditions for short position close.                       |
@@ -314,11 +315,13 @@ bool CSignal2EMA_ITF::CheckTrailingOrderLong(COrderInfo* order,double& price)
 //--- check
    if(order==NULL) return(false);
 //---
-   double ema=SlowEMA(1);
-   double atr=ATR(1);
    double spread=m_symbol.Ask()-m_symbol.Bid();
+   double level =NormalizeDouble(m_symbol.Bid()-m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
+   double new_pr=m_symbol.NormalizePrice(SlowEMA(1)-m_limit*ATR(1)+spread);
 //---
-   price=order.PriceOpen()-m_symbol.NormalizePrice(ema-m_limit*atr+spread);
+   if(new_pr==order.PriceOpen() || new_pr>=level) return(false);
+//---
+   price=new_pr;
 //---
    return(true);
   }
@@ -334,10 +337,12 @@ bool CSignal2EMA_ITF::CheckTrailingOrderShort(COrderInfo* order,double& price)
 //--- check
    if(order==NULL) return(false);
 //---
-   double ema=SlowEMA(1);
-   double atr=ATR(1);
+   double level =NormalizeDouble(m_symbol.Ask()+m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
+   double new_pr=m_symbol.NormalizePrice(SlowEMA(1)+m_limit*ATR(1));
 //---
-   price=order.PriceOpen()-m_symbol.NormalizePrice(ema+m_limit*atr);
+   if(new_pr==order.PriceOpen() || new_pr<=level) return(false);
+//---
+   price=new_pr;
 //---
    return(true);
   }

@@ -171,9 +171,9 @@ public:
 //+------------------------------------------------------------------+
 bool COpenBuffer::Refresh()
   {
-   m_freshed_data=CopyOpen(m_symbol,m_period,0,m_size,m_data);
+   m_data_total=CopyOpen(m_symbol,m_period,0,m_size,m_data);
 //---
-   return(CDoubleBuffer::Refresh());
+   return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of the data buffer.                                   |
@@ -183,9 +183,15 @@ bool COpenBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool COpenBuffer::RefreshCurrent()
   {
-   m_freshed_data=CopyOpen(m_symbol,m_period,0,1,m_data);
+   double array[1];
 //---
-   return(CDoubleBuffer::RefreshCurrent());
+   if(CopyOpen(m_symbol,m_period,0,1,array)==1 && m_data_total>0)
+     {
+      m_data[0]=array[0];
+      return(true);
+     }
+//--- error
+   return(false);
   }
 //+------------------------------------------------------------------+
 //| Class CiOpen.                                                    |
@@ -286,9 +292,9 @@ public:
 //+------------------------------------------------------------------+
 bool CHighBuffer::Refresh()
   {
-   m_freshed_data=CopyHigh(m_symbol,m_period,0,m_size,m_data);
+   m_data_total=CopyHigh(m_symbol,m_period,0,m_size,m_data);
 //---
-   return(CDoubleBuffer::Refresh());
+   return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data buffer.                                       |
@@ -298,9 +304,15 @@ bool CHighBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CHighBuffer::RefreshCurrent()
   {
-   m_freshed_data=CopyHigh(m_symbol,m_period,0,1,m_data);
+   double array[1];
 //---
-   return(CDoubleBuffer::RefreshCurrent());
+   if(CopyHigh(m_symbol,m_period,0,1,array)>0 && m_data_total>0)
+     {
+      m_data[0]=array[0];
+      return(true);
+     }
+//--- error
+   return(false);
   }
 //+------------------------------------------------------------------+
 //| Class CiHigh.                                                    |
@@ -401,9 +413,9 @@ public:
 //+------------------------------------------------------------------+
 bool CLowBuffer::Refresh()
   {
-   m_freshed_data=CopyLow(m_symbol,m_period,0,m_size,m_data);
+   m_data_total=CopyLow(m_symbol,m_period,0,m_size,m_data);
 //---
-   return(CDoubleBuffer::Refresh());
+   return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data buffer.                                       |
@@ -413,9 +425,15 @@ bool CLowBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CLowBuffer::RefreshCurrent()
   {
-   m_freshed_data=CopyLow(m_symbol,m_period,0,1,m_data);
+   double array[1];
 //---
-   return(CDoubleBuffer::RefreshCurrent());
+   if(CopyLow(m_symbol,m_period,0,1,array)>0 && m_data_total>0)
+     {
+      m_data[0]=array[0];
+      return(true);
+     }
+//--- error
+   return(false);
   }
 //+------------------------------------------------------------------+
 //| Class CiLow.                                                     |
@@ -516,9 +534,9 @@ public:
 //+------------------------------------------------------------------+
 bool CCloseBuffer::Refresh()
   {
-   m_freshed_data=CopyClose(m_symbol,m_period,0,m_size,m_data);
+   m_data_total=CopyClose(m_symbol,m_period,0,m_size,m_data);
 //---
-   return(CDoubleBuffer::Refresh());
+   return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of the data buffer.                                   |
@@ -528,9 +546,15 @@ bool CCloseBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CCloseBuffer::RefreshCurrent()
   {
-   m_freshed_data=CopyClose(m_symbol,m_period,0,1,m_data);
+   double array[1];
 //---
-   return(CDoubleBuffer::RefreshCurrent());
+   if(CopyClose(m_symbol,m_period,0,1,array)>0 && m_data_total>0)
+     {
+      m_data[0]=array[0];
+      return(true);
+     }
+//--- error
+   return(false);
   }
 //+------------------------------------------------------------------+
 //| Class CiClose.                                                   |
@@ -645,7 +669,7 @@ public:
 CSpreadBuffer::CSpreadBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -689,6 +713,8 @@ bool CSpreadBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CSpreadBuffer::RefreshCurrent()
   {
+   int array[1];
+//---
    m_freshed_data=CopySpread(m_symbol,m_period,0,1,m_data);
 //---
    if(m_freshed_data==1 && m_data_total>0)
@@ -883,7 +909,7 @@ public:
 CTimeBuffer::CTimeBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -927,6 +953,8 @@ bool CTimeBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CTimeBuffer::RefreshCurrent()
   {
+   long array[1];
+//---
    m_freshed_data=CopyTime(m_symbol,m_period,0,1,m_data);
 //---
    if(m_freshed_data==1 && m_data_total>0)
@@ -1121,7 +1149,7 @@ public:
 CTickVolumeBuffer::CTickVolumeBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -1165,6 +1193,8 @@ bool CTickVolumeBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CTickVolumeBuffer::RefreshCurrent()
   {
+   long array[1];
+//---
    m_freshed_data=CopyTickVolume(m_symbol,m_period,0,1,m_data);
 //---
    if(m_freshed_data==1 && m_data_total>0)
@@ -1359,7 +1389,7 @@ public:
 CRealVolumeBuffer::CRealVolumeBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -1403,6 +1433,8 @@ bool CRealVolumeBuffer::Refresh()
 //+------------------------------------------------------------------+
 bool CRealVolumeBuffer::RefreshCurrent()
   {
+   long array[1];
+//---
    m_freshed_data=CopyRealVolume(m_symbol,m_period,0,1,m_data);
 //---
    if(m_freshed_data==1 && m_data_total>0)

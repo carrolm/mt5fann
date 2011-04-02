@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the intersection of prices and SMA               |
+//| Title=Signals based on price crossover with SMA                  |
 //| Type=Signal                                                      |
 //| Name=MovingAverage                                               |
 //| Class=CSignalMovingAverage                                       |

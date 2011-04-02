@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the relative positions of three EMA              |
+//| Title=Signals based on three EMA                                 |
 //| Type=Signal                                                      |
 //| Name=ThreeEMA                                                    |
 //| Class=CSignal3EMA                                                |

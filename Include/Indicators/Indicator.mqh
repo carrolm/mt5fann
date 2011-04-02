@@ -40,7 +40,7 @@ public:
 CIndicatorBuffer::CIndicatorBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    m_offset=0;
    m_name  ="";
    ArraySetAsSeries(m_data,true);
@@ -71,14 +71,9 @@ bool CIndicatorBuffer::Refresh(int handle,int num)
       return(false);
      }
 //---
-   m_freshed_data=CopyBuffer(handle,num,-m_offset,m_size,m_data);
-   if(m_freshed_data>0)
-     {
-      m_data_total=ArraySize(m_data);
-      return(true);
-     }
-//--- error
-   return(false);
+   m_data_total=CopyBuffer(handle,num,-m_offset,m_size,m_data);
+//---
+   return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of the data in buffer.                                |
@@ -89,6 +84,7 @@ bool CIndicatorBuffer::Refresh(int handle,int num)
 //+------------------------------------------------------------------+
 bool CIndicatorBuffer::RefreshCurrent(int handle,int num)
   {
+   double array[1];
 //--- checking
    if(handle==INVALID_HANDLE)
      {
@@ -96,10 +92,9 @@ bool CIndicatorBuffer::RefreshCurrent(int handle,int num)
       return(false);
      }
 //---
-   m_freshed_data=CopyBuffer(handle,num,-m_offset,1,m_data);
-   if(m_freshed_data==1 && m_data_total>0)
+   if(CopyBuffer(handle,num,-m_offset,1,array)>0 && m_data_total>0)
      {
-      ArrayResize(m_data,m_data_total);
+      m_data[0]=array[0];
       return(true);
      }
 //--- error

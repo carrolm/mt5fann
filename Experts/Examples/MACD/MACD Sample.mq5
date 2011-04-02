@@ -376,7 +376,7 @@ bool CSampleExpert::Processing()
 //--- first check if position exists - try to select it
    if(m_position.Select(Symbol()))
      {
-      if(m_position.Type()==POSITION_TYPE_BUY)
+      if(m_position.PositionType()==POSITION_TYPE_BUY)
         {
          //--- try to close or modify long position
          if(LongClosed())    return(true);

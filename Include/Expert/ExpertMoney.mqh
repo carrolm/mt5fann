@@ -4,6 +4,7 @@
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2010.10.12 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 #include <Trade\SymbolInfo.mqh>
 #include <Trade\AccountInfo.mqh>
 #include <Trade\PositionInfo.mqh>
@@ -11,8 +12,9 @@
 //+------------------------------------------------------------------+
 //| Class CExpertMoney.                                              |
 //| Appointment: Base class money managment.                         |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CExpertMoney
+class CExpertMoney : public CObject
   {
 protected:
    CSymbolInfo      *m_symbol;
@@ -138,9 +140,9 @@ double CExpertMoney::CheckReverse(CPositionInfo* position,double sl)
   {
    double lots=0.0;
 //---
-   if(position.Type()==POSITION_TYPE_BUY)
+   if(position.PositionType()==POSITION_TYPE_BUY)
       lots=CheckOpenShort(m_symbol.Bid(),sl);
-   if(position.Type()==POSITION_TYPE_SELL)
+   if(position.PositionType()==POSITION_TYPE_SELL)
       lots=CheckOpenLong(m_symbol.Ask(),sl);
 //---
    if(lots!=0.0) lots+=position.Volume();

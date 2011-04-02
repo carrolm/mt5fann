@@ -111,7 +111,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- normalize last mfi value
    if(rates_total>1)
      {
-      datetime ctm=TimeTradeServer(),lasttm=Time[rates_total-1],nexttm=lasttm+long(PeriodSeconds());
+      datetime ctm=TimeTradeServer(),lasttm=Time[rates_total-1],nexttm=lasttm+datetime(PeriodSeconds());
       if(ctm<nexttm && ctm>=lasttm && nexttm!=lasttm)
         {
          double correction_koef=double(1+ctm-lasttm)/double(nexttm-lasttm);
