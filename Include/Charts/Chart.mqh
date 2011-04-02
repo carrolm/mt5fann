@@ -2,7 +2,7 @@
 //|                                                     Chart.mqh    |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                                              Revision 2011.03.11 |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -64,6 +64,8 @@ public:
    bool                   ShowVolumes(ENUM_CHART_VOLUME_MODE show);
    bool              ShowObjectDescr() const;
    bool              ShowObjectDescr(bool show);
+   bool              ShowDateScale(bool show);
+   bool              ShowPriceScale(bool show);
    //--- color properties
    color             ColorBackground() const;
    bool              ColorBackground(color new_color);
@@ -692,6 +694,32 @@ bool CChart::ShowObjectDescr(bool show)
    if(m_chart_id<=0) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_OBJECT_DESCR,show));
+  }
+//+------------------------------------------------------------------+
+//| Set value of the "ShowDateScale" property.                       |
+//| INPUT:  show - new value of the "ShowObjectDescr" property.      |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::ShowDateScale(bool show)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartSetInteger(m_chart_id,CHART_SHOW_DATE_SCALE,show));
+  }
+//+------------------------------------------------------------------+
+//| Set value of the "ShowPriceScale" property.                      |
+//| INPUT:  show - new value of the "ShowObjectDescr" property.      |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::ShowPriceScale(bool show)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartSetInteger(m_chart_id,CHART_SHOW_PRICE_SCALE,show));
   }
 //+------------------------------------------------------------------+
 //| Get color value of the "Background" property.                    |

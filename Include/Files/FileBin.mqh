@@ -10,7 +10,7 @@
 //| Purpose: Class of operations with binary files.                  |
 //|          Derives from class CFile.                               |
 //+------------------------------------------------------------------+
-class CFileBin : CFile
+class CFileBin : public CFile
   {
 public:
    //--- methods for working with files

@@ -10,7 +10,7 @@
 //| Appointment: Class-string.                                       |
 //|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CString :public CObject
+class CString : public CObject
   {
 protected:
    string            m_string;
@@ -308,7 +308,7 @@ int CString::Trim(const string targets)
 //+------------------------------------------------------------------+
 int CString::TrimLeft(const string targets)
   {
-   short ch;
+   ushort ch;
 //---
    for(int i=0;i<StringLen(m_string);i++)
      {
@@ -336,7 +336,7 @@ int CString::TrimLeft(const string targets)
 //+------------------------------------------------------------------+
 int CString::TrimRight(const string targets)
   {
-   short ch;
+   ushort ch;
 //---
    for(int i=StringLen(m_string)-1;i>=0;i--)
      {
@@ -363,10 +363,10 @@ int CString::TrimRight(const string targets)
 //+------------------------------------------------------------------+
 void CString::Reverse(void)
   {
-   short ch;
-   int   i,j;
+   ushort ch;
+   int    i,j;
 //---
-   for(i=StringLen(m_string)-1,j=0;i!=j;i--,j++)
+   for(i=StringLen(m_string)-1,j=0;i>j;i--,j++)
      {
       ch=StringGetCharacter(m_string,i);
       StringSetCharacter(m_string,i,StringGetCharacter(m_string,j));

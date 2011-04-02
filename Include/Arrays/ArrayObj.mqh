@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                     ArrayObj.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.21 |
+//|                                              Revision 2011.03.03 |
 //+------------------------------------------------------------------+
 #include "Array.mqh"
 //+------------------------------------------------------------------+
@@ -178,7 +178,7 @@ bool CArrayObj::Resize(int size)
 //--- checking
    if(size<0) return(false);
 //--- resizing array
-   new_size=m_step_resize*(1+(size-Available())/m_step_resize);
+   new_size=m_step_resize*(1+size/m_step_resize);
    if(m_data_total>size)
      {
       //--- "physical" removal of the object (if necessary and possible)

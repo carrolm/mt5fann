@@ -9,7 +9,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trading with lots optimize                                 |
+//| Title=Trading with optimized trade volume                        |
 //| Type=Money                                                       |
 //| Name=SizeOptimized                                               |
 //| Class=CMoneySizeOptimized                                        |

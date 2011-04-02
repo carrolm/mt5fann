@@ -17,9 +17,9 @@ protected:
    CTreeNode        *m_l_node;             // link to node left
    CTreeNode        *m_r_node;             // link to node right
    //---
-   uint              m_balance;            // balance of node
-   uint              m_l_balance;          // balance of the left branch
-   uint              m_r_balance;          // balance of the right branch
+   int               m_balance;            // balance of node
+   int               m_l_balance;          // balance of the left branch
+   int               m_r_balance;          // balance of the right branch
 public:
                      CTreeNode();
                     ~CTreeNode();

@@ -4,12 +4,14 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.08.01 |
 //+------------------------------------------------------------------+
-#include <Trade\SymbolInfo.mqh>
+#include <Object.mqh>
+#include "SymbolInfo.mqh"
 //+------------------------------------------------------------------+
 //| Class COrderInfo.                                                |
 //| Appointment: Class for access to order info.                     |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class COrderInfo
+class COrderInfo : public CObject
   {
 protected:
    ulong             m_ticket;
@@ -22,32 +24,32 @@ protected:
 
 public:
                      COrderInfo();
-   ulong             Ticket() const { return(m_ticket); }
+   ulong             Ticket()                       const { return(m_ticket); }
    //--- fast access methods to the integer order propertyes
-   datetime          TimeSetup() const;
-   ENUM_ORDER_TYPE   Type() const;
-   string            TypeDescription() const;
-   ENUM_ORDER_STATE  State() const;
-   string            StateDescription() const;
-   datetime          TimeExpiration() const;
-   datetime          TimeDone() const;
-   ENUM_ORDER_TYPE_FILLING TypeFilling() const;
+   datetime          TimeSetup()                    const;
+   ENUM_ORDER_TYPE   OrderType()                    const;
+   string            TypeDescription()              const;
+   ENUM_ORDER_STATE  State()                        const;
+   string            StateDescription()             const;
+   datetime          TimeExpiration()               const;
+   datetime          TimeDone()                     const;
+   ENUM_ORDER_TYPE_FILLING TypeFilling()            const;
    string                  TypeFillingDescription() const;
-   ENUM_ORDER_TYPE_TIME    TypeTime() const;
-   string                  TypeTimeDescription() const;
-   long              Magic() const;
-   long              PositionId() const;
+   ENUM_ORDER_TYPE_TIME    TypeTime()               const;
+   string                  TypeTimeDescription()    const;
+   long              Magic()                        const;
+   long              PositionId()                   const;
    //--- fast access methods to the double order propertyes
-   double            VolumeInitial() const;
-   double            VolumeCurrent() const;
-   double            PriceOpen() const;
-   double            StopLoss() const;
-   double            TakeProfit() const;
-   double            PriceCurrent() const;
-   double            PriceStopLimit() const;
+   double            VolumeInitial()                const;
+   double            VolumeCurrent()                const;
+   double            PriceOpen()                    const;
+   double            StopLoss()                     const;
+   double            TakeProfit()                   const;
+   double            PriceCurrent()                 const;
+   double            PriceStopLimit()               const;
    //--- fast access methods to the string order propertyes
-   string            Symbol() const;
-   string            Comment() const;
+   string            Symbol()                       const;
+   string            Comment()                      const;
    //--- access methods to the API MQL5 functions
    bool              InfoInteger(ENUM_ORDER_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_ORDER_PROPERTY_DOUBLE prop_id,double& var) const;
@@ -98,7 +100,7 @@ datetime COrderInfo::TimeSetup() const
 //| OUTPUT: the property value "ORDER_TYPE".                         |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-ENUM_ORDER_TYPE COrderInfo::Type() const
+ENUM_ORDER_TYPE COrderInfo::OrderType() const
   {
    return((ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE));
   }
@@ -545,7 +547,7 @@ bool COrderInfo::SelectByIndex(int index)
 //+------------------------------------------------------------------+
 void COrderInfo::StoreState()
   {
-   m_type       =Type();
+   m_type       =OrderType();
    m_state      =State();
    m_expiration =TimeExpiration();
    m_volume_curr=VolumeCurrent();

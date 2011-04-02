@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trailing with fixed Stop Level                             |
+//| Title=Trailing Stop based on fixed Stop Level                    |
 //| Type=Trailing                                                    |
 //| Name=FixedPips                                                   |
 //| Class=CTrailingFixedPips                                         |
@@ -75,7 +75,9 @@ bool CTrailingFixedPips::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for long position.          |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -103,7 +105,9 @@ bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo* position,double& s
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for short position.         |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+

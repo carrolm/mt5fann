@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trading fixed risk                                         |
+//| Title=Trading with fixed risk                                    |
 //| Type=Money                                                       |
 //| Name=FixRisk                                                     |
 //| Class=CMoneyFixedRisk                                            |

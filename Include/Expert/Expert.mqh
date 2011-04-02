@@ -4,6 +4,7 @@
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2010.10.08 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 #include <Expert\ExpertTrade.mqh>
 #include <Expert\ExpertSignal.mqh>
 #include <Expert\ExpertMoney.mqh>
@@ -30,8 +31,9 @@ enum ENUM_TRADE_EVENTS
 //+------------------------------------------------------------------+
 //| Class CExpert.                                                   |
 //| Appointment: Base class expert advisor.                          |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CExpert
+class CExpert : public CObject
   {
 protected:
    double            m_adjusted_point;           // point value adjusted for 3 or 5 points
@@ -65,6 +67,7 @@ public:
                      CExpert();
                     ~CExpert()                              { Deinit    ();                                               }
    bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long magic=0);
+   virtual bool      InitIndicators();
    //---
    virtual bool      InitSignal(CExpertSignal* signal=NULL);
    virtual bool      InitTrailing(CExpertTrailing* trailing=NULL);
@@ -82,7 +85,6 @@ public:
 protected:
    //--- initialization
    virtual bool      InitParameters()                       { return(true);                                               }
-   virtual bool      InitIndicators();
    virtual bool      InitTrade(long magic);
    //--- deinitialization
    virtual void      DeinitTrade();
@@ -213,12 +215,16 @@ CExpert::CExpert()
 bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long magic)
   {
 //--- initialize common information
-   m_symbol.Name(symbol);                   // symbol
-   m_period=period;                         // period
+   if(!m_symbol.Name(symbol))                  // symbol
+     {
+      printf(__FUNCTION__+": error initialization symbol object");
+      return(false);
+     }
+   m_period=period;                            // period
    if(every_tick)
-      TimeframeAdd(WRONG_VALUE);            // add all periods
+      TimeframeAdd(WRONG_VALUE);               // add all periods
    else
-      TimeframeAdd(period);                 // add specified period
+      TimeframeAdd(period);                    // add specified period
 //--- tuning for 3 or 5 digits
    int digits_adjust=1;
    if(m_symbol.Digits()==3 || m_symbol.Digits()==5) digits_adjust=10;
@@ -501,7 +507,7 @@ bool CExpert::Processing()
         {
          m_order.Select(OrderGetTicket(i));
          if(m_order.Symbol()!=m_symbol.Name()) continue;
-         if(m_order.Type()==ORDER_TYPE_BUY_LIMIT || m_order.Type()==ORDER_TYPE_BUY_STOP)
+         if(m_order.OrderType()==ORDER_TYPE_BUY_LIMIT || m_order.OrderType()==ORDER_TYPE_BUY_STOP)
            {
             //--- check the ability to delete a pending order to buy
             if(CheckDeleteOrderLong()) return(true);
@@ -577,7 +583,9 @@ bool CExpert::CheckOpen()
 //+------------------------------------------------------------------+
 bool CExpert::CheckOpenLong()
   {
-   double   price,sl,tp;
+   double   price=EMPTY_VALUE;
+   double   sl=0.0;
+   double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for long enter operations
    if(m_signal.CheckOpenLong(price,sl,tp,expiration))
@@ -599,7 +607,9 @@ bool CExpert::CheckOpenLong()
 //+------------------------------------------------------------------+
 bool CExpert::CheckOpenShort()
   {
-   double   price,sl,tp;
+   double   price=EMPTY_VALUE;
+   double   sl=0.0;
+   double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for short enter operations
    if(m_signal.CheckOpenShort(price,sl,tp,expiration))
@@ -623,6 +633,7 @@ bool CExpert::CheckOpenShort()
 //+------------------------------------------------------------------+
 bool CExpert::OpenLong(double price,double sl,double tp)
   {
+   if(price==EMPTY_VALUE) return(false);
 //--- get lot for open
    double lot=LotOpenLong(price,sl);
 //--- check lot for open
@@ -640,6 +651,7 @@ bool CExpert::OpenLong(double price,double sl,double tp)
 //+------------------------------------------------------------------+
 bool CExpert::OpenShort(double price,double sl,double tp)
   {
+   if(price==EMPTY_VALUE) return(false);
 //--- get lot for open
    double lot=LotOpenShort(price,sl);
 //--- check lot for open
@@ -655,7 +667,7 @@ bool CExpert::OpenShort(double price,double sl,double tp)
 //+------------------------------------------------------------------+
 bool CExpert::CheckReverse()
   {
-   if(m_position.Type()==POSITION_TYPE_BUY)
+   if(m_position.PositionType()==POSITION_TYPE_BUY)
      {
       //--- check the possibility of reverse the long position
       if(CheckReverseLong())  return(true);
@@ -674,7 +686,9 @@ bool CExpert::CheckReverse()
 //+------------------------------------------------------------------+
 bool CExpert::CheckReverseLong()
   {
-   double   price,sl,tp;
+   double   price=EMPTY_VALUE;
+   double   sl=0.0;
+   double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for long reverse operations
    if(m_signal.CheckReverseLong(price,sl,tp,expiration)) return(ReverseLong(price,sl,tp));
@@ -689,7 +703,9 @@ bool CExpert::CheckReverseLong()
 //+------------------------------------------------------------------+
 bool CExpert::CheckReverseShort()
   {
-   double   price,sl,tp;
+   double   price=EMPTY_VALUE;
+   double   sl=0.0;
+   double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for short reverse operations
    if(m_signal.CheckReverseShort(price,sl,tp,expiration)) return(ReverseShort(price,sl,tp));
@@ -706,6 +722,7 @@ bool CExpert::CheckReverseShort()
 //+------------------------------------------------------------------+
 bool CExpert::ReverseLong(double price,double sl,double tp)
   {
+   if(price==EMPTY_VALUE) return(false);
 //--- get lot for reverse
    double lot=LotReverse(sl);
 //--- check lot
@@ -723,6 +740,7 @@ bool CExpert::ReverseLong(double price,double sl,double tp)
 //+------------------------------------------------------------------+
 bool CExpert::ReverseShort(double price,double sl,double tp)
   {
+   if(price==EMPTY_VALUE) return(false);
 //--- get lot for reverse
    double lot=LotReverse(sl);
 //--- check lot
@@ -743,7 +761,7 @@ bool CExpert::CheckClose()
    if((lot=m_money.CheckClose(GetPointer(m_position)))!=0.0)
       return(CloseAll(lot));
 //--- check for position type
-   if(m_position.Type()==POSITION_TYPE_BUY)
+   if(m_position.PositionType()==POSITION_TYPE_BUY)
      {
       //--- check the possibility of closing the long position / delete pending orders to buy
       if(CheckCloseLong())
@@ -772,7 +790,7 @@ bool CExpert::CheckClose()
 //+------------------------------------------------------------------+
 bool CExpert::CheckCloseLong()
   {
-   double price;
+   double price=EMPTY_VALUE;
 //--- check for long close operations
    if(m_signal.CheckCloseLong(price))
       return(CloseLong(price));
@@ -787,7 +805,7 @@ bool CExpert::CheckCloseLong()
 //+------------------------------------------------------------------+
 bool CExpert::CheckCloseShort()
   {
-   double price;
+   double price=EMPTY_VALUE;
 //--- check for short close operations
    if(m_signal.CheckCloseShort(price))
       return(CloseShort(price));
@@ -804,8 +822,8 @@ bool CExpert::CloseAll(double lot)
   {
    bool result;
 //--- check for close operations
-   if(m_position.Type()==POSITION_TYPE_BUY) result=m_trade.Sell(lot,0,0,0);
-   else                                     result=m_trade.Buy(lot,0,0,0);
+   if(m_position.PositionType()==POSITION_TYPE_BUY) result=m_trade.Sell(lot,0,0,0);
+   else                                             result=m_trade.Buy(lot,0,0,0);
    result|=DeleteOrders();
 //---
    return(result);
@@ -828,6 +846,8 @@ bool CExpert::Close()
 //+------------------------------------------------------------------+
 bool CExpert::CloseLong(double price)
   {
+   if(price==EMPTY_VALUE) return(false);
+//---
    return(m_trade.Sell(m_position.Volume(),price,0,0));
   }
 //+------------------------------------------------------------------+
@@ -838,6 +858,8 @@ bool CExpert::CloseLong(double price)
 //+------------------------------------------------------------------+
 bool CExpert::CloseShort(double price)
   {
+   if(price==EMPTY_VALUE) return(false);
+//---
    return(m_trade.Buy(m_position.Volume(),price,0,0));
   }
 //+------------------------------------------------------------------+
@@ -849,7 +871,7 @@ bool CExpert::CloseShort(double price)
 bool CExpert::CheckTrailingStop()
   {
 //--- position must be selected before call
-   if(m_position.Type()==POSITION_TYPE_BUY)
+   if(m_position.PositionType()==POSITION_TYPE_BUY)
      {
       //--- check the possibility of modifying the long position
       if(CheckTrailingStopLong()) return(true);

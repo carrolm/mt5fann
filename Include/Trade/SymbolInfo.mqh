@@ -4,11 +4,13 @@
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2010.02.22 |
 //+------------------------------------------------------------------+
+#include <Object.mqh>
 //+------------------------------------------------------------------+
 //| Class CSymbolInfo.                                               |
 //| Appointment: Class for access to symbol info.                    |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CSymbolInfo
+class CSymbolInfo : public CObject
   {
 protected:
    string                      m_name;               // symbol name
@@ -44,22 +46,22 @@ protected:
 public:
                      CSymbolInfo();
    //--- methods of access to protected data
-   string            Name()                         const { return(m_name);               }
-   void              Name(string name)                    { m_name=name; Refresh();       }
-   void              Refresh();
+   string            Name()                         const { return(m_name);                 }
+   bool              Name(string name);
+   bool              Refresh();
    bool              RefreshRates();
    //--- fast access methods to the integer symbol propertyes
    bool              Select()                       const;
    bool              Select(bool select);
    bool              IsSynchronized()               const;
    //--- volumes
-   ulong             Volume()                       const { return(m_tick.volume);        }
+   ulong             Volume()                       const { return(m_tick.volume);          }
    ulong             VolumeHigh()                   const;
    ulong             VolumeLow()                    const;
    ulong             VolumeBid()                    const;
    ulong             VolumeAsk()                    const;
    //--- miscellaneous
-   datetime          Time()                         const { return(m_tick.time);          }
+   datetime          Time()                         const { return(m_tick.time);            }
    int               Spread()                       const;
    bool              SpreadFloat()                  const;
    int               TicksBookDepth()               const;
@@ -68,58 +70,58 @@ public:
    int               FreezeLevel()                  const;
    //--- fast access methods to the double symbol propertyes
    //--- bid parameters
-   double            Bid()                          const { return(m_tick.bid);           }
+   double            Bid()                          const { return(m_tick.bid);             }
    double            BidHigh()                      const;
    double            BidLow()                       const;
    //--- ask parameters
-   double            Ask()                          const { return(m_tick.ask);           }
+   double            Ask()                          const { return(m_tick.ask);             }
    double            AskHigh()                      const;
    double            AskLow()                       const;
    //--- last parameters
-   double            Last()                         const { return(m_tick.last);          }
+   double            Last()                         const { return(m_tick.last);            }
    double            LastHigh()                     const;
    double            LastLow()                      const;
    //--- fast access methods to the mix symbol propertyes
    //--- terms of trade
-   ENUM_SYMBOL_CALC_MODE TradeCalcMode()            const { return(m_trade_calcmode);     }
+   ENUM_SYMBOL_CALC_MODE TradeCalcMode()            const { return(m_trade_calcmode);       }
    string            TradeCalcModeDescription()     const;
-   ENUM_SYMBOL_TRADE_MODE TradeMode()               const { return(m_trade_mode);         }
+   ENUM_SYMBOL_TRADE_MODE TradeMode()               const { return(m_trade_mode);          }
    string            TradeModeDescription()         const;
    //--- execution terms of trade
-   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution()     const { return(m_trade_execution);    }
+   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution()     const { return(m_trade_execution);      }
    string            TradeExecutionDescription()    const;
    //--- swap terms of trade
-   ENUM_SYMBOL_SWAP_MODE SwapMode()                 const { return(m_swap_mode);          }
+   ENUM_SYMBOL_SWAP_MODE SwapMode()                 const { return(m_swap_mode);            }
    string            SwapModeDescription()          const;
-   ENUM_DAY_OF_WEEK  SwapRollover3days()            const { return(m_swap3);              }
+   ENUM_DAY_OF_WEEK  SwapRollover3days()            const { return(m_swap3);                }
    string            SwapRollover3daysDescription() const;
    //--- margin parameters
-   double            MarginInitial()                const { return(m_margin_initial);     }
-   double            MarginMaintenance()            const { return(m_margin_maintenance); }
-   double            MarginLong()                   const { return(m_margin_long);        }
-   double            MarginShort()                  const { return(m_margin_short);       }
-   double            MarginLimit()                  const { return(m_margin_limit);       }
-   double            MarginStop()                   const { return(m_margin_stop);        }
-   double            MarginStopLimit()              const { return(m_margin_stoplimit);   }
+   double            MarginInitial()                const { return(m_margin_initial);       }
+   double            MarginMaintenance()            const { return(m_margin_maintenance);   }
+   double            MarginLong()                   const { return(m_margin_long);          }
+   double            MarginShort()                  const { return(m_margin_short);         }
+   double            MarginLimit()                  const { return(m_margin_limit);         }
+   double            MarginStop()                   const { return(m_margin_stop);          }
+   double            MarginStopLimit()              const { return(m_margin_stoplimit);     }
    //--- trade flags parameters
-   int               TradeTimeFlags()               const { return(m_trade_time_flags);   }
-   int               TradeFillFlags()               const { return(m_trade_fill_flags);   }
+   int               TradeTimeFlags()               const { return(m_trade_time_flags);     }
+   int               TradeFillFlags()               const { return(m_trade_fill_flags);     }
    //--- tick parameters
-   int               Digits()                       const { return(m_digits);             }
-   double            Point()                        const { return(m_point);              }
-   double            TickValue()                    const { return(m_tick_value);         }
-   double            TickValueProfit()              const { return(m_tick_value_profit);  }
-   double            TickValueLoss()                const { return(m_tick_value_loss);    }
-   double            TickSize()                     const { return(m_tick_size);          }
+   int               Digits()                       const { return(m_digits);               }
+   double            Point()                        const { return(m_point);                }
+   double            TickValue()                    const { return(m_tick_value);           }
+   double            TickValueProfit()              const { return(m_tick_value_profit);    }
+   double            TickValueLoss()                const { return(m_tick_value_loss);      }
+   double            TickSize()                     const { return(m_tick_size);            }
    //--- lots parameters
-   double            ContractSize()                 const { return(m_contract_size);      }
-   double            LotsMin()                      const { return(m_lots_min);           }
-   double            LotsMax()                      const { return(m_lots_max);           }
-   double            LotsStep()                     const { return(m_lots_step);          }
-   double            LotsLimit()                    const { return(m_lots_limit);         }
+   double            ContractSize()                 const { return(m_contract_size);        }
+   double            LotsMin()                      const { return(m_lots_min);             }
+   double            LotsMax()                      const { return(m_lots_max);             }
+   double            LotsStep()                     const { return(m_lots_step);            }
+   double            LotsLimit()                    const { return(m_lots_limit);           }
    //--- swaps
-   double            SwapLong()                     const { return(m_swap_long);          }
-   double            SwapShort()                    const { return(m_swap_short);         }
+   double            SwapLong()                     const { return(m_swap_long);            }
+   double            SwapShort()                    const { return(m_swap_short);           }
    //--- fast access methods to the string symbol propertyes
    string            CurrencyBase()                 const;
    string            CurrencyProfit()               const;
@@ -171,40 +173,70 @@ void CSymbolInfo::CSymbolInfo()
    m_trade_fill_flags  =0;
   }
 //+------------------------------------------------------------------+
-//| Refresh cached data                                              |
+//| Set name                                                         |
 //| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSymbolInfo::Refresh()
+bool CSymbolInfo::Name(string name)
   {
-   m_point             =SymbolInfoDouble(m_name,SYMBOL_POINT);
-   m_tick_value        =SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE);
-   m_tick_value_profit =SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE_PROFIT);
-   m_tick_value_loss   =SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE_LOSS);
-   m_tick_size         =SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_SIZE);
-   m_contract_size     =SymbolInfoDouble(m_name,SYMBOL_TRADE_CONTRACT_SIZE);
-   m_lots_min          =SymbolInfoDouble(m_name,SYMBOL_VOLUME_MIN);
-   m_lots_max          =SymbolInfoDouble(m_name,SYMBOL_VOLUME_MAX);
-   m_lots_step         =SymbolInfoDouble(m_name,SYMBOL_VOLUME_STEP);
-   m_lots_limit        =SymbolInfoDouble(m_name,SYMBOL_VOLUME_LIMIT);
-   m_swap_long         =SymbolInfoDouble(m_name,SYMBOL_SWAP_LONG);
-   m_swap_short        =SymbolInfoDouble(m_name,SYMBOL_SWAP_SHORT);
-   m_digits            =(int)SymbolInfoInteger(m_name,SYMBOL_DIGITS);
-   m_trade_execution   =(ENUM_SYMBOL_TRADE_EXECUTION)SymbolInfoInteger(m_name,SYMBOL_TRADE_EXEMODE);
-   m_trade_calcmode    =(ENUM_SYMBOL_CALC_MODE)SymbolInfoInteger(m_name,SYMBOL_TRADE_CALC_MODE);
-   m_trade_mode        =(ENUM_SYMBOL_TRADE_MODE)SymbolInfoInteger(m_name,SYMBOL_TRADE_MODE);
-   m_swap_mode         =(ENUM_SYMBOL_SWAP_MODE)SymbolInfoInteger(m_name,SYMBOL_SWAP_MODE);
-   m_swap3             =(ENUM_DAY_OF_WEEK)SymbolInfoInteger(m_name,SYMBOL_SWAP_ROLLOVER3DAYS);
-   m_margin_initial    =SymbolInfoDouble(m_name,SYMBOL_MARGIN_INITIAL);
-   m_margin_maintenance=SymbolInfoDouble(m_name,SYMBOL_MARGIN_MAINTENANCE);
-   m_margin_long       =SymbolInfoDouble(m_name,SYMBOL_MARGIN_LONG);
-   m_margin_short      =SymbolInfoDouble(m_name,SYMBOL_MARGIN_SHORT);
-   m_margin_limit      =SymbolInfoDouble(m_name,SYMBOL_MARGIN_LIMIT);
-   m_margin_stop       =SymbolInfoDouble(m_name,SYMBOL_MARGIN_STOP);
-   m_margin_stoplimit  =SymbolInfoDouble(m_name,SYMBOL_MARGIN_STOPLIMIT);
-   m_trade_time_flags  =(int)SymbolInfoInteger(m_name,SYMBOL_EXPIRATION_MODE);
-   m_trade_fill_flags  =(int)SymbolInfoInteger(m_name,SYMBOL_FILLING_MODE);
+   m_name=name;
+   if(!Refresh())
+     {
+      m_name="";
+      Print(__FUNCTION__+": invalid data of symbol '"+name+"'");
+      return(false);
+     }
+//--- OK
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Refresh cached data                                              |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CSymbolInfo::Refresh()
+  {
+   long tmp=0;
+//---
+   if(!SymbolInfoDouble(m_name,SYMBOL_POINT,m_point))                               return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE,m_tick_value))               return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE_PROFIT,m_tick_value_profit)) return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_VALUE_LOSS,m_tick_value_loss))     return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_TRADE_TICK_SIZE,m_tick_size))                 return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_TRADE_CONTRACT_SIZE,m_contract_size))         return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_VOLUME_MIN,m_lots_min))                       return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_VOLUME_MAX,m_lots_max))                       return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_VOLUME_STEP,m_lots_step))                     return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_VOLUME_LIMIT,m_lots_limit))                   return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_SWAP_LONG,m_swap_long))                       return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_SWAP_SHORT,m_swap_short))                     return(false);
+   if(!SymbolInfoInteger(m_name,SYMBOL_DIGITS,tmp))                                 return(false);
+   m_digits=(int)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_TRADE_EXEMODE,tmp))                          return(false);
+   m_trade_execution=(ENUM_SYMBOL_TRADE_EXECUTION)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_TRADE_CALC_MODE,tmp))                        return(false);
+   m_trade_calcmode=(ENUM_SYMBOL_CALC_MODE)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_TRADE_MODE,tmp))                             return(false);
+   m_trade_mode=(ENUM_SYMBOL_TRADE_MODE)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_SWAP_MODE,tmp))                              return(false);
+   m_swap_mode=(ENUM_SYMBOL_SWAP_MODE)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_SWAP_ROLLOVER3DAYS,tmp))                     return(false);
+   m_swap3=(ENUM_DAY_OF_WEEK)tmp;
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_INITIAL,m_margin_initial))             return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_MAINTENANCE,m_margin_maintenance))     return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_LONG,m_margin_long))                   return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_SHORT,m_margin_short))                 return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_LIMIT,m_margin_limit))                 return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_STOP,m_margin_stop))                   return(false);
+   if(!SymbolInfoDouble(m_name,SYMBOL_MARGIN_STOPLIMIT,m_margin_stoplimit))         return(false);
+   if(!SymbolInfoInteger(m_name,SYMBOL_EXPIRATION_MODE,tmp))                        return(false);
+   m_trade_time_flags=(int)tmp;
+   if(!SymbolInfoInteger(m_name,SYMBOL_FILLING_MODE,tmp))                           return(false);
+   m_trade_fill_flags=(int)tmp;
+//--- OK!
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refresh cached data                                              |

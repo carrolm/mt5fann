@@ -210,7 +210,7 @@ datetime CChartObject::Time(int point) const
    if(m_chart_id==-1)      return(0);
    if(point>=m_num_points) return(0);
 //---
-   return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point));
+   return((datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point));
   }
 //+------------------------------------------------------------------+
 //| Set the time coordinate of the specified anchor point of object. |
@@ -478,7 +478,7 @@ datetime CChartObject::CreateTime() const
 //--- checking
    if(m_chart_id==-1) return(0);
 //---
-   return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_CREATETIME));
+   return((datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_CREATETIME));
   }
 //+------------------------------------------------------------------+
 //| Get number of levels of object.                                  |
@@ -864,7 +864,7 @@ bool CChartObject::ShiftPoint(int point,datetime d_time,double d_price)
    if(m_chart_id==-1)      return(false);
    if(point>=m_num_points) return(false);
 //--- moving
-   datetime time=ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point);
+   datetime time=(datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point);
    double   price=ObjectGetDouble(m_chart_id,m_name,OBJPROP_PRICE,point);
 //---
    return(ObjectMove(m_chart_id,m_name,point,time+d_time,price+d_price));

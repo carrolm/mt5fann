@@ -8,13 +8,13 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the intersection of prices and MA                |
+//| Title=Signals based on price crossover with MA                   |
 //| Type=Signal                                                      |
 //| Name=MA                                                          |
 //| Class=CSignalMA                                                  |
 //| Page=                                                            |
 //| Parameter=Period,int,12                                          |
-//| Parameter=Shift,int,6                                            |
+//| Parameter=Shift,int,0                                            |
 //| Parameter=Method,ENUM_MA_METHOD,MODE_SMA                         |
 //| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE                 |
 //+------------------------------------------------------------------+
@@ -78,7 +78,7 @@ void CSignalMA::CSignalMA()
    m_close=NULL;
 //--- set default inputs
    m_ma_period =12;
-   m_ma_shift  =6;
+   m_ma_shift  =0;
    m_ma_method =MODE_SMA;
    m_ma_applied=PRICE_CLOSE;
   }

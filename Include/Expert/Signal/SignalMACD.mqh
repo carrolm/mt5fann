@@ -8,8 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signal at the intersection                                 |
-//| of the main and signal lines MACD                                |
+//| Title=Signals based on crossover of main and signal MACD lines   |
 //| Type=Signal                                                      |
 //| Name=MACD                                                        |
 //| Class=CSignalMACD                                                |
@@ -42,11 +41,11 @@ public:
                      CSignalMACD();
                     ~CSignalMACD();
    //--- methods initialize protected data
-   void              PeriodFast(int period_fast)     { m_period_fast=period_fast;               }
-   void              PeriodSlow(int period_slow)     { m_period_slow=period_slow;               }
-   void              PeriodSignal(int period_signal) { m_period_signal=period_signal;           }
-   void              StopLoss(int stop_loss)         { m_stop_loss=stop_loss;                   }
-   void              TakeProfit(int take_profit)     { m_take_profit=take_profit;               }
+   void              PeriodFast(int period_fast)     { m_period_fast=period_fast;             }
+   void              PeriodSlow(int period_slow)     { m_period_slow=period_slow;             }
+   void              PeriodSignal(int period_signal) { m_period_signal=period_signal;         }
+   void              StopLoss(int stop_loss)         { m_stop_loss=stop_loss;                 }
+   void              TakeProfit(int take_profit)     { m_take_profit=take_profit;             }
    virtual bool      InitIndicators(CIndicators* indicators);
    virtual bool      ValidationSettings();
    //---
@@ -56,9 +55,9 @@ public:
    virtual bool      CheckCloseShort(double& price);
 
 protected:
-   double            MainMACD(int ind)               { return(m_MACD.Main(ind));                }
-   double            SignalMACD(int ind)             { return(m_MACD.Signal(ind));              }
-   double            StateMACD(int ind)              { return(MainMACD(ind)-SignalMACD(ind+1)); }
+   double            MainMACD(int ind)               { return(m_MACD.Main(ind));              }
+   double            SignalMACD(int ind)             { return(m_MACD.Signal(ind));            }
+   double            StateMACD(int ind)              { return(MainMACD(ind)-SignalMACD(ind)); }
    int               ExtStateMACD(int ind);
   };
 //+------------------------------------------------------------------+

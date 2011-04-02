@@ -4,37 +4,39 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.09.14 |
 //+------------------------------------------------------------------+
-#include <Trade\SymbolInfo.mqh>
+#include <Object.mqh>
+#include "SymbolInfo.mqh"
 //+------------------------------------------------------------------+
 //| Class CDealInfo.                                                 |
 //| Appointment: Class for access to history deal info.              |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CDealInfo
+class CDealInfo : public CObject
   {
 protected:
    ulong             m_ticket;             // ticket of history order
 public:
    //--- methods of access to protected data
-   void              Ticket(ulong ticket) { m_ticket=ticket;  }
-   ulong             Ticket() const       { return(m_ticket); }
+   void              Ticket(ulong ticket)     { m_ticket=ticket;  }
+   ulong             Ticket()           const { return(m_ticket); }
    //--- fast access methods to the integer position propertyes
-   long              Order() const;
-   datetime          Time() const;
-   ENUM_DEAL_TYPE    Type() const;
-   string            TypeDescription() const;
-   ENUM_DEAL_ENTRY   Entry() const;
+   long              Order()            const;
+   datetime          Time()             const;
+   ENUM_DEAL_TYPE    DealType()         const;
+   string            TypeDescription()  const;
+   ENUM_DEAL_ENTRY   Entry()            const;
    string            EntryDescription() const;
-   long              Magic() const;
-   long              PositionId() const;
+   long              Magic()            const;
+   long              PositionId()       const;
    //--- fast access methods to the double position propertyes
-   double            Volume() const;
-   double            Price() const;
-   double            Commission() const;
-   double            Swap() const;
-   double            Profit() const;
+   double            Volume()           const;
+   double            Price()            const;
+   double            Commission()       const;
+   double            Swap()             const;
+   double            Profit()           const;
    //--- fast access methods to the string position propertyes
-   string            Symbol() const;
-   string            Comment() const;
+   string            Symbol()           const;
+   string            Comment()          const;
    //--- access methods to the API MQL5 functions
    bool              InfoInteger(ENUM_DEAL_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_DEAL_PROPERTY_DOUBLE prop_id,double& var) const;
@@ -72,7 +74,7 @@ datetime CDealInfo::Time() const
 //| OUTPUT: the property value "DEAL_TYPE".                          |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-ENUM_DEAL_TYPE CDealInfo::Type() const
+ENUM_DEAL_TYPE CDealInfo::DealType() const
   {
    return((ENUM_DEAL_TYPE)HistoryDealGetInteger(m_ticket,DEAL_TYPE));
   }

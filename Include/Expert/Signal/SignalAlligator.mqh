@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signals Alligator                                          |
+//| Title=Signals based on the Alligator                             |
 //| Type=Signal                                                      |
 //| Name=Alligator                                                   |
 //| Class=CSignalAlligator                                           |

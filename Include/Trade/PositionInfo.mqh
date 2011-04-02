@@ -4,12 +4,14 @@
 //|                                       http://www.metaquotes.net/ |
 //|                                              Revision 2010.05.14 |
 //+------------------------------------------------------------------+
-#include <Trade\SymbolInfo.mqh>
+#include <Object.mqh>
+#include "SymbolInfo.mqh"
 //+------------------------------------------------------------------+
 //| Class CPositionInfo.                                             |
 //| Appointment: Class for access to position info.                  |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CPositionInfo
+class CPositionInfo : public CObject
   {
 protected:
    ENUM_POSITION_TYPE m_type;
@@ -21,7 +23,7 @@ protected:
 public:
    //--- fast access methods to the integer position propertyes
    datetime           Time()            const;
-   ENUM_POSITION_TYPE Type()            const;
+   ENUM_POSITION_TYPE PositionType()    const;
    string             TypeDescription() const;
    long               Magic()           const;
    long               Identifier()      const;
@@ -66,7 +68,7 @@ datetime CPositionInfo::Time() const
 //| OUTPUT: the property value "POSITION_TYPE".                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-ENUM_POSITION_TYPE CPositionInfo::Type() const
+ENUM_POSITION_TYPE CPositionInfo::PositionType() const
   {
    return((ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE));
   }
@@ -308,7 +310,7 @@ bool CPositionInfo::SelectByIndex(int index)
 //+------------------------------------------------------------------+
 void CPositionInfo::StoreState()
   {
-   m_type       =Type();
+   m_type       =PositionType();
    m_volume     =Volume();
    m_price      =PriceOpen();
    m_stop_loss  =StopLoss();

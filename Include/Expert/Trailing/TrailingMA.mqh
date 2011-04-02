@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trailing along MA                                          |
+//| Title=Trailing Stop based on MA                                  |
 //| Type=Trailing                                                    |
 //| Name=MA                                                          |
 //| Class=CTrailingMA                                                |
@@ -129,7 +129,9 @@ bool CTrailingMA::InitIndicators(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for long position.          |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -151,7 +153,9 @@ bool CTrailingMA::CheckTrailingStopLong(CPositionInfo* position,double& sl,doubl
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for short position.         |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+

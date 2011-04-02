@@ -130,7 +130,6 @@ class CDoubleBuffer : public CArrayDouble
 protected:
    string            m_symbol;           // symbol
    ENUM_TIMEFRAMES   m_period;           // period
-   int               m_freshed_data;     // number of freshed data
    int               m_size;             // size of used history
 
 public:
@@ -142,8 +141,8 @@ public:
    int               Minimum(int start,int count) const;
    int               Maximum(int start,int count) const;
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh()           { return(true); }
+   virtual bool      RefreshCurrent()    { return(true); }
    //--- methods of tuning
    void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
   };
@@ -156,7 +155,7 @@ public:
 CDoubleBuffer::CDoubleBuffer()
   {
 //--- initialize protected data
-   m_size  =16;
+   m_size  =256;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -195,38 +194,6 @@ int CDoubleBuffer::Minimum(int start,int count) const
 int CDoubleBuffer::Maximum(int start,int count) const
   {
    return(ArrayMaximum(m_data,start,count));
-  }
-//+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CDoubleBuffer::Refresh()
-  {
-   if(m_freshed_data>0)
-     {
-      m_data_total=ArraySize(m_data);
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CDoubleBuffer::RefreshCurrent()
-  {
-   if(m_freshed_data==1 && m_data_total>0)
-     {
-      ArrayResize(m_data,m_data_total);
-      return(true);
-     }
-//--- error
-   return(false);
   }
 //+------------------------------------------------------------------+
 //| Set symbol and period.                                           |

@@ -12,8 +12,9 @@
 //+------------------------------------------------------------------+
 //| Class CExpertSignal.                                             |
 //| Appointment: Base class trading signals.                         |
+//|              Derives from class CObject.                         |
 //+------------------------------------------------------------------+
-class CExpertSignal
+class CExpertSignal : public CObject
   {
 protected:
    CSymbolInfo      *m_symbol;                   // symbol object

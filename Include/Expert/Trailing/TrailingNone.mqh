@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trailing not used                                          |
+//| Title=Trailing Stop not used                                     |
 //| Type=Trailing                                                    |
 //| Name=None                                                        |
 //| Class=CTrailingNone                                              |

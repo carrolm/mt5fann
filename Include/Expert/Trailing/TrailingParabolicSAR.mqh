@@ -8,7 +8,7 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Trailing with Parabolic SAR                                |
+//| Title=Trailing Stop based on Parabolic SAR                       |
 //| Type=Trailing                                                    |
 //| Name=ParabolicSAR                                                |
 //| Class=CTrailingPSAR                                              |
@@ -102,7 +102,9 @@ bool CTrailingPSAR::InitIndicators(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for long position.          |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -124,7 +126,9 @@ bool CTrailingPSAR::CheckTrailingStopLong(CPositionInfo* position,double& sl,dou
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for short position.         |
-//| INPUT:  symbol -symbol.                                          |
+//| INPUT:  position - pointer for position object,                  |
+//|         sl       - refernce for new stop loss,                   |
+//|         tp       - refernce for new take profit.                 |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
