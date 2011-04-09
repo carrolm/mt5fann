@@ -32,7 +32,7 @@ int Write_File(int qty)
    MqlDateTime tm;
    double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
-   int FileHandle=FileOpen("OracleDummy.mqh",FILE_WRITE|FILE_ANSI,' ');
+   int FileHandle=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
      {
       int copied=CopyRates(_Symbol,_Period,10+_SHIFT_-1,qty+1,rates);
@@ -45,11 +45,11 @@ int Write_File(int qty)
          for(i=0; i<qty;i++)
            {
             TimeToStruct(rates[i].time,tm);
-            res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
-            restanh=tanh(res/5);
-            //            if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
+           // res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
+             if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
               {
-               //               res=OV[0];
+               res=OV[0];
+               restanh=tanh(res/5);
                if(restanh>0.3 || restanh<-0.3) 
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);

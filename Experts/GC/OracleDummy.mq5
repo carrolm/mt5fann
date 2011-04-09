@@ -7,8 +7,9 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #include <GC\Oracle.mqh>
-#include <GC\OracleDummy.mqh>
+#include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -23,7 +24,7 @@ public:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CDummy::forecast(string smbl="",int shift=0,bool train=false)
+double CDummy::forecast(string smbl,int shift=0,bool train=false)
   {
 
    double sig=0;

@@ -19,9 +19,10 @@ double tanh(double x)
   {
    double x_=MathExp(x);
    double _x=MathExp(-x);
-   double ret=(x_-_x)/(x_+_x);
+   return((x_-_x)/(x_+_x));
+   //double ret=(x_-_x)/(x_+_x);
  //  Print(x+" "+x_+" "+_x+"="+ret);
-   return(ret);
+   //return(ret);
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -340,7 +341,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
       if(mS>mB) {res=-mS;if(3*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
       else      { res=mB;if(3*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
       
-      if(TS>0.00001&&TS<res)
+      if(TS>0.00001)
         {
          //Print(res+"/"+(TS));
          res=res/TS;
