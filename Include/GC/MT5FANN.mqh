@@ -120,22 +120,23 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName,bool test)
                outstr=outstr+(string)(OutputVector[ibj])+" ";
               }
             FileWrite(FileHandle,outstr);       // 
-            if(test) continue;
-            // сделаем еще и симметричный дубль
-            outstr="";
-            for(int ibj=0;ibj<num_in_vectors;ibj++)
-              {
-               outstr=outstr+(string)(InputVector[ibj])+" ";
-              }
-            FileWrite(FileHandle,outstr);       // 
-            outstr="";
-            for(int ibj=0;ibj<num_out_vectors;ibj++)
-              {
-               outstr=outstr+(string)(OutputVector[ibj])+" ";
-              }
-            FileWrite(FileHandle,outstr);       // 
+            //if(test) continue;
+            //// сделаем еще и симметричный дубль
+            //outstr="";
+            //for(int ibj=0;ibj<num_in_vectors;ibj++)
+            //  {
+            //   outstr=outstr+(string)(InputVector[ibj])+" ";
+            //  }
+            //FileWrite(FileHandle,outstr);       // 
+            //outstr="";
+            //for(int ibj=0;ibj<num_out_vectors;ibj++)
+            //  {
+            //   outstr=outstr+(string)(OutputVector[ibj])+" ";
+            //  }
+            //FileWrite(FileHandle,outstr);       // 
 
            }
+          else Print("Trouble...");
         }
      }
    FileClose(FileHandle);
@@ -461,7 +462,7 @@ bool CMT5FANN::GetVector(int shift,bool train)
    int n_o_vectors=num_out_vectors;
    int pos_in=0,pos_out=0,i;
    if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
-   if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
+   if(WithHours) InputVector[pos_in++]=((double)tm.hour/24);
    n_vectors=(n_vectors-pos_in)/Max_Symbols;
    n_o_vectors=(n_o_vectors)/Max_Symbols;
    if(!train)n_o_vectors=0;
@@ -479,10 +480,14 @@ bool CMT5FANN::GetVector(int shift,bool train)
             for(i=0;i<n_o_vectors;i++) 
             {
              OutputVector[i]=0;
-             if(OB[i]<-3) OutputVector[i]=-0.5;
-             if(OB[i]>3) OutputVector[i]=0.5;
+             //if(OB[i]<-3) OutputVector[i]=-0.5;
+             //if(OB[i]>3) OutputVector[i]=0.5;
              //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
+//             OutputVector[i]=tanh(OB[i]);
+             OutputVector[i]=OB[i];
+             
              }
+            
            }
          else return(false);
         }

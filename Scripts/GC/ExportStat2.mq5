@@ -21,23 +21,28 @@
 //#include <Fractals.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
-input int _Pers_=5;//Период анализа
-//input int _Shift_=5;//на сколько периодов вперед прогноз
+//input int _Pers_=5;//Период анализа
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+                   //input int _Shift_=5;//на сколько периодов вперед прогноз
 /// ---
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnStart()
   {
-  CPInit();   Write_File(90000,_Pers_); //
-//   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
+  CPInit();   Write_File(90000); //
+
+//   CPInit();   Write_File(900,_Pers_); //
+                                       //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
    return;// работа скрипта завершена
   }
 //+------------------------------------------------------------------+
-int Write_File(int qty,int Pers)
+int Write_File(int qty)
   {
-   int shift=0,i,pp;//,j;
+   int shift=0,i;//,pp;//,j;
    double SumBuy,SumSell,SumWait;
    int QtyBuy,QtySell,QtyWait;
    int ProfQty[11];
@@ -49,17 +54,17 @@ int Write_File(int qty,int Pers)
    int maxprof=11;
    MqlRates rates[];
    MqlDateTime tm;
- //  double IV[50],OV[10];
+//  double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    FileHandle=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
- //  TrainFile=FileOpen("train.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+//  TrainFile=FileOpen("train.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
    if(FileHandle!=INVALID_HANDLE)
      {
       int copied=CopyRates(SymbolsArray[0],_Period,qty,3,rates);
       TimeToStruct(rates[2].time,tm);
       FileWrite(FileHandle,// записываем в файл шапку
-                "Symbol","DayOfWeek","Hours","Minuta","QtyBuy","QtySell","QtyWait");//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
-      //FileWrite(TrainFile,"X","Y","Z","Rez");
+                "Symbol","DayOfWeek","Hours","Minuta","Signal","tanh");
+
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
@@ -67,40 +72,41 @@ int Write_File(int qty,int Pers)
          for(i=0;i<maxprof;i++) ProfQty[i]=0;
          for(i=0;i<qty;i++)
            {
-            res=GetTrend(10,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+            res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
               {
-                outstr="";
-//                res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
-                //for(j=0;j<ni;j++) outstr+=(string)IV[j]+";";
-                //for(j=0;j<no;j++) outstr+=(string)OV[j]+";";
-                 
-                  //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
+               outstr="";
+               //                res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+               //for(j=0;j<ni;j++) outstr+=(string)IV[j]+";";
+               //for(j=0;j<no;j++) outstr+=(string)OV[j]+";";
+
+               //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
                  {
-//                  FileWrite(TrainFile,IV[0],IV[1],res);
- //                 FileWrite(TrainFile,outstr);
+                  //                  FileWrite(TrainFile,IV[0],IV[1],res);
+                  //                 FileWrite(TrainFile,outstr);
                  }
                //if(0==res) continue;
                if((res<0 && res>-1) || (res>0 && res<1)) res=0;
                //if((res<0 && (res*k/10+1)>-10) || (res>0 && (res*k/10-1)<10)) res=0;
                if(0==res) {outstr="Wait";QtyWait++; }
-               if(0<res){res= res;outstr= "Buy"; QtyBuy++;SumBuy+=+res*k/10-1;}
-               if(0>res){res=-res;outstr= "Sell";QtySell++;SumSell+=res*k/10-1;}
-               pp=(int)((res*k/100)); if(pp>(maxprof-1)) pp=maxprof-1;
-               if(pp>(maxprof-1)) maxprof=maxprof-1;
-               ProfQty[pp]++;
+               SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
+               if(0<res){res=res;outstr="Buy"; QtyBuy=(int)res;SumBuy+=+res*k/10-1;}
+               if(0>res){res=res;outstr="Sell";QtySell=(int)res;SumSell-=res*k/10+1;}
+               //               pp=(int)((res*k/100)); if(pp>(maxprof-1)) pp=maxprof-1;
+               //if(pp>(maxprof-1)) maxprof=maxprof-1;
+               //ProfQty[pp]++;
                copied=CopyRates(SymbolsArray[SymbolIdx],PERIOD_M1,i,3,rates);
                TimeToStruct(rates[0].time,tm);
 
-               FileWrite(FileHandle,// записываем в файл шапку
-                SymbolsArray[SymbolIdx],tm.day_of_week,tm.hour,tm.min,QtyBuy,QtySell,QtyWait);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
+               FileWrite(FileHandle,// записываем в файл
+                         SymbolsArray[SymbolIdx],tm.day_of_week,tm.hour,tm.min,(int)res,tanh(res/5));//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
                QtyBuy=0;QtySell=0;QtyWait=0;
               }
             //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);
            }
          outstr="";
- //        for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
-//         FileWrite(FileHandle,outstr);
- //        FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell,outstr);
+         //        for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
+         //         FileWrite(FileHandle,outstr);
+         //        FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell,outstr);
         }
       FileClose(FileHandle);
       //FileClose(TrainFile);
