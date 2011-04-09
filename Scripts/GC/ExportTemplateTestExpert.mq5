@@ -8,13 +8,15 @@
 
 //+------------------------------------------------------------------+
 #include <GC\GetVectors.mqh>
-input int _CNT_=500;//Сколько сигналов
-input int _SHIFT_=1000;//Сколько сигналов
+#include <GC\CurrPairs.mqh> // пары
+input int _CNT_=10000;//Сколько сигналов
+input int _SHIFT_=1000;//Сколько сдвиг
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnStart()
   {
+   CPInit();
    Write_File(_CNT_); //
                       //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
    Print("Files created...");
@@ -24,27 +26,40 @@ void OnStart()
 int Write_File(int qty)
   {
    int i;
-   double res;
+   double res,restanh=0;
    string outstr;
    MqlRates rates[];
    MqlDateTime tm;
    double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
-   int FileHandle=FileOpen("stat.txt",FILE_WRITE|FILE_ANSI,' ');
+   int FileHandle=FileOpen("OracleDummy.mqh",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
      {
       int copied=CopyRates(_Symbol,_Period,10+_SHIFT_-1,qty+1,rates);
-      //FileWrite(TrainFile,"X","Y","Z","Rez");
-    FileWrite(FileHandle,"if(_Symbol!=\""+_Symbol+"\") return(0);");
-      for(i=0; i<qty;i++)
+      FileWrite(FileHandle,"double od_forecast(datetime time,string smb)  ");
+      FileWrite(FileHandle," {");
+      int SymbolIdx;
+      //FileWrite(FileHandle,"if(smb!=\""+SymbolsArray[SymbolIdx]+"\") return(0);");
+      for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
-         TimeToStruct(rates[i].time,tm);
-         if(GetVectors(IV,OV,0,1,"Easy",_Symbol,PERIOD_M1,i+_SHIFT_))
+         for(i=0; i<qty;i++)
            {
-            res=OV[0];
-            if(res>1||res<-1) FileWrite(FileHandle,"if(time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)res+");");
+            TimeToStruct(rates[i].time,tm);
+            res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
+            restanh=tanh(res/5);
+            //            if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
+              {
+               //               res=OV[0];
+               if(restanh>0.3 || restanh<-0.3) 
+               //               Print(tanh(res/5));
+               // FileWrite(FileHandle," //" +(string)res+"="+restanh);
+               FileWrite(FileHandle,"  if(smb==\""+SymbolsArray[SymbolIdx]+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)restanh+");");
+              }
            }
         }
+      FileWrite(FileHandle,"  return(0);");
+      FileWrite(FileHandle," }");
+
      }
    FileClose(FileHandle);
    return(0);

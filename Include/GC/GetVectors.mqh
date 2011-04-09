@@ -19,7 +19,9 @@ double tanh(double x)
   {
    double x_=MathExp(x);
    double _x=MathExp(-x);
-   return((x_-_x)/(x_+_x));
+   double ret=(x_-_x)/(x_+_x);
+ //  Print(x+" "+x_+" "+_x+"="+ret);
+   return(ret);
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -296,7 +298,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
    maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
    maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
    maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
-   double res=0;
+   double res=0, res1=0;
    int is,ib;
 //   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
@@ -335,13 +337,17 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
            }
 
         }
-      if(mS>mB) {res=-mS;if(RatioTP_SL*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
-      else      { res=mB;if(RatioTP_SL*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/5),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
-      if((SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))>0)
-         res=res/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/RatioTP_SL;
+      if(mS>mB) {res=-mS;if(3*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
+      else      { res=mB;if(3*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
+      
+      if(TS>0.00001&&TS<res)
+        {
+         //Print(res+"/"+(TS));
+         res=res/TS;
+        }
       else
         {
-         Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
+         //Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
          res=0;
         }
      }

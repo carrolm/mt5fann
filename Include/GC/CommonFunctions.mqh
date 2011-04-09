@@ -346,7 +346,7 @@ bool Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=lasttick.bid+1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -406,7 +406,7 @@ bool Trailing()
            {
             trReq.action=TRADE_ACTION_SLTP;
             //Print(lasttick.ask," ",1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
-            trReq.sl=lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.tp=PositionGetDouble(POSITION_TP);
             OrderSend(trReq,BigDogModifResult);
             //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode,"lt.ask=",lasttick.ask," trReq.sl=",trReq.sl);
