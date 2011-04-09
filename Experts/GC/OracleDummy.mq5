@@ -53,6 +53,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
+   ExportHistory("res_oracle.csv");
    delete MyExpert;
   }
 //+------------------------------------------------------------------+

@@ -8,7 +8,6 @@
 //#include <icq_mql5.mqh>
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
-int TrailingStop=3;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -61,9 +60,6 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    int i;
 // есть такой-же отложенный ордер
    for(i=0;i<OrdersTotal();i++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {
       OrderGetTicket(i);
       if(OrderGetString(ORDER_SYMBOL)==smb)
@@ -76,9 +72,6 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
      }
 // есть открытая позиция
    for(i=0;i<PositionsTotal();i++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {
       if(smb==PositionGetSymbol(i))
         {
@@ -95,9 +88,6 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
      }
    MqlTick lasttick;
    SymbolInfoTick(smb,lasttick);
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
    if(price==0)
      {
       if(ticket!=0)
@@ -107,7 +97,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            {
             if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
               {
-               // если прибыль уже есть -то приближаем к идиалу
+               // если прибыль уже есть -то приближаем к идеалу
                if(PositionGetDouble(POSITION_PROFIT)>0)
                   price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                else// иначе ставим на мин прибыль
@@ -119,7 +109,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            {
             if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
               {
-               // если прибыль уже есть -то приближаем к идиалу
+               // если прибыль уже есть -то приближаем к идеалу
                if(PositionGetDouble(POSITION_PROFIT)>0)
                   price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                else// иначе ставим на мин прибыль
@@ -151,26 +141,21 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
    trReq.tp=price;
    trReq.comment=comment;
-//Print(smb," ",type," ",comment);
    trReq.expiration=expiration;
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
    if(type==NewOrderBuy || type==NewOrderWaitBuy)
      {
       trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
    else//  if(type==NewOrderSell||type==NewOrderWaitSell)
      {
-      trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+      trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
      }
    OrderSend(trReq,trRez);
-   if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
+   if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
 
    return(true);
   }
@@ -190,7 +175,7 @@ bool Trailing()
 
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
-   int i;
+   int i,TrailingStop;
    MqlTick lasttick;
    MqlTradeRequest BigDogModif;
    MqlTradeResult BigDogModifResult;
@@ -208,9 +193,6 @@ bool Trailing()
    ulong  ticket;
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {// есть "заказы" и открытие разрешено
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -264,7 +246,7 @@ bool Trailing()
                   trReq.comment= OrderGetString(ORDER_COMMENT);
                   trReq.symbol = OrderGetString(ORDER_SYMBOL);
                   //trReq.price=OrderGetDouble(ORDER_PRICE_);
-                  trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+                  trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
                   trReq.sl=OrderGetDouble(ORDER_SL);
                   trReq.magic=OrderGetInteger(ORDER_MAGIC);
                   //if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
@@ -328,9 +310,10 @@ bool Trailing()
          // если был ордер на закрытие -то удаляем просто
          if(666==OrderGetInteger(ORDER_MAGIC))
            {
-            trReq.order=ticket;
-            trReq.action=TRADE_ACTION_REMOVE;
-            OrderSend(trReq,trRez);
+            MqlTradeRequest request;
+            request.order=ticket;
+            request.action=TRADE_ACTION_REMOVE;
+            OrderSend(request,trRez);
             if(10009!=trRez.retcode) Print(__FUNCTION__,":",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
 
            }
@@ -463,6 +446,26 @@ bool Trailing()
         }
      }
 //client.Disconnect();
+   return(true);
+  }
+//+------------------------------------------------------------------+
+bool ExportHistory(string fname,int from=0,int to=0)
+  {
+   HistorySelect(0,TimeCurrent());
+   int deals=HistoryDealsTotal();
+   ulong ticket;
+   int FileHandle=FileOpen(fname,FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      for(int idt=0;idt<deals;idt++)
+        {
+         if((bool)(ticket=HistoryDealGetTicket(idt)))
+           {
+            FileWrite(FileHandle,HistoryDealGetString(ticket,DEAL_SYMBOL),HistoryDealGetDouble(ticket,DEAL_PROFIT));
+           }
+        }
+      FileClose(FileHandle);
+     }
    return(true);
   }
 //+------------------------------------------------------------------+

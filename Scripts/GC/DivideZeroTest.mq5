@@ -14,7 +14,6 @@ double tanh(double x)
   {
    double x_=MathExp(x);
    double _x=MathExp(-x);
-
    Print((string)x+" "+(string)x_+" "+(string)_x);
    double ret=(x_-_x)/(x_+_x);Print("ret="+(string)ret);
    return(ret);
