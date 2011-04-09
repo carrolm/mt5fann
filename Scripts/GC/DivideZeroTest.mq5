@@ -37,6 +37,7 @@ void OnStart()
         }
       FileClose(FileHandle);
      }
+   // вариант вызова ниже - "падает"
    FileHandle=FileOpen("Dummy2.tst",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
      {

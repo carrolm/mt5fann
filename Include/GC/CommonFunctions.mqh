@@ -164,8 +164,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-   else
-//   if(type==NewOrderSell||type==NewOrderWaitSell)
+   else//  if(type==NewOrderSell||type==NewOrderWaitSell)
      {
       trReq.price=1000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
