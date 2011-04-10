@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"Fractals","Easy","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
+string VectorFunctions[21]={"Easy","Fractals","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -221,7 +221,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
-   int shift_history=10,i;//
+   int shift_history=10;//,i;//
    if(0==num_outputvectors) shift_history=0;
 // работаем только если есть фарктал! только на экстремумах!
    ArrayInitialize(InputVector,0);
@@ -240,9 +240,9 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //Print("shift="+shift+" shift_history="+shift_history);
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       // нормируем в гиперкуб -0.5...0.5
-      double sq=0;
-      for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
-      if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+//      double sq=0;
+//     for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
+//     if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
 
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("IMA"==fn_name) ret=GetVectors_IMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -267,7 +267,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //double max=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];if(max==0) max=1;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
-      for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
+  //    for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
 
      }
    return(ret);
@@ -353,6 +353,19 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
         }
      }
    if(NULL==res) res=0.0001;
+//   Сигнал	Количество	процент	дельтах	Серединка	-1
+//QS	7 580,00	1,20317%	0,0240634921	0,012031746	-0,987968254
+//QWS	39 142,00	6,21302%	0,1242603175	0,0621301587	-0,9138063492
+//QW	535 033,00	84,92587%	1,6985174603	0,8492587302	-0,0024174603
+//QWB	40 643,00	6,45127%	0,1290253968	0,0645126984	0,9113539683
+//QB	7 602,00	1,20667%	0,0241333333	0,0120666667	0,9879333333
+   res=tanh(res/5);
+   if(res>0.6) res=0.9879333333;
+   else if (res>0.3) res=0.9113539683;
+   else if (res>-0.3) res=-0.002417460;
+   else if (res>-0.6) res=-0.9138063492;
+   else res=-0.987968254;
+
    return(res);
 
   }
@@ -360,10 +373,11 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl="",ENUM_TIMEFRAMES tf=0,int shift=0)
+bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl,ENUM_TIMEFRAMES tf=0,int shift=0)
   {// пара, период, смещение назад (для индикатора полезно)
 
    int shft_cur=0;
+   double  TS=SymbolInfoDouble(smbl,SYMBOL_POINT)*(SymbolInfoInteger(smbl,SYMBOL_TRADE_STOPS_LEVEL));
 
    double Close[];
    ArraySetAsSeries(Close,true);
@@ -376,11 +390,16 @@ bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl="",E
       Print("Shift = ",shift," maxcount = ",maxcount);
       return(false);
      }
-   int i,j;j=1;
+   int i,j;j=0;
+   double pr=0;
    for(i=0;i<num_inputvectors;i++,j++)
      {
+      pr=Close[j+1]/Close[j+2];
+      pr=MathLog(pr);
+      pr=pr/TS;
+      pr=tanh(pr);
       // вычислим и отнормируем
-      InputVector[i]=MathLog(Close[j+1]/Close[j+2]);
+      InputVector[i]=tanh(MathLog(Close[j+1]/Close[j+2])/TS);
      }
 //  OutputVector[0]=100*(Close[1]-Close[2]);
    return(true);

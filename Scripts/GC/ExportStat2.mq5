@@ -54,16 +54,16 @@ int Write_File(int qty)
    int maxprof=11;
    MqlRates rates[];
    MqlDateTime tm;
-//  double IV[50],OV[10];
+      int copied=0;
+   int QS=0,QWS=0,QW=0,QWB=0,QB=0;
    ArraySetAsSeries(rates,true);
    FileHandle=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
-//  TrainFile=FileOpen("train.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
    if(FileHandle!=INVALID_HANDLE)
      {
       int copied=CopyRates(SymbolsArray[0],_Period,qty,3,rates);
       TimeToStruct(rates[2].time,tm);
       FileWrite(FileHandle,// записываем в файл шапку
-                "Symbol","DayOfWeek","Hours","Minuta","Signal","tanh");
+                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
 
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
@@ -75,42 +75,24 @@ int Write_File(int qty)
             res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
               {
                outstr="";
-               //                res=OV[0];//GetTrend(30,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
-               //for(j=0;j<ni;j++) outstr+=(string)IV[j]+";";
-               //for(j=0;j<no;j++) outstr+=(string)OV[j]+";";
-
-               //if(GetVectors_Easy(IV,3,SymbolsArray[SymbolIdx],0,i+30))
-                 {
-                  //                  FileWrite(TrainFile,IV[0],IV[1],res);
-                  //                 FileWrite(TrainFile,outstr);
-                 }
-               //if(0==res) continue;
-               if((res<0 && res>-1) || (res>0 && res<1)) res=0;
-               //if((res<0 && (res*k/10+1)>-10) || (res>0 && (res*k/10-1)<10)) res=0;
-               if(0==res) {outstr="Wait";QtyWait++; }
-               SumBuy=0;SumSell=0;SumWait=0;QtyBuy=0;QtySell=0;QtyWait=0;
-               if(0<res){res=res;outstr="Buy"; QtyBuy=(int)res;SumBuy+=+res*k/10-1;}
-               if(0>res){res=res;outstr="Sell";QtySell=(int)res;SumSell-=res*k/10+1;}
-               //               pp=(int)((res*k/100)); if(pp>(maxprof-1)) pp=maxprof-1;
-               //if(pp>(maxprof-1)) maxprof=maxprof-1;
-               //ProfQty[pp]++;
                copied=CopyRates(SymbolsArray[SymbolIdx],PERIOD_M1,i,3,rates);
                TimeToStruct(rates[0].time,tm);
 
                FileWrite(FileHandle,// записываем в файл
-                         SymbolsArray[SymbolIdx],tm.day_of_week,tm.hour,tm.min,(int)res,tanh(res/5));//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
+                         SymbolsArray[SymbolIdx],tm.day_of_week,tm.hour,tm.min,res);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
                QtyBuy=0;QtySell=0;QtyWait=0;
+               if(res>0.6) QB++;
+               else if (res>0.3) QWB++;
+               else if (res>-0.3) QW++;
+               else if (res>-0.6) QWS++;
+               else QS++;
               }
-            //FileWrite(FileHandle, SymbolsArray[SymbolIdx],outstr,res*k/10-1,res);
            }
          outstr="";
-         //        for(i=0;i<maxprof;i++) outstr+=";"+(string)ProfQty[i];
-         //         FileWrite(FileHandle,outstr);
-         //        FileWrite(FileHandle,SymbolsArray[SymbolIdx],SumSell+SumBuy,QtyWait,QtyBuy,SumBuy,QtySell,SumSell,outstr);
         }
       FileClose(FileHandle);
-      //FileClose(TrainFile);
      }
+   Print("QS=",QS," QWS=",QWS," QW=",QW," QWB=",QWB," QB=",QB);
    return(shift);
   }
 //+------------------------------------------------------------------+

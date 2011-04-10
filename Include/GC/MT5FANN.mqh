@@ -91,17 +91,25 @@ int CMT5FANN::ExportFANNDataWithTest(int train_qty,int test_qty,string FileName=
 int CMT5FANN::ExportFANNData(int qty,int shift,string FileName,bool test)
   {
    int i;
-   int FileHandle=0;
+   int FileHandle=0,FileStat=0;
    int needcopy=0;
    int copied=0;
+   int QS=0,QWS=0,QW=0,QWB=0,QB=0;
 
    string outstr;
    FileHandle=FileOpen(FileName,FILE_WRITE|FILE_ANSI|FILE_TXT,' ');
    needcopy=qty;
-
+   if (!test)
+   {
+   //FileStat = FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+   //   if(FileStat!=INVALID_HANDLE)
+   //  {// записываем в файл шапку
+   //    FileWrite(FileStat,// записываем в файл шапку
+   //             "Signal","tanh");
+   }
    if(FileHandle!=INVALID_HANDLE)
      {// записываем в файл шапку
-      FileWrite(FileHandle,needcopy*((test)?1:2),num_in_vectors,num_out_vectors);
+      FileWrite(FileHandle,needcopy*((test)?1:1),num_in_vectors,num_out_vectors);
       for(i=0;i<needcopy;shift++)
         {
          if(GetVector(shift,true))
@@ -112,7 +120,16 @@ int CMT5FANN::ExportFANNData(int qty,int shift,string FileName,bool test)
             for(int ibj=0;ibj<num_in_vectors;ibj++)
               {
                outstr=outstr+(string)(InputVector[ibj])+" ";
+   if (!test)
+   {
+   //FileStat = FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+   //   if(FileStat!=INVALID_HANDLE)
+   //  {// записываем в файл шапку
+   //    FileWrite(FileStat,// записываем в файл шапку
+   //             "Signal","tanh");
+   }
               }
+
             FileWrite(FileHandle,outstr);       // 
             outstr="";
             for(int ibj=0;ibj<num_out_vectors;ibj++)
@@ -232,7 +249,7 @@ bool CMT5FANN::ini_load(string path="")
       Max_Functions=1;Functions_Array[0]=VectorFunctions[0];
      }
    TimeFrame=(ENUM_TIMEFRAMES)MyIniFile.ReadInteger("Settings","TimeFrame",_Period);
-   WithNews=MyIniFile.ReadBool("Settings","WithNews",false);
+   WithNews=false;//MyIniFile.ReadBool("Settings","WithNews",false);
    WithHours=MyIniFile.ReadBool("Settings","WithHours",false);
    WithDayOfWeek=MyIniFile.ReadBool("Settings","WithDayOfWeek",false);
    //if(TimeFrame!= _Period) Print("TimeFrame not equals! Need ",TimeFrame);
@@ -474,9 +491,9 @@ bool CMT5FANN::GetVector(int shift,bool train)
          if(GetVectors(IB,OB,n_vectors,n_o_vectors,Functions_Array[FunctionsIdx],Symbols_Array[SymbolIdx],TimeFrame,shift))
            {
             // приведем к общему знаменателю
-            double si=0;
-            for(i=0;i<n_vectors;i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
-            for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i]/si;
+            //double si=0;
+            //for(i=0;i<n_vectors;i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
+            for(i=0;i<n_vectors;i++) InputVector[pos_in++]=IB[i];
             for(i=0;i<n_o_vectors;i++) 
             {
              OutputVector[i]=0;

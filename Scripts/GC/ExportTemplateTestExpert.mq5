@@ -48,8 +48,8 @@ int Write_File(int qty)
            // res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
              if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
               {
-               res=OV[0];
-               restanh=tanh(res/5);
+               restanh=OV[0];
+               //restanh=tanh(res/5);
                if(restanh>0.3 || restanh<-0.3) 
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);
