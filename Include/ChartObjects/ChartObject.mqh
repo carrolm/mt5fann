@@ -2,7 +2,7 @@
 //|                                                  ChartObject.mqh |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                                              Revision 2011.03.30 |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -53,6 +53,8 @@ public:
    bool              Selectable(bool new_sel);
    string            Description() const;
    bool              Description(const string new_text);
+   string            Tooltip() const;
+   bool              Tooltip(const string new_text);
    int               Timeframes() const;
    virtual bool      Timeframes(int timeframes);
    datetime          CreateTime() const;
@@ -440,6 +442,35 @@ bool CChartObject::Description(const string new_text)
       return(ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT," "));
 //---
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT,new_text));
+  }
+//+------------------------------------------------------------------+
+//| Get tooltip of object.                                           |
+//| INPUT:  no.                                                      |
+//| OUTPUT: tooltip of object.                                       |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CChartObject::Tooltip() const
+  {
+//--- checking
+   if(m_chart_id==-1) return("");
+//---
+   return(ObjectGetString(m_chart_id,m_name,OBJPROP_TOOLTIP));
+  }
+//+------------------------------------------------------------------+
+//| Set tooltip of object.                                           |
+//| INPUT:  new_text - new tooltip.                                  |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObject::Tooltip(const string new_text)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//--- tuning
+   if(new_text=="") 
+      return(ObjectSetString(m_chart_id,m_name,OBJPROP_TOOLTIP," "));
+//---
+   return(ObjectSetString(m_chart_id,m_name,OBJPROP_TOOLTIP,new_text));
   }
 //+------------------------------------------------------------------+
 //| Get the "Timeframes" (visibility) flag.                          |

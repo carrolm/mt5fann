@@ -82,7 +82,7 @@ string CPositionInfo::TypeDescription() const
   {
    string str;
 //---
-   return(FormatType(str,Type()));
+   return(FormatType(str,PositionType()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "POSITION_MAGIC".                         |
@@ -267,7 +267,7 @@ string CPositionInfo::FormatPosition(string& str) const
    int digits=symbol.Digits();
 //--- form the position description
    str=StringFormat("%s %s %s %s",
-                    FormatType(type,Type()),
+                    FormatType(type,PositionType()),
                     DoubleToString(Volume(),2),
                     Symbol(),
                     DoubleToString(PriceOpen(),digits+3));
@@ -324,9 +324,9 @@ void CPositionInfo::StoreState()
 //+------------------------------------------------------------------+
 bool CPositionInfo::CheckState()
   {
-   if(m_type==Type() &&
-      m_volume==Volume() &&
-      m_price==PriceOpen() &&
+   if(m_type==PositionType()  &&
+      m_volume==Volume()      &&
+      m_price==PriceOpen()    &&
       m_stop_loss==StopLoss() &&
       m_take_profit==TakeProfit())
       return(false);

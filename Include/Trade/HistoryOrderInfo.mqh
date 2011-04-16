@@ -88,7 +88,7 @@ string CHistoryOrderInfo::TypeDescription() const
   {
    string str;
 //---
-   return(FormatType(str,Type()));
+   return(FormatType(str,OrderType()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_STATE".                            |
@@ -445,7 +445,7 @@ string CHistoryOrderInfo::FormatOrder(string& str) const
 //--- form the order description
    StringFormat("#%I64u %s %s %s",
                 Ticket(),
-                FormatType(type,Type()),
+                FormatType(type,OrderType()),
                 DoubleToString(VolumeInitial(),2),
                 Symbol());
 //--- receive the price of the order

@@ -88,7 +88,7 @@ string CDealInfo::TypeDescription() const
   {
    string str;
 //---
-   switch(Type())
+   switch(DealType())
      {
       case DEAL_TYPE_BUY:
          str="Buy type";
@@ -345,14 +345,14 @@ string CDealInfo::FormatDeal(string& str) const
    symbol.Name(Symbol());
    int digits=symbol.Digits();
 //--- form the description of the deal
-   switch(Type())
+   switch(DealType())
      {
       //--- Buy-Sell
       case DEAL_TYPE_BUY       :
       case DEAL_TYPE_SELL      :
          str=StringFormat("#%I64u %s %s %s at %s",
                           Ticket(),
-                          FormatAction(type,Type()),
+                          FormatAction(type,DealType()),
                           DoubleToString(Volume(),2),
                           Symbol(),
                           DoubleToString(Price(),digits));
@@ -365,13 +365,13 @@ string CDealInfo::FormatDeal(string& str) const
       case DEAL_TYPE_CORRECTION:
          str=StringFormat("#%I64u %s %s [%s]",
                           Ticket(),
-                          FormatAction(type,Type()),
+                          FormatAction(type,DealType()),
                           DoubleToString(Profit(),2),
                           Comment());
       break;
 
       default:
-         str="unknown deal type "+(string)Type();
+         str="unknown deal type "+(string)DealType();
          break;
      }
 //--- return the result
