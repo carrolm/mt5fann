@@ -114,7 +114,7 @@ string COrderInfo::TypeDescription() const
   {
    string str;
 //---
-   return(FormatType(str,Type()));
+   return(FormatType(str,OrderType()));
   }
 //+------------------------------------------------------------------+
 //| Get the property value "ORDER_STATE".                            |
@@ -471,7 +471,7 @@ string COrderInfo::FormatOrder(string& str) const
 //--- form the order description
    StringFormat("#%I64u %s %s %s",
                 Ticket(),
-                FormatType(type,Type()),
+                FormatType(type,OrderType()),
                 DoubleToString(VolumeInitial(),2),
                 Symbol());
 //--- receive the price of the order
@@ -562,7 +562,7 @@ void COrderInfo::StoreState()
 //+------------------------------------------------------------------+
 bool COrderInfo::CheckState()
   {
-   if(m_type==Type() && m_state==State() &&
+   if(m_type==OrderType() && m_state==State() &&
       m_expiration ==TimeExpiration() &&
       m_volume_curr==VolumeCurrent() &&
       m_stop_loss==StopLoss() &&
