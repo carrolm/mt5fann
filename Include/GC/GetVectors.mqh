@@ -336,10 +336,9 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
                if(B<High[i]) {B=High[i];ib=i;}
               }
            }
-
         }
-      if(mS>mB) {res=-mS;if(3*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
-      else      { res=mB;if(3*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts-3),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
+      if(mS>mB) {res=-mS;if(4*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
+      else      { res=mB;if(4*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
       
       if(TS>0.00001)
         {
@@ -360,11 +359,11 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //QWB	40 643,00	6,45127%	0,1290253968	0,0645126984	0,9113539683
 //QB	7 602,00	1,20667%	0,0241333333	0,0120666667	0,9879333333
    res=tanh(res/5);
-   if(res>0.6) res=0.9879333333;
-   else if (res>0.3) res=0.9113539683;
-   else if (res>-0.3) res=-0.002417460;
-   else if (res>-0.6) res=-0.9138063492;
-   else res=-0.987968254;
+   //if(res>0.6) res=0.9879333333;
+   //else if (res>0.3) res=0.9113539683;
+   //else if (res>-0.3) res=-0.002417460;
+   //else if (res>-0.6) res=-0.9138063492;
+   //else res=-0.987968254;
 
    return(res);
 
