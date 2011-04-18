@@ -44,9 +44,9 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
   {
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
-   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
+   if(0.25<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
    if(-0.66>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
-   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
+   if(-0.25>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
