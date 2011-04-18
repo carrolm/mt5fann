@@ -24,7 +24,7 @@
 double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
 input int _TREND_=20;// на сколько смотреть вперед
-input int  _limit_=3000;// на сколько баров уходить назад
+input int  _limit_=5000;// на сколько баров уходить назад
 input int _ts_ = 2;// сколько тейкпрофитов берем
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
