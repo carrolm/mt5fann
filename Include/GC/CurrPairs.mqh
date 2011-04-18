@@ -10,21 +10,21 @@ input bool _USDCHF_=true;//US Dollar vs Swiss Franc
 input bool _USDJPY_=true;//US Dollar vs Japanese Yen
 input bool _USDCAD_=false;//US Dollar vs Canadian Dollar
 input bool _AUDUSD_=true;//Australian Dollar vs US Dollar
-input bool _NZDUSD_=false;//New Zealand Dollar vs US Dollar
+//input bool _NZDUSD_=false;//New Zealand Dollar vs US Dollar
                           //input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
 // crosses
 /////input bool _AUDNZD_=true;//Australian Dollar vs New Zealand Dollar
 /////input bool _AUDCAD_=true;//Australian Dollar vs Canadian Dollar
 //input bool _AUDCHF_=true;//Australian Dollar vs Swiss Franc
 input bool _AUDJPY_=false;//Australian Dollar vs Japanese Yen
-                          //input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
+//input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
 input bool _EURGBP_=false;//Euro vs Great Britain Pound 
-                          //input bool _EURAUD_=false;//Euro vs Australian Dollar
-input bool _EURCHF_=true;//Euro vs Swiss Franc
-input bool _EURJPY_=true;//Euro vs Japanese Yen
+//input bool _EURAUD_=false;//Euro vs Australian Dollar
+input bool _EURCHF_=false;//Euro vs Swiss Franc
+input bool _EURJPY_=false;//Euro vs Japanese Yen
 
 input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
-                          // crosses
+// crosses
 input bool _AUDNZD_=false;//Australian Dollar vs New Zealand Dollar
 input bool _AUDCAD_=false;//Australian Dollar vs Canadian Dollar
 input bool _AUDCHF_=false;//Australian Dollar vs Swiss Franc
@@ -47,7 +47,7 @@ void CPInit()
       if(_EURUSD_) SymbolsArray[MaxSymbols++]="EURUSD";//Euro vs US Dollar
       if(_GBPUSD_) SymbolsArray[MaxSymbols++]="GBPUSD";//Euro vs US Dollar
       if(_AUDUSD_) SymbolsArray[MaxSymbols++]="AUDUSD";//Euro vs US Dollar
-      if(_NZDUSD_) SymbolsArray[MaxSymbols++]="NZDUSD";//Euro vs US Dollar
+//      if(_NZDUSD_) SymbolsArray[MaxSymbols++]="NZDUSD";//Euro vs US Dollar
       if(_USDCHF_) SymbolsArray[MaxSymbols++]="USDCHF";//Euro vs US Dollar
       if(_USDJPY_) SymbolsArray[MaxSymbols++]="USDJPY";//Euro vs US Dollar
       if(_USDCAD_) SymbolsArray[MaxSymbols++]="USDCAD";//Euro vs US Dollar
