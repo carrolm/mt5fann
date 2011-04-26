@@ -1,35 +1,29 @@
 //+------------------------------------------------------------------+
 //|                                                  ExpertMoney.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
+//|                      Copyright © 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.12 |
+//|                                              Revision 2011.03.30 |
 //+------------------------------------------------------------------+
-#include <Object.mqh>
-#include <Trade\SymbolInfo.mqh>
-#include <Trade\AccountInfo.mqh>
-#include <Trade\PositionInfo.mqh>
-#include <Indicators\Indicators.mqh>
+//+------------------------------------------------------------------+
+//| ¬ключаемые файлы.                                                |
+//+------------------------------------------------------------------+
+#include "ExpertBase.mqh"
 //+------------------------------------------------------------------+
 //| Class CExpertMoney.                                              |
-//| Appointment: Base class money managment.                         |
-//|              Derives from class CObject.                         |
+//| Purpose: Base class money managment.                             |
+//| Derives from class CExpertBase.                                  |
 //+------------------------------------------------------------------+
-class CExpertMoney : public CObject
+class CExpertMoney : public CExpertBase
   {
 protected:
-   CSymbolInfo      *m_symbol;
-   ENUM_TIMEFRAMES   m_period;
-   double            m_adjusted_point;
-   CAccountInfo      m_account;
    //--- input parameters
    double            m_percent;
 
 public:
                      CExpertMoney();
-   //--- methods initialize protected data
-   void              Percent(double percent)                 { m_percent=percent; }
-   virtual bool      Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double adjusted_point);
-   virtual bool      InitIndicators(CIndicators* indicators) { return(true);      }
+   //--- methods of setting adjustable parameters
+   void              Percent(double percent)    { m_percent=percent; }
+   //--- method of verification of settings
    virtual bool      ValidationSettings();
    //---
    virtual double    CheckOpenLong(double price,double sl);
@@ -45,35 +39,8 @@ public:
 //+------------------------------------------------------------------+
 void CExpertMoney::CExpertMoney()
   {
-//--- initialize protected data
-   m_symbol        =NULL;
-   m_period        =PERIOD_CURRENT;
-   m_adjusted_point=1.0;
 //--- set default inputs
    m_percent       =10.0;
-  }
-//+------------------------------------------------------------------+
-//| Setting protected data.                                          |
-//| INPUT:  symbol         -pointer to the CSymbolInfo,              |
-//|         period         -working period,                          |
-//|         adjusted_point -adjusted point value.                    |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CExpertMoney::Init(CSymbolInfo *symbol,ENUM_TIMEFRAMES period,double adjusted_point)
-  {
-//--- check
-   if(symbol==NULL)
-     {
-      printf(__FUNCTION__+": error initializing");
-      return(false);
-     }
-//---
-   m_symbol        =symbol;
-   m_period        =period;
-   m_adjusted_point=adjusted_point;
-//---
-   return(true);
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
@@ -83,13 +50,14 @@ bool CExpertMoney::Init(CSymbolInfo *symbol,ENUM_TIMEFRAMES period,double adjust
 //+------------------------------------------------------------------+
 bool CExpertMoney::ValidationSettings()
   {
+   if(!CExpertBase::ValidationSettings()) return(false);
 //--- initial data checks
    if(m_percent<0.0 || m_percent>100.0)
      {
       printf(__FUNCTION__+": percentage of risk should be in the range from 0 to 100 inclusive");
       return(false);
      }
-//---
+//--- ok
    return(true);
   }
 //+------------------------------------------------------------------+

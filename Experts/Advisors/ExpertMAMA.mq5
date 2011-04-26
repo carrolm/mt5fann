@@ -65,7 +65,7 @@ int OnInit()
       return(-3);
      }
 //--- Set signal parameters
-   signal.Period(Inp_Signal_MA_Period);
+   signal.PeriodMA(Inp_Signal_MA_Period);
    signal.Shift(Inp_Signal_MA_Shift);
    signal.Method(Inp_Signal_MA_Method);
    signal.Applied(Inp_Signal_MA_Applied);

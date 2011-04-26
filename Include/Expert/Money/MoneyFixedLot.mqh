@@ -13,13 +13,13 @@
 //| Name=FixLot                                                      |
 //| Class=CMoneyFixedLot                                             |
 //| Page=                                                            |
-//| Parameter=Percent,double,10.0                                    |
-//| Parameter=Lots,double,0.1                                        |
+//| Parameter=Percent,double,10.0,Percent                            |
+//| Parameter=Lots,double,0.1,Fixed volume                           |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CMoneyFixedLot.                                            |
-//| Appointment: Class money managment with fixed lot.               |
+//| Purpose: Class of money management with fixed lot.               |
 //|              Derives from class CExpertMoney.                    |
 //+------------------------------------------------------------------+
 class CMoneyFixedLot : public CExpertMoney

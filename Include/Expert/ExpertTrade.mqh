@@ -2,7 +2,7 @@
 //|                                                  ExpertTrade.mqh |
 //|                      Copyright © 2010, MetaQuotes Software Corp. |
 //|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.10.08 |
+//|                                              Revision 2010.07.01 |
 //+------------------------------------------------------------------+
 #include <Trade\SymbolInfo.mqh>
 #include <Trade\PositionInfo.mqh>

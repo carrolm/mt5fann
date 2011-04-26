@@ -13,15 +13,15 @@
 //| Name=MA                                                          |
 //| Class=CTrailingMA                                                |
 //| Page=                                                            |
-//| Parameter=Period,int,12                                          |
-//| Parameter=Shift,int,0                                            |
-//| Parameter=Method,ENUM_MA_METHOD,MODE_SMA                         |
-//| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE                 |
+//| Parameter=Period,int,12,Period of MA                             |
+//| Parameter=Shift,int,0,Shift of MA                                |
+//| Parameter=Method,ENUM_MA_METHOD,MODE_SMA,Method of averaging     |
+//| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE,Prices series   |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CTrailingMA.                                               |
-//| Appointment: Class traling stops with MA.                        |
+//| Purpose: Class of trailing stops based on MA.                    |
 //|              Derives from class CExpertTrailing.                 |
 //+------------------------------------------------------------------+
 class CTrailingMA : public CExpertTrailing
@@ -37,7 +37,7 @@ protected:
 public:
                      CTrailingMA();
                     ~CTrailingMA();
-   //--- methods initialize protected data
+   //--- methods of initialization of protected data
    void              Period(int period)                  { m_ma_period=period;   }
    void              Shift(int shift)                    { m_ma_shift=shift;     }
    void              Method(ENUM_MA_METHOD method)       { m_ma_method=method;   }

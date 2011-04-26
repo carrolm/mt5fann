@@ -64,8 +64,8 @@ int OnInit()
    signal.PeriodFast(Inp_Signal_MACD_PeriodFast);
    signal.PeriodSlow(Inp_Signal_MACD_PeriodSlow);
    signal.PeriodSignal(Inp_Signal_MACD_PeriodSignal);
-   signal.TakeProfit(Inp_Signal_MACD_TakeProfit);
-   signal.StopLoss(Inp_Signal_MACD_StopLoss);
+   signal.TakeLevel(Inp_Signal_MACD_TakeProfit);
+   signal.StopLevel(Inp_Signal_MACD_StopLoss);
 //--- Check signal parameters
    if(!signal.ValidationSettings())
      {

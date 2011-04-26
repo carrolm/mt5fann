@@ -580,12 +580,12 @@ bool CGNGUAlgorithm::ProcessVector(double &in[],bool train=true)
          v.Weights(wv);
          ArrayResize(wr,input_dimension);
          for(i=0;i<input_dimension;i++) wr[i]=(wu[i]+wv[i])/2;
-         // "закрутим" в гиперкуб!
-               double sq=0;
-         for(i=0;i<input_dimension;i++) sq+=wr[i]*wr[i]; sq=MathSqrt(sq); //if(0==sq) return(false);
-         for(i=0;i<input_dimension;i++) wr[i]=wr[i]/sq;
-
-         //\ 
+//         // "закрутим" в гиперкуб!
+//         double sq=0;
+//         for(i=0;i<input_dimension;i++) sq+=wr[i]*wr[i]; sq=MathSqrt(sq); //if(0==sq) return(false);
+//         for(i=0;i<input_dimension;i++) wr[i]=wr[i]/sq;
+//
+//         //\ 
          CGNGNeuron *r=Neurons.Append();
          r.Init(wr);
 

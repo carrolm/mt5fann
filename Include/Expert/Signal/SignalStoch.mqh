@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                   SignalMACD.mqh |
+//|                                                  SignalStoch.mqh |
 //|                      Copyright © 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2011.03.30 |
@@ -8,40 +8,41 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signals of oscillator 'MACD'                               |
+//| Title=Signals of oscillator 'Stochastic'                         |
 //| Type=SignalAdvanced                                              |
-//| Name=MACD                                                        |
-//| ShortName=MACD                                                   |
-//| Class=CSignalMACD                                                |
-//| Page=signal_macd                                                 |
-//| Parameter=PeriodFast,int,12,Period of fast EMA                   |
-//| Parameter=PeriodSlow,int,24,Period of slow EMA                   |
-//| Parameter=PeriodSignal,int,9,Period of averaging of difference   |
-//| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE,Prices series   |
+//| Name=Stochastic                                                  |
+//| ShortName=Stoch                                                  |
+//| Class=CSignalStoch                                               |
+//| Page=signal_stochastic                                           |
+//| Parameter=PeriodK,int,8,K-period                                 |
+//| Parameter=PeriodD,int,3,D-period                                 |
+//| Parameter=PeriodSlow,int,3,Period of slowing                     |
+//| Parameter=Applied,ENUM_STO_PRICE,STO_LOWHIGH,Prices to apply to  |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
-//| Class CSignalMACD.                                               |
+//| Class CSignalStoch.                                              |
 //| Purpose: Class of generator of trade signals based on            |
-//|          the 'Moving Average Convergence/Divergence' oscillator. |
+//|          the 'Stochastic' oscillator.                            |
 //| Is derived from the CExpertSignal class.                         |
 //+------------------------------------------------------------------+
-class CSignalMACD : public CExpertSignal
+class CSignalStoch : public CExpertSignal
   {
 protected:
-   CiMACD            m_MACD;           // object-oscillator
+   CiStochastic      m_stoch;          // object-oscillator
+   CPriceSeries     *m_app_price_high; // pointer to the object-timeseries for determining divergences directed downwards
+   CPriceSeries     *m_app_price_low;  // pointer to the object-timeseries for determining divergences directed upwards
    //--- adjusted parameters
-   int               m_period_fast;    // the "period of fast EMA" parameter of the oscillator
-   int               m_period_slow;    // the "period of slow EMA" parameter of the oscillator
-   int               m_period_signal;  // the "period of averaging of difference" parameter of the oscillator
-   ENUM_APPLIED_PRICE m_applied;       // the "price series" parameter of the oscillator
+   int               m_periodK;        // the "period %K" parameter of the oscillator
+   int               m_periodD;        // the "period %D" parameter of the oscillator
+   int               m_period_slow;    // the "period of slowing" parameter of the oscillator
+   ENUM_STO_PRICE    m_applied;        // the "apply to" parameter of the oscillator
    //--- "weights" of market models (0-100)
    int               m_pattern_0;      // model 0 "the oscillator has required direction"
    int               m_pattern_1;      // model 1 "reverse of the oscillator to required direction"
    int               m_pattern_2;      // model 2 "crossing of main and signal line"
-   int               m_pattern_3;      // model 3 "crossing of main line an the zero level"
-   int               m_pattern_4;      // model 4 "divergence of the oscillator and price"
-   int               m_pattern_5;      // model 5 "double divergence of the oscillator and price"
+   int               m_pattern_3;      // model 3 "divergence of the oscillator and price"
+   int               m_pattern_4;      // model 4 "double divergence of the oscillator and price"
    //--- variables
    double            m_extr_osc[10];   // array of values of extremums of the oscillator
    double            m_extr_pr[10];    // array of values of the corresponding extremums of price
@@ -49,19 +50,18 @@ protected:
    uint              m_extr_map;       // resulting bit-map of ratio of extremums of the oscillator and the price
 
 public:
-                     CSignalMACD();
+                     CSignalStoch();
    //--- methods of setting adjustable parameters
-   void              PeriodFast(int value)             { m_period_fast=value;           }
-   void              PeriodSlow(int value)             { m_period_slow=value;           }
-   void              PeriodSignal(int value)           { m_period_signal=value;         }
-   void              Applied(ENUM_APPLIED_PRICE value) { m_applied=value;               }
+   void              PeriodK(int value)              { m_periodK=value;                   }
+   void              PeriodD(int value)              { m_periodD=value;                   }
+   void              PeriodSlow(int value)           { m_period_slow=value;               }
+   void              Applied(ENUM_STO_PRICE value)   { m_applied=value;                   }
    //--- methods of adjusting "weights" of market models
-   void              Pattern_0(int value)              { m_pattern_0=value;             }
-   void              Pattern_1(int value)              { m_pattern_1=value;             }
-   void              Pattern_2(int value)              { m_pattern_2=value;             }
-   void              Pattern_3(int value)              { m_pattern_3=value;             }
-   void              Pattern_4(int value)              { m_pattern_4=value;             }
-   void              Pattern_5(int value)              { m_pattern_5=value;             }
+   void              Pattern_0(int value)            { m_pattern_0=value;                 }
+   void              Pattern_1(int value)            { m_pattern_1=value;                 }
+   void              Pattern_2(int value)            { m_pattern_2=value;                 }
+   void              Pattern_3(int value)            { m_pattern_3=value;                 }
+   void              Pattern_4(int value)            { m_pattern_4=value;                 }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- method of creating the indicator and timeseries
@@ -72,37 +72,39 @@ public:
 
 protected:
    //--- method of initialization of the oscillator
-   bool              InitMACD(CIndicators* indicators);
+   bool              InitStoch(CIndicators* indicators);
    //--- methods of getting data
-   double            Main(int ind)                     { return(m_MACD.Main(ind));      }
-   double            Signal(int ind)                   { return(m_MACD.Signal(ind));    }
-   double            DiffMain(int ind)                 { return(Main(ind)-Main(ind+1)); }
-   int               StateMain(int ind);
-   double            State(int ind)                    { return(Main(ind)-Signal(ind)); }
-   bool              ExtState(int ind);
+   double            Main(int ind)                   { return(m_stoch.Main(ind));         }
+   double            DiffMain(int ind)               { return(Main(ind)-Main(ind+1));     }
+   double            Signal(int ind)                 { return(m_stoch.Signal(ind));       }
+   double            DiffSignal(int ind)             { return(Signal(ind)-Signal(ind+1)); }
+   double            DiffMainSignal(int ind)         { return(Main(ind)-Signal(ind));     }
+   int               StateStoch(int ind);
+   bool              ExtStateStoch(int ind);
    bool              CompareMaps(int map,int count,bool minimax=false,int start=0);
+   void              DiverDebugPrint();
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalMACD.                                         |
+//| Constructor CSignalStoch.                                        |
 //| INPUT:  no.                                                      |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSignalMACD::CSignalMACD()
+void CSignalStoch::CSignalStoch()
   {
 //--- initialization of protected data
-   m_used_series  =USE_SERIES_HIGH+USE_SERIES_LOW;
+   m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 //--- setting default values for the oscillator parameters
-   m_period_fast  =12;
-   m_period_slow  =24;
-   m_period_signal=9;
+   m_periodK    =8;
+   m_periodD    =3;
+   m_period_slow=3;
+   m_applied    =STO_LOWHIGH;
 //--- setting default "weights" of the market models
-   m_pattern_0    =10;       // model 0 "the oscillator has required direction"
-   m_pattern_1    =30;       // model 1 "reverse of the oscillator to required direction"
-   m_pattern_2    =80;       // model 2 "crossing of main and signal line"
-   m_pattern_3    =50;       // model 3 "crossing of main line an the zero level"
-   m_pattern_4    =60;       // model 4 "divergence of the oscillator and price"
-   m_pattern_5    =100;      // model 5 "double divergence of the oscillator and price"
+   m_pattern_0  =30;         // model 0 "the oscillator has required direction"
+   m_pattern_1  =60;         // model 1 "reverse of the oscillator to required direction"
+   m_pattern_2  =50;         // model 2 "crossing of main and signal line"
+   m_pattern_3  =100;        // model 3 "divergence of the oscillator and price"
+   m_pattern_4  =90;         // model 4 "double divergence of the oscillator and price"
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
@@ -110,14 +112,19 @@ void CSignalMACD::CSignalMACD()
 //| OUTPUT: true-if settings are correct, false otherwise.           |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMACD::ValidationSettings()
+bool CSignalStoch::ValidationSettings()
   {
 //--- validation settings of additional filters
    if(!CExpertSignal::ValidationSettings()) return(false);
 //--- initial data checks
-   if(m_period_fast>=m_period_slow)
+   if(m_periodK<=0)
      {
-      printf(__FUNCTION__+": slow period must be greater than fast period");
+      printf(__FUNCTION__+": the period %K of the Stochastic oscillator must be greater than 0");
+      return(false);
+     }
+   if(m_periodD<=0)
+     {
+      printf(__FUNCTION__+": the period %D of the Stochastic oscillator must be greater than 0");
       return(false);
      }
 //--- ok
@@ -129,33 +136,49 @@ bool CSignalMACD::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMACD::InitIndicators(CIndicators* indicators)
+bool CSignalStoch::InitIndicators(CIndicators* indicators)
   {
-//--- check of pointer is performed in the method of the parent class
-//---
+//--- check pointer
+   if(indicators==NULL)                           return(false);
 //--- initialization of indicators and timeseries of additional filters
    if(!CExpertSignal::InitIndicators(indicators)) return(false);
-//--- create and initialize MACD oscilator
-   if(!InitMACD(indicators))                      return(false);
+//--- create and initialize Stochastic oscillator
+   if(!InitStoch(indicators))                     return(false);
+   if(m_applied==STO_CLOSECLOSE)
+     {
+      //--- copying the Close timeseries
+      m_app_price_high=GetPointer(m_close);
+      //--- copying the Close timeseries
+      m_app_price_low =GetPointer(m_close);
+     }
+   else
+     {
+      //--- copying the High timeseries
+      m_app_price_high=GetPointer(m_high);
+      //--- copying the Low timeseries
+      m_app_price_low =GetPointer(m_low);
+     }
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Initialize MACD oscillators.                                     |
+//| Initialize Stochastic oscillators.                               |
 //| INPUT:  indicators - pointer of indicator collection.            |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMACD::InitMACD(CIndicators* indicators)
+bool CSignalStoch::InitStoch(CIndicators* indicators)
   {
+//--- check pointer
+   if(indicators==NULL) return(false);
 //--- add object to collection
-   if(!indicators.Add(GetPointer(m_MACD)))
+   if(!indicators.Add(GetPointer(m_stoch)))
      {
       printf(__FUNCTION__+": error adding object");
       return(false);
      }
 //--- initialize object
-   if(!m_MACD.Create(m_symbol.Name(),m_period,m_period_fast,m_period_slow,m_period_signal,m_applied))
+   if(!m_stoch.Create(m_symbol.Name(),m_period,m_periodK,m_periodD,m_period_slow,MODE_SMA,m_applied))
      {
       printf(__FUNCTION__+": error initializing object");
       return(false);
@@ -172,7 +195,7 @@ bool CSignalMACD::InitMACD(CIndicators* indicators)
 //|               >0 - the oscillator has turned upwards.            |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMACD::StateMain(int ind)
+int CSignalStoch::StateStoch(int ind)
   {
    int    res=0;
    double var;
@@ -209,7 +232,7 @@ int CSignalMACD::StateMain(int ind)
 //|         according to certain rules, which                        |
 //|         shows ratios of extremums of the oscillator and price.   |
 //+------------------------------------------------------------------+
-bool CSignalMACD::ExtState(int ind)
+bool CSignalStoch::ExtStateStoch(int ind)
   {
 //--- operation of this method results in a bit-map of extremums
 //--- practically, the bit-map of extremums is an "array" of 4-bit fields
@@ -238,7 +261,7 @@ bool CSignalMACD::ExtState(int ind)
    m_extr_map=0;
    for(int i=0;i<10;i++)
      {
-      off=StateMain(pos);
+      off=StateStoch(pos);
       if(off>0)
         {
          //--- minimum of the oscillator is detected
@@ -291,7 +314,7 @@ bool CSignalMACD::ExtState(int ind)
 //|         otherwise - false.                                       |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMACD::CompareMaps(int map,int count,bool minimax,int start)
+bool CSignalStoch::CompareMaps(int map,int count,bool minimax=false,int start=0)
   {
    int step =(minimax)?4:8;
    int total=step*(start+count);
@@ -345,7 +368,7 @@ bool CSignalMACD::CompareMaps(int map,int count,bool minimax,int start)
 //| OUTPUT: number of "votes" that price will grow.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMACD::LongCondition()
+int CSignalStoch::LongCondition()
   {
    int result=0;
    int idx   =StartIndex();
@@ -359,22 +382,19 @@ int CSignalMACD::LongCondition()
       if(IS_PATTERN_USAGE(1) && DiffMain(idx+1)<0.0)
          result=m_pattern_1;      // signal number 1
       //--- if the model 2 is used, look for an intersection of the main and signal line
-      if(IS_PATTERN_USAGE(2) && State(idx)>0.0 && State(idx+1)<0.0)
+      if(IS_PATTERN_USAGE(2) && DiffMainSignal(idx)>0.0 && DiffMainSignal(idx+1)<0.0)
          result=m_pattern_2;      // signal number 2
-      //--- if the model 3 is used, look for an intersection of the main line and the zero level
-      if(IS_PATTERN_USAGE(3) && Main(idx)>0.0 && Main(idx+1)<0.0)
-         result=m_pattern_3;      // signal number 3
-      //--- if the models 4 or 5 are used and the main line turned upwards below the zero level, look for divergences
-      if((IS_PATTERN_USAGE(4) || IS_PATTERN_USAGE(5)) && Main(idx)<0.0)
+      //--- if the models 3 or 4 are used, look for divergences
+      if((IS_PATTERN_USAGE(4) || IS_PATTERN_USAGE(5)))
         {
          //--- perform the extended analysis of the oscillator state
-         ExtState(idx);
-         //--- if the model 4 is used, look for the "divergence" signal
-         if(IS_PATTERN_USAGE(4) && CompareMaps(1,1))      // 0000 0001b
-            result=m_pattern_4;   // signal number 4
-         //--- if the model 5 is used, look for the "double divergence" signal
-         if(IS_PATTERN_USAGE(5) && CompareMaps(0x11,2))   // 0001 0001b
-            return(m_pattern_5);  // signal number 5
+         ExtStateStoch(idx);
+         //--- if the model 3 is used, look for the "divergence" signal
+         if(IS_PATTERN_USAGE(3) && CompareMaps(1,1))      // 0000 0001b
+            result=m_pattern_3;   // signal number 3
+         //--- if the model 4 is used, look for the "double divergence" signal
+         if(IS_PATTERN_USAGE(4) && CompareMaps(0x11,2))   // 0001 0001b
+            return(m_pattern_4);  // signal number 4
         }
      }
 //--- return the result
@@ -386,7 +406,7 @@ int CSignalMACD::LongCondition()
 //| OUTPUT: number of "votes" that price will fall.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMACD::ShortCondition()
+int CSignalStoch::ShortCondition()
   {
    int result=0;
    int idx   =StartIndex();
@@ -400,22 +420,19 @@ int CSignalMACD::ShortCondition()
       if(IS_PATTERN_USAGE(1) && DiffMain(idx+1)>0.0)
          result=m_pattern_1;      // signal number 1
       //--- if the model 2 is used, look for an intersection of the main and signal line
-      if(IS_PATTERN_USAGE(2) && State(idx)<0.0 && State(idx+1)>0.0)
+      if(IS_PATTERN_USAGE(2) && DiffMainSignal(idx)<0.0 && DiffMainSignal(idx+1)>0.0)
          result=m_pattern_2;      // signal number 2
-      //--- if the model 3 is used, look for an intersection of the main line and the zero level
-      if(IS_PATTERN_USAGE(3) && Main(idx)<0.0 && Main(idx+1)>0.0)
-         result=m_pattern_3;      // signal number 3
-      //--- if the models 4 or 5 are used and the main line turned downwards above the zero level, look for divergences
-      if((IS_PATTERN_USAGE(4) || IS_PATTERN_USAGE(5)) && Main(idx)>0.0)
+      //--- if the models 3 or 4 are used, look for divergences
+      if((IS_PATTERN_USAGE(3) || IS_PATTERN_USAGE(4)))
         {
          //--- perform the extended analysis of the oscillator state
-         ExtState(idx);
-         //--- if the model 4 is used, look for the "divergence" signal
-         if(IS_PATTERN_USAGE(4) && CompareMaps(1,1))      // 0000 0001b
-            result=m_pattern_4;   // signal number 4
-         //--- if the model 5 is used, look for the "double divergence" signal
-         if(IS_PATTERN_USAGE(5) && CompareMaps(0x11,2))   // 0001 0001b
-            return(m_pattern_5);  // signal number 5
+         ExtStateStoch(idx);
+         //--- if the model 3 is used, look for the "divergence" signal
+         if(IS_PATTERN_USAGE(3) && CompareMaps(1,1))      // 0000 0001b
+            result=m_pattern_3;   // signal number 3
+         //--- if the model 4 is used, look for the "double divergence" signal
+         if(IS_PATTERN_USAGE(4) && CompareMaps(0x11,2))   // 0001 0001b
+            return(m_pattern_4);  // signal number 4
         }
      }
 //--- return the result

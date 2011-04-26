@@ -44,9 +44,9 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
   {
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
-   if(0.25<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
+   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
    if(-0.66>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
-   if(-0.25>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
+   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
@@ -87,6 +87,8 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
          break;
         }
      }
+   // если нет паники, а есть слабые сигналы -их пинаем...
+   if((0==ticket)&&(type==NewOrderWaitBuy||type==NewOrderWaitSell))return(false);  
    MqlTick lasttick;
    SymbolInfoTick(smb,lasttick);
    if(price==0)
@@ -354,7 +356,7 @@ bool Trailing()
             trReq.deviation=3;                                    // Maximal possible deviation from the requested price
             trReq.tp=0;                                    // Maximal possible deviation from the requested price
             OrderSend(trReq,trRez);
-            if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," Spread=", SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+            if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=", SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
             else
               {
                trReq.order=ticket;
