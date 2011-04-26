@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                     SignalMA.mqh |
+//|                                                  SignalFrAMA.mqh |
 //|                      Copyright © 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2011.03.30 |
@@ -8,44 +8,41 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signals of indicator 'Moving Average'                      |
+//| Title=Signals of indicator 'Fractal Adaptive Moving Average'     |
 //| Type=SignalAdvanced                                              |
-//| Name=Moving Average                                              |
-//| ShortName=MA                                                     |
-//| Class=CSignalMA                                                  |
-//| Page=signal_ma                                                   |
+//| Name=Fractal Adaptive Moving Average                             |
+//| ShortName=FraMA                                                  |
+//| Class=CSignalFrAMA                                               |
+//| Page=signal_frama                                                |
 //| Parameter=PeriodMA,int,12,Period of averaging                    |
 //| Parameter=Shift,int,0,Time shift                                 |
-//| Parameter=Method,ENUM_MA_METHOD,MODE_SMA,Method of averaging     |
 //| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE,Prices series   |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
-//| Class CSignalMA.                                                 |
+//| Class CSignalFrAMA.                                              |
 //| Purpose: Class of generator of trade signals based on            |
-//|          the 'Moving Average' indicator.                         |
+//|          the 'Fractal Adaptive Moving Average' indicator.        |
 //| Is derived from the CExpertSignal class.                         |
 //+------------------------------------------------------------------+
-class CSignalMA : public CExpertSignal
+class CSignalFrAMA : public CExpertSignal
   {
 protected:
-   CiMA              m_ma;             // object-indicator
+   CiFrAMA           m_ma;             // object-indicator
    //--- adjusted parameters
    int               m_ma_period;      // the "period of averaging" parameter of the indicator
    int               m_ma_shift;       // the "time shift" parameter of the indicator
-   ENUM_MA_METHOD    m_ma_method;      // the "method of averaging" parameter of the indicator
-   ENUM_APPLIED_PRICE m_ma_applied;    // the "object of averaging" parameter of the indicator
+   ENUM_APPLIED_PRICE m_ma_applied;    // the "object of averaging" parameter" of the indicator
    //--- "weights" of market models (0-100)
    int               m_pattern_0;      // model 0 "price is on the necessary side from the indicator"
    int               m_pattern_1;      // model 1 "price crossed the indicator with opposite direction"
    int               m_pattern_2;      // model 2 "price crossed the indicator with the same direction"
 
 public:
-                     CSignalMA();
+                     CSignalFrAMA();
    //--- methods of setting adjustable parameters
    void              PeriodMA(int value)                 { m_ma_period=value;          }
    void              Shift(int value)                    { m_ma_shift=value;           }
-   void              Method(ENUM_MA_METHOD value)        { m_ma_method=value;          }
    void              Applied(ENUM_APPLIED_PRICE value)   { m_ma_applied=value;         }
    //--- methods of adjusting "weights" of market models
    void              Pattern_0(int value)                { m_pattern_0=value;          }
@@ -71,24 +68,23 @@ protected:
    double            DiffCloseMA(int ind)                { return(Close(ind)-MA(ind)); }
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalMA.                                           |
+//| Constructor CSignalFrAMA.                                        |
 //| INPUT:  no.                                                      |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSignalMA::CSignalMA()
+void CSignalFrAMA::CSignalFrAMA()
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 //--- setting default values for the indicator parameters
    m_ma_period =12;
    m_ma_shift  =0;
-   m_ma_method =MODE_SMA;
    m_ma_applied=PRICE_CLOSE;
 //--- setting default "weights" of the market models
-   m_pattern_0 =80;          // model 0 "price is on the necessary side from the indicator"
-   m_pattern_1 =10;          // model 1 "price crossed the indicator with opposite direction"
-   m_pattern_2 =60;          // model 2 "price crossed the indicator with the same direction"
+   m_pattern_0 =90;          // model 0 "price is on the necessary side from the indicator"
+   m_pattern_1 =100;         // model 1 "price crossed the indicator with opposite direction"
+   m_pattern_2 =80;          // model 2 "price crossed the indicator with the same direction"
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
@@ -96,9 +92,9 @@ void CSignalMA::CSignalMA()
 //| OUTPUT: true-if settings are correct, false otherwise.           |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::ValidationSettings()
+bool CSignalFrAMA::ValidationSettings()
   {
-//--- validation settings of additional filters
+//--- call of the method of the parent class
    if(!CExpertSignal::ValidationSettings()) return(false);
 //--- initial data checks
    if(m_ma_period<=0)
@@ -111,39 +107,39 @@ bool CSignalMA::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
+//| INPUT:  indicators -pointer of indicator collection.             |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitIndicators(CIndicators* indicators)
+bool CSignalFrAMA::InitIndicators(CIndicators* indicators)
   {
 //--- check pointer
    if(indicators==NULL)                           return(false);
 //--- initialization of indicators and timeseries of additional filters
    if(!CExpertSignal::InitIndicators(indicators)) return(false);
-//--- create and initialize MA indicator
+//--- create and initialize FrAMA indicator
    if(!InitMA(indicators))                        return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Initialize MA indicators.                                        |
-//| INPUT:  indicators - pointer of indicator collection.            |
+//| Create MA indicators.                                            |
+//| INPUT:  indicators -pointer of indicator collection.             |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitMA(CIndicators* indicators)
+bool CSignalFrAMA::InitMA(CIndicators* indicators)
   {
 //--- check pointer
    if(indicators==NULL) return(false);
-//--- add object to collection
+//--- add indicator to collection
    if(!indicators.Add(GetPointer(m_ma)))
      {
       printf(__FUNCTION__+": error adding object");
       return(false);
      }
-//--- initialize object
-   if(!m_ma.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_method,m_ma_applied))
+//--- initialize indicator
+   if(!m_ma.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_applied))
      {
       printf(__FUNCTION__+": error initializing object");
       return(false);
@@ -157,7 +153,7 @@ bool CSignalMA::InitMA(CIndicators* indicators)
 //| OUTPUT: number of "votes" that price will grow.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMA::LongCondition()
+int CSignalFrAMA::LongCondition()
   {
    int result=0;
    int idx   =StartIndex();
@@ -209,7 +205,7 @@ int CSignalMA::LongCondition()
 //| OUTPUT: number of "votes" that price will fall.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMA::ShortCondition()
+int CSignalFrAMA::ShortCondition()
   {
    int result=0;
    int idx   =StartIndex();

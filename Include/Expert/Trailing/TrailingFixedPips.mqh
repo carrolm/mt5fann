@@ -6,20 +6,20 @@
 //+------------------------------------------------------------------+
 #include <Expert\ExpertTrailing.mqh>
 // wizard description start
-//+------------------------------------------------------------------+
-//| Description of the class                                         |
-//| Title=Trailing Stop based on fixed Stop Level                    |
-//| Type=Trailing                                                    |
-//| Name=FixedPips                                                   |
-//| Class=CTrailingFixedPips                                         |
-//| Page=                                                            |
-//| Parameter=StopLevel,int,30                                       |
-//| Parameter=ProfitLevel,int,50                                     |
-//+------------------------------------------------------------------+
+//+----------------------------------------------------------------------+
+//| Description of the class                                             |
+//| Title=Trailing Stop based on fixed Stop Level                        |
+//| Type=Trailing                                                        |
+//| Name=FixedPips                                                       |
+//| Class=CTrailingFixedPips                                             |
+//| Page=                                                                |
+//| Parameter=StopLevel,int,30,Stop Loss level (in points)               |
+//| Parameter=ProfitLevel,int,50,Take Profit level (in points)           |
+//+----------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CTrailingFixedPips.                                        |
-//| Appointment: Class traling stops with fixed in pips stop.        |
+//| Purpose: Class of trailing stops with fixed stop level in pips.  |
 //|              Derives from class CExpertTrailing.                 |
 //+------------------------------------------------------------------+
 class CTrailingFixedPips : public CExpertTrailing
@@ -31,7 +31,7 @@ protected:
 
 public:
                      CTrailingFixedPips();
-   //--- methods initialize protected data
+   //--- methods of initialization of protected data
    void              StopLevel(int stop_level)     { m_stop_level=stop_level;     }
    void              ProfitLevel(int profit_level) { m_profit_level=profit_level; }
    virtual bool      ValidationSettings();

@@ -13,12 +13,12 @@
 //| Name=FixMargin                                                   |
 //| Class=CMoneyFixedMargin                                          |
 //| Page=                                                            |
-//| Parameter=Percent,double,10.0                                    |
+//| Parameter=Percent,double,10.0,Percentage of margin               |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CMoneyFixedMargin.                                         |
-//| Appointment: Class money managment with fixed percent margin.    |
+//| Purpose: Class of money management with fixed percent margin.    |
 //|              Derives from class CExpertMoney.                    |
 //+------------------------------------------------------------------+
 class CMoneyFixedMargin : public CExpertMoney

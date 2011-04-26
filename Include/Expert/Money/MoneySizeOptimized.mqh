@@ -14,13 +14,13 @@
 //| Name=SizeOptimized                                               |
 //| Class=CMoneySizeOptimized                                        |
 //| Page=                                                            |
-//| Parameter=DecreaseFactor,double,3.0                              |
-//| Parameter=Percent,double,10.0                                    |
+//| Parameter=DecreaseFactor,double,3.0,Decrease factor              |
+//| Parameter=Percent,double,10.0,Percent                            |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CMoneySizeOptimized.                                       |
-//| Appointment: Class money managment with size optimized.          |
+//| Purpose: Class of money management with size optimized.          |
 //|              Derives from class CExpertMoney.                    |
 //+------------------------------------------------------------------+
 class CMoneySizeOptimized : public CExpertMoney
@@ -121,7 +121,7 @@ double CMoneySizeOptimized::Optimize(double lots)
       HistorySelect(0,TimeCurrent());
       //---
       int    orders=HistoryDealsTotal();  // total history deals
-      int    losses=0;                    // number of losses orders without a break
+      int    losses=0;                    // number of consequent losing orders
       CDealInfo deal;
       //---
       for(int i=orders-1;i>=0;i--)

@@ -26,16 +26,18 @@ void OnStart()
 int Write_File(int qty)
   {
    int i;
-   double res,restanh=0;
+   double restanh=0;
    string outstr;
    MqlRates rates[];
    MqlDateTime tm;
    double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
+   TimeToStruct( TimeCurrent(),tm);
+   int cm=tm.mon;
    int FileHandle=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
      {
-      int copied=CopyRates(_Symbol,_Period,10+_SHIFT_-1,qty+1,rates);
+      int copied=CopyRates(_Symbol,PERIOD_M1,15+_SHIFT_-1,qty+1,rates);
       FileWrite(FileHandle,"double od_forecast(datetime time,string smb)  ");
       FileWrite(FileHandle," {");
       int SymbolIdx;
@@ -45,12 +47,13 @@ int Write_File(int qty)
          for(i=0; i<qty;i++)
            {
             TimeToStruct(rates[i].time,tm);
+            if(tm.mon!=cm) break;
            // res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
              if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
               {
                restanh=OV[0];
                //restanh=tanh(res/5);
-               if(restanh>0.3 || restanh<-0.3) 
+               if(restanh>0.333 || restanh<-0.333) 
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);
                FileWrite(FileHandle,"  if(smb==\""+SymbolsArray[SymbolIdx]+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)restanh+");");
@@ -59,7 +62,6 @@ int Write_File(int qty)
         }
       FileWrite(FileHandle,"  return(0);");
       FileWrite(FileHandle," }");
-
      }
    FileClose(FileHandle);
    return(0);

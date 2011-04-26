@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
-//|                                                     SignalMA.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
+//|                                              SignalEnvelopes.mqh |
+//|                      Copyright © 2010, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
 //|                                              Revision 2011.03.30 |
 //+------------------------------------------------------------------+
@@ -8,49 +8,54 @@
 // wizard description start
 //+------------------------------------------------------------------+
 //| Description of the class                                         |
-//| Title=Signals of indicator 'Moving Average'                      |
+//| Title=Signals of indicator 'Envelopes'                           |
 //| Type=SignalAdvanced                                              |
-//| Name=Moving Average                                              |
-//| ShortName=MA                                                     |
-//| Class=CSignalMA                                                  |
-//| Page=signal_ma                                                   |
-//| Parameter=PeriodMA,int,12,Period of averaging                    |
+//| Name=Envelopes                                                   |
+//| ShortName=Envelopes                                              |
+//| Class=CSignalEnvelopes                                           |
+//| Page=signal_envelopes                                            |
+//| Parameter=PeriodMA,int,45,Period of averaging                    |
 //| Parameter=Shift,int,0,Time shift                                 |
 //| Parameter=Method,ENUM_MA_METHOD,MODE_SMA,Method of averaging     |
 //| Parameter=Applied,ENUM_APPLIED_PRICE,PRICE_CLOSE,Prices series   |
+//| Parameter=Deviation,double,0.15,Deviation                        |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
-//| Class CSignalMA.                                                 |
+//| Class CSignalEnvelopes.                                          |
 //| Purpose: Class of generator of trade signals based on            |
-//|          the 'Moving Average' indicator.                         |
+//|          the 'Envelopes' indicator.                              |
 //| Is derived from the CExpertSignal class.                         |
 //+------------------------------------------------------------------+
-class CSignalMA : public CExpertSignal
+class CSignalEnvelopes : public CExpertSignal
   {
 protected:
-   CiMA              m_ma;             // object-indicator
+   CiEnvelopes       m_env;            // object-indicator
    //--- adjusted parameters
    int               m_ma_period;      // the "period of averaging" parameter of the indicator
    int               m_ma_shift;       // the "time shift" parameter of the indicator
    ENUM_MA_METHOD    m_ma_method;      // the "method of averaging" parameter of the indicator
    ENUM_APPLIED_PRICE m_ma_applied;    // the "object of averaging" parameter of the indicator
+   double            m_deviation;      // the "deviation" parameter of the indicator
+   double            m_limit_in;       // threshold sensitivity of the 'rollback zone'
+   double            m_limit_out;      // threshold sensitivity of the 'break through zone'
    //--- "weights" of market models (0-100)
-   int               m_pattern_0;      // model 0 "price is on the necessary side from the indicator"
-   int               m_pattern_1;      // model 1 "price crossed the indicator with opposite direction"
-   int               m_pattern_2;      // model 2 "price crossed the indicator with the same direction"
+   int               m_pattern_0;      // model 0 "price is near the necessary border of the envelope"
+   int               m_pattern_1;      // model 1 "price crossed a border of the envelope"
 
 public:
-                     CSignalMA();
+                     CSignalEnvelopes();
    //--- methods of setting adjustable parameters
-   void              PeriodMA(int value)                 { m_ma_period=value;          }
-   void              Shift(int value)                    { m_ma_shift=value;           }
-   void              Method(ENUM_MA_METHOD value)        { m_ma_method=value;          }
-   void              Applied(ENUM_APPLIED_PRICE value)   { m_ma_applied=value;         }
+   void              PeriodMA(int value)                 { m_ma_period=value;        }
+   void              Shift(int value)                    { m_ma_shift=value;         }
+   void              Method(ENUM_MA_METHOD value)        { m_ma_method=value;        }
+   void              Applied(ENUM_APPLIED_PRICE value)   { m_ma_applied=value;       }
+   void              Deviation(double value)             { m_deviation=value;        }
+   void              LimitIn(double value)               { m_limit_in=value;         }
+   void              LimitOut(double value)              { m_limit_out=value;        }
    //--- methods of adjusting "weights" of market models
-   void              Pattern_0(int value)                { m_pattern_0=value;          }
-   void              Pattern_1(int value)                { m_pattern_1=value;          }
-   void              Pattern_2(int value)                { m_pattern_2=value;          }
+   void              Pattern_0(int value)                { m_pattern_0=value;        }
+   void              Pattern_1(int value)                { m_pattern_1=value;        }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- method of creating the indicator and timeseries
@@ -63,32 +68,31 @@ protected:
    //--- method of initialization of the indicator
    bool              InitMA(CIndicators* indicators);
    //--- methods of getting data
-   double            MA(int ind)                         { return(m_ma.Main(ind));     }
-   double            DiffMA(int ind)                     { return(MA(ind)-MA(ind+1));  }
-   double            DiffOpenMA(int ind)                 { return(Open(ind)-MA(ind));  }
-   double            DiffHighMA(int ind)                 { return(High(ind)-MA(ind));  }
-   double            DiffLowMA(int ind)                  { return(Low(ind)-MA(ind));   }
-   double            DiffCloseMA(int ind)                { return(Close(ind)-MA(ind)); }
+   double            Upper(int ind)                      { return(m_env.Upper(ind)); }
+   double            Lower(int ind)                      { return(m_env.Lower(ind)); }
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalMA.                                           |
+//| Constructor CSignalEnvelopes.                                    |
 //| INPUT:  no.                                                      |
 //| OUTPUT: no.                                                      |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSignalMA::CSignalMA()
+void CSignalEnvelopes::CSignalEnvelopes()
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 //--- setting default values for the indicator parameters
-   m_ma_period =12;
+   m_ma_period =45;
    m_ma_shift  =0;
    m_ma_method =MODE_SMA;
    m_ma_applied=PRICE_CLOSE;
+   m_deviation =0.15;
+//---
+   m_limit_in  =0.2;
+   m_limit_out =0.2;
 //--- setting default "weights" of the market models
-   m_pattern_0 =80;          // model 0 "price is on the necessary side from the indicator"
-   m_pattern_1 =10;          // model 1 "price crossed the indicator with opposite direction"
-   m_pattern_2 =60;          // model 2 "price crossed the indicator with the same direction"
+   m_pattern_0 =90;          // model 0 "price is near the necessary border of the envelope"
+   m_pattern_1 =70;          // model 1 "price crossed a border of the envelope"
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
@@ -96,7 +100,7 @@ void CSignalMA::CSignalMA()
 //| OUTPUT: true-if settings are correct, false otherwise.           |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::ValidationSettings()
+bool CSignalEnvelopes::ValidationSettings()
   {
 //--- validation settings of additional filters
    if(!CExpertSignal::ValidationSettings()) return(false);
@@ -115,7 +119,7 @@ bool CSignalMA::ValidationSettings()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitIndicators(CIndicators* indicators)
+bool CSignalEnvelopes::InitIndicators(CIndicators* indicators)
   {
 //--- check pointer
    if(indicators==NULL)                           return(false);
@@ -132,18 +136,18 @@ bool CSignalMA::InitIndicators(CIndicators* indicators)
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalMA::InitMA(CIndicators* indicators)
+bool CSignalEnvelopes::InitMA(CIndicators* indicators)
   {
 //--- check pointer
    if(indicators==NULL) return(false);
 //--- add object to collection
-   if(!indicators.Add(GetPointer(m_ma)))
+   if(!indicators.Add(GetPointer(m_env)))
      {
       printf(__FUNCTION__+": error adding object");
       return(false);
      }
 //--- initialize object
-   if(!m_ma.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_method,m_ma_applied))
+   if(!m_env.Create(m_symbol.Name(),m_period,m_ma_period,m_ma_shift,m_ma_method,m_ma_applied,m_deviation))
      {
       printf(__FUNCTION__+": error initializing object");
       return(false);
@@ -157,49 +161,20 @@ bool CSignalMA::InitMA(CIndicators* indicators)
 //| OUTPUT: number of "votes" that price will grow.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMA::LongCondition()
+int CSignalEnvelopes::LongCondition()
   {
    int result=0;
    int idx   =StartIndex();
-//--- analyze positional relationship of the close price and the indicator at the first analyzed bar
-   if(DiffCloseMA(idx)<0.0)
-     {
-      //--- the close price is below the indicator
-      if(DiffOpenMA(idx)>0.0 && DiffMA(idx)>0.0)
-        {
-         //--- the open price is above the indicator (i.e. there was an intersection), but the indicator is directed upwards
-         result=m_pattern_1;
-         //--- consider that this is an unformed "piercing" and suggest to enter the market at the current price
-         m_base_price=0.0;
-        }
-     }
-   else
-     {
-      //--- the close price is above the indicator (the indicator has no objections to buying)
+   double close=Close(idx);
+   double upper=Upper(idx);
+   double lower=Lower(idx);
+   double width=upper-lower;
+//--- if the model 0 is used and price is in the rollback zone, then there is a condition for buying
+   if(IS_PATTERN_USAGE(0) && close<lower+m_limit_in*width && close>lower-m_limit_out*width)
       result=m_pattern_0;
-      if(DiffMA(idx)>0.0)
-        {
-         //--- the indicator is directed upwards
-         if(DiffOpenMA(idx)<0.0)
-           {
-            //--- the open price is below the indicator (i.e. there was an intersection)
-            result=m_pattern_2;
-            //--- suggest to enter the market at the "roll back"
-            m_base_price=m_symbol.NormalizePrice(MA(idx));
-           }
-         else
-           {
-            //--- the open price is above the indicator
-            if(DiffLowMA(idx)<0.0)
-              {
-               //--- the low price is below the indicator
-               result=m_pattern_2;
-               //--- consider that this is a formed "piercing" and suggest to enter the market at the current price
-               m_base_price=0.0;
-              }
-           }
-        }
-     }
+//--- if the model 1 is used and price is above the rollback zone, then there is a condition for buying
+   if(IS_PATTERN_USAGE(1) && close>upper+m_limit_out*width)
+      result=m_pattern_1;
 //--- return the result
    return(result);
   }
@@ -209,49 +184,20 @@ int CSignalMA::LongCondition()
 //| OUTPUT: number of "votes" that price will fall.                  |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalMA::ShortCondition()
+int CSignalEnvelopes::ShortCondition()
   {
-   int result=0;
-   int idx   =StartIndex();
-//--- analyze positional relationship of the close price and the indicator at the first analyzed bar
-   if(DiffCloseMA(idx)>0.0)
-     {
-      //--- the close price is above the indicator
-      if(DiffOpenMA(idx)>0.0 && DiffMA(idx)<0.0)
-        {
-         //--- the open price is below the indicator (i.e. there was an intersection), but the indicator is directed downwards
-         result=m_pattern_1;
-         //--- consider that this is an unformed "piercing" and suggest to enter the market at the current price
-         m_base_price=0.0;
-        }
-     }
-   else
-     {
-      //--- the close price is below the indicator (the indicator has no objections to buying)
+   int result  =0;
+   int idx     =StartIndex();
+   double close=Close(idx);
+   double upper=Upper(idx);
+   double lower=Lower(idx);
+   double width=upper-lower;
+//--- if the model 0 is used and price is in the rollback zone, then there is a condition for selling
+   if(IS_PATTERN_USAGE(0) && close>upper-m_limit_in*width && close<upper+m_limit_out*width)
       result=m_pattern_0;
-      if(DiffMA(idx)<0.0)
-        {
-         //--- the indicator is directed downwards
-         if(DiffOpenMA(idx)<0.0)
-           {
-            //--- the open price is above the indicator (i.e. there was an intersection)
-            result=m_pattern_2;
-            //--- suggest to enter the market at the "roll back"
-            m_base_price=m_symbol.NormalizePrice(MA(idx));
-           }
-         else
-           {
-            //--- the open price is below the indicator
-            if(DiffHighMA(idx)>0.0)
-              {
-               //--- the high price is above the indicator
-               result=m_pattern_2;
-               //--- consider that this is a formed "piercing" and suggest to enter the market at the current price
-               m_base_price=0.0;
-              }
-           }
-        }
-     }
+//--- if the model 1 is used and price is above the rollback zone, then there is a condition for selling
+   if(IS_PATTERN_USAGE(1) && close<lower-m_limit_out*width)
+      result=m_pattern_1;
 //--- return the result
    return(result);
   }

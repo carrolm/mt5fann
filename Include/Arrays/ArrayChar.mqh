@@ -781,4 +781,3 @@ bool CArrayChar::Load(int file_handle)
    return(m_data_total==num);
   }
 //+------------------------------------------------------------------+
-

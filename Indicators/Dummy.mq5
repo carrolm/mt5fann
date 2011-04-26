@@ -8,7 +8,7 @@
 #property version   "1.00"
 #property indicator_separate_window
 #property indicator_minimum 0
-#property indicator_maximum 100
+#property indicator_maximum 3
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot Label1

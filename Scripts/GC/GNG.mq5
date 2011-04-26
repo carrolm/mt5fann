@@ -12,7 +12,7 @@
 #include <GC\GetVectors.mqh>
 
 //--- количество входных векторов, используемых для обучения
-input int      samples=1000;
+input int      samples=100;
 
 //--- параметры алгоритма
 input int lambda=20;
@@ -72,9 +72,9 @@ void OnStart()
    ArrayResize(v1,input_dimension);
    ArrayResize(v2,input_dimension);i=1;
    while(!GetVectors(v1,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,i++));
-   Print(i);
+ //  Print(i);
    while(!GetVectors(v2,OV,input_dimension,0,"Easy",_Symbol,PERIOD_M1,++i));
-   Print(i);
+ //  Print(i);
 //   for(i=0;i<input_dimension;i++)
 //     {
 //      v1[i] = RSI_buffer[i];
@@ -108,7 +108,9 @@ void OnStart()
       ObjectSetString(0,"Label_neurons",OBJPROP_TEXT,"Total neurons: 2");
      }
 //--- главный цикл агоритма начинаем с i=2 т.к. 2 векора уже использовали
-   for(;i<samples;i++)
+   int si=i;
+   for(int jjj=0;jjj<100;jjj++)
+   for(i=si;i<samples;i++)
      {
       //--- заполняем вектор данных (для наглядности берем отсчеты, отстоящие
       //--- на 3 бара - они меньше скоррелированы)
@@ -121,8 +123,8 @@ void OnStart()
         {
          //--- показываем вектор на графике
          ObjectCreate(0,"Sample_"+(string)i,OBJ_ARROW,window,time[v[0]*400+550],v[1]*1.4+1.5);
-         ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_ARROWCODE,158);
-         ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Blue);
+         ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_ARROWCODE,159);
+         ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_COLOR,Magenta);
          ObjectSetInteger(0,"Sample_"+(string)i,OBJPROP_BACK,true);
 
          //--- меняем информационную метку
@@ -163,7 +165,7 @@ void OnStart()
          if(window>0)
            {
             ObjectCreate(0,"Neuron_"+(string)tmp.uid,OBJ_ARROW,window,time[weights[0]*400+550],weights[1]*1.4+1.5);
-            ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_ARROWCODE,159);
+            ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_ARROWCODE,158);
 
             //--- победитель цветом Lime, второй лучший Green, остальные Red
             if(tmp==W1) ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Lime);
@@ -183,17 +185,17 @@ void OnStart()
       tmpc=GNGAlgorithm.Connections.GetFirstNode();
       while(CheckPointer(tmpc))
         {
-         int x1=0,x2,y1=0,y2;
+         double x1=0,x2,y1=0,y2;
 
          tmp=GNGAlgorithm.Neurons.Find(tmpc.uid1);
          if(tmp!=NULL)
            {
             tmp.Weights(weights);
-            x1=(int)weights[0];y1=(int)weights[1];
+            x1=(weights[0]*400+550);y1=(weights[1]*1.4+1.47);
            }
          tmp=GNGAlgorithm.Neurons.Find(tmpc.uid2);
          tmp.Weights(weights);
-         x2=(int)weights[0];y2=(int)weights[1];
+         x2=(weights[0]*400+550);y2=(weights[1]*1.4+1.47);
 
          if(window>0)
            {

@@ -221,7 +221,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
   {// пара, период, смещение назад (дл€ индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
-   int shift_history=10;//,i;//
+   int shift_history=15;//,i;//
    if(0==num_outputvectors) shift_history=0;
 // работаем только если есть фарктал! только на экстремумах!
    ArrayInitialize(InputVector,0);
@@ -234,7 +234,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 //if((High[1]>High[0] && High[1]>High[2])
 //   || (Low[1]<Low[0] && Low[1]<Low[2]))
 //   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
-   if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift); ret=true;}
+   if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift,false,2); ret=true;}
    if(num_inputvectors>0)
      {// ≈сть фрактал!
       //Print("shift="+shift+" shift_history="+shift_history);

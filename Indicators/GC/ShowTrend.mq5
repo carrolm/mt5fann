@@ -9,10 +9,10 @@
 #include <GC\GetVectors.mqh>
 #property indicator_separate_window
 #property indicator_minimum -1.0
-#property indicator_level1  -0.66
-#property indicator_level2  -0.33
-#property indicator_level3  0.33
-#property indicator_level4  0.66
+#property indicator_level1  -0.666
+#property indicator_level2  -0.333
+#property indicator_level3  0.333
+#property indicator_level4  0.666
 #property indicator_maximum 1.0
 #property indicator_buffers 2
 #property indicator_plots   1
@@ -23,7 +23,7 @@
 //--- indicator buffers
 double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
-input int _TREND_=20;// на сколько смотреть вперед
+input int _TREND_=15;// на сколько смотреть вперед
 input int  _limit_=5000;// на сколько баров уходить назад
 input int _ts_ = 2;// сколько тейкпрофитов берем
 //+------------------------------------------------------------------+
@@ -37,7 +37,7 @@ int OnInit()
 //---- name for DataWindow and indicator subwindow label
    IndicatorSetString(INDICATOR_SHORTNAME,"GC Oracle trend");
 //---- indicator digits
-   IndicatorSetInteger(INDICATOR_DIGITS,0);
+   IndicatorSetInteger(INDICATOR_DIGITS,3);
    ArraySetAsSeries(ExtVolumesBuffer,true);
    ArraySetAsSeries(ExtColorsBuffer,true);
 //---

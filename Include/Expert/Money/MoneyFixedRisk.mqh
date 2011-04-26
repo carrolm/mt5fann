@@ -13,12 +13,12 @@
 //| Name=FixRisk                                                     |
 //| Class=CMoneyFixedRisk                                            |
 //| Page=                                                            |
-//| Parameter=Percent,double,10.0                                    |
+//| Parameter=Percent,double,10.0,Risk percentage                    |
 //+------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+
 //| Class CMoneyFixedRisk.                                           |
-//| Appointment: Class money managment with fixed percent risk.      |
+//| Purpose: Class of money management with fixed percent risk.      |
 //|              Derives from class CExpertMoney.                    |
 //+------------------------------------------------------------------+
 class CMoneyFixedRisk : public CExpertMoney
