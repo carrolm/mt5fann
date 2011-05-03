@@ -16,7 +16,7 @@ public:
    bool              debug;
    string            inputSignals;
    string            filename;
-                     COracleTemplate(){Init();};
+                     COracleTemplate(){/*Init();*/};
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(){debug=false;filename=Name();loadSettings(filename);};
    virtual void      DeInit(){saveSettings(filename);};
@@ -31,6 +31,7 @@ public:
 //+------------------------------------------------------------------+
 bool COracleTemplate::loadSettings(string filename)
   {
+   if(""==filename) filename=Name();   
    int FileHandle=FileOpen(filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
    string fr;
    if(FileHandle!=INVALID_HANDLE)
@@ -38,12 +39,14 @@ bool COracleTemplate::loadSettings(string filename)
       while(""!=(fr=FileReadString(FileHandle)))
         {
          if("inputSignals"==fr)
-           {inputSignals=FileReadString(FileHandle);
-            Print("inputSignals=",inputSignals);
+           {
+            inputSignals=FileReadString(FileHandle);
+            Print(Name()," inputSignals=",inputSignals);
            }
         }
       FileClose(FileHandle);
      }
+   Print(Name()," ready!");
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -51,6 +54,7 @@ bool COracleTemplate::loadSettings(string filename)
 //+------------------------------------------------------------------+
 bool COracleTemplate::saveSettings(string filename)
   {
+   if(""==filename) filename=Name();
    int FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
    string fr;
    if(FileHandle!=INVALID_HANDLE)
@@ -58,7 +62,7 @@ bool COracleTemplate::saveSettings(string filename)
       FileWrite(FileHandle,"inputSignals",inputSignals);
       FileClose(FileHandle);
      }
-  return(true);
+   return(true);
   }
 
 COracleTemplate *AllOracles[];
@@ -1093,6 +1097,7 @@ int AllOracles()
    AllOracles[nAllOracles++]=new CiAO;
    AllOracles[nAllOracles++]=new CiIchimoku;
    AllOracles[nAllOracles++]=new CiEnvelopes;
+   for(int i=0;i<nAllOracles;i++) AllOracles[i].Init();
    return(nAllOracles);
   }
 //+------------------------------------------------------------------+

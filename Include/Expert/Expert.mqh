@@ -1489,7 +1489,7 @@ void CExpert::TimeframeAdd(ENUM_TIMEFRAMES period)
       case PERIOD_D1:  m_period_flags|=OBJ_PERIOD_D1;  break;
       case PERIOD_W1:  m_period_flags|=OBJ_PERIOD_W1;  break;
       case PERIOD_MN1: m_period_flags|=OBJ_PERIOD_MN1; break;
-      default:         m_period_flags=OBJ_ALL_PERIODS; break;
+      default:         m_period_flags=WRONG_VALUE;     break;
      }
   }
 //+------------------------------------------------------------------+

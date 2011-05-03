@@ -17,20 +17,7 @@ int OnInit()
   {
 //ArrayResize(Oracles,20);
    nOracles=AllOracles();
-//Oracles[nOracles++]=new CiStochastic;
-//Oracles[nOracles++]=new CiMACD;
-//Oracles[nOracles++]=new CiMA;
-//Oracles[nOracles++]=new CPriceChanel;
-//Oracles[nOracles++]=new CiRSI;
-//Oracles[nOracles++]=new CiCGI;
-//Oracles[nOracles++]=new CiWPR;
-//Oracles[nOracles++]=new CiBands;
-//Oracles[nOracles++]=new CiAlligator;
-//Oracles[nOracles++]=new CiAO;
-//Oracles[nOracles++]=new CiIchimoku;
-//Oracles[nOracles++]=new CiEnvelopes;
-//  Oracles[nOracles++]=new CNRTR;
-   Print("Ready!");
+   //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
    return(0);
   }
 //+------------------------------------------------------------------+
