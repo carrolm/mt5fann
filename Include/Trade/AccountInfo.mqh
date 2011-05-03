@@ -408,12 +408,7 @@ double CAccountInfo::MaxLotCheck(const string symbol,ENUM_ORDER_TYPE trade_opera
    double volume=NormalizeDouble(FreeMargin()*percent/100.0/margin,2);
 //--- normalize and check limits
    double stepvol=SymbolInfoDouble(symbol,SYMBOL_VOLUME_STEP);
-   if(stepvol>0.0)
-     {
-      double newvol=stepvol*NormalizeDouble(volume/stepvol,0);
-      if(newvol>volume) volume=NormalizeDouble(newvol-stepvol,2);
-      else              volume=newvol;
-     }
+   if(stepvol>0.0)   volume=stepvol*MathFloor(volume/stepvol);
 //---
    double minvol=SymbolInfoDouble(symbol,SYMBOL_VOLUME_MIN);
    if(volume<minvol) volume=0.0;
