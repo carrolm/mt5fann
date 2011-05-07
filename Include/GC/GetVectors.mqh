@@ -20,9 +20,9 @@ double tanh(double x)
    double x_=MathExp(x);
    double _x=MathExp(-x);
    return((x_-_x)/(x_+_x));
-   //double ret=(x_-_x)/(x_+_x);
- //  Print(x+" "+x_+" "+_x+"="+ret);
-   //return(ret);
+//double ret=(x_-_x)/(x_+_x);
+//  Print(x+" "+x_+" "+_x+"="+ret);
+//return(ret);
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -217,6 +217,139 @@ int err()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   double output_vector=0;
+   int shift_history=15,ni=0;
+   if(shift<shift_history) shift_history=0;
+   ArrayInitialize(InputVector,0);
+// вернем выход -если история
+   if(shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift,false,2);
+   if(StringLen(fn_names)<5) return output_vector;
+// разберем строку...
+   int start_pos=0,end_pos=0;
+   end_pos=StringFind(fn_names," ",start_pos);
+   while(end_pos>0)
+     {
+      //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
+      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history);
+      start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
+     }
+   if(start_pos>0)
+     {
+      //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-"); 
+      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history);
+
+     }
+//
+   return output_vector;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
+  {
+   if("DayOfWeek"==fn_name) return GetVector_DayOfWeek(smbl,tf,shift);
+   if("Hour"==fn_name) return GetVector_Hour(smbl,tf,shift);
+   if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
+   if("Stochastic"==fn_name) return GetVector_Stochastic(smbl,tf,shift);
+   if("RSI"==fn_name) return GetVector_RSI(smbl,tf,shift);
+   Print("Not found fn=",fn_name);
+   return 0.0;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_DayOfWeek(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {
+   datetime Time[]; ArraySetAsSeries(Time,true);
+   CopyTime(smb,tf,shift,3,Time);
+   MqlDateTime tm;
+
+   TimeToStruct(Time[1],tm);
+   return((double)tm.day_of_week/7);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_Hour(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {
+   datetime Time[]; ArraySetAsSeries(Time,true);
+   CopyTime(smb,tf,shift,3,Time);
+   MqlDateTime tm;
+
+   TimeToStruct(Time[1],tm);
+   return((double)tm.day_of_week/7);
+   return((double)tm.hour/24);
+  }
+  
+double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+
+   double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+
+   double Close[];
+   ArraySetAsSeries(Close,true);
+// копируем историю
+   int maxcount=CopyClose(smb,tf,shift,3,Close);
+
+   if(maxcount<3)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(false);
+     }
+    return tanh(MathLog(Close[1]/Close[2])/TS);
+  }
+ 
+double GetVector_Stochastic(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
+   //int i;   double res=0;
+   //for(i=0;i<num_inputvectors;i++)
+   //  {
+   //   // вычислим и отнормируем
+   //   res=ind_buffer[i+1]/100-0.5;
+   //   //if(ind_buffer[i+2]==0) res=0;
+   //   //else res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+   //   ////res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
+   //   InputVector[i]=res;
+   //  }
+   IndicatorRelease(h_ind);
+   return ind_buffer[1]/100-0.5;
+   
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iRSI(smb,tf,14,PRICE_CLOSE);
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5))return(0);
+     {
+      //Print("RSI not copy= "+(string)h_ind+" "+(string)num_inputvectors+" shift="+(string)shift);
+      //return(false);
+     }
+   //int i;   double res=0;
+   //for(i=0;i<num_inputvectors;i++)
+   //  {
+   //   // вычислим и отнормируем
+   //   res=ind_buffer[i+1]/100-0.5;
+   //   //      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+   //   //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
+   //   InputVector[i]=res;
+   //  }
+IndicatorRelease(h_ind);
+       return ind_buffer[1]/100-0.5;
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
@@ -240,9 +373,9 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //Print("shift="+shift+" shift_history="+shift_history);
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       // нормируем в гиперкуб -0.5...0.5
-//      double sq=0;
-//     for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
-//     if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
+      //      double sq=0;
+      //     for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
+      //     if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
 
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("IMA"==fn_name) ret=GetVectors_IMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -267,7 +400,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       //double max=InputVector[0];
       //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];if(max==0) max=1;
       //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
-  //    for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
+      //    for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
 
      }
    return(ret);
@@ -299,7 +432,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
    maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
    maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
    maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
-   double res=0, res1=0;
+   double res=0,res1=0;
    int is,ib;
 //   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
@@ -339,7 +472,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
         }
       if(mS>mB) {res=-mS;if(4*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
       else      { res=mB;if(4*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
-      
+
       if(TS>0.00001)
         {
          //Print(res+"/"+(TS));
@@ -359,11 +492,11 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //QWB	40 643,00	6,45127%	0,1290253968	0,0645126984	0,9113539683
 //QB	7 602,00	1,20667%	0,0241333333	0,0120666667	0,9879333333
    res=tanh(res/5);
-   //if(res>0.6) res=0.9879333333;
-   //else if (res>0.3) res=0.9113539683;
-   //else if (res>-0.3) res=-0.002417460;
-   //else if (res>-0.6) res=-0.9138063492;
-   //else res=-0.987968254;
+//if(res>0.6) res=0.9879333333;
+//else if (res>0.3) res=0.9113539683;
+//else if (res>-0.3) res=-0.002417460;
+//else if (res>-0.6) res=-0.9138063492;
+//else res=-0.987968254;
 
    return(res);
 

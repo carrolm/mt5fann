@@ -15,9 +15,13 @@ int nOracles;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-//ArrayResize(Oracles,20);
-   nOracles=AllOracles();
+ArrayResize(AllOracles,20);
+   nOracles=0;//AllOracles();
+   AllOracles[nOracles++]=new CiStochastic;
+   AllOracles[0].Init();
    //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
+   double            InputVector[];ArrayResize(InputVector,20);
+   GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);
    return(0);
   }
 //+------------------------------------------------------------------+
