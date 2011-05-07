@@ -15,7 +15,7 @@ int nOracles;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-ArrayResize(AllOracles,20);
+   ArrayResize(AllOracles,20);
    nOracles=0;//AllOracles();
    AllOracles[nOracles++]=new CiStochastic;
    AllOracles[0].Init();
