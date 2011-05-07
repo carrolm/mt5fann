@@ -12,13 +12,14 @@
 class COracleTemplate
   {
 private:
+   bool              IsInit;
 public:
    bool              debug;
    string            inputSignals;
    string            filename;
-                     COracleTemplate(){/*Init();*/};
+                     COracleTemplate(){IsInit=false;/*Init();*/};
                     ~COracleTemplate(){DeInit();};
-   virtual void      Init(){debug=false;filename=Name();loadSettings(filename);};
+   virtual void      Init(){if(!IsInit) {IsInit=true;debug=false;filename=Name()+".ini";loadSettings(filename);}};
    virtual void      DeInit(){saveSettings(filename);};
    virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
@@ -31,7 +32,7 @@ public:
 //+------------------------------------------------------------------+
 bool COracleTemplate::loadSettings(string filename)
   {
-   if(""==filename) filename=Name();   
+   if(""==filename) filename=Name()+".ini";
    int FileHandle=FileOpen(filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
    string fr;
    if(FileHandle!=INVALID_HANDLE)
@@ -54,7 +55,7 @@ bool COracleTemplate::loadSettings(string filename)
 //+------------------------------------------------------------------+
 bool COracleTemplate::saveSettings(string filename)
   {
-   if(""==filename) filename=Name();
+   if(""==filename) filename=Name()+".ini";
    int FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
    string fr;
    if(FileHandle!=INVALID_HANDLE)
@@ -69,9 +70,7 @@ COracleTemplate *AllOracles[];
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 class CiMA:public COracleTemplate
   {
    virtual double    forecast(string smbl,int shift,bool train);
@@ -81,9 +80,7 @@ class CiMA:public COracleTemplate
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 double CiMA::forecast(string smbl,int shift,bool train)
   {
 
@@ -110,12 +107,9 @@ double CiMA::forecast(string smbl,int shift,bool train)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 double CiMA::forecast(string smbl,datetime startdt,bool train)
   {
-
    double sig=0;
    double ind1_buffer[];
    double ind2_buffer[];
@@ -139,7 +133,7 @@ double CiMA::forecast(string smbl,datetime startdt,bool train)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
+
 class CiMACD:public COracleTemplate
   {
    virtual double    forecast(string smbl,int shift,bool train);
@@ -149,9 +143,7 @@ class CiMACD:public COracleTemplate
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 double CiMACD::forecast(string smbl,int shift,bool train)
   {
 
@@ -179,9 +171,7 @@ double CiMACD::forecast(string smbl,int shift,bool train)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 double CiMACD::forecast(string smbl,datetime shift,bool train)
   {
 
@@ -208,7 +198,6 @@ double CiMACD::forecast(string smbl,datetime shift,bool train)
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
-//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 class CPriceChanel:public COracleTemplate
   {
