@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"Easy","Fractals","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
+string VectorFunctions[21]={"DayOfWeek","Hour","EasyClose","Fractals","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -20,9 +20,6 @@ double tanh(double x)
    double x_=MathExp(x);
    double _x=MathExp(-x);
    return((x_-_x)/(x_+_x));
-//double ret=(x_-_x)/(x_+_x);
-//  Print(x+" "+x_+" "+_x+"="+ret);
-//return(ret);
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -31,188 +28,6 @@ double tanh(double x)
 double Sigmoid(double x)// вычисление логистической функции активации
   {
    return(1/(1+exp(-x)));
-  }
-//+------------------------------------------------------------------+
-//| Предобработка сигнала                                            |
-//+------------------------------------------------------------------+
-void InNormalize(double &aa[],int typ=1)
-  {
-   double sum_sqrt,rmax,rmin;
-   int i,n=ArraySize(aa);
-//---
-   switch(typ)
-     {
-      case 1:
-         rmax=aa[ArrayMaximum(aa)];
-         rmin=aa[ArrayMinimum(aa)];
-         for(i=0;i<=n-1;i++)
-           {
-            aa[i]=2*(aa[i]-rmin)/(rmax-rmin)-1;
-           }
-         break;
-      case 2:
-         sum_sqrt=0;
-         for(i=0; i<=n-1; i++)
-           {
-            sum_sqrt+=MathPow(aa[i],2);
-           }
-         sum_sqrt=MathSqrt(sum_sqrt);
-         //---
-         if(sum_sqrt!=0)
-           {
-            for(i=0; i<=n-1; i++)
-              {
-               aa[i]=aa[i]/sum_sqrt;
-              }
-           }
-         break;
-      case 3:
-         for(i=0; i<=n-1; i++)
-           {
-            aa[i]=tanh(aa[i]);
-           }
-         break;
-      case 4:
-         for(i=0; i<=n-1; i++)
-           {
-            aa[i]=Sigmoid(aa[i]);
-           }
-         break;
-
-      default: break;
-     }
-
-//---
-   return;
-  }
-//+-------------------------------------------------------------------+
-//| Масштабирование входящих сигналов                                              |
-//| aa[]  - числовой массив подлежащий нормализации        |
-//| scale - диаппазон нормализации                                                                      |
-//|              +1 -1 ->>  scale=11;   +1  0  ->> scale==10              |
-//| Return - 0 и нормализоваанный массив, в случае успеха|
-//|                     или код последней  ошибки                                                          |
-//+------------------------------------------------------------------+
-int GetScale(int scale,double &aa[])
-  {
-   int sign=0;
-   int I,i=0,Err=0;
-//double range;
-   double sum[],nn[];
-
-   double rmax=aa[ArrayMaximum(aa)];
-   double rmin=aa[ArrayMinimum(aa)];
-
-
-   if(rmax>0 && rmin>=0) sign= 1;
-   if(rmin<0 && rmax<=0) sign=-1;
-
-   I=ArraySize(aa);
-   ArrayResize(sum,I);
-   ArrayResize(nn,I);
-
-   if(scale==11) // приводим к +1 -1 
-     {
-      if(sign==0) // для массивов с положительными и отрицательными значениями
-        {
-         for(i=0;i<=I-1;i++)
-           {
-            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
-           }
-         Scale01(sum);
-
-         for(i=0;i<=I-1;i++)
-           {
-            if(nn[i]== 1) aa[i]= sum[i];
-            if(nn[i]==-1) aa[i]=-sum[i];
-           }
-        }
-      else                   // для массивов только с положительными или отрицательными значениями
-        {
-         if(sign==-1) for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
-         Scale11(aa);
-         if(sign==-1) aa[i]=-aa[i];// recover sign
-        }
-      Err=err();
-      return(Err);
-     }
-
-   if(scale==10) // приводим к 0 +1 
-     {
-      if(sign==0) // для массивов с положительными и отрицательными значениями
-        {
-         for(i=0;i<=I-1;i++)
-           {
-            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
-           }
-         Scale01(sum);
-
-         for(i=0;i<=I-1;i++)
-           {
-            if(nn[i]== 1) aa[i]= (sum[i]+1)/2;
-            if(nn[i]==-1) aa[i]=(-sum[i]+1)/2;
-           }
-        }
-      else                   // для массивов только с положительными или отрицательными значениями
-        {
-         if(sign==1) Scale01(aa);
-         else
-           {
-            for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
-            Scale01(aa);
-            aa[i]=-aa[i];// recover sign
-           }
-        }
-      Err=err();
-      return(Err);
-
-     }
-   return(Err);
-  }
-//+-------------------------------------------------------------------------------------+
-//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1 -1 |
-//+-------------------------------------------------------------------------------------+
-void Scale11(double &aa[])
-  {
-   int I=ArraySize(aa);
-   double rmax=aa[ArrayMaximum(aa)];
-   double rmin=aa[ArrayMinimum(aa)];
-   double range=(rmax-rmin);
-   if( range==0 ) range=0.5;
-   for(int i=0;i<=I-1;i++)
-     {
-      aa[i]=2*(aa[i]-rmin)/range-1;
-     }
-   return;
-  }
-//+-------------------------------------------------------------------------------------+
-//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1  0 |
-//+-------------------------------------------------------------------------------------+
-void Scale01(double &aa[])
-  {
-   int I=ArraySize(aa);
-   double rmax=aa[ArrayMaximum(aa)];
-   double rmin=aa[ArrayMinimum(aa)];
-   double range=rmax-rmin;
-   for(int i=0;i<=I-1;i++)
-     {
-      if( range!=0 ) aa[i]=(aa[i]-rmin)/range;
-      else aa[i]=0;
-     }
-   return;
-
-  }
-//+------------------------------------------------------------------+
-//|       Обработка ошибок                                                                                                |
-//+------------------------------------------------------------------+
-int err()
-  {
-   int err=GetLastError();
-   if(err!=0)
-     {
-      Print("error(",err,"): ");///,ErrorDescription(err));
-     }
-   return(err);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -229,19 +44,13 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 // разберем строку...
    int start_pos=0,end_pos=0;
    end_pos=StringFind(fn_names," ",start_pos);
-   while(end_pos>0)
+   do //while(end_pos>0)
      {
       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
       InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
-   if(start_pos>0)
-     {
-      //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-"); 
-      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history);
-
-     }
-//
+   while(start_pos>0);
    return output_vector;
   }
 //+------------------------------------------------------------------+
@@ -254,12 +63,130 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
    if("Stochastic"==fn_name) return GetVector_Stochastic(smbl,tf,shift);
    if("RSI"==fn_name) return GetVector_RSI(smbl,tf,shift);
+   if("IMA"==fn_name) return GetVector_IMA(smbl,tf,shift);
+   if("MACD"==fn_name) return GetVector_MACD(smbl,tf,shift);
+   if("CCI"==fn_name) return GetVector_CCI(smbl,tf,shift);
+   if("WPR"==fn_name) return GetVector_WPR(smbl,tf,shift);
+   if("AMA"==fn_name) return GetVector_AMA(smbl,tf,shift);
+   if("AO"==fn_name) return GetVector_AO(smbl,tf,shift);
+   if("Ichimoku"==fn_name) return GetVector_Ichimoku(smbl,tf,shift);
+   if("Envelopes"==fn_name) return GetVector_Envelopes(smbl,tf,shift);
    Print("Not found fn=",fn_name);
    return 0.0;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double GetVector_WPR(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iWPR(smb,tf,14);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
+
+   IndicatorRelease(h_ind);
+   return ind_buffer[1]/100+0.5;
+
+  }
+//+------------------------------------------------------------------+
+
+double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iAMA(smb,tf,9,2,30,0,PRICE_CLOSE);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_AO(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iAO(smb,tf);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_Ichimoku(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iIchimoku(smb,tf,9,26,52);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+  }
+//+------------------------------------------------------------------+
+double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iEnvelopes(smb,tf,28,0,MODE_SMA,PRICE_MEDIAN,0.1);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+
+   IndicatorRelease(h_ind);
+
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_IMA(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iMA(smb,tf,6,0,MODE_LWMA,PRICE_WEIGHTED);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_MACD(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iMACD(smb,tf,12,26,9,PRICE_CLOSE);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+
+  }
+//+------------------------------------------------------------------+
+double GetVector_CCI(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iCCI(smb,tf,14,PRICE_TYPICAL);
+   if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
+   IndicatorRelease(h_ind);
+   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+
+  }
+//+------------------------------------------------------------------+
+
 double GetVector_DayOfWeek(string smb,ENUM_TIMEFRAMES tf,int shift)
   {
    datetime Time[]; ArraySetAsSeries(Time,true);
@@ -279,10 +206,11 @@ double GetVector_Hour(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[1],tm);
-   return((double)tm.day_of_week/7);
    return((double)tm.hour/24);
   }
-  
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
 
@@ -292,34 +220,38 @@ double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
    ArraySetAsSeries(Close,true);
 // копируем историю
    int maxcount=CopyClose(smb,tf,shift,3,Close);
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<3)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
       return(false);
      }
-    return tanh(MathLog(Close[1]/Close[2])/TS);
+   return tanh(MathLog(Close[1]/Close[2])/TS);
   }
- 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 double GetVector_Stochastic(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
-   //int i;   double res=0;
-   //for(i=0;i<num_inputvectors;i++)
-   //  {
-   //   // вычислим и отнормируем
-   //   res=ind_buffer[i+1]/100-0.5;
-   //   //if(ind_buffer[i+2]==0) res=0;
-   //   //else res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
-   //   ////res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
-   //   InputVector[i]=res;
-   //  }
+//int i;   double res=0;
+//for(i=0;i<num_inputvectors;i++)
+//  {
+//   // вычислим и отнормируем
+//   res=ind_buffer[i+1]/100-0.5;
+//   //if(ind_buffer[i+2]==0) res=0;
+//   //else res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
+//   ////res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
+//   InputVector[i]=res;
+//  }
    IndicatorRelease(h_ind);
    return ind_buffer[1]/100-0.5;
-   
+
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -330,21 +262,8 @@ double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5))return(0);
-     {
-      //Print("RSI not copy= "+(string)h_ind+" "+(string)num_inputvectors+" shift="+(string)shift);
-      //return(false);
-     }
-   //int i;   double res=0;
-   //for(i=0;i<num_inputvectors;i++)
-   //  {
-   //   // вычислим и отнормируем
-   //   res=ind_buffer[i+1]/100-0.5;
-   //   //      res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
-   //   //res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
-   //   InputVector[i]=res;
-   //  }
-IndicatorRelease(h_ind);
-       return ind_buffer[1]/100-0.5;
+   IndicatorRelease(h_ind);
+   return ind_buffer[1]/100-0.5;
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -368,6 +287,9 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 //   || (Low[1]<Low[0] && Low[1]<Low[2]))
 //   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
    if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift,false,2); ret=true;}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(num_inputvectors>0)
      {// Есть фрактал!
       //Print("shift="+shift+" shift_history="+shift_history);
@@ -516,7 +438,9 @@ bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl,ENUM
 // копируем историю
    int maxcount=CopyClose(smbl,tf,shift,num_inputvectors+5,Close);
    ArrayInitialize(InputVector,EMPTY_VALUE);
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors+2)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -525,6 +449,9 @@ bool GetVectors_Easy(double &InputVector[],int num_inputvectors,string smbl,ENUM
    int i,j;j=0;
    double pr=0;
    for(i=0;i<num_inputvectors;i++,j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       pr=Close[j+1]/Close[j+2];
       pr=MathLog(pr);
@@ -558,8 +485,9 @@ bool GetVectors_HL(double &InputVector[],int num_inputvectors,string smbl="",ENU
    int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+2,High);
    maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
    maxcount=CopyLow(smbl,tf,shift,num_inputvectors+2,Low);
-
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors+2)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -568,6 +496,9 @@ bool GetVectors_HL(double &InputVector[],int num_inputvectors,string smbl="",ENU
    int i,j;j=1;
 
    for(i=0;i<num_inputvectors;j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
@@ -602,7 +533,9 @@ bool GetVectors_High(double &InputVector[],int num_inputvectors,string smbl="",E
    int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+2,High);
    maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
    maxcount=CopyLow(smbl,tf,shift,num_inputvectors+2,Low);
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors+2)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -611,6 +544,9 @@ bool GetVectors_High(double &InputVector[],int num_inputvectors,string smbl="",E
    int i,j;j=1;
 // вычислим и отнормируем
    for(i=0;i<num_inputvectors;j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
@@ -645,8 +581,9 @@ bool GetVectors_Low(double &InputVector[],int num_inputvectors,string smbl="",EN
    int maxcount=CopyHigh(smbl,tf,shift,num_inputvectors+2,High);
    maxcount=CopyClose(smbl,tf,shift,num_inputvectors+2,Close);
    maxcount=CopyLow(smbl,tf,shift,num_inputvectors+2,Low);
-
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(maxcount<num_inputvectors+2)
      {
       Print("Shift = ",shift," maxcount = ",maxcount);
@@ -655,6 +592,9 @@ bool GetVectors_Low(double &InputVector[],int num_inputvectors,string smbl="",EN
    int i,j;j=1;
 // вычислим и отнормируем
    for(i=0;i<num_inputvectors;j++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
@@ -705,6 +645,9 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
    ArrayInitialize(LowerBuffer,EMPTY_VALUE);
    int i,j;
    for(i=npf-1;i<maxcount-2;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
@@ -780,6 +723,9 @@ bool GetVectors_Fractals(double &InputVector[],int num_inputvectors,string smbl=
       //+------------------------------------------------------------------+
       //|                                                                  |
       //+------------------------------------------------------------------+
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       for(j=fp+1;UpperBuffer[j]==EMPTY_VALUE && LowerBuffer[j]==EMPTY_VALUE && j<maxcount;j++);
       if(LowerBuffer[j]==EMPTY_VALUE)// ExtUpperBuffer[i]=High[i];
@@ -805,6 +751,9 @@ bool GetVectors_Stochastic(double &InputVector[],int num_inputvectors,string smb
    if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1)) return(false);
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=ind_buffer[i+1]/100-0.5;
@@ -824,6 +773,9 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
    int h_ind=iRSI(smbl,tf,14,PRICE_CLOSE);
    double ind_buffer[];ArrayResize(ind_buffer,num_inputvectors+6);
    if(!ArraySetAsSeries(ind_buffer,true)) return(false);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(CopyBuffer(h_ind,0,shift,num_inputvectors+5,ind_buffer)<(num_inputvectors+1))
      {
       Print("RSI not copy= "+(string)h_ind+" "+(string)num_inputvectors+" shift="+(string)shift);
@@ -831,6 +783,9 @@ bool GetVectors_RSI(double &InputVector[],int num_inputvectors,string smbl="",EN
      }
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=ind_buffer[i+1]/100-0.5;
@@ -854,6 +809,9 @@ bool GetVectors_IMA(double &InputVector[],int num_inputvectors,string smbl="",EN
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -876,6 +834,9 @@ bool GetVectors_MACD(double &InputVector[],int num_inputvectors,string smbl="",E
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -896,6 +857,9 @@ bool GetVectors_CCI(double &InputVector[],int num_inputvectors,string smbl="",EN
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -917,6 +881,9 @@ bool GetVectors_WPR(double &InputVector[],int num_inputvectors,string smbl="",EN
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       res=ind_buffer[i+1]/100+0.5;
       // вычислим и отнормируем
@@ -939,6 +906,9 @@ bool GetVectors_AMA(double &InputVector[],int num_inputvectors,string smbl="",EN
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -961,6 +931,9 @@ bool GetVectors_AO(double &InputVector[],int num_inputvectors,string smbl="",ENU
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -983,6 +956,9 @@ bool GetVectors_Ichimoku(double &InputVector[],int num_inputvectors,string smbl=
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -1003,6 +979,9 @@ bool GetVectors_Envelopes(double &InputVector[],int num_inputvectors,string smbl
 
    int i;   double res=0;
    for(i=0;i<num_inputvectors;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       // вычислим и отнормируем
       res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
@@ -1011,5 +990,201 @@ bool GetVectors_Envelopes(double &InputVector[],int num_inputvectors,string smbl
    IndicatorRelease(h_ind);
 
    return(true);
+  }
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| Предобработка сигнала                                            |
+//+------------------------------------------------------------------+
+void InNormalize(double &aa[],int typ=1)
+  {
+   double sum_sqrt,rmax,rmin;
+   int i,n=ArraySize(aa);
+//---
+   switch(typ)
+     {
+      case 1:
+         rmax=aa[ArrayMaximum(aa)];
+         rmin=aa[ArrayMinimum(aa)];
+         for(i=0;i<=n-1;i++)
+           {
+            aa[i]=2*(aa[i]-rmin)/(rmax-rmin)-1;
+           }
+         break;
+      case 2:
+         sum_sqrt=0;
+         for(i=0; i<=n-1; i++)
+           {
+            sum_sqrt+=MathPow(aa[i],2);
+           }
+         sum_sqrt=MathSqrt(sum_sqrt);
+         //---
+         if(sum_sqrt!=0)
+           {
+            for(i=0; i<=n-1; i++)
+              {
+               aa[i]=aa[i]/sum_sqrt;
+              }
+           }
+         break;
+      case 3:
+         for(i=0; i<=n-1; i++)
+           {
+            aa[i]=tanh(aa[i]);
+           }
+         break;
+      case 4:
+         for(i=0; i<=n-1; i++)
+           {
+            aa[i]=Sigmoid(aa[i]);
+           }
+         break;
+
+      default: break;
+     }
+
+//---
+   return;
+  }
+//+-------------------------------------------------------------------+
+//| Масштабирование входящих сигналов                                              |
+//| aa[]  - числовой массив подлежащий нормализации        |
+//| scale - диаппазон нормализации                                                                      |
+//|              +1 -1 ->>  scale=11;   +1  0  ->> scale==10              |
+//| Return - 0 и нормализоваанный массив, в случае успеха|
+//|                     или код последней  ошибки                                                          |
+//+------------------------------------------------------------------+
+int GetScale(int scale,double &aa[])
+  {
+   int sign=0;
+   int I,i=0,Err=0;
+//double range;
+   double sum[],nn[];
+
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+
+
+   if(rmax>0 && rmin>=0) sign= 1;
+   if(rmin<0 && rmax<=0) sign=-1;
+
+   I=ArraySize(aa);
+   ArrayResize(sum,I);
+   ArrayResize(nn,I);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+   if(scale==11) // приводим к +1 -1 
+     {
+      if(sign==0) // для массивов с положительными и отрицательными значениями
+        {
+         for(i=0;i<=I-1;i++)
+           {
+            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
+           }
+         Scale01(sum);
+
+         for(i=0;i<=I-1;i++)
+           {
+            if(nn[i]== 1) aa[i]= sum[i];
+            if(nn[i]==-1) aa[i]=-sum[i];
+           }
+        }
+      else                   // для массивов только с положительными или отрицательными значениями
+        {
+         if(sign==-1) for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
+         Scale11(aa);
+         if(sign==-1) aa[i]=-aa[i];// recover sign
+        }
+      Err=err();
+      return(Err);
+     }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+   if(scale==10) // приводим к 0 +1 
+     {
+      if(sign==0) // для массивов с положительными и отрицательными значениями
+        {
+         for(i=0;i<=I-1;i++)
+           {
+            if(aa[i]>=0) {sum[i]=aa[i]; nn[i]=1;}  else {sum[i]=-aa[i]; nn[i]=-1;}
+           }
+         Scale01(sum);
+
+         for(i=0;i<=I-1;i++)
+           {
+            if(nn[i]== 1) aa[i]= (sum[i]+1)/2;
+            if(nn[i]==-1) aa[i]=(-sum[i]+1)/2;
+           }
+        }
+      else                   // для массивов только с положительными или отрицательными значениями
+        {
+         if(sign==1) Scale01(aa);
+         else
+           {
+            for(i=0;i<=I-1;i++) aa[i]=-aa[i];// invert sign
+            Scale01(aa);
+            aa[i]=-aa[i];// recover sign
+           }
+        }
+      Err=err();
+      return(Err);
+
+     }
+   return(Err);
+  }
+//+-------------------------------------------------------------------------------------+
+//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1 -1 |
+//+-------------------------------------------------------------------------------------+
+void Scale11(double &aa[])
+  {
+   int I=ArraySize(aa);
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+   double range=(rmax-rmin);
+   if( range==0 ) range=0.5;
+   for(int i=0;i<=I-1;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      aa[i]=2*(aa[i]-rmin)/range-1;
+     }
+   return;
+  }
+//+-------------------------------------------------------------------------------------+
+//| Масштабирование входящих сигналов > 0 приводим в диаппазон +1  0 |
+//+-------------------------------------------------------------------------------------+
+void Scale01(double &aa[])
+  {
+   int I=ArraySize(aa);
+   double rmax=aa[ArrayMaximum(aa)];
+   double rmin=aa[ArrayMinimum(aa)];
+   double range=rmax-rmin;
+   for(int i=0;i<=I-1;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      if( range!=0 ) aa[i]=(aa[i]-rmin)/range;
+      else aa[i]=0;
+     }
+   return;
+
+  }
+//+------------------------------------------------------------------+
+//|       Обработка ошибок                                                                                                |
+//+------------------------------------------------------------------+
+int err()
+  {
+   int err=GetLastError();
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+   if(err!=0)
+     {
+      Print("error(",err,"): ");///,ErrorDescription(err));
+     }
+   return(err);
   }
 //+------------------------------------------------------------------+
