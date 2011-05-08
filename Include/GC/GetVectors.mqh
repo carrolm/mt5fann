@@ -42,12 +42,20 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
    if(shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift,false,2);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
-   int start_pos=0,end_pos=0;
+   int start_pos=0,end_pos=0,shift_pos=0,add_shift;
    end_pos=StringFind(fn_names," ",start_pos);
    do //while(end_pos>0)
      {
       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
-      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history);
+      add_shift=0;
+      shift_pos = StringFind(fn_names,"-",start_pos);
+      if(shift_pos>0 && shift_pos<end_pos)
+         {
+         
+         add_shift=(int)StringToInteger(StringSubstr(fn_names,start_pos,shift_pos-start_pos));
+         start_pos=shift_pos+1;
+         }
+      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history+add_shift);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
    while(start_pos>0);
@@ -58,6 +66,8 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //+------------------------------------------------------------------+
 double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {
+   //Print("Process=",fn_name);
+
    if("DayOfWeek"==fn_name) return GetVector_DayOfWeek(smbl,tf,shift);
    if("Hour"==fn_name) return GetVector_Hour(smbl,tf,shift);
    if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
