@@ -14,19 +14,108 @@ class COracleTemplate
 private:
    bool              IsInit;
 public:
+   double            InputVector[];
    bool              debug;
    string            inputSignals;
+   int               num_input_signals;
    string            filename;
                      COracleTemplate(){IsInit=false;/*Init();*/};
                     ~COracleTemplate(){DeInit();};
-   virtual void      Init(){if(!IsInit) {IsInit=true;debug=false;filename=Name()+".ini";loadSettings(filename);}};
+   virtual void      Init(){if(!IsInit) {IsInit=true;debug=false;filename=Name()+".ini";loadSettings(filename);ArrayResize(InputVector,num_input_signals);}};
    virtual void      DeInit(){saveSettings(filename);};
    virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return("Prpototype");};
+   bool              ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid);
    bool              loadSettings(string filename);
    bool              saveSettings(string filename);
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid)
+  {
+   if(num_train==0 && 0==num_test && 0==num_valid) return(false);
+   if(""==smbl) smbl=_Symbol;
+   if(""==fname) fname=Name();
+   int FileHandle=-1;
+   int i,j,shift=30;
+   string outstr;
+   double Result;
+   if(num_valid>0)
+     {
+      FileHandle=FileOpen(fname+"_valid_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
+      if(FileHandle!=INVALID_HANDLE)
+        {
+         // Header
+         outstr="";
+         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
+         outstr+="Result";
+         FileWrite(FileHandle,outstr);
+         for(i=shift;i<(shift+num_valid);i++)
+           {
+            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+            outstr="";
+            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
+            outstr+=(string)Result;
+            FileWrite(FileHandle,outstr);
+           }
+         FileClose(FileHandle);
+         Print("Created.",fname+"_valid_data.csv");
+        }
+      shift+=num_valid;
+     }
+   if(num_test>0)
+     {
+      FileHandle=FileOpen(fname+"_test_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
+      if(FileHandle!=INVALID_HANDLE)
+        {
+         // Header
+         outstr="";
+         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
+         outstr+="Result";
+         FileWrite(FileHandle,outstr);
+         for(i=shift;i<(shift+num_test);i++)
+           {
+            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+            outstr="";
+            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
+            outstr+=(string)Result;
+            FileWrite(FileHandle,outstr);
+           }
+         FileClose(FileHandle);
+         Print("Created.",fname+"_test_data.csv");
+        }
+      shift+=num_valid;
+     }
+  if(num_train>0)
+     {
+      FileHandle=FileOpen(fname+"_train_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
+      if(FileHandle!=INVALID_HANDLE)
+        {
+         // Header
+         outstr="";
+         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
+         outstr+="Result";
+         FileWrite(FileHandle,outstr);
+         for(i=shift;i<(shift+num_train);i++)
+           {
+            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+            outstr="";
+            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
+            outstr+=(string)Result;
+            FileWrite(FileHandle,outstr);
+           }
+         FileClose(FileHandle);
+         Print("Created.",fname+"_train_data.csv");
+        }
+      shift+=num_train;
+     }
+
+   return(true);
+  }
+  
+  
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -42,7 +131,16 @@ bool COracleTemplate::loadSettings(string filename)
          if("inputSignals"==fr)
            {
             inputSignals=FileReadString(FileHandle);
-            Print(Name()," inputSignals=",inputSignals);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputSignals," ",start_pos);
+            do //while(end_pos>0)
+              {
+               num_input_signals++;
+               start_pos=end_pos+1;    end_pos=StringFind(inputSignals," ",start_pos);
+              }
+            while(start_pos>0);
+
+            //Print(Name()," inputSignals=",inputSignals," ",num_input_signals);
            }
         }
       FileClose(FileHandle);

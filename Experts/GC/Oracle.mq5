@@ -19,6 +19,7 @@ int OnInit()
    nOracles=0;//AllOracles();
    AllOracles[nOracles++]=new CiStochastic;
    AllOracles[0].Init();
+   AllOracles[0].ExportHistoryENCOG("","",100,5,10);
    //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
    double            InputVector[];ArrayResize(InputVector,20);
    GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);
@@ -36,6 +37,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   return;
    if(_TrailingPosition_) Trailing();
    int io;
    double   res=0;

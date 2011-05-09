@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"DayOfWeek","Hour","EasyClose","Fractals","RSI","IMA","Stochastic","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
+string VectorFunctions[21]={"DayOfWeek","Hour","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -46,15 +46,14 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
    end_pos=StringFind(fn_names," ",start_pos);
    do //while(end_pos>0)
      {
-      //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
       add_shift=0;
-      shift_pos = StringFind(fn_names,"-",start_pos);
-      if(shift_pos>0 && shift_pos<end_pos)
-         {
-         
+      shift_pos= StringFind(fn_names,"-",start_pos);
+      if(shift_pos>0 && (shift_pos<end_pos||-1==end_pos))
+        {
          add_shift=(int)StringToInteger(StringSubstr(fn_names,start_pos,shift_pos-start_pos));
          start_pos=shift_pos+1;
-         }
+        }
+       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
       InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history+add_shift);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
@@ -66,12 +65,13 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //+------------------------------------------------------------------+
 double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {
-   //Print("Process=",fn_name);
+//Print("Process=",fn_name);
 
    if("DayOfWeek"==fn_name) return GetVector_DayOfWeek(smbl,tf,shift);
    if("Hour"==fn_name) return GetVector_Hour(smbl,tf,shift);
    if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
-   if("Stochastic"==fn_name) return GetVector_Stochastic(smbl,tf,shift);
+   if("StochasticK"==fn_name) return GetVector_StochasticK(smbl,tf,shift);
+   if("StochasticD"==fn_name) return GetVector_StochasticD(smbl,tf,shift);
    if("RSI"==fn_name) return GetVector_RSI(smbl,tf,shift);
    if("IMA"==fn_name) return GetVector_IMA(smbl,tf,shift);
    if("MACD"==fn_name) return GetVector_MACD(smbl,tf,shift);
@@ -243,22 +243,27 @@ double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double GetVector_Stochastic(string smb,ENUM_TIMEFRAMES tf,int shift)
+double GetVector_StochasticK(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
-//int i;   double res=0;
-//for(i=0;i<num_inputvectors;i++)
-//  {
-//   // вычислим и отнормируем
-//   res=ind_buffer[i+1]/100-0.5;
-//   //if(ind_buffer[i+2]==0) res=0;
-//   //else res=MathLog10(ind_buffer[i+1]/ind_buffer[i+2]);
-//   ////res=MathLog10(rsi_buffer[i]/rsi_buffer[i+1]);
-//   InputVector[i]=res;
-//  }
+
+   IndicatorRelease(h_ind);
+   return ind_buffer[1]/100-0.5;
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_StochasticD(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,1,shift,5,ind_buffer)<(5)) return(0);
+
    IndicatorRelease(h_ind);
    return ind_buffer[1]/100-0.5;
 
