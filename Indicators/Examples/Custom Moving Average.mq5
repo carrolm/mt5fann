@@ -39,7 +39,7 @@ void CalculateSimpleMA(int rates_total,int prev_calculated,int begin,const doubl
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       ExtLineBuffer[i]=ExtLineBuffer[i-1]+(price[i]-price[i-InpMAPeriod])/InpMAPeriod;
 //---
   }
@@ -60,7 +60,7 @@ void CalculateEMA(int rates_total,int prev_calculated,int begin,const double &pr
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       ExtLineBuffer[i]=price[i]*SmoothFactor+ExtLineBuffer[i-1]*(1.0-SmoothFactor);
 //---
   }
@@ -92,7 +92,7 @@ void CalculateLWMA(int rates_total,int prev_calculated,int begin,const double &p
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       sum=0;
       for(int j=0;j<InpMAPeriod;j++) sum+=(InpMAPeriod-j)*price[i-j];
@@ -121,7 +121,7 @@ void CalculateSmoothedMA(int rates_total,int prev_calculated,int begin,const dou
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       ExtLineBuffer[i]=(ExtLineBuffer[i-1]*(InpMAPeriod-1)+price[i])/InpMAPeriod;
 //---
   }

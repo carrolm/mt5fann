@@ -89,7 +89,7 @@ int OnCalculate(const int rates_total,
       pos=ExtPeriodRSI+1;
      }
 //--- the main loop of calculations
-   for(i=pos;i<rates_total;i++)
+   for(i=pos;i<rates_total && !IsStopped();i++)
      {
       diff=price[i]-price[i-1];
       ExtPosBuffer[i]=(ExtPosBuffer[i-1]*(ExtPeriodRSI-1)+(diff>0.0?diff:0.0))/ExtPeriodRSI;

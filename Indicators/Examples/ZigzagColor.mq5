@@ -137,7 +137,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
          whatlookfor=-1;
         }
       //---
-      for(i=limit+1;i<rates_total;i++)
+      for(i=limit+1;i<rates_total && !IsStopped();i++)
         {
          ZigzagPeakBuffer[i]=0.0;
          ZigzagLawnBuffer[i]=0.0;
@@ -146,7 +146,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
         }
      }
 //----
-   for(shift=limit;shift<rates_total;shift++)
+   for(shift=limit;shift<rates_total && !IsStopped();shift++)
      {
 
       val=Lowest(Low,ExtDepth,shift);
@@ -208,7 +208,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       lasthigh=curhigh;
      }
 //----
-   for(shift=limit;shift<rates_total;shift++)
+   for(shift=limit;shift<rates_total && !IsStopped();shift++)
      {
       res=0.0;
       switch(whatlookfor)

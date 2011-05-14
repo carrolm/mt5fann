@@ -218,6 +218,7 @@ bool CSignalDeM::ExtStateDeM(int ind)
    int    pos=ind,off,index;
    uint   map;                 // intermediate bit-map for one extremum
 //---
+   m_extr_map=0;
    for(int i=0;i<10;i++)
      {
       off=StateDeM(pos);
@@ -301,21 +302,21 @@ bool CSignalDeM::CompareMaps(int map,int count,bool minimax,int start)
 //--- price and the oscillator are checked separately (thus, there are 16 checks)
    for(i=step*start,j=0;i<total;i+=step,j+=4)
      {
-      //--- "take" two bits - patter of the corresponding extremum of the oscillator
-      inp_map=(map>>i)&3;
+      //--- "take" two bits - patter of the corresponding extremum of the price
+      inp_map=(map>>j)&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
       if(inp_map<2)
         {
-         //--- "take" two bits of the corresponding extremum of the oscillator (higher-order bit is always 0)
-         check_map=(m_extr_map>>j)&3;
+         //--- "take" two bits of the corresponding extremum of the price (higher-order bit is always 0)
+         check_map=(m_extr_map>>i)&3;
          if(inp_map!=check_map) return(false);
         }
-      //--- "take" two bits - pattern of the corresponding price extremum
-      inp_map=(map>>(i+2))&3;
+      //--- "take" two bits - pattern of the corresponding oscillator extremum
+      inp_map=(map>>(j+2))&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
       if(inp_map>=2) continue;
-      //--- "take" two bits of the corresponding price extremum (higher-order bit is always 0)
-      check_map=(m_extr_map>>(j+2))&3;
+      //--- "take" two bits of the corresponding oscillator extremum (higher-order bit is always 0)
+      check_map=(m_extr_map>>(i+2))&3;
       if(inp_map!=check_map) return(false);
      }
 //--- ok

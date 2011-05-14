@@ -248,17 +248,18 @@ int CSignalAO::LongCondition()
 //--- if the first analyzed bar is "red", don't "vote" for buying
    if(DiffAO(idx)<0.0)   return(result);
 //--- first analyzed bar is "green" (the indicator has no objections to buying)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
    if(AO(idx++)>0.0)
      {
       //--- first analyzed bar is greater than zero, search for the "saucer" and "crosing of the zero line" signals
-      if(DiffAO(idx)<0.0)
+      if(IS_PATTERN_USAGE(1) && DiffAO(idx)<0.0)
         {
          //--- the "saucer" signal
          //--- there is a condition for buying
          return(m_pattern_1);
         }
-      if(AO(idx)<0.0)
+      if(IS_PATTERN_USAGE(2) && AO(idx)<0.0)
         {
          //--- the "crossing of the zero line" signal
          //--- there is a condition for buying
@@ -269,7 +270,7 @@ int CSignalAO::LongCondition()
      {
       //--- first analyzed bar is less than zero, search for the "divergence" signal
       //--- if the second analyzed bar is "red", the condition for buying may be fulfilled
-      if(DiffAO(idx)<0.0)
+      if(IS_PATTERN_USAGE(3) && DiffAO(idx)<0.0)
         {
          idx=StartIndex();
          //--- search for the "divergence" signal
@@ -301,17 +302,18 @@ int CSignalAO::ShortCondition()
 //--- if the first analyzed bar is "green", don't "vote" for selling
    if(DiffAO(idx)>0.0)   return(result);
 //--- first analyzed bar is "red" (the indicator has no objections to selling)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
    if(AO(idx++)<0.0)
      {
       //--- first analyzed bar is below zero, search for the "saucer" and "crossing of the zero line" signals
-      if(DiffAO(idx)>0.0)
+      if(IS_PATTERN_USAGE(1) && DiffAO(idx)>0.0)
         {
          //--- the "saucer" signal
          //--- there is a condition for buying
          return(m_pattern_1);
         }
-      if(AO(idx)>0.0)
+      if(IS_PATTERN_USAGE(2) && AO(idx)>0.0)
         {
          //--- the "crossing of the zero line" signal
          //--- there is a condition for buying
@@ -322,7 +324,7 @@ int CSignalAO::ShortCondition()
      {
       //--- first analyzed bar is above zero, search for the "divergence" signal
       //--- if the second analyzed bar is "green", the condition for buying may be fulfilled
-      if(DiffAO(idx)>0.0)
+      if(IS_PATTERN_USAGE(3) && DiffAO(idx)>0.0)
         {
          idx=StartIndex();
          //--- search for the "divergence" signal

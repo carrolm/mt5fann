@@ -63,7 +63,7 @@ int OnCalculate(const int rates_total,
 //--- calculate EMA on EMA array
    ExponentialMAOnBuffer(rates_total,prev_calculated,InpPeriodEMA-1,InpPeriodEMA,Ema,EmaOfEma);
 //--- calculate DEMA
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
       DemaBuffer[i]=2*Ema[i]-EmaOfEma[i];
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

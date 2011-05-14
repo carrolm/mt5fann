@@ -72,7 +72,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       for(i=0;i<InpRVIPeriod+AVERAGE_PERIOD;i++)  ExtSignalBuffer[i]=0.0;
      }
 //--- RVI counted in the 1-st buffer
-   for(i=nLimit;i<rates_total;i++)
+   for(i=nLimit;i<rates_total && !IsStopped();i++)
      {
       dNum=0.0;
       dDeNum=0.0;
@@ -92,7 +92,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    nLimit=InpRVIPeriod+TRIANGLE_PERIOD+2;
    if(prev_calculated>InpRVIPeriod+AVERAGE_PERIOD+2)
       nLimit=prev_calculated-1;
-   for(i=nLimit;i<rates_total;i++) ExtSignalBuffer[i]=(ExtRVIBuffer[i]+2*ExtRVIBuffer[i-1]+2*ExtRVIBuffer[i-2]+ExtRVIBuffer[i-3])/AVERAGE_PERIOD;
+   for(i=nLimit;i<rates_total && !IsStopped();i++) ExtSignalBuffer[i]=(ExtRVIBuffer[i]+2*ExtRVIBuffer[i-1]+2*ExtRVIBuffer[i-2]+ExtRVIBuffer[i-3])/AVERAGE_PERIOD;
 
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

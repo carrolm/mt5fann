@@ -61,7 +61,7 @@ int OnCalculate(const int rates_total,
    if(prev_calculated<1) i=0;
    else                  i=prev_calculated-1;
 //----
-   while(i<rates_total)
+   while(i<rates_total && !IsStopped())
      {
       ExtOpenBuffer[i]=open[i];
       ExtHighBuffer[i]=high[i];

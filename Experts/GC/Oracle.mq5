@@ -17,9 +17,9 @@ int OnInit()
   {
    ArrayResize(AllOracles,20);
    nOracles=0;//AllOracles();
-   AllOracles[nOracles++]=new CiStochastic;
+   AllOracles[nOracles++]=new COracleTemplate;
    AllOracles[0].Init();
-   AllOracles[0].ExportHistoryENCOG("","",100,5,10);
+   AllOracles[0].ExportHistoryENCOG("","",100,0,0);
    //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
    double            InputVector[];ArrayResize(InputVector,20);
    GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);

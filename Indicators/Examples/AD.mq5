@@ -70,7 +70,7 @@ void Calculate(const int rates_total,const int pos,
   {
    double hi,lo,cl;
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get some data from arrays
       hi=High[i];

@@ -67,7 +67,7 @@ int OnCalculate(const int rates_total,
 //--- calculate EMA on EMA array on EMA array
    ExponentialMAOnBuffer(rates_total,prev_calculated,2*InpPeriodEMA-2,InpPeriodEMA,EmaOfEma,EmaOfEmaOfEma);
 //--- calculate TEMA
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
       TemaBuffer[i]=3*Ema[i]-3*EmaOfEma[i]+EmaOfEmaOfEma[i];
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

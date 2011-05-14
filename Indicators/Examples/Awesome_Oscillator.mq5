@@ -84,12 +84,14 @@ int OnCalculate(const int rates_total,
       if(prev_calculated>0) to_copy++;
      }
 //--- get FastSMA buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtFastSMAHandle,0,0,to_copy,ExtFastBuffer)<=0)
      {
       Print("Getting fast SMA is failed! Error",GetLastError());
       return(0);
      }
 //--- get SlowSMA buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtSlowSMAHandle,0,0,to_copy,ExtSlowBuffer)<=0)
      {
       Print("Getting slow SMA is failed! Error",GetLastError());
@@ -105,7 +107,7 @@ int OnCalculate(const int rates_total,
      }
    else limit=prev_calculated-1;
 //--- main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtAOBuffer[i]=ExtFastBuffer[i]-ExtSlowBuffer[i];
       if(ExtAOBuffer[i]>ExtAOBuffer[i-1])ExtColorBuffer[i]=0.0; // set color Green

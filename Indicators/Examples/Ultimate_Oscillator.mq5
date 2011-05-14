@@ -113,16 +113,19 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ATR buffers
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtFastATRhandle,0,0,to_copy,ExtFastATRBuffer)<=0)
      {
       Print("getting ExtFastATRhandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtMiddleATRhandle,0,0,to_copy,ExtMiddleATRBuffer)<=0)
      {
       Print("getting ExtMiddleATRhandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtSlowATRhandle,0,0,to_copy,ExtSlowATRBuffer)<=0)
      {
       Print("getting ExtSlowATRhandle is failed! Error",GetLastError());
@@ -146,7 +149,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
      }
    else limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       //--- TL is True Low
       TL=MathMin(Low[i],Close[i-1]);

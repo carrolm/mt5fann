@@ -54,7 +54,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,const int begin,
    if(pos<ExtRocPeriod)
       pos=ExtRocPeriod;
 //--- the main loop of calculations
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       if(price[i]==0.0)
          ExtRocBuffer[i]=0.0;

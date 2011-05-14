@@ -70,6 +70,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ma buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtMAHandle,0,0,to_copy,ExtMABuffer)<=0)
      {
       Print("Getting MA data is failed! Error",GetLastError());
@@ -82,12 +83,12 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- the main loop of calculations
    if(InpAppliedVolume==VOLUME_TICK)
      {
-      for(i=limit;i<rates_total;i++)
+      for(i=limit;i<rates_total && !IsStopped();i++)
          ExtForceBuffer[i]=TickVolume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
      }
    else
      {
-      for(i=limit;i<rates_total;i++)
+      for(i=limit;i<rates_total && !IsStopped();i++)
          ExtForceBuffer[i]=Volume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
      }
 //--- OnCalculate done. Return new prev_calculated.

@@ -70,7 +70,7 @@ int OnCalculate(const int rates_total,
 //--- calculate EMA on EMA array on EMA array
    ExponentialMAOnBuffer(rates_total,prev_calculated,2*InpPeriodEMA-2,InpPeriodEMA,SecondEMA,ThirdEMA);
 //--- calculate TRIX
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
      {
       if(ThirdEMA[i-1]!=0.0)
          TRIX_Buffer[i]=(ThirdEMA[i]-ThirdEMA[i-1])/ThirdEMA[i-1];

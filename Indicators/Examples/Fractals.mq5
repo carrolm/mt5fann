@@ -67,7 +67,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
      }
    else limit=rates_total-5;
 
-   for(i=limit;i<rates_total-3;i++)
+   for(i=limit;i<rates_total-3 && !IsStopped();i++)
      {
       //---- Upper Fractal
       if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])

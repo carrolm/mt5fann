@@ -92,12 +92,14 @@ int OnCalculate(const int rates_total,
       if(prev_calculated>0) to_copy++;
      }
 //--- get AC buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtACHandle,0,0,to_copy,ExtACBuffer)<=0)
      {
       Print("Getting iAC is failed! Error",GetLastError());
       return(0);
      }
 //--- get AO buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtAOHandle,0,0,to_copy,ExtAOBuffer)<=0)
      {
       Print("Getting iAO is failed! Error",GetLastError());
@@ -109,7 +111,7 @@ int OnCalculate(const int rates_total,
    else
       limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtOBuffer[i]=Open[i];
       ExtHBuffer[i]=High[i];

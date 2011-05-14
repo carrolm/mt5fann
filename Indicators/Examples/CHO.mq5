@@ -109,19 +109,19 @@ int OnCalculate(const int rates_total,
 //--- calculate AD buffer
    if(InpVolumeType==VOLUME_TICK)
      {
-      for(i=limit;i<rates_total;i++)
+      for(i=limit;i<rates_total && !IsStopped();i++)
          ExtADBuffer[i]=ExtADBuffer[i-1]+AD(High[i],Low[i],Close[i],TickVolume[i]);
      }
    else
      {
-      for(i=limit;i<rates_total;i++)
+      for(i=limit;i<rates_total && !IsStopped();i++)
          ExtADBuffer[i]=ExtADBuffer[i-1]+AD(High[i],Low[i],Close[i],Volume[i]);
      }
 //--- calculate EMA on array ExtADBuffer
    AverageOnArray(InpSmoothMethod,rates_total,prev_calculated,0,InpSlowMA,ExtADBuffer,ExtSlowEMABuffer,weightslow);
    AverageOnArray(InpSmoothMethod,rates_total,prev_calculated,0,InpFastMA,ExtADBuffer,ExtFastEMABuffer,weightfast);
 //--- calculate chaikin oscillator
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       ExtCHOBuffer[i]=ExtFastEMABuffer[i]-ExtSlowEMABuffer[i];
 //--- return value of prev_calculated for next call
    return(rates_total);

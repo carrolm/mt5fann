@@ -168,7 +168,7 @@ int OnCalculate(const int rates_total,
          whatlookfor=Sill;
         }
       //--- chipping
-      for(i=limit+1;i<rates_total;i++)
+      for(i=limit+1;i<rates_total && !IsStopped();i++)
         {
          ZigzagBuffer[i]=0.0;
          LowMapBuffer[i]=0.0;
@@ -177,7 +177,7 @@ int OnCalculate(const int rates_total,
      }
 
 //--- searching High and Low
-   for(shift=limit;shift<rates_total;shift++)
+   for(shift=limit;shift<rates_total && !IsStopped();shift++)
      {
       val=low[iLowest(low,ExtDepth,shift)];
       if(val==lastlow) val=0.0;
@@ -227,7 +227,7 @@ int OnCalculate(const int rates_total,
      }
 
 //--- final rejection
-   for(shift=limit;shift<rates_total;shift++)
+   for(shift=limit;shift<rates_total && !IsStopped();shift++)
      {
       res=0.0;
       switch(whatlookfor)

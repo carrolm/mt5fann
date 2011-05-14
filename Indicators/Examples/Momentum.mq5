@@ -60,7 +60,7 @@ int OnCalculate(const int rates_total,
    if(pos<StartCalcPosition)
       pos=begin+ExtMomentumPeriod;
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       ExtMomentumBuffer[i]=price[i]*100/price[i-ExtMomentumPeriod];
      }

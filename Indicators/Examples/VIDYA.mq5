@@ -63,7 +63,7 @@ int OnCalculate(const int rates_total,
      }
    else limit=prev_calculated-1;
 //--- main cycle
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
      {
       //--- calculate CMO and get absolute value
       double mulCMO=fabs(CalculateCMO(i,InpPeriodCMO,price));

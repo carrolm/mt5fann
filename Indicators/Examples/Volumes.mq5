@@ -71,7 +71,7 @@ void CalculateVolume(const int nPosition,
    ExtVolumesBuffer[0]=(double)SrcBuffer[0];
    ExtColorsBuffer[0]=0.0;
 //---
-   for(int i=nPosition;i<nRatesCount;i++)
+   for(int i=nPosition;i<nRatesCount && !IsStopped();i++)
      {
       //--- get some data from src buffer
       double dCurrVolume=(double)SrcBuffer[i];

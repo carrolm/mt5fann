@@ -93,7 +93,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       ExtEPBuffer[1]=Low[pos];
      }
 //---main cycle
-   for(int i=pos;i<rates_total-1;i++)
+   for(int i=pos;i<rates_total-1 && !IsStopped();i++)
      {
       //--- check for reverse
       if(ExtDirectionLong)

@@ -67,7 +67,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- correct position
    if(i<ExtPeriodWPR-1) i=ExtPeriodWPR-1;
 //---  main cycle
-   while(i<rates_total)
+   while(i<rates_total && !IsStopped())
      {
       //--- calculate maximum High
       double dMaxHigh=MaxAr(High,ExtPeriodWPR,i);

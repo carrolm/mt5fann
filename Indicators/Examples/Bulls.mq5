@@ -72,6 +72,7 @@ int OnCalculate(const int rates_total,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ma buffers
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtEmaHandle,0,0,to_copy,ExtTempBuffer)<=0)
      {
       Print("getting ExtEmaHandle is failed! Error",GetLastError());
@@ -82,7 +83,7 @@ int OnCalculate(const int rates_total,
       limit=InpBullsPeriod;
    else limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtBullsBuffer[i]=High[i]-ExtTempBuffer[i];
      }

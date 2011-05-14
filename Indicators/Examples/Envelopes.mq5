@@ -83,6 +83,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ma buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtMAHandle,0,0,to_copy,ExtMABuffer)<=0)
      {
       Print("Getting MA data is failed! Error",GetLastError());
@@ -93,7 +94,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(limit<InpMAPeriod)
       limit=InpMAPeriod;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtUpBuffer[i]=(1+InpDeviation/100.0)*ExtMABuffer[i];
       ExtDownBuffer[i]=(1-InpDeviation/100.0)*ExtMABuffer[i];

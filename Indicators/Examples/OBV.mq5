@@ -72,7 +72,7 @@ void CalculateOBV(int StartPosition,
                   const double &ClBuffer[],
                   const long &VolBuffer[])
   {
-   for(int i=StartPosition;i<RatesCount;i++)
+   for(int i=StartPosition;i<RatesCount && !IsStopped();i++)
      {
       //--- get some data
       double Volume=(double)VolBuffer[i];

@@ -65,7 +65,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    else limit=prev_calculated-1;
 
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       double haOpen=(ExtOBuffer[i-1]+ExtCBuffer[i-1])/2;
       double haClose=(Open[i]+High[i]+Low[i]+Close[i])/4;
