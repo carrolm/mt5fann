@@ -93,7 +93,7 @@ int OnCalculate(const int rates_total,
       pos=0;
    else pos=prev_calculated-1;
 //--- fill H-L(i) buffer 
-   for(i=pos;i<rates_total;i++) ExtHLBuffer[i]=High[i]-Low[i];
+   for(i=pos;i<rates_total && !IsStopped();i++) ExtHLBuffer[i]=High[i]-Low[i];
 //--- calculate smoothed H-L(i) buffer
    if(pos<ExtSmoothPeriod-1)
      {
@@ -107,7 +107,7 @@ int OnCalculate(const int rates_total,
 //--- correct calc position
    if(pos<posCHV) pos=posCHV;
 //--- calculate CHV buffer
-   for(i=pos;i<rates_total;i++)
+   for(i=pos;i<rates_total && !IsStopped();i++)
      {
       if(ExtSHLBuffer[i-ExtCHVPeriod]!=0.0)
          ExtCHVBuffer[i]=100.0*(ExtSHLBuffer[i]-ExtSHLBuffer[i-ExtCHVPeriod])/ExtSHLBuffer[i-ExtCHVPeriod];

@@ -20,10 +20,13 @@
 #include <GC\Oracle.mqh>
 double    ExtBufferData[];
 double    ExtBufferColor[];
+input int  _limit_=5000;// на сколько баров уходить назад
+input int _TREND_=15;// на сколько смотреть вперед
+input int _NO_=5;// Номер оракула
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
-COracleEasy *Oracles[];
+
 int nOracles;
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -38,22 +41,9 @@ int OnInit()
    ArraySetAsSeries(ExtBufferData,true);
    ArraySetAsSeries(ExtBufferColor,true);
 //----
-   ArrayResize(Oracles,10);
-   nOracles=0;
-   Oracles[nOracles++]=new CiStochastic;
-   Oracles[nOracles++]=new CiMACD;
-   Oracles[nOracles++]=new CiMA;
-   Oracles[nOracles++]=new CPriceChanel;
-   Oracles[nOracles++]=new CiRSI;
-   Oracles[nOracles++]=new CiCGI;
-   Oracles[nOracles++]=new CiWPR;
-   Oracles[nOracles++]=new CiBands;
-   Oracles[nOracles++]=new CNRTR;
-   Oracles[nOracles++]=new CiAlligator;
-   Oracles[nOracles++]=new CiAO;
-   Oracles[nOracles++]=new CiIchimoku;
-   Oracles[nOracles++]=new CiEnvelopes;
-   IndicatorSetString(INDICATOR_SHORTNAME,"GC Oracles "+(string)nOracles);
+
+   nOracles=AllOracles();
+   IndicatorSetString(INDICATOR_SHORTNAME,"GC Oracles... "+(string)nOracles);
 //  for(int i=0;i<nOracles;i++) Print(Oracles[i].Name());
    refresh();
    return(0);
@@ -80,19 +70,25 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    ArraySetAsSeries(Close,true);
    refresh();
    int i,io; double res;
-   for(i=0;i<100;i++)
+   for(i=0;i<_limit_;i++)
      {
       res=0;
       for(io=0;io<nOracles;io++)
         {
-         res+=Oracles[io].forecast(Symbol(),i);
+         res+=AllOracles[_NO_].forecast(Symbol(),_TREND_+i,false);
         }
-      ExtBufferData[i]=res;
-      if(res<0)
-         ExtBufferColor[i]=2.0;
-      else if(res>0)
-         ExtBufferColor[i]=0.0;
-      else ExtBufferColor[i]=1.0;
+      res=res/nOracles;
+      ExtBufferData[i+_TREND_]=res;
+      ExtBufferColor[i+_TREND_]=2.0;
+      if(res<-0.33)
+         ExtBufferColor[i+_TREND_]=1.0;
+      if(res>0.33)
+         ExtBufferColor[i+_TREND_]=1.0;
+      if(res<-0.66)
+         ExtBufferColor[i+_TREND_]=0.0;
+      if(res>0.66)
+         ExtBufferColor[i+_TREND_]=3.0;
+
      }
 
    return(rates_total);
@@ -108,6 +104,6 @@ void refresh()
 void OnDeinit(const int reason)
 
   {
-   for(int i=0;i<nOracles;i++) delete Oracles[i];
+   for(int i=0;i<nOracles;i++) delete AllOracles[i];
   }
 //+------------------------------------------------------------------+

@@ -109,7 +109,7 @@ int SimpleMAOnBuffer(const int rates_total,const int prev_calculated,const int b
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       buffer[i]=buffer[i-1]+(price[i]-price[i-period])/period;
 //--- restore as_series flags
    if(as_series_price)  ArraySetAsSeries(price,true);
@@ -145,7 +145,7 @@ int ExponentialMAOnBuffer(const int rates_total,const int prev_calculated,const 
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       buffer[i]=price[i]*dSmoothFactor+buffer[i-1]*(1.0-dSmoothFactor);
 //--- restore as_series flags
    if(as_series_price)  ArraySetAsSeries(price,true);
@@ -188,7 +188,7 @@ int LinearWeightedMAOnBuffer(const int rates_total,const int prev_calculated,con
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       sum=0;
       for(int j=0;j<period;j++) sum+=(period-j)*price[i-j];
@@ -229,7 +229,7 @@ int SmoothedMAOnBuffer(const int rates_total,const int prev_calculated,const int
      }
    else limit=prev_calculated-1;
 //--- main loop
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
       buffer[i]=(buffer[i-1]*(period-1)+price[i])/period;
 //--- restore as_series flags
    if(as_series_price)  ArraySetAsSeries(price,true);

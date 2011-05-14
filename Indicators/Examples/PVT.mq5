@@ -77,7 +77,7 @@ void CalculatePVT(int nPosition,
   {
    if(nPosition<=0) nPosition=1;
 //---
-   for(int i=nPosition;i<nRatesCount;i++)
+   for(int i=nPosition;i<nRatesCount && !IsStopped();i++)
      {
       //--- get some data
       double PrevClose=ClBuffer[i-1];

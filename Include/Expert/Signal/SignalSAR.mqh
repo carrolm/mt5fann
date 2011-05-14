@@ -144,9 +144,11 @@ int CSignalSAR::LongCondition()
 //--- if the indicator is above the price at the first analyzed bar, don't 'vote' buying
    if(DiffClose(idx++)<0.0) return(result);
 //--- the indicator is below the price at the first analyzed bar (the indicator has no objections to buying)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
 //--- if the indicator is above the price at the second analyzed bar, then there is a condition for buying
-   if(DiffClose(idx++)<0.0) return(m_pattern_1);
+   if(IS_PATTERN_USAGE(1) && DiffClose(idx)<0.0)
+      return(m_pattern_1);
 //--- return the result
    return(result);
   }
@@ -163,9 +165,11 @@ int CSignalSAR::ShortCondition()
 //--- if the indicator is below the price at the first analyzed bar, don't "vote" for selling
    if(DiffClose(idx++)>0.0) return(result);
 //--- the indicator is above the price at the first analyzed bar (the indicator has no objections to selling)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
 //--- if the indicator is below the price at the second analyzed bar, then there is a condition for selling
-   if(DiffClose(idx++)>0.0) return(m_pattern_1);
+   if(IS_PATTERN_USAGE(1) && DiffClose(idx)>0.0)
+      return(m_pattern_1);
 //--- return the result
    return(result);
   }

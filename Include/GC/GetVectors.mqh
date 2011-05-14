@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"DayOfWeek","Hour","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
+string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -19,6 +19,7 @@ double tanh(double x)
   {
    double x_=MathExp(x);
    double _x=MathExp(-x);
+   if(0==(x_+_x)) return(0);
    return((x_-_x)/(x_+_x));
   }
 //+------------------------------------------------------------------+
@@ -36,10 +37,10 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
   {// пара, период, смещение назад (для индикатора полезно)
    double output_vector=0;
    int shift_history=15,ni=0;
-   if(shift<shift_history) shift_history=0;
+   //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история
-   if(shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift,false,2);
+   if(shift>shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift-shift_history,false,2);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
    int start_pos=0,end_pos=0,shift_pos=0,add_shift;
@@ -54,7 +55,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
          start_pos=shift_pos+1;
         }
        //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
-      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+shift_history+add_shift);
+      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift-1);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
    while(start_pos>0);
@@ -69,6 +70,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
 
    if("DayOfWeek"==fn_name) return GetVector_DayOfWeek(smbl,tf,shift);
    if("Hour"==fn_name) return GetVector_Hour(smbl,tf,shift);
+   if("Minute"==fn_name) return GetVector_Minute(smbl,tf,shift);
    if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
    if("StochasticK"==fn_name) return GetVector_StochasticK(smbl,tf,shift);
    if("StochasticD"==fn_name) return GetVector_StochasticD(smbl,tf,shift);
@@ -110,7 +112,7 @@ double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
 
   }
 //+------------------------------------------------------------------+
@@ -125,7 +127,7 @@ double GetVector_AO(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return tanh(MathLog10(ind_buffer[1]/ind_buffer[2]));
 
   }
 //+------------------------------------------------------------------+
@@ -140,7 +142,7 @@ double GetVector_Ichimoku(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
   }
 //+------------------------------------------------------------------+
 double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
@@ -153,7 +155,7 @@ double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
 
    IndicatorRelease(h_ind);
 
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -166,7 +168,7 @@ double GetVector_IMA(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return MathLog10(ind_buffer[1]/ind_buffer[2])*1000;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -180,7 +182,7 @@ double GetVector_MACD(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return tanh(MathLog10(ind_buffer[1]/ind_buffer[2]));
 
   }
 //+------------------------------------------------------------------+
@@ -192,7 +194,7 @@ double GetVector_CCI(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
    IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2]);
+   return tanh(MathLog10(ind_buffer[1]/ind_buffer[2])/10);
 
   }
 //+------------------------------------------------------------------+
@@ -204,7 +206,7 @@ double GetVector_DayOfWeek(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[1],tm);
-   return((double)tm.day_of_week/7);
+   return((double)tm.day_of_week/3.5-1);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -216,7 +218,16 @@ double GetVector_Hour(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[1],tm);
-   return((double)tm.hour/24);
+   return((double)tm.hour/12-1);
+  }
+  double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {
+   datetime Time[]; ArraySetAsSeries(Time,true);
+   CopyTime(smb,tf,shift,3,Time);
+   MqlDateTime tm;
+
+   TimeToStruct(Time[1],tm);
+   return((double)tm.min/30-1);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |

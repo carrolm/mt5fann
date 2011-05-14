@@ -103,7 +103,7 @@ int OnCalculate(const int rates_total,
       ExtAMABuffer[pos-1]=price[pos-1];
      }
 //--- main cycle
-   for(i=pos;i<rates_total;i++)
+   for(i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- calculate SSC
       double dCurrentSSC=(CalculateER(i,price)*(ExtFastSC-ExtSlowSC))+ExtSlowSC;

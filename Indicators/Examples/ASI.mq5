@@ -79,7 +79,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       ExtTRBuffer[0]=High[0]-Low[0];
      }
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get some data
       double dPrevClose=Close[i-1];

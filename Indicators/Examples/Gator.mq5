@@ -144,16 +144,19 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ma buffers
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtJawsHandle,0,0,to_copy,ExtJawsBuffer)<=0)
      {
       Print("getting ExtJawsHandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtTeethHandle,0,0,to_copy,ExtTeethBuffer)<=0)
      {
       Print("getting ExtTeethHandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtLipsHandle,0,0,to_copy,ExtLipsBuffer)<=0)
      {
       Print("getting ExtLipsHandle is failed! Error",GetLastError());
@@ -175,7 +178,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- main cycle
    int lower_limit=ExtLowerShift+InpLipsShift+InpLipsPeriod;
    int upper_limit=ExtUpperShift+InpTeethShift+InpTeethPeriod;
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       if(i>=lower_limit)
         {

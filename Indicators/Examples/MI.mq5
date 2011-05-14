@@ -96,7 +96,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       pos=1;
      }
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- fill main data buffer
       ExtHLBuffer[i]=High[i]-Low[i];

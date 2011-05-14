@@ -69,9 +69,10 @@ int OnCalculate(const int rates_total,
    if(prev_calculated==0)
      {
       //--- copy values of MA into indicator buffer ExtColorLineBuffer
+      if(IsStopped()) return(0); //Checking for stop flag
       if(CopyBuffer(ExtMAHandle,0,0,rates_total,ExtColorLineBuffer)<=0) return(0);
       //--- now set line color for every bar
-      for(int i=0;i<rates_total;i++)
+      for(int i=0;i<rates_total && !IsStopped();i++)
          ExtColorsBuffer[i]=getIndexOfColor(i);
      }
    else
@@ -85,6 +86,7 @@ int OnCalculate(const int rates_total,
          if(prev_calculated>0) to_copy++;
         }
       //--- copy values of MA into indicator buffer ExtColorLineBuffer
+      if(IsStopped()) return(0); //Checking for stop flag
       int copied=CopyBuffer(ExtMAHandle,0,0,rates_total,ExtColorLineBuffer);
       if(copied<=0) return(0);
 
@@ -101,19 +103,16 @@ int OnCalculate(const int rates_total,
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,Red);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,Blue);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,2,Green);
-               //Print("Color scheme"+modified);
                break;
             case 1:// second color scheme
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,Yellow);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,Pink);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,2,LightSlateGray);
-               //Print("Color scheme"+modified);
                break;
             default:// third color scheme
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,LightGoldenrod);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,Orchid);
                PlotIndexSetInteger(0,PLOT_LINE_COLOR,2,LimeGreen);
-               //Print("Color scheme"+modified);
            }
         }
       else
@@ -121,7 +120,7 @@ int OnCalculate(const int rates_total,
          //--- set start position
          limit=prev_calculated-1;
          //--- now we set line color for every bar
-         for(int i=limit;i<rates_total;i++)
+         for(int i=limit;i<rates_total && !IsStopped();i++)
             ExtColorsBuffer[i]=getIndexOfColor(i);
         }
      }

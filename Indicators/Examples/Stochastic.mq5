@@ -80,7 +80,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
         }
      }
 //--- calculate HighesBuffer[] and ExtHighesBuffer[]
-   for(i=start;i<rates_total;i++)
+   for(i=start;i<rates_total && !IsStopped();i++)
      {
       double dmin=1000000.0;
       double dmax=-1000000.0;
@@ -100,7 +100,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       for(i=0;i<start;i++) ExtMainBuffer[i]=0.0;
      }
 //--- main cycle
-   for(i=start;i<rates_total;i++)
+   for(i=start;i<rates_total && !IsStopped();i++)
      {
       double sumlow=0.0;
       double sumhigh=0.0;
@@ -119,7 +119,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
      {
       for(i=0;i<start;i++) ExtSignalBuffer[i]=0.0;
      }
-   for(i=start;i<rates_total;i++)
+   for(i=start;i<rates_total && !IsStopped();i++)
      {
       double sum=0.0;
       for(k=0;k<InpDPeriod;k++) sum+=ExtMainBuffer[i-k];

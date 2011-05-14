@@ -35,87 +35,59 @@ public:
 //+------------------------------------------------------------------+
 bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid)
   {
+   int export_precision=5;
    if(num_train==0 && 0==num_test && 0==num_valid) return(false);
    if(""==smbl) smbl=_Symbol;
    if(""==fname) fname=Name();
    int FileHandle=-1;
-   int i,j,shift=30;
+   int i,j,shift=15;
    string outstr;
    double Result;
-   if(num_valid>0)
+   int num_vals;
+   string fnm="";
+   for(int ring=0;ring<3;ring++)
      {
-      FileHandle=FileOpen(fname+"_valid_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
-      if(FileHandle!=INVALID_HANDLE)
+
+      switch(ring)
         {
-         // Header
-         outstr="";
-         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
-         outstr+="Result";
-         FileWrite(FileHandle,outstr);
-         for(i=shift;i<(shift+num_valid);i++)
-           {
-            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
-            outstr="";
-            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
-            outstr+=(string)Result;
-            FileWrite(FileHandle,outstr);
-           }
-         FileClose(FileHandle);
-         Print("Created.",fname+"_valid_data.csv");
+         case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_test_data.csv";  break;
+         case 1: num_vals=num_valid;fnm=fname+"_"+smbl+"_valid_data.csv";  break;
+         case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_train_data.csv";  break;
+         default: num_vals=0;
         }
-      shift+=num_valid;
-     }
-   if(num_test>0)
-     {
-      FileHandle=FileOpen(fname+"_test_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
-      if(FileHandle!=INVALID_HANDLE)
+      if(num_vals>0)
         {
-         // Header
-         outstr="";
-         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
-         outstr+="Result";
-         FileWrite(FileHandle,outstr);
-         for(i=shift;i<(shift+num_test);i++)
+         FileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
+         if(FileHandle!=INVALID_HANDLE)
            {
-            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+            // Header
             outstr="";
-            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
-            outstr+=(string)Result;
+            outstr=inputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
+            outstr+=",Result";
             FileWrite(FileHandle,outstr);
+            bool need_exp=true;
+            for(i=shift;i<(shift+num_vals);i++)
+              {
+               Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+               outstr="";need_exp=true;
+               for(j=0;j<num_input_signals;j++) 
+                 {
+                  outstr+=DoubleToString(InputVector[j],export_precision)+",";
+                  if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
+                 }
+               outstr+=DoubleToString(Result,export_precision);
+               //if(need_exp && -1==StringFind(outstr,"#IND0")) 
+               FileWrite(FileHandle,outstr);
+              }
+            FileClose(FileHandle);
+            Print("Created.",fnm);
            }
-         FileClose(FileHandle);
-         Print("Created.",fname+"_test_data.csv");
+         shift+=num_vals;
         }
-      shift+=num_valid;
-     }
-  if(num_train>0)
-     {
-      FileHandle=FileOpen(fname+"_train_data.csv",FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",",CP_ACP);
-      if(FileHandle!=INVALID_HANDLE)
-        {
-         // Header
-         outstr="";
-         for(j=0;j<num_input_signals;j++) outstr+="Input"+(string)j+",";
-         outstr+="Result";
-         FileWrite(FileHandle,outstr);
-         for(i=shift;i<(shift+num_train);i++)
-           {
-            Result=GetVectors(InputVector,inputSignals,smbl,0,i);
-            outstr="";
-            for(j=0;j<num_input_signals;j++) outstr+=(string)InputVector[j]+",";
-            outstr+=(string)Result;
-            FileWrite(FileHandle,outstr);
-           }
-         FileClose(FileHandle);
-         Print("Created.",fname+"_train_data.csv");
-        }
-      shift+=num_train;
      }
 
    return(true);
   }
-  
-  
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

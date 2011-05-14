@@ -357,11 +357,12 @@ bool CSampleExpert::ShortOpened()
 bool CSampleExpert::Processing()
   {
 //--- refresh rates
-   if(!m_symbol.RefreshRates()) return(false);
+   if(!m_symbol.RefreshRates())                                          return(false);
 //--- refresh indicators
-   CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main);
-   CopyBuffer(m_handle_macd,1,0,2,m_buff_MACD_signal);
-   CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA);
+   if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2) return(false);
+   if(CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main)  !=2 ||
+      CopyBuffer(m_handle_macd,1,0,2,m_buff_MACD_signal)!=2 ||
+      CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA)         !=2)             return(false);
 //   m_indicators.Refresh();
 //--- to simplify the coding and speed up access
 //--- data are put into internal variables

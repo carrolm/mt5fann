@@ -116,7 +116,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
         }
      }
 //--- main cycle
-   for(int i=start;i<rates_total;i++)
+   for(int i=start;i<rates_total && !IsStopped();i++)
      {
       //--- get some data
       double Hi    =High[i];

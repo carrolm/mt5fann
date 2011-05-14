@@ -61,7 +61,7 @@ int OnCalculate(const int rates_total,
 //--- calculate simple moving average
    SimpleMAOnBuffer(rates_total,prev_calculated,begin,ExtMAPeriod,price,ExtMABuffer);
 //--- the main loop of calculations
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
       ExtDPOBuffer[i]=price[i]-ExtMABuffer[i];
 //--- done
    return(rates_total);

@@ -73,7 +73,7 @@ int OnCalculate(const int rates_total,
    if(pos<StartCalcPosition)
       pos=StartCalcPosition;
 //--- main cycle
-   for(i=pos;i<rates_total;i++)
+   for(i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- SMA on price buffer
       ExtSPBuffer[i]=SimpleMA(i,ExtCCIPeriod,price);

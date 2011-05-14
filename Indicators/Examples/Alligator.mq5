@@ -121,16 +121,19 @@ int OnCalculate(const int rates_total,
       if(prev_calculated>0) to_copy++;
      }
 //---- get ma buffers
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtJawsHandle,0,0,to_copy,ExtJaws)<=0)
      {
       Print("getting ExtJawsHandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtTeethHandle,0,0,to_copy,ExtTeeth)<=0)
      {
       Print("getting ExtTeethHandle is failed! Error",GetLastError());
       return(0);
      }
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtLipsHandle,0,0,to_copy,ExtLips)<=0)
      {
       Print("getting ExtLipsHandle is failed! Error",GetLastError());

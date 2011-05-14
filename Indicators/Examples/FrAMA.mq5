@@ -58,6 +58,7 @@ int OnCalculate(const int rates_total,
    double N1,N2,N3,D;
    double ALFA;
 //--- load High
+   if(IsStopped()) return(0); //Checking for stop flag
    copied=CopyHigh(_Symbol,_Period,0,rates_total,High);
    if(copied!=rates_total)
      {
@@ -65,6 +66,7 @@ int OnCalculate(const int rates_total,
       return(0);
      }
 //--- load Low
+   if(IsStopped()) return(0); //Checking for stop flag
    copied=CopyLow(_Symbol,_Period,0,rates_total,Low);
    if(copied!=rates_total)
      {
@@ -81,7 +83,7 @@ int OnCalculate(const int rates_total,
      }
    else limit=prev_calculated-1;
 //--- main cycle
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
      {
       Hi1=iHighest(i,InpPeriodFrAMA);
       Lo1=iLowest(i,InpPeriodFrAMA);

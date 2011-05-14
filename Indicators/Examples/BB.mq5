@@ -102,15 +102,12 @@ int OnCalculate(const int rates_total,
      }
 //--- check for bars count
    if(rates_total<ExtPlotBegin)
-     {
-      
       return(0);
-     }
 //--- starting calculation
    if(prev_calculated>1) pos=prev_calculated-1;
    else pos=0;
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- middle line
       ExtMLBuffer[i]=SimpleMA(i,ExtBandsPeriod,price);

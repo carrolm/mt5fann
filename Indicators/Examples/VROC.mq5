@@ -82,7 +82,7 @@ void CalculateVROC(const int nPosition,
                    const int nRatesCount,
                    const long &VolBuffer[])
   {
-   for(int i=nPosition;i<nRatesCount;i++)
+   for(int i=nPosition;i<nRatesCount && !IsStopped();i++)
      {
       //--- getting some data
       double PrevVolume=(double)(VolBuffer[i-(ExtPeriodVROC-1)]);

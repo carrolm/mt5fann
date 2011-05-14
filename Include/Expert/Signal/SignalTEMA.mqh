@@ -161,7 +161,7 @@ int CSignalTEMA::LongCondition()
    if(DiffCloseMA(idx)<0.0)
      {
       //--- the close price is below the indicator
-      if(DiffOpenMA(idx)>0.0 && DiffMA(idx)>0.0)
+      if(IS_PATTERN_USAGE(1) && DiffOpenMA(idx)>0.0 && DiffMA(idx)>0.0)
         {
          //--- the open price is above the indicator (i.e. there was an intersection), but the indicator is directed upwards
          result=m_pattern_1;
@@ -172,8 +172,10 @@ int CSignalTEMA::LongCondition()
    else
      {
       //--- the close price is above the indicator (the indicator has no objections to buying)
-      result=m_pattern_0;
-      if(DiffMA(idx)>0.0)
+      if(IS_PATTERN_USAGE(0))
+         result=m_pattern_0;
+      //--- if the model 2 is used
+      if(IS_PATTERN_USAGE(2) && DiffMA(idx)>0.0)
         {
          //--- the indicator is directed upwards
          if(DiffOpenMA(idx)<0.0)
@@ -213,7 +215,7 @@ int CSignalTEMA::ShortCondition()
    if(DiffCloseMA(idx)>0.0)
      {
       //--- the close price is above the indicator
-      if(DiffOpenMA(idx)>0.0 && DiffMA(idx)<0.0)
+      if(IS_PATTERN_USAGE(1) && DiffOpenMA(idx)<0.0 && DiffMA(idx)<0.0)
         {
          //--- the open price is below the indicator (i.e. there was an intersection), but the indicator is directed downwards
          result=m_pattern_1;
@@ -224,8 +226,10 @@ int CSignalTEMA::ShortCondition()
    else
      {
       //--- the close price is below the indicator (the indicator has no objections to buying)
-      result=m_pattern_0;
-      if(DiffMA(idx)<0.0)
+      if(IS_PATTERN_USAGE(0))
+         result=m_pattern_0;
+      //--- if the model 2 is used
+      if(IS_PATTERN_USAGE(2) && DiffMA(idx)<0.0)
         {
          //--- the indicator is directed downwards
          if(DiffOpenMA(idx)<0.0)

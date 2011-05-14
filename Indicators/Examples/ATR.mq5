@@ -69,7 +69,7 @@ int OnCalculate(const int rates_total,
       ExtTRBuffer[0]=0.0;
       ExtATRBuffer[0]=0.0;
       //--- filling out the array of True Range values for each period
-      for(i=1;i<rates_total;i++)
+      for(i=1;i<rates_total && !IsStopped();i++)
          ExtTRBuffer[i]=MathMax(High[i],Close[i-1])-MathMin(Low[i],Close[i-1]);
       //--- first AtrPeriod values of the indicator are not calculated
       double firstValue=0.0;
@@ -85,7 +85,7 @@ int OnCalculate(const int rates_total,
      }
    else limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtTRBuffer[i]=MathMax(High[i],Close[i-1])-MathMin(Low[i],Close[i-1]);
       ExtATRBuffer[i]=ExtATRBuffer[i-1]+(ExtTRBuffer[i]-ExtTRBuffer[i-ExtPeriodATR])/ExtPeriodATR;

@@ -100,7 +100,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       limit=InpChannelPeriod;
    else limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtHighBuffer[i]=Highest(High,InpChannelPeriod,i);
       ExtLowBuffer[i]=Lowest(Low,InpChannelPeriod,i);

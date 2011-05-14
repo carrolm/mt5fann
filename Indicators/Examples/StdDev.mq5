@@ -77,7 +77,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,const int begin,
    switch(InpMAMethod)
      {
       case  MODE_EMA :
-         for(int i=pos;i<rates_total;i++)
+         for(int i=pos;i<rates_total && !IsStopped();i++)
            {
             if(i==InpStdDevPeriod-1)
                ExtMABuffer[i]=SimpleMA(i,InpStdDevPeriod,price);
@@ -88,7 +88,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,const int begin,
            }
          break;
       case MODE_SMMA :
-         for(int i=pos;i<rates_total;i++)
+         for(int i=pos;i<rates_total && !IsStopped();i++)
            {
             if(i==InpStdDevPeriod-1)
                ExtMABuffer[i]=SimpleMA(i,InpStdDevPeriod,price);
@@ -99,14 +99,14 @@ int OnCalculate(const int rates_total,const int prev_calculated,const int begin,
            }
          break;
       case MODE_LWMA :
-         for(int i=pos;i<rates_total;i++)
+         for(int i=pos;i<rates_total && !IsStopped();i++)
            {
             ExtMABuffer[i]=LinearWeightedMA(i,InpStdDevPeriod,price);
             ExtStdDevBuffer[i]=StdDevFunc(price,ExtMABuffer,i);
            }
          break;
       default   :
-         for(int i=pos;i<rates_total;i++)
+         for(int i=pos;i<rates_total && !IsStopped();i++)
            {
             ExtMABuffer[i]=SimpleMA(i,InpStdDevPeriod,price);
             //--- Calculate StdDev

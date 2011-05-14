@@ -78,7 +78,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
     }
    else limit=prev_calculated-1;
 //--- the main loop of calculations
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       if(High[i]>High[i-1]) ExtDeMaxBuffer[i]=High[i]-High[i-1];
       else ExtDeMaxBuffer[i]=0.0;

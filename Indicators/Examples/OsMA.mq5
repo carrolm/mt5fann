@@ -88,12 +88,14 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(prev_calculated>0) to_copy++;
      }
 //--- get Fast EMA buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtFastMaHandle,0,0,to_copy,ExtFastMaBuffer)<=0)
      {
       Print("Getting fast EMA is failed! Error",GetLastError());
       return(0);
      }
 //--- get SlowSMA buffer
+   if(IsStopped()) return(0); //Checking for stop flag
    if(CopyBuffer(ExtSlowMaHandle,0,0,to_copy,ExtSlowMaBuffer)<=0)
      {
       Print("Getting slow SMA is failed! Error",GetLastError());
@@ -113,7 +115,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- calculate Signal
    SimpleMAOnBuffer(rates_total,prev_calculated,0,InpSignalSMAPeriod,ExtMacdBuffer,ExtSignalBuffer);
 //--- calculate OsMA
-   for(i=limit;i<rates_total;i++)
+   for(i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtOsMABuffer[i]=ExtMacdBuffer[i]-ExtSignalBuffer[i];
      }

@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                              Moving Averages.mq5 |
-//|              Copyright Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
@@ -68,7 +68,7 @@ double TradeSizeOptimized(void)
    return(lot);
   }
 //+------------------------------------------------------------------+
-//| Check for open order conditions                                  |
+//| Check for open position conditions                               |
 //+------------------------------------------------------------------+
 void CheckForOpen()
   {
@@ -106,7 +106,7 @@ void CheckForOpen()
 //---
   }
 //+------------------------------------------------------------------+
-//| Check for close order conditions                                 |
+//| Check for close position conditions                              |
 //+------------------------------------------------------------------+
 void CheckForClose()
   {
@@ -148,6 +148,11 @@ int OnInit()
   {
 //---
    ExtHandle=iMA(_Symbol,_Period,MovingPeriod,MovingShift,MODE_SMA,PRICE_CLOSE);
+   if(ExtHandle==INVALID_HANDLE)
+     {
+      printf("Error creating MA indicator");
+      return(-1);
+     }
 //---
    return(0);
   }

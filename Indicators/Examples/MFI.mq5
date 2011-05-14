@@ -89,7 +89,7 @@ void CalculateMFI(const int nPosition,
                   const double &ClBuffer[],
                   const long &VolBuffer[])
   {
-   for(int i=nPosition;i<nRatesCount;i++)
+   for(int i=nPosition;i<nRatesCount && !IsStopped();i++)
      {
       double dPositiveMF=0.0;
       double dNegativeMF=0.0;

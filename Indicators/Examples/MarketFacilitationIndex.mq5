@@ -62,7 +62,7 @@ void CalculateMFI(const int start,const int rates_total,
         }
      }
 //---
-   while(i<rates_total)
+   while(i<rates_total && !IsStopped())
      {
       if(Volume[i]==0)
         {

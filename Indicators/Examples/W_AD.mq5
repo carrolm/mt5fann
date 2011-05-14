@@ -54,7 +54,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       ExtWADBuffer[0]=0.0;
      }
 //--- main cycle
-   for(int i=pos;i<rates_total;i++)
+   for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get data
       double hi=High[i];

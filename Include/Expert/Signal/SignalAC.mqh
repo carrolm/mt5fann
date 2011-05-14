@@ -118,7 +118,8 @@ int CSignalAC::LongCondition()
 //--- if the first analyzed bar is "red", don't "vote" for buying
    if(DiffAC(idx++)<0.0)    return(result);
 //--- first analyzed bar is "green" (the indicator has no objections to buying)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
 //--- if the second analyzed bar is "red", there is no condition for buying
    if(DiffAC(idx)<0.0)      return(result);
 //--- second analyzed bar is "green" (the condition for buying may be fulfilled)
@@ -129,9 +130,11 @@ int CSignalAC::LongCondition()
       if(DiffAC(idx++)<0.0) return(result);
      }
 //--- there is a condition for buying
-   result=m_pattern_1;
+   if(IS_PATTERN_USAGE(1))
+      result=m_pattern_1;
 //--- if the previously analyzed bar is "red", the condition for buying has just been fulfilled
-   if(DiffAC(idx)<0.0)      result=m_pattern_2;
+   if(IS_PATTERN_USAGE(2) && DiffAC(idx)<0.0)
+      result=m_pattern_2;
 //--- return the result
    return(result);
   }
@@ -148,7 +151,8 @@ int CSignalAC::ShortCondition()
 //--- if the first analyzed bar is "green", don't "vote" for selling
    if(DiffAC(idx++)>0.0)    return(result);
 //--- first analyzed bar is "red" (the indicator has no objections to selling)
-   result=m_pattern_0;
+   if(IS_PATTERN_USAGE(0))
+      result=m_pattern_0;
 //--- if the second analyzed bar is "green", there is no condition for selling
    if(DiffAC(idx)>0.0)      return(result);
 //--- second analyzed bar is "red" (the condition for selling may be fulfilled)
@@ -159,9 +163,11 @@ int CSignalAC::ShortCondition()
       if(DiffAC(idx++)>0.0) return(result);
      }
 //--- there us a condition for selling
-   result=m_pattern_1;
+   if(IS_PATTERN_USAGE(1))
+      result=m_pattern_1;
 //--- if the previously analyzed bar is "green", the condition for selling has just been fulfilled
-   if(DiffAC(idx)>0.0)      result=m_pattern_2;
+   if(IS_PATTERN_USAGE(2) && DiffAC(idx)>0.0)
+      result=m_pattern_2;
 //--- return the result
    return(result);
   }

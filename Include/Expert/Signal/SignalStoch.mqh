@@ -342,21 +342,21 @@ bool CSignalStoch::CompareMaps(int map,int count,bool minimax=false,int start=0)
 //--- price and the oscillator are checked separately (thus, there are 16 checks)
    for(i=step*start,j=0;i<total;i+=step,j+=4)
      {
-      //--- "take" two bits - patter of the corresponding extremum of the oscillator
-      inp_map=(map>>i)&3;
+      //--- "take" two bits - patter of the corresponding extremum of the price
+      inp_map=(map>>j)&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
       if(inp_map<2)
         {
-         //--- "take" two bits of the corresponding extremum of the oscillator (higher-order bit is always 0)
-         check_map=(m_extr_map>>j)&3;
+         //--- "take" two bits of the corresponding extremum of the price (higher-order bit is always 0)
+         check_map=(m_extr_map>>i)&3;
          if(inp_map!=check_map) return(false);
         }
-      //--- "take" two bits - pattern of the corresponding price extremum
-      inp_map=(map>>(i+2))&3;
+      //--- "take" two bits - pattern of the corresponding oscillator extremum
+      inp_map=(map>>(j+2))&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
       if(inp_map>=2) continue;
-      //--- "take" two bits of the corresponding price extremum (higher-order bit is always 0)
-      check_map=(m_extr_map>>(j+2))&3;
+      //--- "take" two bits of the corresponding oscillator extremum (higher-order bit is always 0)
+      check_map=(m_extr_map>>(i+2))&3;
       if(inp_map!=check_map) return(false);
      }
 //--- ok
@@ -385,7 +385,7 @@ int CSignalStoch::LongCondition()
       if(IS_PATTERN_USAGE(2) && DiffMainSignal(idx)>0.0 && DiffMainSignal(idx+1)<0.0)
          result=m_pattern_2;      // signal number 2
       //--- if the models 3 or 4 are used, look for divergences
-      if((IS_PATTERN_USAGE(4) || IS_PATTERN_USAGE(5)))
+      if((IS_PATTERN_USAGE(3) || IS_PATTERN_USAGE(4)))
         {
          //--- perform the extended analysis of the oscillator state
          ExtStateStoch(idx);

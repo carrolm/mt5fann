@@ -106,7 +106,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(prev_calculated==0) limit=0;
    else                   limit=prev_calculated-1;
 //---
-   for(int i=limit;i<rates_total;i++)
+   for(int i=limit;i<rates_total && !IsStopped();i++)
      {
       ExtChinkouBuffer[i]=Close[i];
       //--- tenkan sen
