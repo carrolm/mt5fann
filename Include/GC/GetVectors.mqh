@@ -37,7 +37,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
   {// пара, период, смещение назад (для индикатора полезно)
    double output_vector=0;
    int shift_history=15,ni=0;
-   //if(shift<shift_history) shift_history=0;
+//if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история
    if(shift>shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift-shift_history,false,2);
@@ -49,12 +49,12 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
      {
       add_shift=0;
       shift_pos= StringFind(fn_names,"-",start_pos);
-      if(shift_pos>0 && (shift_pos<end_pos||-1==end_pos))
+      if(shift_pos>0 && (shift_pos<end_pos || -1==end_pos))
         {
          add_shift=(int)StringToInteger(StringSubstr(fn_names,start_pos,shift_pos-start_pos));
          start_pos=shift_pos+1;
         }
-       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
+      //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
       InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift-1);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
@@ -91,13 +91,14 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_WPR(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iWPR(smb,tf,14);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iWPR(smb,tf,14);
    if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return ind_buffer[1]/100+0.5;
 
   }
@@ -105,13 +106,14 @@ double GetVector_WPR(string smb,ENUM_TIMEFRAMES tf,int shift)
 
 double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iAMA(smb,tf,9,2,30,0,PRICE_CLOSE);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iAMA(smb,tf,9,2,30,0,PRICE_CLOSE);
    if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
 
   }
@@ -120,13 +122,14 @@ double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_AO(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iAO(smb,tf);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iAO(smb,tf);
    if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return tanh(MathLog10(ind_buffer[1]/ind_buffer[2]));
 
   }
@@ -135,25 +138,27 @@ double GetVector_AO(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_Ichimoku(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iIchimoku(smb,tf,9,26,52);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iIchimoku(smb,tf,9,26,52);
    if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
   }
 //+------------------------------------------------------------------+
 double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iEnvelopes(smb,tf,28,0,MODE_SMA,PRICE_MEDIAN,0.1);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iEnvelopes(smb,tf,28,0,MODE_SMA,PRICE_MEDIAN,0.1);
    if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
 
    return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
   }
@@ -162,12 +167,13 @@ double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_IMA(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iMA(smb,tf,6,0,MODE_LWMA,PRICE_WEIGHTED);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iMA(smb,tf,6,0,MODE_LWMA,PRICE_WEIGHTED);
    if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return MathLog10(ind_buffer[1]/ind_buffer[2])*1000;
   }
 //+------------------------------------------------------------------+
@@ -175,25 +181,27 @@ double GetVector_IMA(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_MACD(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iMACD(smb,tf,12,26,9,PRICE_CLOSE);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iMACD(smb,tf,12,26,9,PRICE_CLOSE);
    if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return tanh(MathLog10(ind_buffer[1]/ind_buffer[2]));
 
   }
 //+------------------------------------------------------------------+
 double GetVector_CCI(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iCCI(smb,tf,14,PRICE_TYPICAL);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iCCI(smb,tf,14,PRICE_TYPICAL);
    if(h_ind==INVALID_HANDLE) return(false);//--- если хэндл невалидный
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return tanh(MathLog10(ind_buffer[1]/ind_buffer[2])/10);
 
   }
@@ -220,7 +228,10 @@ double GetVector_Hour(string smb,ENUM_TIMEFRAMES tf,int shift)
    TimeToStruct(Time[1],tm);
    return((double)tm.hour/12-1);
   }
-  double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
   {
    datetime Time[]; ArraySetAsSeries(Time,true);
    CopyTime(smb,tf,shift,3,Time);
@@ -256,12 +267,13 @@ double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_StochasticK(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return ind_buffer[1]/100-0.5;
 
   }
@@ -270,12 +282,13 @@ double GetVector_StochasticK(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_StochasticD(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iStochastic(smb,tf,5,3,3,MODE_SMA,STO_LOWHIGH);
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,1,shift,5,ind_buffer)<(5)) return(0);
 
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return ind_buffer[1]/100-0.5;
 
   }
@@ -284,13 +297,14 @@ double GetVector_StochasticD(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   int h_ind=iRSI(smb,tf,14,PRICE_CLOSE);
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iRSI(smb,tf,14,PRICE_CLOSE);
    double ind_buffer[];
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5))return(0);
-   IndicatorRelease(h_ind);
+//IndicatorRelease(h_ind);
    return ind_buffer[1]/100-0.5;
-   return(true);
+
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
