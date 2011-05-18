@@ -43,7 +43,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    int i,j,shift=15;
    string outstr;
    double Result;
-   int num_vals;
+   int num_vals,prev_prg=0;
    string fnm="";
    for(int ring=0;ring<3;ring++)
      {
@@ -68,9 +68,14 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             bool need_exp=true;
             for(i=shift;i<(shift+num_vals);i++)
               {
+               //if(prev_prg<(int)(100*i/(shift+num_vals)))
+               //  {
+               //   prev_prg=(int)(100*i/(shift+num_vals));
+               //   Comment(prev_prg,"%");
+               //  }
                Result=GetVectors(InputVector,inputSignals,smbl,0,i);
                outstr="";need_exp=true;
-               for(j=0;j<num_input_signals;j++) 
+               for(j=0;j<num_input_signals;j++)
                  {
                   outstr+=DoubleToString(InputVector[j],export_precision)+",";
                   if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;

@@ -9,6 +9,7 @@
 #include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
 //COracleTemplate *Oracles[];
+input int _NEDATA_=100000;// cколько выгрузить
 int nOracles;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -19,8 +20,8 @@ int OnInit()
    nOracles=0;//AllOracles();
    AllOracles[nOracles++]=new COracleTemplate;
    AllOracles[0].Init();
-   AllOracles[0].ExportHistoryENCOG("","",100,0,0);
-   //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
+   AllOracles[0].ExportHistoryENCOG("","",_NEDATA_,0,0);
+//for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
    double            InputVector[];ArrayResize(InputVector,20);
    GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);
    return(0);
