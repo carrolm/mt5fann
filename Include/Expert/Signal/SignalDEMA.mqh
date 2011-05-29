@@ -37,6 +37,7 @@ protected:
    int               m_pattern_0;      // model 0 "price is on the necessary side from the indicator"
    int               m_pattern_1;      // model 1 "price crossed the indicator with opposite direction"
    int               m_pattern_2;      // model 2 "price crossed the indicator with the same direction"
+   int               m_pattern_3;      // model 3 "piercing"
 
 public:
                      CSignalDEMA();
@@ -48,6 +49,7 @@ public:
    void              Pattern_0(int value)                { m_pattern_0=value;          }
    void              Pattern_1(int value)                { m_pattern_1=value;          }
    void              Pattern_2(int value)                { m_pattern_2=value;          }
+   void              Pattern_3(int value)                { m_pattern_3=value;          }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- method of creating the indicator and timeseries
@@ -85,6 +87,7 @@ void CSignalDEMA::CSignalDEMA()
    m_pattern_0 =20;          // model 0 "price is on the necessary side from the indicator"
    m_pattern_1 =60;          // model 1 "price crossed the indicator with opposite direction"
    m_pattern_2 =80;          // model 2 "price crossed the indicator with the same direction"
+   m_pattern_3 =60;          // model 3 "piercing"
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
@@ -174,24 +177,27 @@ int CSignalDEMA::LongCondition()
       //--- the close price is above the indicator (the indicator has no objections to buying)
       if(IS_PATTERN_USAGE(0))
          result=m_pattern_0;
-      //--- if the model 2 is used
-      if(IS_PATTERN_USAGE(2) && DiffMA(idx)>0.0)
+      //--- if the indicator is directed upwards
+      if(DiffMA(idx)>0.0)
         {
-         //--- the indicator is directed upwards
          if(DiffOpenMA(idx)<0.0)
            {
-            //--- the open price is below the indicator (i.e. there was an intersection)
-            result=m_pattern_2;
-            //--- suggest to enter the market at the "roll back"
-            m_base_price=m_symbol.NormalizePrice(MA(idx));
+            //--- if the model 2 is used
+            if(IS_PATTERN_USAGE(2))
+              {
+               //--- the open price is below the indicator (i.e. there was an intersection)
+               result=m_pattern_2;
+               //--- suggest to enter the market at the "roll back"
+               m_base_price=m_symbol.NormalizePrice(MA(idx));
+              }
            }
          else
            {
-            //--- the open price is above the indicator
-            if(DiffLowMA(idx)<0.0)
+            //--- if the model 3 is used and the open price is above the indicator
+            if(IS_PATTERN_USAGE(3) && DiffLowMA(idx)<0.0)
               {
                //--- the low price is below the indicator
-               result=m_pattern_2;
+               result=m_pattern_3;
                //--- consider that this is a formed "piercing" and suggest to enter the market at the current price
                m_base_price=0.0;
               }
@@ -228,24 +234,27 @@ int CSignalDEMA::ShortCondition()
       //--- the close price is below the indicator (the indicator has no objections to buying)
       if(IS_PATTERN_USAGE(0))
          result=m_pattern_0;
-      //--- if the model 2 is used
-      if(IS_PATTERN_USAGE(2) && DiffMA(idx)<0.0)
+      //--- the indicator is directed downwards
+      if(DiffMA(idx)<0.0)
         {
-         //--- the indicator is directed downwards
-         if(DiffOpenMA(idx)<0.0)
+         if(DiffOpenMA(idx)>0.0)
            {
-            //--- the open price is above the indicator (i.e. there was an intersection)
-            result=m_pattern_2;
-            //--- suggest to enter the market at the "roll back"
-            m_base_price=m_symbol.NormalizePrice(MA(idx));
+            //--- if the model 2 is used
+            if(IS_PATTERN_USAGE(2))
+              {
+               //--- the open price is above the indicator (i.e. there was an intersection)
+               result=m_pattern_2;
+               //--- suggest to enter the market at the "roll back"
+               m_base_price=m_symbol.NormalizePrice(MA(idx));
+              }
            }
          else
            {
-            //--- the open price is below the indicator
-            if(DiffHighMA(idx)>0.0)
+            //--- if the model 3 is used and the open price is below the indicator
+            if(IS_PATTERN_USAGE(3) && DiffHighMA(idx)>0.0)
               {
                //--- the high price is above the indicator
-               result=m_pattern_2;
+               result=m_pattern_3;
                //--- consider that this is a formed "piercing" and suggest to enter the market at the current price
                m_base_price=0.0;
               }

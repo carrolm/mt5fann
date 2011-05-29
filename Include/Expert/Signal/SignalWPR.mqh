@@ -351,7 +351,7 @@ int CSignalWPR::LongCondition()
       if(IS_PATTERN_USAGE(0))
          result=m_pattern_0;      // "confirming" signal number 0
       //--- if the model 1 is used, search for a reverse of the oscillator upwards behind the level of overselling
-      if(IS_PATTERN_USAGE(1) && Diff(idx+1)<0.0 && WPR(idx+1)>-20.0)
+      if(IS_PATTERN_USAGE(1) && Diff(idx+1)<0.0 && WPR(idx+1)>-80.0)
          result=m_pattern_1;      // signal number 1
       //--- if the model 2 or 3 is used, search for the divergences
       if(IS_PATTERN_USAGE(2))
@@ -383,7 +383,7 @@ int CSignalWPR::ShortCondition()
       if(IS_PATTERN_USAGE(0)) 
          result=m_pattern_0;      // "confirming" signal number 0
       //--- if the model 1 is used, search for a reverse of the oscillator downwards behind the level of overbuying
-      if(IS_PATTERN_USAGE(1) && Diff(idx+1)>0.0 && WPR(idx+1)<-80.0)
+      if(IS_PATTERN_USAGE(1) && Diff(idx+1)>0.0 && WPR(idx+1)<-20.0)
          result=m_pattern_1;      // signal number 1
       //--- if the model 2 or 3 is used, search for the divergences
       if(IS_PATTERN_USAGE(2))
