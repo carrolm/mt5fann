@@ -390,17 +390,23 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 // копируем историю
 // TF всегда минутка!
 //   tf=PERIOD_M1;
-   int maxcount=CopyHigh(smb,tf,shift,shift_history+3,High);
-   maxcount=CopyClose(smb,tf,shift,shift_history+3,Close);
-   maxcount=CopyLow(smb,tf,shift,shift_history+3,Low);
-   maxcount=CopyTime(smb,tf,shift,shift_history+3,Time);
+   if(((shift_history+3)>CopyHigh(smb,tf,shift,shift_history+3,High)) 
+   || ((shift_history+3)>CopyClose(smb,tf,shift,shift_history+3,Close)) 
+   ||   ((shift_history+3)>CopyLow(smb,tf,shift,shift_history+3,Low))
+   //|| ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
+   )
+     {
+      Print(smb," ",shift);
+      return(0);
+     }
+
    double res=0,res1=0;
-   int is,ib;
+   int is,ib;double  TS;
 //   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
-      double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_ts*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_ts*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(Close[shift_history]<Close[shift_history-1]) mS=Close[shift_history]-S;
       if(Close[shift_history]>Close[shift_history-1]) mB=Close[shift_history]-B;
       for(int i=shift_history-1;i>0;i--)
@@ -442,11 +448,16 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
         }
       else
         {
-         //Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
+         Print(smb+" SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
          res=0;
         }
      }
-   if(NULL==res) res=0.0001;
+   if(NULL==res)
+     {
+      //         Print(smb+" NULL SYMBOL_TRADE_STOPS_LEVEL="+(string)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)+" SYMBOL_POINT="+(string)SymbolInfoDouble(smb,SYMBOL_POINT));
+      res=0;
+      //    res=0.0001;
+     }
 //   Сигнал	Количество	процент	дельтах	Серединка	-1
 //QS	7 580,00	1,20317%	0,0240634921	0,012031746	-0,987968254
 //QWS	39 142,00	6,21302%	0,1242603175	0,0621301587	-0,9138063492
