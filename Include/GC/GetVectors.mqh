@@ -114,7 +114,7 @@ double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
 //IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
+   return atan(MathLog10(ind_buffer[1]/ind_buffer[2])*10000);
 
   }
 //+------------------------------------------------------------------+
@@ -146,7 +146,7 @@ double GetVector_Ichimoku(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
 //IndicatorRelease(h_ind);
-   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
+   return tanh(MathLog10(ind_buffer[1]/ind_buffer[2])*10000);
   }
 //+------------------------------------------------------------------+
 double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
@@ -160,7 +160,7 @@ double GetVector_Envelopes(string smb,ENUM_TIMEFRAMES tf,int shift)
 
 //IndicatorRelease(h_ind);
 
-   return MathLog10(ind_buffer[1]/ind_buffer[2])*10000;
+   return tanh(MathLog10(ind_buffer[1]/ind_buffer[2])*10000);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -470,6 +470,14 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //else if (res>-0.3) res=-0.002417460;
 //else if (res>-0.6) res=-0.9138063492;
 //else res=-0.987968254;
+              //if(res==0) continue;
+              // if(res>0.66) QB++;
+              // else if(res>0.33) QCS++;
+              // else if(res>0.1) QWCS++;
+              // else if(res>-0.1) QZ++;
+              // else if(res>-0.33) QWCB++;
+              // else if(res>-0.66) QCB++;
+              // else QS++;
 
    return(res);
 

@@ -77,7 +77,7 @@ int OnStart()
    ArrayDouble.Delta(0.1);
 //--- produce some of the search in sorted array
    key=MathRand()*MathPow(10,MathRand()%100);
-   if((pos=ArrayDouble.SearchGreat(key))==UINT_MAX)
+   if((pos=ArrayDouble.SearchGreat(key))==-1)
       printf("Search for items greater than %f, not found",key);
    else
      {
@@ -87,7 +87,7 @@ int OnStart()
       //---
      }
    key=MathRand()*MathPow(10,MathRand()%100);
-   if((pos=ArrayDouble.SearchLess(key))==UINT_MAX)
+   if((pos=ArrayDouble.SearchLess(key))==-1)
       printf("Search for items less than %f, not found",key);
    else
      {
