@@ -80,7 +80,16 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                   outstr+=DoubleToString(InputVector[j],export_precision)+",";
                   if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
                  }
-               outstr+=DoubleToString(Result,export_precision);
+               if(Result==0) continue;
+               if(Result>0.66) outstr+="""QB""";
+               else if(Result>0.33) outstr+="""QCS""";
+               else if(Result>0.1) outstr+="""QWCS""";
+               else if(Result>-0.1) outstr+="""QZ""";
+               else if(Result>-0.33) outstr+="""QWCB""";
+               else if(Result>-0.66) outstr+="""QCB""";
+               else outstr+="""QS""";
+
+               //outstr+=DoubleToString(Result,export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
               }
