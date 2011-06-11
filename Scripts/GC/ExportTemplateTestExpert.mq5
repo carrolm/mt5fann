@@ -26,11 +26,11 @@ void OnStart()
 int Write_File(int qty)
   {
    int i;
-   double restanh=0;
+   double res=0;
    string outstr;
    MqlRates rates[];
    MqlDateTime tm;
-   double IV[50],OV[10];
+   //double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    TimeToStruct( TimeCurrent(),tm);
    int cm=tm.mon;
@@ -48,15 +48,22 @@ int Write_File(int qty)
            {
             TimeToStruct(rates[i].time,tm);
             if(tm.mon!=cm) break;
-           // res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
-             if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
+            res=GetTrend(15,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
+             //if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
               {
-               restanh=OV[0];
+            //   restanh=OV[0];
                //restanh=tanh(res/5);
-               if(restanh>0.333 || restanh<-0.333) 
+               if(res<1 && res>-1) continue;
+               if(res>4) {res=0.7;}
+               else if(res>1) res=0.35;
+               else if(res>0.1) res=0;
+               else if(res>-0.1) res=0;
+               else if(res>-1) res=0;
+               else if(res>-4) {res=-.35;}
+               else res=-0.7;
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);
-               FileWrite(FileHandle,"  if(smb==\""+SymbolsArray[SymbolIdx]+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)restanh+");");
+               FileWrite(FileHandle,"  if(smb==\""+SymbolsArray[SymbolIdx]+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)res+");");
               }
            }
         }

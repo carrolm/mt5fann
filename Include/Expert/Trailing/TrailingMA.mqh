@@ -82,6 +82,7 @@ void CTrailingMA::~CTrailingMA()
 //+------------------------------------------------------------------+
 bool CTrailingMA::ValidationSettings()
   {
+   if(!CExpertTrailing::ValidationSettings()) return(false);
 //--- initial data checks
    if(m_ma_period<=0)
      {

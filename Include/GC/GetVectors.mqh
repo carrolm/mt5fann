@@ -40,7 +40,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история
-   if(shift>shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift-shift_history,false,2);
+   if(shift>shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift-shift_history,false);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
    int start_pos=0,end_pos=0,shift_pos=0,add_shift;
@@ -326,7 +326,7 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
 //if((High[1]>High[0] && High[1]>High[2])
 //   || (Low[1]<Low[0] && Low[1]<Low[2]))
 //   if(shift_history>0) {OutputVector[0]=Sigmoid(GetTrend(shift_history,smbl,tf,shift))-0.5; ret=true;}
-   if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift,false,2); ret=true;}
+   if(shift_history>0) {OutputVector[0]=GetTrend(shift_history,smbl,tf,shift,false); ret=true;}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -379,7 +379,7 @@ void DelTrash()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,int _ts=2)
+double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
   {
    double mS=0,mB=0,S=0,B=0;
    double Close[]; ArraySetAsSeries(Close,true);
@@ -393,7 +393,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
    if(((shift_history+3)>CopyHigh(smb,tf,shift,shift_history+3,High)) 
    || ((shift_history+3)>CopyClose(smb,tf,shift,shift_history+3,Close)) 
    ||   ((shift_history+3)>CopyLow(smb,tf,shift,shift_history+3,Low))
-   //|| ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
+   || ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
    )
      {
       Print(smb," ",shift);
@@ -406,45 +406,45 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
      {
       S=Close[shift_history]-0.0000001; B=Close[shift_history]+0.0000001;
       is=ib=shift_history;
-      TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_ts*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-      if(Close[shift_history]<Close[shift_history-1]) mS=Close[shift_history]-S;
-      if(Close[shift_history]>Close[shift_history-1]) mB=Close[shift_history]-B;
-      for(int i=shift_history-1;i>0;i--)
-        {
-         if(0==mS)
-           {
-            if(Close[i]>(Low[i]+TS) || S<(High[i]-TS))
-              {
-               if(S>Low[i]){S=Low[i];is=i;}
-               mS=Close[shift_history]-S;
-               //S=0;
-              }
-            else
-              {
-               if(S>Low[i]){S=Low[i];is=i;}
-              }
-           }
-         if(0==mB)
-           {
-            if(Close[i]<(High[i]-TS) || B>(Low[i]+TS))
-              {
-               if(B<High[i]) {B=High[i];ib=i;}
-               mB=B-Close[shift_history];
-               //B=0;
-              }
-            else
-              {
-               if(B<High[i]) {B=High[i];ib=i;}
-              }
-           }
-        }
-      if(mS>mB) {res=-mS;if(4*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
-      else      { res=mB;if(4*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_ts),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
-
+      TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(TS>0.00001)
         {
+         if(Close[shift_history]<Close[shift_history-1]) mS=Close[shift_history]-S;
+         if(Close[shift_history]>Close[shift_history-1]) mB=Close[shift_history]-B;
+         for(int i=shift_history-1;i>0;i--)
+           {
+            if(0==mS)
+              {
+               if(Close[i]>(Low[i]+TS) || S<(High[i]-TS))
+                 {
+                  if(S>Low[i]){S=Low[i];is=i;}
+                  mS=Close[shift_history]-S;
+                  //S=0;
+                 }
+               else
+                 {
+                  if(S>Low[i]){S=Low[i];is=i;}
+                 }
+              }
+            if(0==mB)
+              {
+               if(Close[i]<(High[i]-TS) || B>(Low[i]+TS))
+                 {
+                  if(B<High[i]) {B=High[i];ib=i;}
+                  mB=B-Close[shift_history];
+                  //B=0;
+                 }
+               else
+                 {
+                  if(B<High[i]) {B=High[i];ib=i;}
+                 }
+              }
+           }
+         if(mS>mB) {res=-mS;if(4*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
+         else      { res=mB;if(4*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
+
          //Print(res+"/"+(TS));
-         res=res/TS;
+         res=_NumTS_*res/TS;
         }
       else
         {
@@ -464,7 +464,7 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //QW	535 033,00	84,92587%	1,6985174603	0,8492587302	-0,0024174603
 //QWB	40 643,00	6,45127%	0,1290253968	0,0645126984	0,9113539683
 //QB	7 602,00	1,20667%	0,0241333333	0,0120666667	0,9879333333
-   res=tanh(res/5);
+   //res=tanh(res/5);
 //if(res>0.6) res=0.9879333333;
 //else if (res>0.3) res=0.9113539683;
 //else if (res>-0.3) res=-0.002417460;
