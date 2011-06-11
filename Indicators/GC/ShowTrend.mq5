@@ -25,7 +25,7 @@ double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
 input int _TREND_=15;// на сколько смотреть вперед
 input int  _limit_=5000;// на сколько баров уходить назад
-input int _ts_ = 2;// сколько тейкпрофитов берем
+input int _ts_ = 3;// сколько тейкпрофитов берем
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
@@ -85,7 +85,7 @@ int OnCalculate(const int rates_total,
 
    for(i=1;i<_limit_;i++)
      {
-      res=GetTrend(_TREND_,_Symbol,0,i,true,_ts_);
+      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true,_ts_)/8);
       ExtVolumesBuffer[i+_TREND_]=res;
       ExtColorsBuffer[i+_TREND_]=2.0;
       if(res<-0.33)

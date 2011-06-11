@@ -59,6 +59,7 @@ void CTrailingFixedPips::CTrailingFixedPips()
 //+------------------------------------------------------------------+
 bool CTrailingFixedPips::ValidationSettings()
   {
+   if(!CExpertTrailing::ValidationSettings()) return(false);
 //--- initial data checks
    if(m_profit_level!=0 && m_profit_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
      {

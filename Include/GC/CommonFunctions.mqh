@@ -8,6 +8,7 @@
 //#include <icq_mql5.mqh>
 input bool _TrailingPosition_=true;//–азрешить следить за ордерами
 input bool _OpenNewPosition_=true;//–азрешить входить в рынок
+input int _NumTS_=3;//—колько спредов до стоплоса
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -212,7 +213,7 @@ bool Trailing()
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       //if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionSelect(smb))
         {// есть открытые
@@ -334,7 +335,7 @@ bool Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=lasttick.bid+2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -342,7 +343,7 @@ bool Trailing()
             ))
            {
             trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.sl=lasttick.ask-2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
            }
          // будем открыватьс€...
@@ -386,30 +387,25 @@ bool Trailing()
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
-      TrailingStop=(int)(2*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-      //if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
+      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL))
            {
             trReq.action=TRADE_ACTION_SLTP;
-            //Print(lasttick.ask," ",1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
             trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=0;//PositionGetDouble(POSITION_TP);
+            trReq.tp=0;
             OrderSend(trReq,BigDogModifResult);
-            //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode,"lt.ask=",lasttick.ask," trReq.sl=",trReq.sl);
            }
          else
            {
             newsl=lasttick.ask+1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if(PositionGetDouble(POSITION_SL)>newsl)
+            if((PositionGetDouble(POSITION_SL)>newsl)&&((PositionGetDouble(POSITION_SL)-newsl)>SymbolInfoDouble(smb,SYMBOL_POINT)))
                {
                trReq.action=TRADE_ACTION_SLTP;
-               trReq.sl=lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               //trReq.sl=BufferH[1]+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.tp=0;//PositionGetDouble(POSITION_TP);
-               if((PositionGetDouble(POSITION_SL)-trReq.sl)>SymbolInfoDouble(smb,SYMBOL_POINT)) OrderSend(trReq,BigDogModifResult);
-               //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode,"lt.ask=",lasttick.ask," trReq.sl=",trReq.sl);
+               trReq.sl=newsl;
+               trReq.tp=0;
+               OrderSend(trReq,BigDogModifResult);
               }
            }
         }
@@ -418,28 +414,19 @@ bool Trailing()
          if(0==PositionGetDouble(POSITION_SL))
            {
             trReq.action=TRADE_ACTION_SLTP;
-            trReq.sl= lasttick.bid-1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=0;// PositionGetDouble(POSITION_TP);
-            //Print(trReq.sl," tp=",trReq.tp);
-            //if((trReq.sl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)) 
+            trReq.sl= lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.tp=0;
             OrderSend(trReq,BigDogModifResult);
            }
          else
            {
-            newsl=lasttick.bid-1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if(PositionGetDouble(POSITION_SL)<newsl)
-               //if(
-               //   ((lasttick.bid-PositionGetDouble(POSITION_PRICE_OPEN))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               //   && ((lasttick.bid-1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT))>PositionGetDouble(POSITION_SL)
-               //   && (lasttick.bid-PositionGetDouble(POSITION_SL))/SymbolInfoDouble(smb,SYMBOL_POINT)>TrailingStop)
-               //   )
+            newsl=lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if((PositionGetDouble(POSITION_SL)<newsl)&&((newsl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
-               // Print(TimeCurrent()," ",BufferL[1] - TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT));
                trReq.action=TRADE_ACTION_SLTP;
-               trReq.sl= lasttick.bid-1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.tp=0;//PositionGetDouble(POSITION_TP);
-               if((trReq.sl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)) OrderSend(trReq,BigDogModifResult);
-               //Print(__FUNCTION__,":",trRez.comment," код ответа",trRez.retcode," lt.bid=",lasttick.bid," trReq.sl=",trReq.sl);
+               trReq.sl= newsl;
+               trReq.tp=0;
+               OrderSend(trReq,BigDogModifResult);
               }
            }
         }
