@@ -26,9 +26,34 @@ double tanh(double x)
 //| Сигмоидальная логистическая функция                                          |
 //+------------------------------------------------------------------+
 
+
 double Sigmoid(double x)// вычисление логистической функции активации
   {
    return(1/(1+exp(-x)));
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double Result2Neuro(double in,string smbl)
+  {// in - количество спредов
+   double res=0;
+   double ac[];
+   double EURUSD[]={-0.8480719565410989,-0.4637545640751625,-0.1728337340813964,0,0.1701620803277229,0.4561626146584736,0.8437527829726601};
+//EURUSD;79895;3;73337.27777777761;6558.555555555656;13648;20876;5258;10322;4910;20782;14036;89832;-0.8480719565410989;-0.4637545640751625;-0.1728337340813964;0;0.1701620803277229;0.4561626146584736;0.8437527829726601
+//GBPUSD;31380;3;28091.64285714257;3289.321428571481;6210;14897;5486;22955;5656;15352;6366;76922;-0.9192688697641767;-0.6448740282363954;-0.3798913184784587;0;0.3617950651309119;0.634902888640441;0.9172408413717792
+//AUDUSD;15838;3;13962.26666666666;1876.2333333334;3646;11917;6214;27916;6056;12135;3353;71237;-0.9488187318387916;-0.730350800847874;-0.4758341872903126;0;0.4801577831744739;0.7355166556705083;0.9529317629883347
+   if("EURUSD"==smbl) ArrayCopy(ac,EURUSD);
+   else { Print("Not data for ",smbl);return 0;}
+   if(in==0) return 0;
+   if(in>4) return ac[6];
+   else if(in>1) return ac[5];
+   else if(in>0.1) return ac[4];
+   else if(in>-0.1) return ac[3];
+   else if(in>-1) return ac[2];
+   else if(in>-4) return ac[1];
+   else return ac[0];
+
+   return res;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -99,7 +124,7 @@ double GetVector_WPR(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
 
 //IndicatorRelease(h_ind);
-   return ind_buffer[1]/100+0.5;
+   return 2*(ind_buffer[1]/100+0.5);
 
   }
 //+------------------------------------------------------------------+
@@ -114,7 +139,7 @@ double GetVector_AMA(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<5) return(0);
 
 //IndicatorRelease(h_ind);
-   return atan(MathLog10(ind_buffer[1]/ind_buffer[2])*10000);
+   return atan(MathLog10(ind_buffer[1]/ind_buffer[2])*6000);
 
   }
 //+------------------------------------------------------------------+
@@ -274,7 +299,7 @@ double GetVector_StochasticK(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
 
 //IndicatorRelease(h_ind);
-   return ind_buffer[1]/100-0.5;
+   return 2*(ind_buffer[1]/100-0.5);
 
   }
 //+------------------------------------------------------------------+
@@ -289,7 +314,7 @@ double GetVector_StochasticD(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(CopyBuffer(h_ind,1,shift,5,ind_buffer)<(5)) return(0);
 
 //IndicatorRelease(h_ind);
-   return ind_buffer[1]/100-0.5;
+   return 2*(ind_buffer[1]/100-0.5);
 
   }
 //+------------------------------------------------------------------+
@@ -303,7 +328,7 @@ double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
    if(!ArraySetAsSeries(ind_buffer,true)) return(0);
    if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5))return(0);
 //IndicatorRelease(h_ind);
-   return ind_buffer[1]/100-0.5;
+   return 2*(ind_buffer[1]/100-0.5);
 
   }
 //+------------------------------------------------------------------+
@@ -334,11 +359,6 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
      {// Есть фрактал!
       //Print("shift="+shift+" shift_history="+shift_history);
       if("Easy"==fn_name) ret=GetVectors_Easy(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
-      // нормируем в гиперкуб -0.5...0.5
-      //      double sq=0;
-      //     for(i=0;i<num_inputvectors;i++) sq+=InputVector[i]*InputVector[i]; sq=MathSqrt(sq);
-      //     if(0<sq) for(i=0;i<num_inputvectors;i++) InputVector[i]=InputVector[i]/sq;
-
       if("RSI"==fn_name) ret=GetVectors_RSI(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("IMA"==fn_name) ret=GetVectors_IMA(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Fractals"==fn_name) ret=GetVectors_Fractals(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
@@ -354,16 +374,6 @@ bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvector
       if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Envelopes"==fn_name) ret=GetVectors_Envelopes(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
       if("Ichimoku"==fn_name) ret=GetVectors_Ichimoku(InputVector,num_inputvectors,smbl,tf,shift+shift_history);
-      // for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq)-0.5;
-      //for(i=0;i<num_inputvectors;i++) InputVector[i]=Sigmoid(InputVector[i]/sq);
-      //double min=InputVector[0];
-      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]<min) min=InputVector[i];
-      //for(i=0;i<num_inputvectors;i++) InputVector[i]-=min;
-      //double max=InputVector[0];
-      //for(i=0;i<num_inputvectors;i++) if(InputVector[i]>max) max=InputVector[i];if(max==0) max=1;
-      //for(i=0;i<num_inputvectors;i++) InputVector[i]=2*InputVector[i]/max-1;
-      //    for(i=0;i<num_inputvectors;i++) InputVector[i]=MathRound(1000*InputVector[i])/1000;
-
      }
    return(ret);
   }
@@ -390,11 +400,11 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 // копируем историю
 // TF всегда минутка!
 //   tf=PERIOD_M1;
-   if(((shift_history+3)>CopyHigh(smb,tf,shift,shift_history+3,High)) 
-   || ((shift_history+3)>CopyClose(smb,tf,shift,shift_history+3,Close)) 
-   ||   ((shift_history+3)>CopyLow(smb,tf,shift,shift_history+3,Low))
-   || ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
-   )
+   if(((shift_history+3)>CopyHigh(smb,tf,shift,shift_history+3,High))
+      || ((shift_history+3)>CopyClose(smb,tf,shift,shift_history+3,Close))
+      || ((shift_history+3)>CopyLow(smb,tf,shift,shift_history+3,Low))
+      || ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
+      )
      {
       Print(smb," ",shift);
       return(0);
@@ -440,9 +450,16 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
                  }
               }
            }
-         if(mS>mB) {res=-mS;if(4*TS<-res&&draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);}
-         else      { res=mB;if(4*TS<res&&draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);}
-
+         if(mS>mB)
+           {
+            if(Close[shift_history]<Close[shift_history-1]) return(0);
+            res=-mS;if(4*TS<-res && draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
+           }
+         else
+           {
+            if(Close[shift_history]>Close[shift_history-1]) return(0);
+            res=mB;if(4*TS<res && draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
+           }
          //Print(res+"/"+(TS));
          res=_NumTS_*res/TS;
         }
@@ -464,20 +481,20 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 //QW	535 033,00	84,92587%	1,6985174603	0,8492587302	-0,0024174603
 //QWB	40 643,00	6,45127%	0,1290253968	0,0645126984	0,9113539683
 //QB	7 602,00	1,20667%	0,0241333333	0,0120666667	0,9879333333
-   //res=tanh(res/5);
+//res=tanh(res/5);
 //if(res>0.6) res=0.9879333333;
 //else if (res>0.3) res=0.9113539683;
 //else if (res>-0.3) res=-0.002417460;
 //else if (res>-0.6) res=-0.9138063492;
 //else res=-0.987968254;
-              //if(res==0) continue;
-              // if(res>0.66) QB++;
-              // else if(res>0.33) QCS++;
-              // else if(res>0.1) QWCS++;
-              // else if(res>-0.1) QZ++;
-              // else if(res>-0.33) QWCB++;
-              // else if(res>-0.66) QCB++;
-              // else QS++;
+//if(res==0) continue;
+// if(res>0.66) QB++;
+// else if(res>0.33) QCS++;
+// else if(res>0.1) QWCS++;
+// else if(res>-0.1) QZ++;
+// else if(res>-0.33) QWCB++;
+// else if(res>-0.66) QCB++;
+// else QS++;
 
    return(res);
 

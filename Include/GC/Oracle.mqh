@@ -47,7 +47,6 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    string fnm="";
    for(int ring=0;ring<3;ring++)
      {
-
       switch(ring)
         {
          case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_test_data.csv";  break;
@@ -68,28 +67,26 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             bool need_exp=true;
             for(i=shift;i<(shift+num_vals);i++)
               {
-               //if(prev_prg<(int)(100*i/(shift+num_vals)))
-               //  {
-               //   prev_prg=(int)(100*i/(shift+num_vals));
-               //   Comment(prev_prg,"%");
-               //  }
                Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+               //отнормируем
+               Result=Result2Neuro(Result,smbl);
+               // отнормируем
+               //if(Result==0) continue;
                outstr="";need_exp=true;
                for(j=0;j<num_input_signals;j++)
                  {
                   outstr+=DoubleToString(InputVector[j],export_precision)+",";
                   if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
                  }
-               if(Result==0) continue;
-               if(Result>0.66) outstr+="""QB""";
-               else if(Result>0.33) outstr+="""QCS""";
-               else if(Result>0.1) outstr+="""QWCS""";
-               else if(Result>-0.1) outstr+="""QZ""";
-               else if(Result>-0.33) outstr+="""QWCB""";
-               else if(Result>-0.66) outstr+="""QCB""";
-               else outstr+="""QS""";
+               //if(Result>0.66) outstr+="""QB""";
+               //else if(Result>0.33) outstr+="""QCS""";
+               //else if(Result>0.1) outstr+="""QWCS""";
+               //else if(Result>-0.1) outstr+="""QZ""";
+               //else if(Result>-0.33) outstr+="""QWCB""";
+               //else if(Result>-0.66) outstr+="""QCB""";
+               //else outstr+="""QS""";
 
-               //outstr+=DoubleToString(Result,export_precision);
+               outstr+=DoubleToString(Result,export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
               }
