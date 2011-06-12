@@ -74,7 +74,7 @@ int Write_File(int qty)
            {
             res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
             outstr="";
-            if(res==0) continue;
+//            if(res==0) continue;
             if(res>4) {QB++;SumBuy+=(res-2);}
             else if(res>1) QCS++;
             else if(res>0.1) QWCS++;

@@ -40,9 +40,9 @@ int Write_File(int qty)
       int copied=CopyRates(_Symbol,PERIOD_M1,15+_SHIFT_-1,qty+1,rates);
       FileWrite(FileHandle,"double od_forecast(datetime time,string smb)  ");
       FileWrite(FileHandle," {");
-      int SymbolIdx;
+      int SymbolIdx=0;
       //FileWrite(FileHandle,"if(smb!=\""+SymbolsArray[SymbolIdx]+"\") return(0);");
-      for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+      //for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          for(i=0; i<qty;i++)
            {
@@ -53,13 +53,13 @@ int Write_File(int qty)
               {
             //   restanh=OV[0];
                //restanh=tanh(res/5);
-               if(res<1 && res>-1) continue;
-               if(res>4) {res=0.7;}
+               if(res<4 && res>-4) continue;
+               if(res>4) res=0.7;
                else if(res>1) res=0.35;
                else if(res>0.1) res=0;
                else if(res>-0.1) res=0;
                else if(res>-1) res=0;
-               else if(res>-4) {res=-.35;}
+               else if(res>-4) res=-.35;
                else res=-0.7;
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);
