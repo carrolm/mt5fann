@@ -546,13 +546,13 @@ void CExpert::DeinitIndicators()
 bool CExpert::Refresh()
   {
    MqlDateTime time;
+//--- refresh rates
+   if(!m_symbol.RefreshRates()) return(false);
 //--- check need processing
-   TimeCurrent(time);
+   TimeToStruct(m_symbol.Time(),time);
    if(m_period_flags!=WRONG_VALUE && m_period_flags!=0)
       if((m_period_flags & TimeframesFlags(time))==0) return(false);
    m_last_tick_time=time;
-//--- refresh rates
-   if(!m_symbol.RefreshRates()) return(false);
 //--- refresh indicators
    m_indicators.Refresh();
 //--- ok
@@ -1519,7 +1519,6 @@ int CExpert::TimeframesFlags(MqlDateTime &time)
    if(time.min%15==0)      result|=OBJ_PERIOD_M15;
    if(time.min%20==0)      result|=OBJ_PERIOD_M20;
    if(time.min%30==0)      result|=OBJ_PERIOD_M30;
-   if(time.min!=0) return(result);
 //--- new hour
    result|=OBJ_PERIOD_H1;
    if(time.hour%2==0)      result|=OBJ_PERIOD_H2;
@@ -1527,8 +1526,7 @@ int CExpert::TimeframesFlags(MqlDateTime &time)
    if(time.hour%4==0)      result|=OBJ_PERIOD_H4;
    if(time.hour%6==0)      result|=OBJ_PERIOD_H6;
    if(time.hour%8==0)      result|=OBJ_PERIOD_H8;
-   if(time.hour%12==0) result|=OBJ_PERIOD_H12;
-   if(time.hour!=0) return(result);
+   if(time.hour%12==0)     result|=OBJ_PERIOD_H12;
 //--- new day
    result|=OBJ_PERIOD_D1;
 //--- new week

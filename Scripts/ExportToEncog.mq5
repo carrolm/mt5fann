@@ -11,54 +11,18 @@
 //+------------------------------------------------------------------+
 
 // Export Indicator values for NN training by ENCOG
-extern string IndExportFileName = "mt5export.csv";
-extern int  trainSize = 2000;
-
-MqlRates srcArr[];
-double StochKArr[], StochDArr[], WilliamsRArr[];
-
+#include <GC\Oracle.mqh>
+#include <GC\CommonFunctions.mqh>
+//COracleTemplate *Oracles[];
+input int _NEDATA_=100000;// cколько выгрузить
 
 void OnStart()
   {
-//---
-   ArraySetAsSeries(srcArr, true);   
-   ArraySetAsSeries(StochKArr, true);   
-   ArraySetAsSeries(StochDArr, true);   
-   ArraySetAsSeries(WilliamsRArr, true);
-         
-   int copied = CopyRates(Symbol(), Period(), 0, trainSize, srcArr);
-   
-   if (copied!=trainSize) { Print("Not enough data for " + Symbol()); return; }
-   
-   int hStochastic = iStochastic(Symbol(), Period(), 8, 5, 5, MODE_EMA, STO_LOWHIGH);
-   int hWilliamsR = iWPR(Symbol(), Period(), 21);
-   
-   
-   CopyBuffer(hStochastic, 0, 0, trainSize, StochKArr);
-   CopyBuffer(hStochastic, 1, 0, trainSize, StochDArr);
-   CopyBuffer(hWilliamsR, 0, 0, trainSize, WilliamsRArr);
-    
-   int hFile = FileOpen(IndExportFileName, FILE_CSV | FILE_ANSI | FILE_WRITE | FILE_REWRITE, ",", CP_ACP);
-   
-   FileWriteString(hFile, "DATE,TIME,CLOSE,StochK,StochD,WilliamsR\n");
-   
-   Print("Exporting indicator data to " + IndExportFileName);
-   
-   for (int i=trainSize-1; i>=0; i--)
-      {
-         string candleDate = TimeToString(srcArr[i].time, TIME_DATE);
-         StringReplace(candleDate,".","");
-         string candleTime = TimeToString(srcArr[i].time, TIME_MINUTES);
-         StringReplace(candleTime,":","");
-         FileWrite(hFile, candleDate, candleTime, DoubleToString(srcArr[i].close), 
-                                                  DoubleToString(StochKArr[i], -10),
-                                                  DoubleToString(StochDArr[i], -10),
-                                                  DoubleToString(WilliamsRArr[i], -10)
-                                                  );
-      }
-      
-   FileClose(hFile);   
-     
+
+   COracleTemplate* MyOracles=new COracleTemplate;
+   MyOracles.Init();
+   MyOracles.ExportHistoryENCOG("","",_NEDATA_,0,0);
+   delete  MyOracles;
    Print("Indicator data exported."); 
   }
 //+------------------------------------------------------------------+

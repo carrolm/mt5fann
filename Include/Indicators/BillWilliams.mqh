@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                 BillWilliams.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -69,22 +69,22 @@ bool CiAC::Initialize(string symbol,ENUM_TIMEFRAMES period)
 //+------------------------------------------------------------------+
 bool CiAC::Create(string symbol,ENUM_TIMEFRAMES period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iAC(symbol,period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to the buffer of "Accelerator Oscillator".                |
@@ -241,22 +241,22 @@ bool CiAlligator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period
 //+------------------------------------------------------------------+
 bool CiAlligator::Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iAlligator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Jaw buffer of "Alligator".                             |
@@ -363,22 +363,22 @@ bool CiAO::Initialize(string symbol,ENUM_TIMEFRAMES period)
 //+------------------------------------------------------------------+
 bool CiAO::Create(string symbol,ENUM_TIMEFRAMES period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iAO(symbol,period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfullly created
+   if(!Initialize(symbol,period))
      {
-      //--- indicator successfullly created
-      if(!Initialize(symbol,period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Awesome Oscillator".                        |
@@ -460,22 +460,22 @@ bool CiFractals::Initialize(string symbol,ENUM_TIMEFRAMES period)
 //+------------------------------------------------------------------+
 bool CiFractals::Create(string symbol,ENUM_TIMEFRAMES period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iFractals(symbol,period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Upper buffer of "Fractals".                            |
@@ -643,22 +643,22 @@ bool CiGator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int
 //+------------------------------------------------------------------+
 bool CiGator::Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iGator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Upper buffer of "Gator oscillator".                    |
@@ -774,22 +774,22 @@ bool CiBWMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUM
 //+------------------------------------------------------------------+
 bool CiBWMFI::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iBWMFI(symbol,period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,applied))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Market Facilitation Index by Bill Williams".|

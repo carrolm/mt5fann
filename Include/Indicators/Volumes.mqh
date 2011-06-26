@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                      Volumes.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -90,22 +90,22 @@ bool CiAD::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME a
 //+------------------------------------------------------------------+
 bool CiAD::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iAD(symbol,period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Accumulation/Distribution".                 |
@@ -213,22 +213,22 @@ bool CiMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_A
 //+------------------------------------------------------------------+
 bool CiMFI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iMFI(symbol,period,ma_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Money Flow Index".                          |
@@ -329,22 +329,22 @@ bool CiOBV::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME 
 //+------------------------------------------------------------------+
 bool CiOBV::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iOBV(symbol,period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "On Balance Volume".                         |
@@ -445,22 +445,22 @@ bool CiVolumes::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOL
 //+------------------------------------------------------------------+
 bool CiVolumes::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iVolumes(symbol,period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Volumes".                                   |

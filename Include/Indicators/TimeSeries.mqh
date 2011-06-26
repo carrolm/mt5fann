@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   TimeSeries.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Series.mqh"
 #include <Arrays\ArrayInt.mqh>
@@ -16,7 +16,7 @@ class CPriceSeries : public CSeries
   {
 public:
    //--- method of creation
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods for searching extremum
    virtual int       MinIndex(int start,int count)            const;
    virtual double    MinValue(int start,int count,int& index) const;
@@ -30,16 +30,20 @@ public:
 //+------------------------------------------------------------------+
 //| Set size of buffer.                                              |
 //| INPUT:  size - size buffer.                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CPriceSeries::BufferResize(int size)
+bool CPriceSeries::BufferResize(int size)
   {
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
    CDoubleBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
+//--- check pointer
+   if(buff==NULL) return(false);
 //--
    buff.Size(size);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Find minimum of specified buffer.                                |
@@ -217,18 +221,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiOpen::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CDoubleBuffer *buff=new COpenBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CDoubleBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new COpenBuffer)==NULL)    return(false);
+//--- add
+   if(!Add(buff))
      {
-      SetSymbolPeriod(symbol,period);
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the open buffer by specifying         |
@@ -338,18 +345,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiHigh::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CDoubleBuffer *buff=new CHighBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CDoubleBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new CHighBuffer)==NULL)    return(false);
+//--- add
+   if(!Add(buff))
      {
-      SetSymbolPeriod(symbol,period);
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the high buffer by specifying         |
@@ -459,18 +469,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiLow::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CDoubleBuffer *buff=new CLowBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CDoubleBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new CLowBuffer)==NULL)     return(false);
+//--- add
+   if(!Add(buff))
      {
-      SetSymbolPeriod(symbol,period);
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the low buffer by specifying          |
@@ -580,18 +593,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiClose::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CDoubleBuffer *buff=new CCloseBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CDoubleBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new CCloseBuffer)==NULL)   return(false);
+//--- add
+   if(!Add(buff))
      {
-      SetSymbolPeriod(symbol,period);
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the close buffer by specifying        |
@@ -669,7 +685,7 @@ public:
 CSpreadBuffer::CSpreadBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -749,7 +765,7 @@ class CiSpread : public CSeries
 public:
    //--- method of creation
    bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods of access to data
    int               GetData(int index)                                            const;
    int               GetData(int start_pos,int count,int& buffer[])                const;
@@ -767,21 +783,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiSpread::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CSpreadBuffer *buff=new CSpreadBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CSpreadBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new CSpreadBuffer)==NULL)  return(false);
+//--- add
+   if(!Add(buff))
      {
-      if(symbol==NULL) m_symbol=ChartSymbol();
-      else             m_symbol=symbol;
-      if(period==0)    m_period=ChartPeriod();
-      else             m_period=period;
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Method to access data.                                           |
@@ -846,16 +862,20 @@ int CiSpread::GetData(datetime start_time,datetime stop_time,int& buffer[]) cons
 //+------------------------------------------------------------------+
 //| Set size buffer.                                                 |
 //| INPUT:  size - size buffer.                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CiSpread::BufferResize(int size)
+bool CiSpread::BufferResize(int size)
   {
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
    CSpreadBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
+//--- check pointer
+   if(buff==NULL) return(false);
 //---
    buff.Size(size);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data.                                              |
@@ -909,7 +929,7 @@ public:
 CTimeBuffer::CTimeBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -989,7 +1009,7 @@ class CiTime : public CSeries
 public:
    //--- method of creation
    bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods of access to data
    datetime          GetData(int index)                                                 const;
    int               GetData(int start_pos,int count,datetime& buffer[])                const;
@@ -1007,21 +1027,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiTime::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool           result=true;
-   CTimeBuffer *buff=new CTimeBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CTimeBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
+   if((buff=new CTimeBuffer)==NULL)    return(false);
+//--- add
+   if(!Add(buff))
      {
-      if(symbol==NULL) m_symbol=ChartSymbol();
-      else             m_symbol=symbol;
-      if(period==0)    m_period=ChartPeriod();
-      else             m_period=period;
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Method to access data.                                           |
@@ -1086,16 +1106,20 @@ int CiTime::GetData(datetime start_time,datetime stop_time,datetime& buffer[]) c
 //+------------------------------------------------------------------+
 //| Set size buffer.                                                 |
 //| INPUT:  size - size buffer.                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CiTime::BufferResize(int size)
+bool CiTime::BufferResize(int size)
   {
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
    CTimeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
+//--- check pointer
+   if(buff==NULL) return(false);
 //---
    buff.Size(size);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data.                                              |
@@ -1149,7 +1173,7 @@ public:
 CTickVolumeBuffer::CTickVolumeBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -1229,7 +1253,7 @@ class CiTickVolume : public CSeries
 public:
    //--- method of creation
    bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods of access to data
    long              GetData(int index)                                             const;
    int               GetData(int start_pos,int count,long& buffer[])                const;
@@ -1247,21 +1271,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiTickVolume::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool               result=true;
-   CTickVolumeBuffer *buff=new CTickVolumeBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CTickVolumeBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))    return(false);
+//--- create
+   if((buff=new CTickVolumeBuffer)==NULL) return(false);
+//--- add
+   if(!Add(buff))
      {
-      if(symbol==NULL) m_symbol=ChartSymbol();
-      else             m_symbol=symbol;
-      if(period==0)    m_period=ChartPeriod();
-      else             m_period=period;
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Method to access data.                                           |
@@ -1326,16 +1350,20 @@ int CiTickVolume::GetData(datetime start_time,datetime stop_time,long& buffer[])
 //+------------------------------------------------------------------+
 //| Set size buffer.                                                 |
 //| INPUT:  size - size buffer.                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CiTickVolume::BufferResize(int size)
+bool CiTickVolume::BufferResize(int size)
   {
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
    CTickVolumeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
+//--- check pointer
+   if(buff==NULL) return(false);
 //--
    buff.Size(size);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data.                                              |
@@ -1389,7 +1417,7 @@ public:
 CRealVolumeBuffer::CRealVolumeBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
@@ -1469,7 +1497,7 @@ class CiRealVolume : public CSeries
 public:
    //--- method of creation
    bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods of access to data
    long              GetData(int index)                                             const;
    int               GetData(int start_pos,int count,long& buffer[])                const;
@@ -1487,21 +1515,21 @@ public:
 //+------------------------------------------------------------------+
 bool CiRealVolume::Create(string symbol,ENUM_TIMEFRAMES period)
   {
-   bool               result=true;
-   CRealVolumeBuffer *buff=new CRealVolumeBuffer;
-//---
-   result&=Add(buff);
-//---
-   if(result)
+   CRealVolumeBuffer *buff;
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))    return(false);
+//--- create
+   if((buff=new CRealVolumeBuffer)==NULL) return(false);
+//--- add
+   if(!Add(buff))
      {
-      if(symbol==NULL) m_symbol=ChartSymbol();
-      else             m_symbol=symbol;
-      if(period==0)    m_period=ChartPeriod();
-      else             m_period=period;
-      buff.SetSymbolPeriod(m_symbol,m_period);
+      delete buff;
+      return(false);
      }
-//---
-   return(result);
+//--- tune
+   buff.SetSymbolPeriod(m_symbol,m_period);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Method to access data.                                           |
@@ -1566,16 +1594,20 @@ int CiRealVolume::GetData(datetime start_time,datetime stop_time,long& buffer[])
 //+------------------------------------------------------------------+
 //| Set size buffer.                                                 |
 //| INPUT:  size - size buffer.                                      |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CiRealVolume::BufferResize(int size)
+bool CiRealVolume::BufferResize(int size)
   {
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
    CRealVolumeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
+//--- check pointer
+   if(buff==NULL) return(false);
 //--
    buff.Size(size);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refreshing of data.                                              |
