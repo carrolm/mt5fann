@@ -1,11 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                                    Indicator.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Series.mqh"
-#include <Arrays\ArrayDouble.mqh>
 //+------------------------------------------------------------------+
 //| Class CIndicatorBuffer.                                          |
 //| Purpose: Class for access to data of buffers of                  |
@@ -40,7 +39,7 @@ public:
 CIndicatorBuffer::CIndicatorBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size  =DEFAULT_BUFFER_SIZE;
    m_offset=0;
    m_name  ="";
    ArraySetAsSeries(m_data,true);
@@ -121,7 +120,7 @@ public:
    void              FullRelease(bool flag) { m_full_release=flag; }
    //--- method for creating
    bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int num_params,MqlParam &params[]);
-   virtual void      BufferResize(int size);
+   virtual bool      BufferResize(int size);
    //--- methods of access to data
    double            GetData(int buffer_num,int index)                                               const;
    int               GetData(int start_pos,int count,int buffer_num,double& buffer[])                const;
@@ -184,22 +183,22 @@ void CIndicator::~CIndicator()
 //+------------------------------------------------------------------+
 bool CIndicator::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int num_params,MqlParam &params[])
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=IndicatorCreate(symbol,period,type,num_params,params);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,num_params,params))
      {
-      //--- idicator successfully created
-      if(!Initialize(symbol,period,num_params,params))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-     return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+  return(true);
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying an element of indicator buffer        |
@@ -429,29 +428,30 @@ bool CIndicator::CreateBuffers(string symbol,ENUM_TIMEFRAMES period,int buffers)
       result&=Add(new CIndicatorBuffer);
 //---
    if(result)
-     {
-      SetSymbolPeriod(symbol,period);
       m_buffers_total=buffers;
-     }
 //---
    return(result);
   }
 //+------------------------------------------------------------------+
 //| Set size of buffers of indicator.                                |
 //| INPUT:  size - size of buffers.                                  |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CIndicator::BufferResize(int size)
+bool CIndicator::BufferResize(int size)
   {
-   int               i;
-   CIndicatorBuffer *buff;
-//--
-   for(i=0;i<Total();i++)
+   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+//-- history is avalible
+   int total=Total();
+   for(int i=0;i<total;i++)
      {
-      buff=At(i);
+      CIndicatorBuffer *buff=At(i);
+      //--- check pointer
+      if(buff==NULL) return(false);
       buff.Size(size);
      }
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Refreshing data of indicator.                                    |

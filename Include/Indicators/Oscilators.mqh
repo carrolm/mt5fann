@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   Oscilators.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -90,22 +90,22 @@ bool CiATR::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
 //+------------------------------------------------------------------+
 bool CiATR::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iATR(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Average True Range".                        |
@@ -206,22 +206,22 @@ bool CiBearsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period
 //+------------------------------------------------------------------+
 bool CiBearsPower::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iBearsPower(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Bears Power".                               |
@@ -322,22 +322,22 @@ bool CiBullsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period
 //+------------------------------------------------------------------+
 bool CiBullsPower::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iBullsPower(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Bulls Power".                               |
@@ -445,22 +445,22 @@ bool CiCCI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ap
 //+------------------------------------------------------------------+
 bool CiCCI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iCCI(symbol,period,ma_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Commodity Channel Index".                   |
@@ -582,22 +582,22 @@ bool CiChaikin::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ma_peri
 //+------------------------------------------------------------------+
 bool CiChaikin::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ma_period,int slow_ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iChaikin(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Chaikin Oscillator".                        |
@@ -698,22 +698,22 @@ bool CiDeMarker::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
 //+------------------------------------------------------------------+
 bool CiDeMarker::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iDeMarker(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "DeMarker".                                  |
@@ -829,22 +829,22 @@ bool CiForce::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM
 //+------------------------------------------------------------------+
 bool CiForce::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iForce(symbol,period,ma_period,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_method,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Force Index".                               |
@@ -969,22 +969,22 @@ bool CiMACD::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period
 //+------------------------------------------------------------------+
 bool CiMACD::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
   {   
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iMACD(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Main buffer of "Moving Averages                        |
@@ -1108,22 +1108,22 @@ bool CiMomentum::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,i
 //+------------------------------------------------------------------+
 bool CiMomentum::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iMomentum(symbol,period,ma_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Momentum".                                  |
@@ -1247,22 +1247,22 @@ bool CiOsMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period
 //+------------------------------------------------------------------+
 bool CiOsMA::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iOsMA(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Moving Average of Oscillator                |
@@ -1371,22 +1371,22 @@ bool CiRSI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ap
 //+------------------------------------------------------------------+
 bool CiRSI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iRSI(symbol,period,ma_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Relative Strength Index".                   |
@@ -1490,22 +1490,22 @@ bool CiRVI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
 //+------------------------------------------------------------------+
 bool CiRVI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iRVI(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Main buffer of "Relative Vigor Index".                 |
@@ -1650,22 +1650,22 @@ bool CiStochastic::Initialize(string symbol,ENUM_TIMEFRAMES period,int Kperiod,i
 //+------------------------------------------------------------------+
 bool CiStochastic::Create(string symbol,ENUM_TIMEFRAMES period,int Kperiod,int Dperiod,int slowing,ENUM_MA_METHOD ma_method,ENUM_STO_PRICE price_field)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iStochastic(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Main buffer of "Stochastic Oscillator".                |
@@ -1781,22 +1781,22 @@ bool CiWPR::Initialize(string symbol,ENUM_TIMEFRAMES period,int calc_period)
 //+------------------------------------------------------------------+
 bool CiWPR::Create(string symbol,ENUM_TIMEFRAMES period,int calc_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iWPR(symbol,period,calc_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,calc_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,calc_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Williams' Percent Range".                   |
@@ -1907,22 +1907,22 @@ bool CiTriX::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int a
 //+------------------------------------------------------------------+
 bool CiTriX::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iTriX(symbol,period,ma_period,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Triple Exponential Moving Averages          |

@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                        Trend.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -94,22 +94,22 @@ bool CiADX::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
 //+------------------------------------------------------------------+
 bool CiADX::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iADX(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Main buffer of "Average Directional Index".            |
@@ -243,22 +243,22 @@ bool CiADXWilder::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
 //+------------------------------------------------------------------+
 bool CiADXWilder::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iADXWilder(symbol,period,ma_period);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Main buffer of "Average Directional Index              |
@@ -418,22 +418,22 @@ bool CiBands::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int 
 //+------------------------------------------------------------------+
 bool CiBands::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ma_shift,double deviation,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iBands(symbol,period,ma_period,ma_shift,deviation,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_shift,deviation,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ma_shift,deviation,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Base buffer of "Bollinger Bands".                      |
@@ -595,22 +595,22 @@ bool CiEnvelopes::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,
 //+------------------------------------------------------------------+
 bool CiEnvelopes::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ma_shift,ENUM_MA_METHOD ma_method,int applied,double deviation)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iEnvelopes(symbol,period,ma_period,ma_shift,ma_method,applied,deviation);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied,deviation))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied,deviation))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to Upper buffer of "Envelopes".                           |
@@ -750,22 +750,22 @@ bool CiIchimoku::Initialize(string symbol,ENUM_TIMEFRAMES period,int tenkan_sen,
 //+------------------------------------------------------------------+
 bool CiIchimoku::Create(string symbol,ENUM_TIMEFRAMES period,int tenkan_sen,int kijun_sen,int senkou_span_b)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iIchimoku(symbol,period,tenkan_sen,kijun_sen,senkou_span_b);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,tenkan_sen,kijun_sen,senkou_span_b))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,tenkan_sen,kijun_sen,senkou_span_b))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to TenkanSen buffer of "Ichimoku Kinko Hyo".              |
@@ -944,22 +944,22 @@ bool CiMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ma_
 //+------------------------------------------------------------------+
 bool CiMA::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ma_shift,ENUM_MA_METHOD ma_method,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iMA(symbol,period,ma_period,ma_shift,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Moving Average".                            |
@@ -1068,22 +1068,22 @@ bool CiSAR::Initialize(string symbol,ENUM_TIMEFRAMES period,double step,double m
 //+------------------------------------------------------------------+
 bool CiSAR::Create(string symbol,ENUM_TIMEFRAMES period,double step,double maximum)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iSAR(symbol,period,step,maximum);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,step,maximum))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,step,maximum))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Parabolic Stop And Reverse System".         |
@@ -1206,22 +1206,22 @@ bool CiStdDev::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int
 //+------------------------------------------------------------------+
 bool CiStdDev::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ma_shift,ENUM_MA_METHOD ma_method,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iStdDev(symbol,period,ma_period,ma_shift,ma_method,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ma_shift,ma_method,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Standard Deviation".                        |
@@ -1337,22 +1337,22 @@ bool CiDEMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int i
 //+------------------------------------------------------------------+
 bool CiDEMA::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ind_shift,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iDEMA(symbol,period,ma_period,ind_shift,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ind_shift,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ind_shift,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Double Exponential Moving Average".         |
@@ -1468,22 +1468,22 @@ bool CiTEMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int i
 //+------------------------------------------------------------------+
 bool CiTEMA::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ind_shift,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iTEMA(symbol,period,ma_period,ind_shift,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ind_shift,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ind_shift,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Triple Exponential Moving Average".         |
@@ -1598,22 +1598,22 @@ bool CiFrAMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int 
 //+------------------------------------------------------------------+
 bool CiFrAMA::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int ind_shift,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iFrAMA(symbol,period,ma_period,ind_shift,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ind_shift,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,ind_shift,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Fractal Adaptive Moving Average".           |
@@ -1743,22 +1743,22 @@ bool CiAMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int fa
 //+------------------------------------------------------------------+
 bool CiAMA::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int fast_ema_period,int slow_ema_period,int ind_shift,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iAMA(symbol,period,ma_period,fast_ema_period,slow_ema_period,ind_shift,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,fast_ema_period,slow_ema_period,ind_shift,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,ma_period,fast_ema_period,slow_ema_period,ind_shift,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Adaptive Moving Average".                   |
@@ -1882,22 +1882,22 @@ bool CiVIDyA::Initialize(string symbol,ENUM_TIMEFRAMES period,int cmo_period,int
 //+------------------------------------------------------------------+
 bool CiVIDyA::Create(string symbol,ENUM_TIMEFRAMES period,int cmo_period,int ema_period,int ind_shift,int applied)
   {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period)) return(false);
+//--- create
    m_handle=iVIDyA(symbol,period,cmo_period,ema_period,ind_shift,applied);
-//---
-   if(m_handle!=INVALID_HANDLE)
+//--- check result
+   if(m_handle==INVALID_HANDLE)        return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,cmo_period,ema_period,ind_shift,applied))
      {
-      //--- indicator successfully created
-      if(!Initialize(symbol,period,cmo_period,ema_period,ind_shift,applied))
-        {
-         //--- initialization failed
-         IndicatorRelease(m_handle);
-         m_handle=INVALID_HANDLE;
-         return(false);
-        }
-      return(true);
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
      }
-//---
-   return(false);
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Access to buffer of "Variable Index DYnamic Average".            |

@@ -1,11 +1,15 @@
 //+------------------------------------------------------------------+
 //|                                                       Series.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include <Arrays\ArrayObj.mqh>
 #include <Arrays\ArrayDouble.mqh>
+//+------------------------------------------------------------------+
+//| defines                                                          |
+//+------------------------------------------------------------------+
+#define DEFAULT_BUFFER_SIZE 256
 //+------------------------------------------------------------------+
 //| Class CSeries.                                                   |
 //| Purpose: Base class for access to timeseries.                    |
@@ -16,10 +20,13 @@ class CSeries : public CArrayObj
 protected:
    string            m_name;             // name of series
    int               m_buffers_total;    // number of buffers
+   int               m_buffer_size;      // buffer size
    int               m_timeframe_flags;  // flags of timeframes (similar to "flags of visibility of objects")
    string            m_symbol;           // symbol
    ENUM_TIMEFRAMES   m_period;           // period
    bool              m_refresh_current;  // flag
+//--- 
+   datetime          m_first_date;
 
 public:
                      CSeries();
@@ -31,16 +38,19 @@ public:
    ENUM_TIMEFRAMES   Period()            const { return(m_period);          }
    string            PeriodDescription(int val=0);
    void              RefreshCurrent(bool flag) { m_refresh_current=flag;    }
-   //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual void      BufferResize(int size)    {                            }
+   //--- method of tuning
+   virtual bool      BufferResize(int size);
    //--- method of refreshing" of the data
    virtual void      Refresh(int flags)        {                            }
 
 protected:
    //--- methods of tuning
-   void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
+   bool              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
    void              PeriodToTimeframeFlag(ENUM_TIMEFRAMES period);
+   //---
+   bool              CheckLoadHistory(int size);
+   bool              CheckTerminalHistory(int size);
+   bool              CheckServerHistory(int size);
   };
 //+------------------------------------------------------------------+
 //| Constructor CSeries.                                             |
@@ -54,24 +64,42 @@ void CSeries::CSeries()
    m_name           ="";
    m_timeframe_flags=0;
    m_buffers_total  =0;
+   m_buffer_size    =0;
    m_symbol         ="";
    m_period         =WRONG_VALUE;
    m_refresh_current=true;
   }
 //+------------------------------------------------------------------+
+//| Set buffer size.                                                 |
+//| INPUT:  size - new buffer size.                                  |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CSeries::BufferResize(int size)
+  {
+//--- check history
+   if(!CheckLoadHistory(size)) return(false);
+//--- history is available
+   m_buffer_size=size;
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
 //| Set symbol and period.                                           |
 //| INPUT:  symbol - symbol,                                         |
 //|         period - period.                                         |
-//| OUTPUT: no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSeries::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
+bool CSeries::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
   {
    if(symbol==NULL) m_symbol=ChartSymbol();
    else             m_symbol=symbol;
    if(period==0)    m_period=ChartPeriod();
    else             m_period=period;
    PeriodToTimeframeFlag(m_period);
+//---
+   return(CSeries::BufferResize(DEFAULT_BUFFER_SIZE));
   }
 //+------------------------------------------------------------------+
 //| Convert period to timeframe flag (similar to visibility flags).  |
@@ -121,6 +149,96 @@ string CSeries::PeriodDescription(int val)
    return(_p_str[i]);
   }
 //+------------------------------------------------------------------+
+//| Checks data by specified symbol's timeframe and                  |
+//| downloads it from server, if necessary.                          |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CSeries::CheckLoadHistory(int size)
+  {
+//--- don't ask for load of its own data if it is an indicator
+   if(MQL5InfoInteger(MQL5_PROGRAM_TYPE)==PROGRAM_INDICATOR && Period()==m_period && Symbol()==m_symbol)
+      return(true);
+   if(size>TerminalInfoInteger(TERMINAL_MAXBARS))
+     {
+      //--- Definitely won't have such amount of data
+      printf(__FUNCTION__+": requested too much data (%d)",size);
+      return(false);
+     }
+   m_first_date=0;
+   if(CheckTerminalHistory(size)) return(true);
+   if(CheckServerHistory(size))   return(true);
+//--- failed
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Checks data in terminal.                                         |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CSeries::CheckTerminalHistory(int size)
+  {
+   datetime times[1];
+   long     bars=0;
+//--- Enough data in timeseries?
+   if(Bars(m_symbol,m_period)>size) return(true);
+//--- second attempt
+   if(SeriesInfoInteger(m_symbol,PERIOD_M1,SERIES_BARS_COUNT,bars))
+     {
+      //--- there is loaded data to build timeseries
+      if(bars>size*PeriodSeconds(m_period)/60)
+        {
+         //--- force timeseries build
+         CopyTime(m_symbol,m_period,size-1,1,times);
+         //--- check date
+         if(SeriesInfoInteger(m_symbol,m_period,SERIES_BARS_COUNT,bars))
+            //--- Timeseries generated using data from terminal
+            if(bars>size)           return(true);
+        }
+     }
+//--- failed
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Downloads missing data from server.                              |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CSeries::CheckServerHistory(int size)
+  {
+//--- load symbol history info
+   datetime first_server_date=0;
+   while(!SeriesInfoInteger(m_symbol,PERIOD_M1,SERIES_SERVER_FIRSTDATE,first_server_date) && !IsStopped())
+      Sleep(5);
+//--- Enough data on server?
+   if(first_server_date>TimeCurrent()-size*PeriodSeconds(m_period)) return(false);
+//--- load data step by step
+   int      fail_cnt=0;
+   datetime times[1];
+   while(!IsStopped())
+     {
+      //--- wait for timeseries build
+      while(!SeriesInfoInteger(m_symbol,m_period,SERIES_SYNCRONIZED) && !IsStopped())
+         Sleep(5);
+      //--- ask for built bars
+      int bars=Bars(m_symbol,m_period);
+      if(bars>size)                 return(true);
+      //--- copying of next part forces data loading
+      if(CopyTime(m_symbol,m_period,size-1,1,times)==1) return(true);
+      else
+        {
+         //--- no more than 100 failed attempts
+         if(++fail_cnt>=100)        return(false);
+         Sleep(10);
+        }
+     }
+//--- failed
+   return(false);
+  }
+//+------------------------------------------------------------------+
 //| Class CDoubleBuffer.                                             |
 //| Purpose: Base class of buffer of data of the double type.        |
 //|          Derives from class CArrayDouble.                        |
@@ -155,7 +273,7 @@ public:
 CDoubleBuffer::CDoubleBuffer()
   {
 //--- initialize protected data
-   m_size  =256;
+   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+

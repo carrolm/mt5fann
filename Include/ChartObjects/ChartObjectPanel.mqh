@@ -64,9 +64,7 @@ bool CChartObjectPanel::Attach(CChartObjectLabel *chart_object)
   {
    if(m_attachment.Add(chart_object))
      {
-//      m_dX.Add(chart_object.X_Distance()-X_Distance());
-//      m_dY.Add(chart_object.Y_Distance()+CChartObjectButton::Y_Size()+2);
-int x,y;
+      int x,y;
       x=chart_object.X_Distance();
       m_dX.Add(chart_object.X_Distance());
       x+=X_Distance();
@@ -224,7 +222,7 @@ bool CChartObjectPanel::CheckState(void)
          for(i=0;i<m_attachment.Total();i++)
            {
             chart_object=m_attachment.At(i);
-            chart_object.Timeframes(0);
+            chart_object.Timeframes(-1);
            }
         }
       else

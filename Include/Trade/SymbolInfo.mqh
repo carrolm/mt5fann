@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   SymbolInfo.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
+//|                      Copyright © 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                                              Revision 2011.06.08 |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -46,7 +46,7 @@ protected:
 public:
                      CSymbolInfo();
    //--- methods of access to protected data
-   string            Name()                         const { return(m_name);                 }
+   string            Name()                         const { return(m_name);               }
    bool              Name(string name);
    bool              Refresh();
    bool              RefreshRates();
@@ -55,13 +55,13 @@ public:
    bool              Select(bool select);
    bool              IsSynchronized()               const;
    //--- volumes
-   ulong             Volume()                       const { return(m_tick.volume);          }
+   ulong             Volume()                       const { return(m_tick.volume);        }
    ulong             VolumeHigh()                   const;
    ulong             VolumeLow()                    const;
    ulong             VolumeBid()                    const;
    ulong             VolumeAsk()                    const;
    //--- miscellaneous
-   datetime          Time()                         const { return(m_tick.time);            }
+   datetime          Time()                         const { return(m_tick.time);          }
    int               Spread()                       const;
    bool              SpreadFloat()                  const;
    int               TicksBookDepth()               const;
@@ -70,58 +70,58 @@ public:
    int               FreezeLevel()                  const;
    //--- fast access methods to the double symbol propertyes
    //--- bid parameters
-   double            Bid()                          const { return(m_tick.bid);             }
+   double            Bid()                          const { return(m_tick.bid);           }
    double            BidHigh()                      const;
    double            BidLow()                       const;
    //--- ask parameters
-   double            Ask()                          const { return(m_tick.ask);             }
+   double            Ask()                          const { return(m_tick.ask);           }
    double            AskHigh()                      const;
    double            AskLow()                       const;
    //--- last parameters
-   double            Last()                         const { return(m_tick.last);            }
+   double            Last()                         const { return(m_tick.last);          }
    double            LastHigh()                     const;
    double            LastLow()                      const;
    //--- fast access methods to the mix symbol propertyes
    //--- terms of trade
-   ENUM_SYMBOL_CALC_MODE TradeCalcMode()            const { return(m_trade_calcmode);       }
+   ENUM_SYMBOL_CALC_MODE TradeCalcMode()            const { return(m_trade_calcmode);     }
    string            TradeCalcModeDescription()     const;
-   ENUM_SYMBOL_TRADE_MODE TradeMode()               const { return(m_trade_mode);          }
+   ENUM_SYMBOL_TRADE_MODE TradeMode()               const { return(m_trade_mode);         }
    string            TradeModeDescription()         const;
    //--- execution terms of trade
-   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution()     const { return(m_trade_execution);      }
+   ENUM_SYMBOL_TRADE_EXECUTION TradeExecution()     const { return(m_trade_execution);    }
    string            TradeExecutionDescription()    const;
    //--- swap terms of trade
-   ENUM_SYMBOL_SWAP_MODE SwapMode()                 const { return(m_swap_mode);            }
+   ENUM_SYMBOL_SWAP_MODE SwapMode()                 const { return(m_swap_mode);          }
    string            SwapModeDescription()          const;
-   ENUM_DAY_OF_WEEK  SwapRollover3days()            const { return(m_swap3);                }
+   ENUM_DAY_OF_WEEK  SwapRollover3days()            const { return(m_swap3);              }
    string            SwapRollover3daysDescription() const;
    //--- margin parameters
-   double            MarginInitial()                const { return(m_margin_initial);       }
-   double            MarginMaintenance()            const { return(m_margin_maintenance);   }
-   double            MarginLong()                   const { return(m_margin_long);          }
-   double            MarginShort()                  const { return(m_margin_short);         }
-   double            MarginLimit()                  const { return(m_margin_limit);         }
-   double            MarginStop()                   const { return(m_margin_stop);          }
-   double            MarginStopLimit()              const { return(m_margin_stoplimit);     }
+   double            MarginInitial()                const { return(m_margin_initial);     }
+   double            MarginMaintenance()            const { return(m_margin_maintenance); }
+   double            MarginLong()                   const { return(m_margin_long);        }
+   double            MarginShort()                  const { return(m_margin_short);       }
+   double            MarginLimit()                  const { return(m_margin_limit);       }
+   double            MarginStop()                   const { return(m_margin_stop);        }
+   double            MarginStopLimit()              const { return(m_margin_stoplimit);   }
    //--- trade flags parameters
-   int               TradeTimeFlags()               const { return(m_trade_time_flags);     }
-   int               TradeFillFlags()               const { return(m_trade_fill_flags);     }
+   int               TradeTimeFlags()               const { return(m_trade_time_flags);   }
+   int               TradeFillFlags()               const { return(m_trade_fill_flags);   }
    //--- tick parameters
-   int               Digits()                       const { return(m_digits);               }
-   double            Point()                        const { return(m_point);                }
-   double            TickValue()                    const { return(m_tick_value);           }
-   double            TickValueProfit()              const { return(m_tick_value_profit);    }
-   double            TickValueLoss()                const { return(m_tick_value_loss);      }
-   double            TickSize()                     const { return(m_tick_size);            }
+   int               Digits()                       const { return(m_digits);             }
+   double            Point()                        const { return(m_point);              }
+   double            TickValue()                    const { return(m_tick_value);         }
+   double            TickValueProfit()              const { return(m_tick_value_profit);  }
+   double            TickValueLoss()                const { return(m_tick_value_loss);    }
+   double            TickSize()                     const { return(m_tick_size);          }
    //--- lots parameters
-   double            ContractSize()                 const { return(m_contract_size);        }
-   double            LotsMin()                      const { return(m_lots_min);             }
-   double            LotsMax()                      const { return(m_lots_max);             }
-   double            LotsStep()                     const { return(m_lots_step);            }
-   double            LotsLimit()                    const { return(m_lots_limit);           }
+   double            ContractSize()                 const { return(m_contract_size);      }
+   double            LotsMin()                      const { return(m_lots_min);           }
+   double            LotsMax()                      const { return(m_lots_max);           }
+   double            LotsStep()                     const { return(m_lots_step);          }
+   double            LotsLimit()                    const { return(m_lots_limit);         }
    //--- swaps
-   double            SwapLong()                     const { return(m_swap_long);            }
-   double            SwapShort()                    const { return(m_swap_short);           }
+   double            SwapLong()                     const { return(m_swap_long);          }
+   double            SwapShort()                    const { return(m_swap_short);         }
    //--- fast access methods to the string symbol propertyes
    string            CurrencyBase()                 const;
    string            CurrencyProfit()               const;
@@ -135,6 +135,7 @@ public:
    bool              InfoString(ENUM_SYMBOL_INFO_STRING prop_id,string& var) const;
    //--- service methods
    double            NormalizePrice(double price)   const;
+   bool              CheckMarketWatch();
   };
 //+------------------------------------------------------------------+
 //| Constructor CSymbolInfo.                                         |
@@ -181,13 +182,16 @@ void CSymbolInfo::CSymbolInfo()
 bool CSymbolInfo::Name(string name)
   {
    m_name=name;
+//---
+   if(!CheckMarketWatch()) return(false);
+//---
    if(!Refresh())
      {
       m_name="";
       Print(__FUNCTION__+": invalid data of symbol '"+name+"'");
       return(false);
      }
-//--- OK
+//--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -235,7 +239,7 @@ bool CSymbolInfo::Refresh()
    m_trade_time_flags=(int)tmp;
    if(!SymbolInfoInteger(m_name,SYMBOL_FILLING_MODE,tmp))                           return(false);
    m_trade_fill_flags=(int)tmp;
-//--- OK!
+//--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -458,7 +462,7 @@ string CSymbolInfo::TradeCalcModeDescription() const
       default:
          str="Unknown calculation mode";
      }
-//---
+//--- result
    return(str);
   }
 //+------------------------------------------------------------------+
@@ -491,7 +495,7 @@ string CSymbolInfo::TradeModeDescription() const
       default:
          str="Unknown trade mode";
      }
-//---
+//--- result
    return(str);
   }
 //+------------------------------------------------------------------+
@@ -518,7 +522,7 @@ string CSymbolInfo::TradeExecutionDescription() const
       default:
          str="Unknown trade execution";
      }
-//---
+//--- result
    return(str);
   }
 //+------------------------------------------------------------------+
@@ -551,7 +555,7 @@ string CSymbolInfo::SwapModeDescription() const
       default:
          str="Unknown swap mode";
      }
-//---
+//--- result
    return(str);
   }
 //+------------------------------------------------------------------+
@@ -590,7 +594,7 @@ string CSymbolInfo::SwapRollover3daysDescription() const
       default:
          str="Unknown";
      }
-//---
+//--- result
    return(str);
   }
 //+------------------------------------------------------------------+
@@ -698,5 +702,31 @@ double CSymbolInfo::NormalizePrice(double price) const
       return(NormalizeDouble(MathRound(price/m_tick_size)*m_tick_size,m_digits));
    else
       return(NormalizeDouble(price,m_digits));
+  }
+//+------------------------------------------------------------------+
+//| Checks if symbol is selected in the MarketWatch                  |
+//| and adds symbol to the MarketWatch, if necessary.                |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if successful, false otherwise.                     |
+//| REMARK: Symbol in MarketWatch is required for access.            |
+//+------------------------------------------------------------------+
+bool CSymbolInfo::CheckMarketWatch()
+  {
+//--- check if symbol is selected in the MarketWatch
+   if(!Select())
+     {
+      if(GetLastError()==ERR_MARKET_UNKNOWN_SYMBOL)
+        {
+         printf(__FUNCTION__+": Unknown symbol '%s'",m_name);
+         return(false);
+        }
+      if(!Select(true))
+        {
+         printf(__FUNCTION__+": Error adding symbol %d",GetLastError());
+         return(false);
+        }
+     }
+//--- ok
+   return(true);
   }
 //+------------------------------------------------------------------+

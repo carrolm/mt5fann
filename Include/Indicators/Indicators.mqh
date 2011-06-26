@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   Indicators.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.17 |
+//|                                              Revision 2011.06.09 |
 //+------------------------------------------------------------------+
 #include "Trend.mqh"
 #include "Oscilators.mqh"
@@ -24,6 +24,7 @@ public:
                      CIndicators();
    //--- method for creation
    CIndicator*       Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int count,MqlParam& params[]);
+   bool              BufferResize(int size);
    //--- method of refreshing of the data of all indicators in the collection
    int               Refresh();
 protected:
@@ -267,6 +268,25 @@ CIndicator *CIndicators::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICA
    return(result);
   }
 //+------------------------------------------------------------------+
+//| Set size of buffers of all indicators in the collection.         |
+//| INPUT:  size - size of buffers.                                  |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CIndicators::BufferResize(int size)
+  {
+   int total=Total();
+   for(int i=0;i<total;i++)
+     {
+      CSeries *series=At(i);
+      //--- check pointer
+      if(series==NULL)               return(false);
+      if(!series.BufferResize(size)) return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
 //| Refreshing of the data of all indicators in the collection.      |
 //| INPUT:  no.                                                      |
 //| OUTPUT: flags of updating timeframes.                            |
@@ -275,8 +295,9 @@ CIndicator *CIndicators::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICA
 int CIndicators::Refresh()
   {
    int flags=TimeframesFlags();
+   int total=Total();
 //---
-   for(int i=0;i<Total();i++)
+   for(int i=0;i<total;i++)
      {
       CSeries *indicator=At(i);
       if(indicator!=NULL) indicator.Refresh(flags);
