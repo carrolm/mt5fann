@@ -93,6 +93,7 @@ public:
                      CExpertBase();
                     ~CExpertBase();
    //--- methods of access to protected data
+   ENUM_INIT_PHASE   InitPhase()         const        { return(m_init_phase);       }
    void              TrendType(ENUM_TYPE_TREND value) { m_trend_type=value;         }
    int               UsedSeries()        const;
    void              EveryTick(bool value)            { m_every_tick=value;         }
@@ -334,6 +335,15 @@ bool CExpertBase::SetPriceSeries(CiOpen* open,CiHigh* high,CiLow* low,CiClose* c
       printf(__FUNCTION__+": changing of timeseries is forbidden");
       return(false);
      }
+//--- check pointers
+   if((IS_OPEN_SERIES_USAGE  && open==NULL) ||
+      (IS_HIGH_SERIES_USAGE  && high==NULL) ||
+      (IS_LOW_SERIES_USAGE   && low==NULL)  ||
+      (IS_CLOSE_SERIES_USAGE && close==NULL))
+     {
+      printf(__FUNCTION__+": NULL pointer");
+      return(false);
+     }
    m_open =open;
    m_high =high;
    m_low  =low;
@@ -357,6 +367,15 @@ bool CExpertBase::SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tic
    if(m_init_phase!=INIT_PHASE_VALIDATION)
      {
       printf(__FUNCTION__+": changing of timeseries is forbidden");
+      return(false);
+     }
+//--- check pointers
+   if((IS_SPREAD_SERIES_USAGE      && spread==NULL)      ||
+      (IS_TIME_SERIES_USAGE        && time==NULL)        ||
+      (IS_TICK_VOLUME_SERIES_USAGE && tick_volume==NULL) ||
+      (IS_REAL_VOLUME_SERIES_USAGE && real_volume==NULL))
+     {
+      printf(__FUNCTION__+": NULL pointer");
       return(false);
      }
    m_spread     =spread;

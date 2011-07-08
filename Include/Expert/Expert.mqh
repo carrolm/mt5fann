@@ -83,11 +83,12 @@ public:
                      CExpert();
                     ~CExpert()                              { Deinit();                       }
    //--- initialization
-   bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long magic=0);
+   bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic=0);
    //--- initialization trading objects
    virtual bool      InitSignal(CExpertSignal* signal=NULL);
    virtual bool      InitTrailing(CExpertTrailing* trailing=NULL);
    virtual bool      InitMoney(CExpertMoney* money=NULL);
+   virtual bool      InitTrade(long magic,CExpertTrade* trade=NULL);
    //--- deinitialization
    virtual void      Deinit();
    //--- methods of setting adjustable parameters
@@ -114,7 +115,6 @@ public:
 protected:
    //--- initialization
    virtual bool      InitParameters()                       { return(true);                   }
-   virtual bool      InitTrade(long magic);
    //--- deinitialization
    virtual void      DeinitTrade();
    virtual void      DeinitSignal();
@@ -240,7 +240,7 @@ CExpert::CExpert()
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long magic)
+bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic)
   {
 //--- returns false if the EA is initialized on a symbol/timeframe different from the current one
    if(symbol!=Symbol() || period!=Period())
@@ -300,20 +300,26 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,long mag
   }
 //+------------------------------------------------------------------+
 //| Initialization trade object                                      |
-//| INPUT:  magic - magic number for trade.                          |
+//| INPUT:  magic - magic number for trade,                          |
+//|         trade - pointer of trade object.                         |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitTrade(long magic)
+bool CExpert::InitTrade(long magic,CExpertTrade* trade=NULL)
   {
-   if(m_trade==NULL)
+//--- удаляем существующий объект
+   if(m_trade!=NULL) delete m_trade;
+//---
+   if(trade==NULL)
      {
       if((m_trade=new CExpertTrade)==NULL) return(false);
-      m_trade.SetSymbol(GetPointer(m_symbol)); // symbol for trade
-      m_trade.SetExpertMagicNumber(magic);     // magic
-      //--- set default deviation for trading in adjusted points
-      m_trade.SetDeviationInPoints((ulong)(3*m_adjusted_point/m_symbol.Point()));
      }
+   else m_trade=trade;
+//--- tune trade object
+   m_trade.SetSymbol(GetPointer(m_symbol));
+   m_trade.SetExpertMagicNumber(magic);
+   //--- set default deviation for trading in adjusted points
+   m_trade.SetDeviationInPoints((ulong)(3*m_adjusted_point/m_symbol.Point()));
 //--- ok
    return(true);
   }
@@ -767,7 +773,6 @@ bool CExpert::OpenShort(double price,double sl,double tp)
 //--- check lot for open
    if(lot==0.0) return(false);
 //---
-printf(__FUNCTION__+": %g",price);
    return(m_trade.Sell(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+

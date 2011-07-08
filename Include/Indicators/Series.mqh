@@ -77,6 +77,21 @@ void CSeries::CSeries()
 //+------------------------------------------------------------------+
 bool CSeries::BufferResize(int size)
   {
+//--- correcting size for "big" timeframes (1 year limitation)
+   switch(m_period)
+     {
+      case PERIOD_D1:
+        if(size>365) size=365;
+        break;
+      case PERIOD_W1:
+        if(size>52)  size=52;
+        break;
+      case PERIOD_MN1:
+        if(size>12)  size=12;
+        break;
+      default:
+        break;
+     }
 //--- check history
    if(!CheckLoadHistory(size)) return(false);
 //--- history is available
