@@ -13,8 +13,8 @@
 //| Name=FixedPips                                                       |
 //| Class=CTrailingFixedPips                                             |
 //| Page=                                                                |
-//| Parameter=StopLevel,int,30,Stop Loss level (in points)               |
-//| Parameter=ProfitLevel,int,50,Take Profit level (in points)           |
+//| Parameter=StopLevel,int,30,Stop Loss trailing level (in points)      |
+//| Parameter=ProfitLevel,int,50,Take Profit trailing level (in points)  |
 //+----------------------------------------------------------------------+
 // wizard description end
 //+------------------------------------------------------------------+

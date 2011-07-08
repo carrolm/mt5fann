@@ -110,6 +110,8 @@ public:
                                ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="");
    bool              SellStop(double volume,double price,const string symbol=NULL,double sl=0.0,double tp=0.0,
                               ENUM_ORDER_TYPE_TIME type_time=ORDER_TIME_GTC,datetime expiration=0,const string comment="");
+   //--- method check
+   virtual bool      OrderCheck(MqlTradeRequest& m_request,MqlTradeCheckResult& m_check_result);
    //--- info methods
    void              PrintRequest() const;
    void              PrintResult()  const;
@@ -1014,7 +1016,7 @@ string CTrade::FormatOrderPrice(string& str,const double price_order,const doubl
 //+------------------------------------------------------------------+
 //| Converts the parameters of a trade request to text.              |
 //| INPUT:  str     - receiving string,                              |
-//|         request - reference ri the request structure.            |
+//|         request - reference at the request structure.            |
 //| OUTPUT: formatted string.                                        |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
@@ -1201,5 +1203,16 @@ string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,co
      }
 //--- return the result
    return(str);
+  }
+//+------------------------------------------------------------------+
+//| Проверяет правильность заполнения структуры m_request.           |
+//| INPUT:  request - reference at the request structure,            |
+//|         result  - reference at the request result.               |
+//| OUTPUT: true - если правильно, иначе false.                      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CTrade::OrderCheck(MqlTradeRequest& m_request,MqlTradeCheckResult& m_check_result)
+  {
+   return(::OrderCheck(m_request,m_check_result));
   }
 //+------------------------------------------------------------------+
