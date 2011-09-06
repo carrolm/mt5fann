@@ -527,7 +527,6 @@ void CArrayObj::QuickSort(int beg,int end,int mode)
         }
       if(beg<j) QuickSort(beg,j,mode);
       beg=i;
-      i=beg;
       j=end;
      }
   }

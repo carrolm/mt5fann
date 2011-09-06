@@ -16,12 +16,16 @@ class CChartObjectBitmap : public CChartObject
   {
 public:
    //--- methods of access to properties of the object
-   string            BmpFile() const;
+   string            BmpFile()    const;
    bool              BmpFile(string name);
+   int               X_Offset()   const;
+   bool              X_Offset(int X);
+   int               Y_Offset()   const;
+   bool              Y_Offset(int Y);
    //--- method of creating the object
    bool              Create(long chart_id,string name,int window,datetime time,double price);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_BITMAP); }
+   virtual int       Type()       const { return(OBJ_BITMAP); }
    //--- methods for working with files
    virtual bool      Save(int file_handle);
    virtual bool      Load(int file_handle);
@@ -68,6 +72,58 @@ bool CChartObjectBitmap::BmpFile(string name)
    if(m_chart_id==-1) return(false);
 //---
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_BMPFILE,name));
+  }
+//+------------------------------------------------------------------+
+//| Get the XOffset property.                                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: XOffset.                                                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CChartObjectBitmap::X_Offset() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(0);
+//---
+   return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XOFFSET));
+  }
+//+------------------------------------------------------------------+
+//| Set the XOffset property.                                        |
+//| INPUT:  X - new value.                                           |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectBitmap::X_Offset(int X)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_XOFFSET,X));
+  }
+//+------------------------------------------------------------------+
+//| Get the YOffset property.                                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: YOffset.                                                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CChartObjectBitmap::Y_Offset() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(0);
+//---
+   return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YOFFSET));
+  }
+//+------------------------------------------------------------------+
+//| Set the YOffset property.                                        |
+//| INPUT:  Y - new value.                                           |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectBitmap::Y_Offset(int Y)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YOFFSET,Y));
   }
 //+------------------------------------------------------------------+
 //| Writing parameters of object to file.                            |
@@ -138,23 +194,27 @@ public:
    bool              X_Distance(int X);
    int               Y_Distance() const;
    bool              Y_Distance(int Y);
-   int               X_Size() const;
-   int               Y_Size() const;
-   ENUM_BASE_CORNER  Corner() const;
+   int               X_Size()     const;
+   int               Y_Size()     const;
+   ENUM_BASE_CORNER  Corner()     const;
    bool              Corner(ENUM_BASE_CORNER corner);
-   string            BmpFileOn() const;
+   string            BmpFileOn()  const;
    bool              BmpFileOn(string name);
    string            BmpFileOff() const;
    bool              BmpFileOff(string name);
-   bool              State() const;
+   bool              State()      const;
    bool              State(bool state);
+   int               X_Offset()   const;
+   bool              X_Offset(int X);
+   int               Y_Offset()   const;
+   bool              Y_Offset(int Y);
    //--- change of time/price coordinates is blocked
    bool              Time(datetime time) { return(false);            }
    bool              Price(double price) { return(false);            }
    //--- method of creating the object
    bool              Create(long chart_id,string name,int window,int X,int Y);
    //--- method of identifying the object
-   virtual int       Type() const        { return(OBJ_BITMAP_LABEL); }
+   virtual int       Type()       const  { return(OBJ_BITMAP_LABEL); }
    //--- methods for working with files
    virtual bool      Save(int file_handle);
    virtual bool      Load(int file_handle);
@@ -360,6 +420,58 @@ bool CChartObjectBmpLabel::State(bool state)
    if(m_chart_id==-1) return(false);
 //---
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_STATE,state));
+  }
+//+------------------------------------------------------------------+
+//| Get the XOffset property.                                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: XOffset.                                                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CChartObjectBmpLabel::X_Offset() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(0);
+//---
+   return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XOFFSET));
+  }
+//+------------------------------------------------------------------+
+//| Set the XOffset property.                                        |
+//| INPUT:  X - new value.                                           |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectBmpLabel::X_Offset(int X)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_XOFFSET,X));
+  }
+//+------------------------------------------------------------------+
+//| Get the YOffset property.                                        |
+//| INPUT:  no.                                                      |
+//| OUTPUT: YOffset.                                                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CChartObjectBmpLabel::Y_Offset() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(0);
+//---
+   return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YOFFSET));
+  }
+//+------------------------------------------------------------------+
+//| Set the YOffset property.                                        |
+//| INPUT:  Y - new value.                                           |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectBmpLabel::Y_Offset(int Y)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YOFFSET,Y));
   }
 //+------------------------------------------------------------------+
 //| Writing parameters of object to file.                            |

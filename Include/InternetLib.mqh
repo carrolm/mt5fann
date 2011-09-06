@@ -163,7 +163,7 @@ bool MqlNet::Request(tagRequest &req)
   if (hSession<=0 || hConnect<=0) { Close(); if (!Open(Host, Port, User, Pass, Service)) { Print("-Err Connect"); Close(); return(false); } }
   // создаем дескриптор запроса
   hRequest=HttpOpenRequestW(hConnect, req.stVerb, req.stObject, Vers, nill, 0, INTERNET_FLAG_KEEP_CONNECTION|INTERNET_FLAG_RELOAD|INTERNET_FLAG_PRAGMA_NOCACHE, 0); 
-  if (hRequest<=0) { Print("-Err OpenRequest"); InternetCloseHandle(hConnect); return(false); }
+  if (hRequest<=0) { Print("-Err OpenRequest ",GetLastError()); InternetCloseHandle(hConnect); return(false); }
   
   
   // отправляем запрос
@@ -174,7 +174,7 @@ bool MqlNet::Request(tagRequest &req)
     hSend=HttpSendRequestW(hRequest, req.stHead, StringLen(req.stHead), data, ArraySize(data)); // отправили файл
     if (hSend<=0) // если отправка неудачна, то проверим SSL
     {       
-      int err=0; err=GetLastError(err); Print("-Err SendRequest= ", err); 
+      int err=0; err=GetLastError(); Print("-Err SendRequest= ", err); 
       if (err!=ERROR_INTERNET_INVALID_CA) // если ошибка действительно связана с запросом SSL
       {
         int dwFlags;
@@ -182,7 +182,7 @@ bool MqlNet::Request(tagRequest &req)
         InternetQueryOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, dwBuffLen);
         dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;
         int rez=InternetSetOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, sizeof (dwFlags));
-        if (!rez) { Print("-Err InternetSetOptionW= ", GetLastError(err)); break; }
+        if (!rez) { Print("-Err InternetSetOptionW= ", GetLastError()); break; }
       }
       else break;
     } 

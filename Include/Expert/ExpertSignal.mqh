@@ -55,6 +55,8 @@ public:
    void              StopLevel(double value)                                  { m_stop_level=value;       }
    void              TakeLevel(double value)                                  { m_take_level=value;       }
    void              Expiration(int value)                                    { m_expiration=value;       }
+   //--- method of initialization of the object
+   void              Magic(ulong value);
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- method of creating the indicator and timeseries
@@ -131,6 +133,26 @@ int CExpertSignal::UsedSeries()
    return(m_used_series);
   }
 //+------------------------------------------------------------------+
+//| Sets magic number for object and its dependent objects           |
+//| INPUT:  value - new value of magic number.                       |
+//| OUTPUT: no.                                                      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+void CExpertSignal::Magic(ulong value)
+  {
+   int total=m_filters.Total();
+//--- loop by the additional filters
+   for(int i=0;i<total;i++)
+     {
+      CExpertSignal *filter=m_filters.At(i);
+      //--- check pointer
+      if(filter==NULL) continue;
+      filter.Magic(value);
+     }
+//---
+   CExpertBase::Magic(value);
+  }
+//+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //| INPUT:  no.                                                      |
 //| OUTPUT: true-if settings are correct, false otherwise.           |
@@ -199,6 +221,7 @@ bool CExpertSignal::AddFilter(CExpertSignal *filter)
 //--- add the filter to the array of filters
    if(!m_filters.Add(filter))                           return(false);
    filter.EveryTick(m_every_tick);
+   filter.Magic(m_magic);
 //--- ok
    return(true);
   }

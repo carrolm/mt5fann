@@ -23,11 +23,25 @@
 class CMoneyNone : public CExpertMoney
   {
 public:
-   virtual bool      ValidationSettings() { Percent(100.0); return(true); }
+   virtual bool      ValidationSettings();
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
   };
+//+------------------------------------------------------------------+
+//| Validation settings protected data.                              |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true-if settings are correct, false otherwise.           |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CMoneyNone::ValidationSettings()
+  {
+   Percent(100.0);
+//--- initial data checks
+   if(!CExpertMoney::ValidationSettings()) return(false);
+//--- ok
+   return(true);
+  }
 //+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
 //| INPUT:  no.                                                      |

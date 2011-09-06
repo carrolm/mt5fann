@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
-string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes"};
+string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
 //| входных веторов может быть много                                    |
@@ -17,14 +17,14 @@ string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","
 //+------------------------------------------------------------------+
 double tanh(double x)
   {
-   x=1+MathExp(-2* x );
+   x=1+MathExp(-2 *x);
    if(0==0) return(0);
-   //return((x_-_x)/(x_+_x));
-   return -1 + (2/ (1+MathExp(-2* x ) ) );
-   //double x_=MathExp(x);
-   //double _x=MathExp(-x);
-   //if(0==(x_+_x)) return(0);
-   //return((x_-_x)/(x_+_x));
+//return((x_-_x)/(x_+_x));
+   return -1+(2/(1+MathExp(-2 *x)));
+//double x_=MathExp(x);
+//double _x=MathExp(-x);
+//if(0==(x_+_x)) return(0);
+//return((x_-_x)/(x_+_x));
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -112,8 +112,26 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("AO"==fn_name) return GetVector_AO(smbl,tf,shift);
    if("Ichimoku"==fn_name) return GetVector_Ichimoku(smbl,tf,shift);
    if("Envelopes"==fn_name) return GetVector_Envelopes(smbl,tf,shift);
+   if("Chaikin"==fn_name) return GetVector_Chaikin(smbl,tf,shift);
+   if("ROC"==fn_name) return GetVector_Chaikin(smbl,tf,shift);
    Print("Not found fn=",fn_name);
    return 0.0;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_ROC(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iCustom(smb,tf,"GC\ROC");
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
+
+//IndicatorRelease(h_ind);
+   return 4*(ind_buffer[1]);
+
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -129,6 +147,22 @@ double GetVector_WPR(string smb,ENUM_TIMEFRAMES tf,int shift)
 
 //IndicatorRelease(h_ind);
    return 2*(ind_buffer[1]/100+0.5);
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_Chaikin(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+   static int h_ind=0;
+   if(0==h_ind) h_ind=iChaikin(smb,tf,3,10,MODE_EMA,VOLUME_TICK);
+   if(h_ind==INVALID_HANDLE) return(0);//--- если хэндл невалидный
+   double ind_buffer[];
+   if(!ArraySetAsSeries(ind_buffer,true)) return(0);
+   if(CopyBuffer(h_ind,0,shift,5,ind_buffer)<(5)) return(0);
+
+//IndicatorRelease(h_ind);
+   return 2*(ind_buffer[1]/150);
 
   }
 //+------------------------------------------------------------------+
@@ -413,7 +447,14 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
       Print(smb," ",shift);
       return(0);
      }
-
+// только фрактал попробуем...
+   if((High[shift_history+1]>High[shift_history+0] && High[shift_history+1]>High[shift_history+2])
+      || (Low[shift_history+1]<Low[shift_history+0] && Low[shift_history+1]<Low[shift_history+2]))
+     {}
+   else
+     {
+      return(0);
+     }
    double res=0,res1=0;
    int is,ib;double  TS;
 //   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) || (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))

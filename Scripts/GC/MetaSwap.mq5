@@ -18,8 +18,8 @@ MqlNet INet; // экземпл€р класса дл€ работы
 void OnStart()
 {
 	// открываем сессию
-	if (!INet.Open("www.russianarmy.ru/forex", 80, "", "", INTERNET_SERVICE_HTTP)) return;
-	
+	//if (!INet.Open("www.russianarmy.ru", 80, "", "", INTERNET_SERVICE_HTTP)) return;
+	if (!INet.Open("www.fxmaster.de", 80, "", "", INTERNET_SERVICE_HTTP)) return;
 	// обнулили массивы
 	ArrayResize(Server, 0); ArrayResize(Long, 0); ArrayResize(Short, 0);
 	
@@ -34,6 +34,7 @@ bool SendData(string file, string mode)
 	string smb=Symbol();
 	string Head="Content-Type: application/x-www-form-urlencoded"; // заголовок
 	string Path="/forex/metaswap.php"; // путь к странице
+	//string Path="/mt5swap/metaswap.php"; // путь к странице
 	string Data="server="+AccountInfoString(ACCOUNT_SERVER)+
 							"&pair="+smb+
 							"&long="+DTS(SymbolInfoDouble(smb, SYMBOL_SWAP_LONG))+
