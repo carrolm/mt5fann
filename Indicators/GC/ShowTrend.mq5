@@ -17,7 +17,7 @@
 #property indicator_buffers 2
 #property indicator_plots   1
 #property indicator_type1   DRAW_COLOR_HISTOGRAM
-#property indicator_color1  Red,Yellow,Blue,Green
+#property indicator_color1  clrRed,clrYellow,clrBlue,clrLime
 #property indicator_style1  0
 #property indicator_width1  1
 //--- indicator buffers

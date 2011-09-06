@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
-//|                                                     Chart.mqh    |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                                                       Chart.mqh  |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.11 |
+//|                                              Revision 2011.07.07 |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -20,90 +20,94 @@ public:
    //--- methods of access to protected data
    long              ChartId() const       { return(m_chart_id); }
    //--- method of identifying the object
-   virtual int       Type() const          { return(0x1111);     }
+   virtual int       Type()    const       { return(0x1111);     }
    //--- methods of access to properties of the chart
    //--- common properties
-   ENUM_CHART_MODE   Mode() const;
+   ENUM_CHART_MODE   Mode()                                const;
    bool              Mode(ENUM_CHART_MODE mode);
-   bool              Foreground() const;
+   bool              Foreground()                          const;
    bool              Foreground(bool foreground);
-   bool              Shift() const;
+   bool              Shift()                               const;
    bool              Shift(bool shift);
-   double            ShiftSize() const;
+   double            ShiftSize()                           const;
    bool              ShiftSize(double shift);
-   bool              AutoScroll() const;
+   bool              AutoScroll()                          const;
    bool              AutoScroll(bool auto_scroll);
-   int               Scale() const;
+   int               Scale()                               const;
    bool              Scale(int scale);
-   bool              ScaleFix() const;
+   bool              ScaleFix()                            const;
    bool              ScaleFix(bool scale_fix);
-   bool              ScaleFix_11() const;
+   bool              ScaleFix_11()                         const;
    bool              ScaleFix_11(bool scale_fix_11);
-   double            FixedMax() const;
+   double            FixedMax()                            const;
    bool              FixedMax(double fixed_max);
-   double            FixedMin() const;
+   double            FixedMin()                            const;
    bool              FixedMin(double fixed_min);
-   bool              ScalePPB() const;
+   bool              ScalePPB()                            const;
    bool              ScalePPB(bool scale_ppb);
-   double            PointsPerBar() const;
+   double            PointsPerBar()                        const;
    bool              PointsPerBar(double points_per_bar);
    //--- show properties
-   bool              ShowOHLC() const;
+   bool              ShowOHLC()                            const;
    bool              ShowOHLC(bool show);
-   bool              ShowLineBid() const;
+   bool              ShowLineBid()                         const;
    bool              ShowLineBid(bool show);
-   bool              ShowLineAsk() const;
+   bool              ShowLineAsk()                         const;
    bool              ShowLineAsk(bool show);
-   bool              ShowLastLine() const;
+   bool              ShowLastLine()                        const;
    bool              ShowLastLine(bool show);
-   bool              ShowPeriodSep() const;
+   bool              ShowPeriodSep()                       const;
    bool              ShowPeriodSep(bool show);
-   bool              ShowGrid() const;
+   bool              ShowGrid()                            const;
    bool              ShowGrid(bool show);
-   ENUM_CHART_VOLUME_MODE ShowVolumes() const;
+   ENUM_CHART_VOLUME_MODE ShowVolumes()                    const;
    bool                   ShowVolumes(ENUM_CHART_VOLUME_MODE show);
-   bool              ShowObjectDescr() const;
+   bool              ShowObjectDescr()                     const;
    bool              ShowObjectDescr(bool show);
    bool              ShowDateScale(bool show);
    bool              ShowPriceScale(bool show);
    //--- color properties
-   color             ColorBackground() const;
+   color             ColorBackground()                     const;
    bool              ColorBackground(color new_color);
-   color             ColorForeground() const;
+   color             ColorForeground()                     const;
    bool              ColorForeground(color new_color);
-   color             ColorGrid() const;
+   color             ColorGrid()                           const;
    bool              ColorGrid(color new_color);
-   color             ColorBarUp() const;
+   color             ColorBarUp()                          const;
    bool              ColorBarUp(color new_color);
-   color             ColorBarDown() const;
+   color             ColorBarDown()                        const;
    bool              ColorBarDown(color new_color);
-   color             ColorCandleBull() const;
+   color             ColorCandleBull()                     const;
    bool              ColorCandleBull(color new_color);
-   color             ColorCandleBear() const;
+   color             ColorCandleBear()                     const;
    bool              ColorCandleBear(color new_color);
-   color             ColorChartLine() const;
+   color             ColorChartLine()                      const;
    bool              ColorChartLine(color new_color);
-   color             ColorVolumes() const;
+   color             ColorVolumes()                        const;
    bool              ColorVolumes(color new_color);
-   color             ColorLineBid() const;
+   color             ColorLineBid()                        const;
    bool              ColorLineBid(color new_color);
-   color             ColorLineAsk() const;
+   color             ColorLineAsk()                        const;
    bool              ColorLineAsk(color new_color);
-   color             ColorLineLast() const;
+   color             ColorLineLast()                       const;
    bool              ColorLineLast(color new_color);
-   color             ColorStopLevels() const;
+   color             ColorStopLevels()                     const;
    bool              ColorStopLevels(color new_color);
+   //--- other properties
+   bool              BringToTop();
+   bool              EventObjectCreate(bool flag);
+   bool              EventObjectDelete(bool flag);
    //--- methods of access to READ ONLY properties of the chart
-   int               VisibleBars() const;
-   int               WindowsTotal() const;
-   bool              WindowIsVisible(int num) const;
-   int               WindowHandle() const;
-   int               FirstVisibleBar() const;
-   int               WidthInBars() const;
-   int               WidthInPixels() const;
-   int               HeightInPixels(int num) const;
-   double            PriceMin(int num) const;
-   double            PriceMax(int num) const;
+   int               VisibleBars()                         const;
+   int               WindowsTotal()                        const;
+   bool              WindowIsVisible(int num)              const;
+   int               WindowHandle()                        const;
+   int               FirstVisibleBar()                     const;
+   int               WidthInBars()                         const;
+   int               WidthInPixels()                       const;
+   int               HeightInPixels(int num)               const;
+   double            PriceMin(int num)                     const;
+   double            PriceMax(int num)                     const;
    //--- methods of binding chart
    void              Attach()             { m_chart_id=ChartID();             }
    void              Attach(long chart)   { m_chart_id=chart;                 }
@@ -118,23 +122,28 @@ public:
    string            Symbol() const       { return(ChartSymbol(m_chart_id));  }
    ENUM_TIMEFRAMES   Period() const       { return(ChartPeriod(m_chart_id));  }
    void              Redraw()             { ChartRedraw(m_chart_id);          }
-   long              GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int sub_window=0) const;
+   long              GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int sub_window=0)           const;
    bool              GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int sub_window,long& value) const;
    bool              SetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,long value);
-   double            GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int sub_window=0) const;
+   double            GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int sub_window=0)             const;
    bool              GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int sub_window,double& value) const;
    bool              SetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,double value);
-   string            GetString(ENUM_CHART_PROPERTY_STRING prop_id) const;
-   bool              GetString(ENUM_CHART_PROPERTY_STRING prop_id,string& value) const;
+   string            GetString(ENUM_CHART_PROPERTY_STRING prop_id)                              const;
+   bool              GetString(ENUM_CHART_PROPERTY_STRING prop_id,string& value)                const;
    bool              SetString(ENUM_CHART_PROPERTY_STRING prop_id,const string value);
    bool              SetSymbolPeriod(const string symbol,ENUM_TIMEFRAMES period);
    bool              ApplyTemplate(const string filename);
    bool              ScreenShot(const string filename, int width, int height, ENUM_ALIGN_MODE align_mode=ALIGN_RIGHT) const;
-   int               WindowOnDropped() const;
-   double            PriceOnDropped() const;
-   datetime          TimeOnDropped() const;
-   int               XOnDropped() const;
-   int               YOnDropped() const;
+   int               WindowOnDropped()                     const;
+   double            PriceOnDropped()                      const;
+   datetime          TimeOnDropped()                       const;
+   int               XOnDropped()                          const;
+   int               YOnDropped()                          const;
+   //--- methods for working with indicators
+   bool              IndicatorAdd(int subwin,int handle);
+   bool              IndicatorDelete(int subwin,const string name);
+   int               IndicatorsTotal(int subwin);
+   string            IndicatorName(int subwin,int index);
    //--- methods for working with files
    virtual bool      Save(int file_handle);
    virtual bool      Load(int file_handle);
@@ -1060,6 +1069,45 @@ bool CChart::ColorStopLevels(color new_color)
    return(ChartSetInteger(m_chart_id,CHART_COLOR_STOP_LEVEL,new_color));
   }
 //+------------------------------------------------------------------+
+//| Shows chart always on top.                                       |
+//| INPUT:  no.                                                      |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::BringToTop()
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartSetInteger(m_chart_id,CHART_BRING_TO_TOP,true));
+  }
+//+------------------------------------------------------------------+
+//| Sets flag to generate event of creating objects.                 |
+//| INPUT: flag - new value of flag.                                 |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::EventObjectCreate(bool flag)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartSetInteger(m_chart_id,CHART_EVENT_OBJECT_CREATE,flag));
+  }
+//+------------------------------------------------------------------+
+//| Sets flag to generate event of deleting objects.                 |
+//| INPUT: flag - new value of flag.                                 |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::EventObjectDelete(bool flag)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartSetInteger(m_chart_id,CHART_EVENT_OBJECT_DELETE,flag));
+  }
+//+------------------------------------------------------------------+
 //| Get value of the "VisibleBars" property.                         |
 //| INPUT:  no.                                                      |
 //| OUTPUT: value of the "VisibleBars" property.                     |
@@ -1458,6 +1506,61 @@ int CChart::YOnDropped() const
    if(m_chart_id<=0) return(0);
 //---
    return(ChartYOnDropped());
+  }
+//+------------------------------------------------------------------+
+//| Adds indicator to chart.                                         |
+//| INPUT:  subwin - number of chart subwindow,                      |
+//|         handle - handle of indicator.                            |
+//| OUTPUT: true- if successful, false if not.                       |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::IndicatorAdd(int subwin,int handle)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartIndicatorAdd(m_chart_id,subwin,handle));
+  }
+//+------------------------------------------------------------------+
+//| Deletes indicator from chart.                                    |
+//| INPUT:  subwin - number of chart subwindow,                      |
+//|         name   - short name of indicator.                        |
+//| OUTPUT: true- if successful, false if not.                       |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChart::IndicatorDelete(int subwin,const string name)
+  {
+//--- checking
+   if(m_chart_id<=0) return(false);
+//---
+   return(ChartIndicatorDelete(m_chart_id,subwin,name));
+  }
+//+------------------------------------------------------------------+
+//| Gets number of indicators in chart subwindow.                    |
+//| INPUT:  subwin - number of chart subwindow.                      |
+//| OUTPUT: number of indicators in chart subwindow.                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CChart::IndicatorsTotal(int subwin)
+  {
+//--- checking
+   if(m_chart_id<=0) return(0);
+//---
+   return(ChartIndicatorsTotal(m_chart_id,subwin));
+  }
+//+------------------------------------------------------------------+
+//| Gets short name of indicator.                                    |
+//| INPUT:  subwin - number of chart subwindow,                      |
+//|         index  - index of indicator in subwindow.                |
+//| OUTPUT: short name of indicator.                                 |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CChart::IndicatorName(int subwin,int index)
+  {
+//--- checking
+   if(m_chart_id<=0) return("");
+//---
+   return(ChartIndicatorName(m_chart_id,subwin,index));
   }
 //+------------------------------------------------------------------+
 //| Writing parameters of chart to file.                             |

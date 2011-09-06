@@ -25,7 +25,7 @@ public:
    //--- methods of access to data
    double            GetData(int index)                       const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
 //| Set size of buffer.                                              |
@@ -772,7 +772,7 @@ public:
    int               GetData(datetime start_time,int count,int& buffer[])          const;
    int               GetData(datetime start_time,datetime stop_time,int& buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
 //| Creating of the spread series.                                   |
@@ -1016,7 +1016,7 @@ public:
    int               GetData(datetime start_time,int count,datetime& buffer[])          const;
    int               GetData(datetime start_time,datetime stop_time,datetime& buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
 //| Creating of the time series.                                     |
@@ -1260,7 +1260,7 @@ public:
    int               GetData(datetime start_time,int count,long& buffer[])          const;
    int               GetData(datetime start_time,datetime stop_time,long& buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
 //| Creation of the tick volume series.                              |
@@ -1504,7 +1504,7 @@ public:
    int               GetData(datetime start_time,int count,long& buffer[])          const;
    int               GetData(datetime start_time,datetime stop_time,long& buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
 //| Creation of the real volume series.                              |

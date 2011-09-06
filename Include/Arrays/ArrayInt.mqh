@@ -520,7 +520,6 @@ void CArrayInt::QuickSort(int beg,int end,int mode)
         }
       if(beg<j) QuickSort(beg,j);
       beg=i;
-      i=beg;
       j=end;
      }
   }

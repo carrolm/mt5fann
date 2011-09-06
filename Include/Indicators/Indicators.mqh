@@ -29,7 +29,7 @@ public:
    int               Refresh();
 protected:
    //--- method of formation of flags timeframes
-   int               TimeframesFlags();
+   int               TimeframesFlags(MqlDateTime& time);
   };
 //+------------------------------------------------------------------+
 //| Constructor CIndicators.                                         |
@@ -294,7 +294,11 @@ bool CIndicators::BufferResize(int size)
 //+------------------------------------------------------------------+
 int CIndicators::Refresh()
   {
-   int flags=TimeframesFlags();
+   MqlDateTime time;
+   TimeCurrent(time);
+//---
+//   int flags=TimeframesFlags();
+   int flags=TimeframesFlags(time);
    int total=Total();
 //---
    for(int i=0;i<total;i++)
@@ -303,11 +307,13 @@ int CIndicators::Refresh()
       if(indicator!=NULL) indicator.Refresh(flags);
      }
 //---
+   m_prev_time=time;
+//---
    return(flags);
   }
 //+------------------------------------------------------------------+
 //| Formation of timeframe flags.                                    |
-//| INPUT:  no.                                                      |
+//| INPUT:  time - reference.                                        |
 //| OUTPUT: flags.                                                   |
 //| REMARK: formation of flags is similar to "flags of visibility    |
 //|         of objects".                                             |
@@ -333,46 +339,58 @@ int CIndicators::Refresh()
 //|         OBJ_PERIOD_W1  =0x00080000                               |
 //|         OBJ_PERIOD_MN1 =0x00100000                               |
 //+------------------------------------------------------------------+
-int CIndicators::TimeframesFlags()
+int CIndicators::TimeframesFlags(MqlDateTime& time)
   {
-   MqlDateTime time;
-   int         result=OBJ_PERIOD_M1;
-//--- check time
-   TimeCurrent(time);
+//--- set flags for all timeframes
+   int   result=OBJ_ALL_PERIODS;
+//--- if first check, then setting flags all timeframes
+   if(m_prev_time.min==-1)       return(result);
+//--- check change time
    if(time.min==m_prev_time.min &&
       time.hour==m_prev_time.hour &&
       time.day==m_prev_time.day &&
-      time.mon==m_prev_time.mon) return(0);
-//---
-   if(m_prev_time.min==-1) result=0x1FFFFF;
-   m_prev_time=time;
-//--- minutes
-   if(time.min%2==0)       result|=OBJ_PERIOD_M2;   
-   if(time.min%3==0)       result|=OBJ_PERIOD_M3;
-   if(time.min%4==0)       result|=OBJ_PERIOD_M4;
-   if(time.min%5==0)       result|=OBJ_PERIOD_M5;
-   if(time.min%6==0)       result|=OBJ_PERIOD_M6;
-   if(time.min%10==0)      result|=OBJ_PERIOD_M10;
-   if(time.min%12==0)      result|=OBJ_PERIOD_M12;
-   if(time.min%15==0)      result|=OBJ_PERIOD_M15;
-   if(time.min%20==0)      result|=OBJ_PERIOD_M20;
-   if(time.min%30==0)      result|=OBJ_PERIOD_M30;
-   if(time.min!=0)         return(result);
-//--- new hour
-   result|=OBJ_PERIOD_H1;
-   if(time.hour%2==0)      result|=OBJ_PERIOD_H2;
-   if(time.hour%3==0)      result|=OBJ_PERIOD_H3;
-   if(time.hour%4==0)      result|=OBJ_PERIOD_H4;
-   if(time.hour%6==0)      result|=OBJ_PERIOD_H6;
-   if(time.hour%8==0)      result|=OBJ_PERIOD_H8;
-   if(time.hour%12==0)     result|=OBJ_PERIOD_H12;
-   if(time.hour!=0)        return(result);
-//--- new day
-   result|=OBJ_PERIOD_D1;
-//--- new week
-   if(time.day_of_week==1) result|=OBJ_PERIOD_W1;
-//--- new month
-   if(time.day==1)         result|=OBJ_PERIOD_MN1;
+      time.mon==m_prev_time.mon) return(OBJ_NO_PERIODS);
+//--- new month?
+   if(time.mon!=m_prev_time.mon) return(result);
+//--- reset the "new month" flag
+   result^=OBJ_PERIOD_MN1;
+//--- new day?
+   if(time.day!=m_prev_time.day) return(result);
+//--- reset the "new day" and "new week" flags
+   result^=OBJ_PERIOD_D1+OBJ_PERIOD_W1;
+//--- temporary variables to speed up working with structures
+   int last,curr;
+//--- new hour?
+   curr=time.hour;
+   last=m_prev_time.hour;
+   if(curr!=last)
+     {
+      if(curr%2!=0  && curr-last<2)      result^=OBJ_PERIOD_H2;
+      if(curr%3!=0  && curr-last<3)      result^=OBJ_PERIOD_H3;
+      if(curr%4!=0  && curr-last<4)      result^=OBJ_PERIOD_H4;
+      if(curr%6!=0  && curr-last<6)      result^=OBJ_PERIOD_H6;
+      if(curr%8!=0  && curr-last<8)      result^=OBJ_PERIOD_H8;
+      if(curr%12!=0 && curr-last<12)     result^=OBJ_PERIOD_H12;
+      return(result);
+     }
+//--- reset all flags for hour timeframes
+   result^=OBJ_PERIOD_H1+OBJ_PERIOD_H2+OBJ_PERIOD_H3+OBJ_PERIOD_H4+OBJ_PERIOD_H6+OBJ_PERIOD_H8+OBJ_PERIOD_H12;
+//--- new minute?
+   curr=time.min;
+   last=m_prev_time.min;
+   if(curr!=last)
+     {
+      if(curr%2!=0  && curr-last<2)       result^=OBJ_PERIOD_M2;
+      if(curr%3!=0  && curr-last<3)       result^=OBJ_PERIOD_M3;
+      if(curr%4!=0  && curr-last<4)       result^=OBJ_PERIOD_M4;
+      if(curr%5!=0  && curr-last<5)       result^=OBJ_PERIOD_M5;
+      if(curr%6!=0  && curr-last<6)       result^=OBJ_PERIOD_M6;
+      if(curr%10!=0 && curr-last<10)      result^=OBJ_PERIOD_M10;
+      if(curr%12!=0 && curr-last<12)      result^=OBJ_PERIOD_M12;
+      if(curr%15!=0 && curr-last<15)      result^=OBJ_PERIOD_M15;
+      if(curr%20!=0 && curr-last<20)      result^=OBJ_PERIOD_M20;
+      if(curr%30!=0 && curr-last<30)      result^=OBJ_PERIOD_M30;
+     }
 //---
    return(result);
   }

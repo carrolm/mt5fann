@@ -46,7 +46,7 @@ enum ENUM_INIT_PHASE
    INIT_PHASE_FIRST      =0,           // start phase (only Init(...) can be called)
    INIT_PHASE_TUNING     =1,           // phase of tuning (set in Init(...))
    INIT_PHASE_VALIDATION =2,           // phase of checking of parameters(set in ValidationSettings(...))
-   INIT_PHASE_COMPLIT    =3            // end phase (set in InitIndicators(...))
+   INIT_PHASE_COMPLETE   =3            // end phase (set in InitIndicators(...))
   };
 //+------------------------------------------------------------------+
 //| Macro definitions.                                               |
@@ -69,6 +69,7 @@ class CExpertBase : public CObject
   {
 protected:
    //--- variables
+   ulong             m_magic;          // expert magic number
    ENUM_INIT_PHASE   m_init_phase;     // the phase (stage) of initialization of object
    bool              m_other_symbol;   // flag of a custom work symbols (different from one of the Expert Advisor)
    CSymbolInfo      *m_symbol;         // pointer to the object-symbol
@@ -79,7 +80,7 @@ protected:
    ENUM_TYPE_TREND   m_trend_type;     // identifier of trend
    bool              m_every_tick;     // flag of starting the analysis from current (incomplete) bar
    //--- timeseries
-   int               m_used_series;    // flags of using of timeseries
+   int               m_used_series;    // flags of using of series
    CiOpen           *m_open;           // pointer to the object for access to open prices of bars
    CiHigh           *m_high;           // pointer to the object for access to high prices of bars
    CiLow            *m_low;            // pointer to the object for access to low prices of bars
@@ -106,10 +107,11 @@ public:
    datetime          Time(int ind)       const;
    long              TickVolume(int ind) const;
    long              RealVolume(int ind) const;
-   //--- method of initialization of the object
+   //--- methods of initialization of the object
    virtual bool      Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double point);
    bool              Symbol(string name);
    bool              Period(ENUM_TIMEFRAMES value);
+   void              Magic(ulong value)               { m_magic=value;              }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- methods of creating the indicator and timeseries
@@ -131,6 +133,7 @@ protected:
    virtual double    PriceLevelUnit()                 { return(m_adjusted_point);   }
    //--- method of getting index of bar the analysis starts with
    virtual int       StartIndex()                     { return((m_every_tick?0:1)); }
+   virtual bool      CompareMagic(ulong magic)        { return(m_magic==magic);     }
   };
 //+------------------------------------------------------------------+
 //| Constructor CExpertBase.                                         |
@@ -141,6 +144,7 @@ protected:
 void CExpertBase::CExpertBase()
   {
 //--- initialization of protected data
+   m_magic         =0;
    m_init_phase    =INIT_PHASE_FIRST;
    m_other_symbol  =false;
    m_symbol        =NULL;
@@ -395,7 +399,7 @@ bool CExpertBase::SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tic
 bool CExpertBase::InitIndicators(CIndicators* indicators)
   {
 //--- this call is for compatibility with the previous version
-   if(!CExpertBase::ValidationSettings()) return(false);
+   if(!ValidationSettings())                                      return(false);
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_VALIDATION)
      {
@@ -417,7 +421,7 @@ bool CExpertBase::InitIndicators(CIndicators* indicators)
    if(IS_REAL_VOLUME_SERIES_USAGE && !InitRealVolume(indicators)) return(false);
 //--- initialization of object (from the point of view of the base class) has been performed successfully
 //--- now it's impossible to change anything in the settings
-   m_init_phase=INIT_PHASE_COMPLIT;
+   m_init_phase=INIT_PHASE_COMPLETE;
 //--- ok
    return(true);
   }

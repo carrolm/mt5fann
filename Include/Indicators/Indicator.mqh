@@ -2,7 +2,7 @@
 //|                                                    Indicator.mqh |
 //|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                                              Revision 2011.07.07 |
 //+------------------------------------------------------------------+
 #include "Series.mqh"
 //+------------------------------------------------------------------+
@@ -132,7 +132,10 @@ public:
    int               Maximum(int buffer_num,int start,int count)             const;
    double            MaxValue(int buffer_num,int start,int count,int& index) const;
    //--- method of "freshening" of the data
-   virtual void      Refresh(int flags);
+   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   //--- methods for working with chart
+   bool              AddToChart(long chart,int subwin);
+   bool              DeleteFromChart(long chart,int subwin);
    //--- methods of conversion of constants to strings
    string            MethodDescription(int val) const;
    string            PriceDescription(int val)  const;
@@ -473,6 +476,34 @@ void CIndicator::Refresh(int flags)
         }
       else                     buff.Refresh(m_handle,i);
      }
+  }
+//+------------------------------------------------------------------+
+//| Adds indicator to chart.                                         |
+//| INPUT:  chart  - chart id,                                       |
+//|         subwin - number of chart subwindow.                      |
+//| OUTPUT: true- if successful, false if not.                       |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CIndicator::AddToChart(long chart,int subwin)
+  {
+   if(ChartIndicatorAdd(chart,subwin,m_handle))
+     {
+      m_name=ChartIndicatorName(chart,subwin,ChartIndicatorsTotal(chart,subwin)-1);
+      return(true);
+     }
+//--- failed
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Deletes indicator from chart.                                    |
+//| INPUT:  chart  - chart id,                                       |
+//|         subwin - number of chart subwindow.                      |
+//| OUTPUT: true- if successful, false if not.                       |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CIndicator::DeleteFromChart(long chart,int subwin)
+  {
+   return(ChartIndicatorDelete(chart,subwin,m_name));
   }
 //+------------------------------------------------------------------+
 //| Converting value of ENUM_MA_METHOD into string                   |

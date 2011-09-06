@@ -155,7 +155,7 @@ string CSeries::PeriodDescription(int val)
                                     PERIOD_H1,PERIOD_H2,PERIOD_H3,PERIOD_H4,PERIOD_H6,PERIOD_H8,PERIOD_H12,
                                     PERIOD_D1,PERIOD_W1,PERIOD_MN1};
 //--- checking
-   frame=(val==-1)?m_period:val;
+   frame=(val==0)?m_period:val;
    if(frame==WRONG_VALUE) return("WRONG_VALUE");
 //--- cycle for all timeframes
    for(i=0;i<ArraySize(_p_int);i++)
@@ -198,7 +198,7 @@ bool CSeries::CheckTerminalHistory(int size)
    datetime times[1];
    long     bars=0;
 //--- Enough data in timeseries?
-   if(Bars(m_symbol,m_period)>size) return(true);
+   if(Bars(m_symbol,m_period)>=size) return(true);
 //--- second attempt
    if(SeriesInfoInteger(m_symbol,PERIOD_M1,SERIES_BARS_COUNT,bars))
      {
@@ -210,7 +210,7 @@ bool CSeries::CheckTerminalHistory(int size)
          //--- check date
          if(SeriesInfoInteger(m_symbol,m_period,SERIES_BARS_COUNT,bars))
             //--- Timeseries generated using data from terminal
-            if(bars>size)           return(true);
+            if(bars>size)            return(true);
         }
      }
 //--- failed

@@ -38,6 +38,7 @@ public:
    double            Profit()           const;
    //--- fast access methods to the string position propertyes
    string            Symbol()           const;
+   string            Comment()          const;
    //--- access methods to the API MQL5 functions
    bool              InfoInteger(ENUM_POSITION_PROPERTY_INTEGER prop_id,long& var) const;
    bool              InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var) const;
@@ -193,6 +194,16 @@ double CPositionInfo::Profit() const
 string CPositionInfo::Symbol() const
   {
    return(PositionGetString(POSITION_SYMBOL));
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "POSITION_COMMENT".                       |
+//| INPUT:  no.                                                      |
+//| OUTPUT: the property value "POSITION_COMMENT".                   |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+string CPositionInfo::Comment() const
+  {
+   return(PositionGetString(POSITION_COMMENT));
   }
 //+------------------------------------------------------------------+
 //| Access functions PositionGetInteger(...).                        |

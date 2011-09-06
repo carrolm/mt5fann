@@ -84,11 +84,12 @@ public:
                     ~CExpert()                              { Deinit();                       }
    //--- initialization
    bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic=0);
+   void              Magic(ulong value);
    //--- initialization trading objects
    virtual bool      InitSignal(CExpertSignal* signal=NULL);
    virtual bool      InitTrailing(CExpertTrailing* trailing=NULL);
    virtual bool      InitMoney(CExpertMoney* money=NULL);
-   virtual bool      InitTrade(long magic,CExpertTrade* trade=NULL);
+   virtual bool      InitTrade(ulong magic,CExpertTrade* trade=NULL);
    //--- deinitialization
    virtual void      Deinit();
    //--- methods of setting adjustable parameters
@@ -256,6 +257,7 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong ma
    if(!m_symbol.Name(symbol)) return(false);
    m_period    =period;                     // period
    m_every_tick=every_tick;
+   m_magic     =magic;
    if(every_tick)
       TimeframeAdd(WRONG_VALUE);            // add all periods
    else
@@ -299,13 +301,28 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong ma
    return(true);
   }
 //+------------------------------------------------------------------+
+//| Sets magic number for object and its dependent objects           |
+//| INPUT:  value - new value of magic number.                       |
+//| OUTPUT: no.                                                      |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+void CExpert::Magic(ulong value)
+  {
+   if(m_trade!=NULL)    m_trade.SetExpertMagicNumber(value);
+   if(m_signal!=NULL)   m_signal.Magic(value);
+   if(m_money!=NULL)    m_money.Magic(value);
+   if(m_trailing!=NULL) m_trailing.Magic(value);
+//---
+   CExpertBase::Magic(value);
+  }
+//+------------------------------------------------------------------+
 //| Initialization trade object                                      |
 //| INPUT:  magic - magic number for trade,                          |
 //|         trade - pointer of trade object.                         |
 //| OUTPUT: true-if successful, false otherwise.                     |
 //| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitTrade(long magic,CExpertTrade* trade=NULL)
+bool CExpert::InitTrade(ulong magic,CExpertTrade* trade=NULL)
   {
 //--- удаляем существующий объект
    if(m_trade!=NULL) delete m_trade;
@@ -342,6 +359,7 @@ bool CExpert::InitSignal(CExpertSignal* signal)
 //--- initializing signal object
    if(!m_signal.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
    m_signal.EveryTick(m_every_tick);
+   m_signal.Magic(m_magic);
 //--- ok
    return(true);
   }
@@ -364,6 +382,7 @@ bool CExpert::InitTrailing(CExpertTrailing* trailing)
 //--- initializing trailing object
    if(!m_trailing.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
    m_trailing.EveryTick(m_every_tick);
+   m_trailing.Magic(m_magic);
 //--- ok
    return(true);
   }
@@ -386,6 +405,7 @@ bool CExpert::InitMoney(CExpertMoney *money)
 //--- initializing money object
    if(!m_money.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
    m_money.EveryTick(m_every_tick);
+   m_money.Magic(m_magic);
 //--- ok
    return(true);
   }
@@ -1501,43 +1521,61 @@ void CExpert::TimeframeAdd(ENUM_TIMEFRAMES period)
 //| Forms timeframes flags                                           |
 //| INPUT:  time - reference.                                        |
 //| OUTPUT: timeframes flags.                                        |
-//| REMARK: no.                                                      |
+//| REMARK: for simplicity, set the "new week" flag at the beginning |
+//          of every new day                                         |
 //+------------------------------------------------------------------+
 int CExpert::TimeframesFlags(MqlDateTime &time)
   {
-   int   result=OBJ_PERIOD_M1;
-//--- check change time
-   if(time.min==m_last_tick_time.min && 
-      time.hour==m_last_tick_time.hour && 
-      time.day==m_last_tick_time.day &&
-      time.mon==m_last_tick_time.mon) return(0);
+//--- set flags for all timeframes
+   int   result=OBJ_ALL_PERIODS;
 //--- if first check, then setting flags all timeframes
-   if(m_last_tick_time.min==-1) result=0x1FFFFF;
-//--- new minute
-   if(time.min%2==0)       result|=OBJ_PERIOD_M2;
-   if(time.min%3==0)       result|=OBJ_PERIOD_M3;
-   if(time.min%4==0)       result|=OBJ_PERIOD_M4;
-   if(time.min%5==0)       result|=OBJ_PERIOD_M5;
-   if(time.min%6==0)       result|=OBJ_PERIOD_M6;
-   if(time.min%10==0)      result|=OBJ_PERIOD_M10;
-   if(time.min%12==0)      result|=OBJ_PERIOD_M12;
-   if(time.min%15==0)      result|=OBJ_PERIOD_M15;
-   if(time.min%20==0)      result|=OBJ_PERIOD_M20;
-   if(time.min%30==0)      result|=OBJ_PERIOD_M30;
-//--- new hour
-   result|=OBJ_PERIOD_H1;
-   if(time.hour%2==0)      result|=OBJ_PERIOD_H2;
-   if(time.hour%3==0)      result|=OBJ_PERIOD_H3;
-   if(time.hour%4==0)      result|=OBJ_PERIOD_H4;
-   if(time.hour%6==0)      result|=OBJ_PERIOD_H6;
-   if(time.hour%8==0)      result|=OBJ_PERIOD_H8;
-   if(time.hour%12==0)     result|=OBJ_PERIOD_H12;
-//--- new day
-   result|=OBJ_PERIOD_D1;
-//--- new week
-   if(time.day_of_week==1) result|=OBJ_PERIOD_W1;
-//--- new month
-   if(time.day==1) result|=OBJ_PERIOD_MN1;
+   if(m_last_tick_time.min==-1)       return(result);
+//--- check change time
+   if(time.min==m_last_tick_time.min &&
+      time.hour==m_last_tick_time.hour &&
+      time.day==m_last_tick_time.day &&
+      time.mon==m_last_tick_time.mon) return(OBJ_NO_PERIODS);
+//--- new month?
+   if(time.mon!=m_last_tick_time.mon) return(result);
+//--- reset the "new month" flag
+   result^=OBJ_PERIOD_MN1;
+//--- new day?
+   if(time.day!=m_last_tick_time.day) return(result);
+//--- reset the "new day" and "new week" flags
+   result^=OBJ_PERIOD_D1+OBJ_PERIOD_W1;
+//--- temporary variables to speed up working with structures
+   int last,curr;
+//--- new hour?
+   curr=time.hour;
+   last=m_last_tick_time.hour;
+   if(curr!=last)
+     {
+      if(curr%2!=0  && curr-last<2)      result^=OBJ_PERIOD_H2;
+      if(curr%3!=0  && curr-last<3)      result^=OBJ_PERIOD_H3;
+      if(curr%4!=0  && curr-last<4)      result^=OBJ_PERIOD_H4;
+      if(curr%6!=0  && curr-last<6)      result^=OBJ_PERIOD_H6;
+      if(curr%8!=0  && curr-last<8)      result^=OBJ_PERIOD_H8;
+      if(curr%12!=0 && curr-last<12)     result^=OBJ_PERIOD_H12;
+      return(result);
+     }
+//--- reset all flags for hour timeframes
+   result^=OBJ_PERIOD_H1+OBJ_PERIOD_H2+OBJ_PERIOD_H3+OBJ_PERIOD_H4+OBJ_PERIOD_H6+OBJ_PERIOD_H8+OBJ_PERIOD_H12;
+//--- new minute?
+   curr=time.min;
+   last=m_last_tick_time.min;
+   if(curr!=last)
+     {
+      if(curr%2!=0  && curr-last<2)       result^=OBJ_PERIOD_M2;
+      if(curr%3!=0  && curr-last<3)       result^=OBJ_PERIOD_M3;
+      if(curr%4!=0  && curr-last<4)       result^=OBJ_PERIOD_M4;
+      if(curr%5!=0  && curr-last<5)       result^=OBJ_PERIOD_M5;
+      if(curr%6!=0  && curr-last<6)       result^=OBJ_PERIOD_M6;
+      if(curr%10!=0 && curr-last<10)      result^=OBJ_PERIOD_M10;
+      if(curr%12!=0 && curr-last<12)      result^=OBJ_PERIOD_M12;
+      if(curr%15!=0 && curr-last<15)      result^=OBJ_PERIOD_M15;
+      if(curr%20!=0 && curr-last<20)      result^=OBJ_PERIOD_M20;
+      if(curr%30!=0 && curr-last<30)      result^=OBJ_PERIOD_M30;
+     }
 //---
    return(result);
   }
