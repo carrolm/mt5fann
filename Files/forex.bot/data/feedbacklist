@@ -1,1 +1,2 @@
-test_com|sel|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\commands.txt
+com|command|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\commands.txt
+sel|sell|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\sell.txt
