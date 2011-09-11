@@ -1,1 +1,1 @@
-[position closed] EURUSD  sell 1.00  -200.00 USD
+Starting expert 'statusbot'

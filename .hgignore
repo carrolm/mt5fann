@@ -1,7 +1,8 @@
 relre:log
 relre:ex5
-relre:dat
 relre:csv
 relre:train
 relre:test
 relre:csv
+syntax: glob
+experts.dat
