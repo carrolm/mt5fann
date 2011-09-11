@@ -271,7 +271,7 @@ string CPositionInfo::FormatType(string& str,const uint type) const
 //+------------------------------------------------------------------+
 string CPositionInfo::FormatPosition(string& str) const
   {
-   string tmp,type,volume,price;
+   string      tmp,type;
    CSymbolInfo symbol;
 //--- set up
    symbol.Name(Symbol());

@@ -339,7 +339,7 @@ string CDealInfo::FormatEntry(string& str,const uint entry) const
 //+------------------------------------------------------------------+
 string CDealInfo::FormatDeal(string& str) const
   {
-   string type,volume,price,date;
+   string      type;
    CSymbolInfo symbol;
 //--- set up
    symbol.Name(Symbol());

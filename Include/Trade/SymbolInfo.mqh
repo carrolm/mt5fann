@@ -519,6 +519,9 @@ string CSymbolInfo::TradeExecutionDescription() const
       case SYMBOL_TRADE_EXECUTION_MARKET:
          str="Execution of orders on the market";
          break;
+      case SYMBOL_TRADE_EXECUTION_EXCHANGE:
+         str="Exchange execution";
+         break;
       default:
          str="Unknown trade execution";
      }

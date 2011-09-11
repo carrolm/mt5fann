@@ -184,7 +184,6 @@ void CPositionInfoSample::InfoToChart()
 //+------------------------------------------------------------------+
 int OnStart()
   {
-   string str;
 //--- call init function
    if(ExtScript.Init()==0)
      {
