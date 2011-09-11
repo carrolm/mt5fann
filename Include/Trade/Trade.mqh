@@ -143,7 +143,7 @@ void CTrade::CTrade()
    ClearStructures();
    m_magic       =0;
    m_deviation   =10;
-   m_type_filling=ORDER_FILLING_AON;
+   m_type_filling=ORDER_FILLING_FOK;
    m_log_level   =LOG_LEVEL_ERRORS;
 //--- check programm mode
    if(MQL5InfoInteger(MQL5_OPTIMIZATION)) m_log_level=LOG_LEVEL_NO;
@@ -954,8 +954,8 @@ string CTrade::FormatOrderTypeFilling(string& str,const uint type) const
    switch(type)
      {
       case ORDER_FILLING_RETURN: str="return remainder"; break;
-      case ORDER_FILLING_CANCEL: str="cancel remainder"; break;
-      case ORDER_FILLING_AON   : str="all or none";      break;
+      case ORDER_FILLING_IOC   : str="cancel remainder"; break;
+      case ORDER_FILLING_FOK   : str="all or none";      break;
 
       default:
          str="unknown type filling "+(string)type;
@@ -978,9 +978,10 @@ string CTrade::FormatOrderTypeTime(string& str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case ORDER_TIME_GTC      : str="gtc";       break;
-      case ORDER_TIME_DAY      : str="day";       break;
-      case ORDER_TIME_SPECIFIED: str="specified"; break;
+      case ORDER_TIME_GTC          : str="gtc";           break;
+      case ORDER_TIME_DAY          : str="day";           break;
+      case ORDER_TIME_SPECIFIED    : str="specified";     break;
+      case ORDER_TIME_SPECIFIED_DAY: str="specified day"; break;
 
       default:
          str="unknown type time "+(string)type;
@@ -1022,7 +1023,7 @@ string CTrade::FormatOrderPrice(string& str,const double price_order,const doubl
 //+------------------------------------------------------------------+
 string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
   {
-   string      type,volume,volume_new,price,sl,tp,price_new,sl_new,tp_new;
+   string      type,price,price_new;
    string      tmp;
    CSymbolInfo symbol;
 //--- clean
@@ -1126,7 +1127,6 @@ string CTrade::FormatRequest(string& str,const MqlTradeRequest& request) const
 //+------------------------------------------------------------------+
 string CTrade::FormatRequestResult(string& str,const MqlTradeRequest& request,const MqlTradeResult& result) const
   {
-   string      bid,ask;
    CSymbolInfo symbol;
 //--- clean
    str="";

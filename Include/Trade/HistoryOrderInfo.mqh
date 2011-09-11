@@ -393,8 +393,8 @@ string CHistoryOrderInfo::FormatTypeFilling(string& str,const uint type) const
    switch(type)
      {
       case ORDER_FILLING_RETURN: str="return remainder"; break;
-      case ORDER_FILLING_CANCEL: str="cancel remainder"; break;
-      case ORDER_FILLING_AON   : str="all or none";      break;
+      case ORDER_FILLING_IOC   : str="cancel remainder"; break;
+      case ORDER_FILLING_FOK   : str="all or none";      break;
 
       default:
          str="unknown type filling "+(string)type;
@@ -417,9 +417,10 @@ string CHistoryOrderInfo::FormatTypeTime(string& str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case ORDER_TIME_GTC      : str="gtc";       break;
-      case ORDER_TIME_DAY      : str="day";       break;
-      case ORDER_TIME_SPECIFIED: str="specified"; break;
+      case ORDER_TIME_GTC          : str="gtc";           break;
+      case ORDER_TIME_DAY          : str="day";           break;
+      case ORDER_TIME_SPECIFIED    : str="specified";     break;
+      case ORDER_TIME_SPECIFIED_DAY: str="specified day"; break;
 
       default:
          str="unknown type time "+(string)type;
@@ -437,7 +438,7 @@ string CHistoryOrderInfo::FormatTypeTime(string& str,const uint type) const
 //+------------------------------------------------------------------+
 string CHistoryOrderInfo::FormatOrder(string& str) const
   {
-   string type,volume,price;
+   string      type,price;
    CSymbolInfo symbol;
 //--- set up
    symbol.Name(Symbol());
