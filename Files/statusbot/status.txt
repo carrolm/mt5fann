@@ -1,1 +1,6 @@
-Balance = 9054.59 USD
+Balance = 9170.59 USD
+------------------
+EURUSD  sell 1.00  -63.00 USD
+summa = -63.00 USD
+------------------
+Equity = 9107.59 USD

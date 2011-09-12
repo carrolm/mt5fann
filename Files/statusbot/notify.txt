@@ -1,1 +1,1 @@
-Starting expert 'statusbot'
+[position open] 
