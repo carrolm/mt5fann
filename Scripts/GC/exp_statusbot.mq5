@@ -28,7 +28,7 @@ int OnInit()
 //---
    ResetLastError();
    string filename=expname+"\\"+spamfilename;
-   int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,codepage);
+   int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
    if(filehandle!=INVALID_HANDLE)
      {
       FileWrite(filehandle,"Starting expert '"+expname+"'");
@@ -71,7 +71,7 @@ void WriteStatus()
    ArrayResize(ar_sSTATUScur,PositionsTotal());
    ResetLastError();
    string filename=expname+"\\"+statusfilename;
-   int    filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,codepage);
+   int    filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
    FileWrite(filehandle,"Balance = "+DoubleToString(balance,2)+" "+AccountInfoString(ACCOUNT_CURRENCY));
    for(int i=0;i<PositionsTotal() && filehandle!=INVALID_HANDLE;i++)
      {
@@ -79,8 +79,8 @@ void WriteStatus()
       PositionGetSymbol(i);
       if(PositionGetInteger(POSITION_TYPE)==ORDER_TYPE_BUY) order_type="buy";
       if(PositionGetInteger(POSITION_TYPE)==ORDER_TYPE_SELL)order_type="sell";
-      sl    =PositionGetDouble(POSITION_SL);
-      tp    =PositionGetDouble(POSITION_TP);
+      sl    =(int)PositionGetDouble(POSITION_SL);
+      tp    =(int)PositionGetDouble(POSITION_TP);
       vol   =PositionGetDouble(POSITION_VOLUME);
       open  =PositionGetDouble(POSITION_PRICE_OPEN);
       profit=PositionGetDouble(POSITION_PROFIT);
@@ -110,7 +110,8 @@ void WriteNotify()
       for(j=0;j<pospast;j++) {if(StringSubstr(ar_sSTATUScur[i],0,6)==StringSubstr(ar_sSTATUSpast[j],0,6))break;}
       if(j==pospast)
         {
-         ar_sSPAM[changing]="[position added] "+ar_sSTATUScur[i];
+//         ar_sSPAM[changing]="[position added] "+ar_sSTATUScur[i];
+         ar_sSPAM[changing]="[position open] ";//+ar_sSTATUScur[i];
          changing++;
         }
      }
@@ -131,7 +132,7 @@ void WriteNotify()
 //--- если изменения есть то пишем файл notify.txt
    ResetLastError();
    string filename=expname+"\\"+spamfilename;
-   int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,codepage);
+   int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
    if(filehandle!=INVALID_HANDLE)
      {
       for(int i=0;i<changing;i++)
@@ -150,22 +151,22 @@ void WriteReport()
    HistorySelect(0,TimeCurrent());
    if(HistoryDealsTotal()<=0) return;
    string report_buffer[];
-   string report_buffer_sorted[];
+   //string report_buffer_sorted[];
    ArrayResize(report_buffer,HistoryDealsTotal());
    int report_size=0,dig;
    string rts="|";
    string opentime,type,size,item,openprice,loss_lim,profit_lim,closetime,closeprice,commision,swap,profit;
    double opendeallots = 0;
    double opendealcomm = 0;
-   datetime opendealtime;
-   string opendealtype;
+   //datetime opendealtime;
+   //string opendealtype;
    double opendealprice=0;
    uint     total=HistoryDealsTotal();
    ulong    ticket=0;
 //--- for all deals
    for(uint i=0;i<total;i++)
      {
-      if(ticket=HistoryDealGetTicket(i))
+      if((bool)(ticket=HistoryDealGetTicket(i)))
         {
          if(HistoryDealGetInteger(ticket,DEAL_ENTRY)!=DEAL_ENTRY_OUT) continue;
          if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BUY && HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_SELL) continue;
@@ -173,11 +174,11 @@ void WriteReport()
          if(HistoryDealGetInteger(ticket,DEAL_TYPE)==DEAL_TYPE_SELL)type="buy";
          item       = HistoryDealGetString(ticket,DEAL_SYMBOL);
          opentime   = TimeToString(HistoryDealGetInteger(ticket,DEAL_TIME),TIME_DATE|TIME_MINUTES);
-         dig        = SymbolInfoInteger(item,SYMBOL_DIGITS);
+         dig        = (int)SymbolInfoInteger(item,SYMBOL_DIGITS);
          openprice  = DoubleToString(HistoryDealGetDouble(ticket,DEAL_PRICE),dig);
          size       = DoubleToString(HistoryDealGetDouble(ticket,DEAL_VOLUME),2);
-         loss_lim   = 0;
-         profit_lim = 0;
+         loss_lim   = "";
+         profit_lim = "";
          closetime  = TimeToString(HistoryDealGetInteger(ticket,DEAL_TIME),TIME_DATE|TIME_MINUTES);
          closeprice = DoubleToString(HistoryDealGetDouble(ticket,DEAL_PRICE),dig);
          commision  = DoubleToString(HistoryDealGetDouble(ticket,DEAL_COMMISSION),2);
