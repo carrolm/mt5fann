@@ -153,11 +153,8 @@ void OnTick()
    if(!posinf.Select(_Symbol))
      {
 //         if((MathAbs(ama_buffer[1])>=1) && (ama_buffer[1]>0) && (ama_buffer[2]<=0))
-         if(1=2) {}
-//         if((wpr_buffer[1]>-50) && (sth_buffer_main[1]>80) && (sth_buffer_main[1]>sth_buffer_signal[1]))
+         if((wpr_buffer[1]>-50) && (sth_buffer_main[1]>80) && (sth_buffer_main[2]<=80) && (sth_buffer_main[1]>sth_buffer_signal[1]))
 //         if(silver_buffer_buy[0]>=1)
-         else if((wpr_buffer[1]>-50) && (sth_buffer_main[1]>80) && (sth_buffer_main[1]>sth_buffer_signal[1]))
-//         else if((wpr_buffer[1]<-50) && (sth_buffer_main[1]<20) && (sth_buffer_main[1]<sth_buffer_signal[1]))
            {
             if(SL>0) sl=SymbolInfoDouble(_Symbol,SYMBOL_ASK)-SL*Point();
             if(TP>0) tp=SymbolInfoDouble(_Symbol,SYMBOL_ASK)+TP*Point();
@@ -176,8 +173,7 @@ void OnTick()
 
            }
 //         else if((MathAbs(ama_buffer[1])>=1) && (ama_buffer[1]<0) && (ama_buffer[2]>=0))
-         else if((wpr_buffer[1]>-50) && (sth_buffer_main[1]>80) && (sth_buffer_main[1]>sth_buffer_signal[1]))
-//         else if((wpr_buffer[1]<-50) && (sth_buffer_main[1]<20) && (sth_buffer_main[1]<sth_buffer_signal[1]))
+         else if((wpr_buffer[1]<-50) && (sth_buffer_main[1]<20) && (sth_buffer_main[2]>=20) && (sth_buffer_main[1]<sth_buffer_signal[1]))
            {
             if(SL>0) sl=SymbolInfoDouble(_Symbol,SYMBOL_BID)+SL*Point();
             if(TP>0) tp=SymbolInfoDouble(_Symbol,SYMBOL_BID)-TP*Point();
