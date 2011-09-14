@@ -8,7 +8,7 @@
 #property version   "1.00"
 
 //#include <Fann2MQL.mqh>
-#import "Fann2MQL114b2.dll"
+#import "fanndouble32.dll"
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M_create_from_file(uchar& path[]);

@@ -459,6 +459,15 @@ string CSymbolInfo::TradeCalcModeDescription() const
       case SYMBOL_CALC_MODE_CFDLEVERAGE:
          str="Calculation of collateral and earnings for the CFD when trading with leverage";
          break;
+      case SYMBOL_CALC_MODE_EXCH_STOCKS:
+         str="Calculation for exchange stocks";
+         break;
+      case SYMBOL_CALC_MODE_EXCH_FUTURES:
+         str="Calculation for exchange futures";
+         break;
+      case SYMBOL_CALC_MODE_EXCH_OPTIONS:
+         str="Calculation for exchange options";
+         break;
       default:
          str="Unknown calculation mode";
      }

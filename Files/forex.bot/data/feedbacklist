@@ -1,2 +1,1 @@
-com|com|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\com.txt
-sel|sell|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\sell.txt
+com|command|C:\Program Files\MetaTrader 5\MQL5\Files\statusbot\watchercommand.txt

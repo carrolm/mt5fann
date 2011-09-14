@@ -3,6 +3,10 @@
 //|                                      Copyright 2011, Investeo.pl |
 //|                                                http:/Investeo.pl |
 //+------------------------------------------------------------------+
+//Из-за реализации в виде "двойной DLL-обертки под .NET", 
+//файлы Cloo.dll, encog-core-cs.dll и log4net.dll нужно скопировать в каталог установки клиентского терминала. 
+//Файл EncogNNTrainDLL.dll нужно скопировать в каталог папка_данных_клиентского_терминала\MQL5\Libraries\.
+
 #property copyright "Copyright 2011, Investeo.pl"
 #property link      "http:/Investeo.pl"
 #property version   "1.00"
