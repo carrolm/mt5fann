@@ -7,38 +7,38 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 
-//#include <Fann2MQL.mqh>
-#import "fanndouble32.dll"
+#include <gc\FANN2MQL5.mqh>
+//#import "fanndouble32.dll"
+////int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-int f2M_create_from_file(uchar& path[]);
-int f2M_run(int ann,double &input_vector[]);
-int f2M_destroy(int ann);
-int f2M_destroy_all_anns();
-
-double f2M_get_output(int ann,int output);
-int  f2M_get_num_input(int ann);
-int  f2M_get_num_output(int ann);
-
-int f2M_train(int ann,double &input_vector[],double &output_vector[]);
-int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
-int f2M_randomize_weights(int ann,double min_weight,double max_weight);
-double f2M_get_MSE(int ann);
-int f2M_save(int ann,char &path[]);
-int f2M_reset_MSE(int ann);
-int f2M_test(int ann,double &input_vector[],double &output_vector[]);
-int f2M_set_act_function_layer(int ann,int activation_function,int layer);
-int f2M_set_act_function_hidden(int ann,int activation_function);
-int f2M_set_act_function_output(int ann,int activation_function);
-
-/* Threads functions */
-int f2M_threads_init(int num_threads);
-int f2M_threads_deinit();
-int f2M_parallel_init();
-int f2M_parallel_deinit();
-int f2M_run_threaded(int anns_count,int &anns[],double &input_vector[]);
-int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
-#import
+//int f2M_create_from_file(uchar& path[]);
+//int f2M_run(int ann,double &input_vector[]);
+//int f2M_destroy(int ann);
+//int f2M_destroy_all_anns();
+//
+//double f2M_get_output(int ann,int output);
+//int  f2M_get_num_input(int ann);
+//int  f2M_get_num_output(int ann);
+//
+//int f2M_train(int ann,double &input_vector[],double &output_vector[]);
+//int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
+//int f2M_randomize_weights(int ann,double min_weight,double max_weight);
+//double f2M_get_MSE(int ann);
+//int f2M_save(int ann,char &path[]);
+//int f2M_reset_MSE(int ann);
+//int f2M_test(int ann,double &input_vector[],double &output_vector[]);
+//int f2M_set_act_function_layer(int ann,int activation_function,int layer);
+//int f2M_set_act_function_hidden(int ann,int activation_function);
+//int f2M_set_act_function_output(int ann,int activation_function);
+//
+///* Threads functions */
+//int f2M_threads_init(int num_threads);
+//int f2M_threads_deinit();
+//int f2M_parallel_init();
+//int f2M_parallel_deinit();
+//int f2M_run_threaded(int anns_count,int &anns[],double &input_vector[]);
+//int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
+//#import
 
 int ann;
 int input_count=4999;
@@ -62,7 +62,7 @@ int OnInit()
 
 // Creating NN
 //ann_prepare_input2(0);
-   f2M_parallel_init();
+   //f2M5_parallel_init();
    ann=CreateAnn();
    Print("ann=",ann);
    //ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\1.net");
@@ -81,7 +81,7 @@ void OnDeinit(const int reason)
 
    ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\fann.net");
    ann_destroy();
-   f2M_parallel_deinit();
+   //f2M5_parallel_deinit();
 //---
   }
 //+------------------------------------------------------------------+
@@ -106,21 +106,21 @@ void get_res()
 //---
    ann_prepare_input(0);
 
-   if(f2M_run(ann,InputVector)<0)
+   if(f2M5_run(ann,InputVector)<0)
      {
       Print("Network RUN ERROR! ann="+IntegerToString(ann));
      }
-   double nxt_price=f2M_get_output(ann,0)/GetDelim(_Symbol);
+   double nxt_price=f2M5_get_output(ann,0)/GetDelim(_Symbol);
    draw_line(nxt_price);
-   Comment("\nNext Price Target: "+DoubleToString(nxt_price,_Digits)+" MSE: "+DoubleToString(f2M_get_MSE(ann))+" NN Input: "+IntegerToString(f2M_get_num_input(ann))+" NN Output: "+IntegerToString(f2M_get_num_output(ann)));
+   Comment("\nNext Price Target: "+DoubleToString(nxt_price,_Digits)+" MSE: "+DoubleToString(f2M5_get_MSE(ann))+" NN Input: "+IntegerToString(f2M5_get_num_input(ann))+" NN Output: "+IntegerToString(f2M5_get_num_output(ann)));
   }
 //+------------------------------------------------------------------+
 int CreateAnn()
   {
-   ann=f2M_create_standard(4,8,16,8,1);
-   f2M_set_act_function_hidden(ann,6);
-   f2M_set_act_function_output(ann,6);
-   f2M_randomize_weights(ann,-0.7,0.7);
+   ann=f2M5_create_standard(4,8,16,8,1);
+   f2M5_set_act_function_hidden(ann,6);
+   f2M5_set_act_function_output(ann,6);
+   f2M5_randomize_weights(ann,-0.7,0.7);
    Print("ANN: created successfully with handler "+IntegerToString(ann));
    if(ann==-1) Print("ERROR INITIALIZING NETWORK!");
    return(ann);
@@ -142,9 +142,9 @@ void TrainNN()
 
          ArrayFree(cl);
 
-         f2M_run(ann,InputVector);
+         f2M5_run(ann,InputVector);
 
-         Comment("Training NN# MSE:  "+DoubleToString(f2M_get_MSE(ann))+":"+IntegerToString(i)+" Result="+DoubleToString(f2M_get_output(ann,0)/GetDelim(_Symbol),_Digits));
+         Comment("Training NN# MSE:  "+DoubleToString(f2M5_get_MSE(ann))+":"+IntegerToString(i)+" Result="+DoubleToString(f2M5_get_output(ann,0)/GetDelim(_Symbol),_Digits));
 
         }
 
@@ -218,7 +218,7 @@ void ann_prepare_input2(int pos)
 //+------------------------------------------------------------------+
 void ann_train(int fann,double &input_vector[],double &output_vector[])
   {
-   if(f2M_train(fann,input_vector,output_vector)==-1)
+   if(f2M5_train(fann,input_vector,output_vector)==-1)
      {
       Print("Network TRAIN ERROR! ann="+IntegerToString(ann));
      }
@@ -229,7 +229,7 @@ void ann_train(int fann,double &input_vector[],double &output_vector[])
 //+------------------------------------------------------------------+
 void ann_destroy()
   {
-   Print("f2M_destroy("+IntegerToString(ann)+") returned: "+IntegerToString(f2M_destroy(ann)));
+   Print("f2M_destroy("+IntegerToString(ann)+") returned: "+IntegerToString(f2M5_destroy(ann)));
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -253,7 +253,7 @@ bool ann_save(int fann,string path)
 //ret=f2M_save(ann,path);
    uchar p[];
    StringToCharArray(path,p);
-   if(f2M_save(fann,p)<0) 
+   if(f2M5_save(fann,p)<0) 
      {
       Print(path);
       return(false);
@@ -311,7 +311,7 @@ bool isNewBar(ENUM_TIMEFRAMES timeFrame)
 //----
    static datetime old_Times[21];// массив дл€ хранени€ старых значений
    bool res=false;               // переменна€ результата анализа  
-   int  i;                       // номер €чейки массива old_Times[]     
+   int  i=0;                       // номер €чейки массива old_Times[]     
    datetime new_Time[1];         // врем€ нового бара
 
    switch(timeFrame)

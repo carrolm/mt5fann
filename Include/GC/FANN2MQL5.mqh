@@ -1,5 +1,5 @@
-//#import "fanndouble32.dll"
-#import "fanndouble64.dll"
+#import "fanndouble32.dll"
+//#import "fanndouble64.dll"
 
 //int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
 int f2M5_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
@@ -26,8 +26,8 @@ int f2M5_set_act_function_output(int ann,int activation_function);
 /* Threads functions */
 int f2M5_threads_init(int num_threads);
 int f2M5_threads_deinit();
-int f2M5_parallel_init();
-int f2M5_parallel_deinit();
+//int f2M5_parallel_init();
+//int f2M5_parallel_deinit();
 int f2M5_run_threaded(int anns_count,int &anns[],double &input_vector[]);
 int f2M5_run_parallel(int anns_count,int &anns[],double &input_vector[]);
 ///* Data training */
@@ -70,11 +70,11 @@ int f2M5_create_from_file(string path)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int f2M5_save(int ann,string path)
+int f2M5_save(int ann_,string path)
   {
    char p[];
    StringToCharArray(path,p);
-   return(f2M5_save(ann,p));
+   return(f2M5_save(ann_,p));
   }
 
 //+------------------------------------------------------------------+
