@@ -45,9 +45,9 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
   {
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
-   // пока выключим -кажется что глючит if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
+// пока выключим -кажется что глючит if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
    if(-0.66>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
-   // пока выключим -кажется что глючит if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
+// пока выключим -кажется что глючит if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
@@ -56,10 +56,10 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
 bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
    if(""==smb)
-   {
-   Print("empty symbol");
-   return(false);
-   }
+     {
+      Print("empty symbol");
+      return(false);
+     }
    StringToUpper(smb);
    if(NewOrderWait==type || !_OpenNewPosition_) return(false);
    if(""==comment) comment=smb;
@@ -94,8 +94,8 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
          break;
         }
      }
-   // если нет паники, а есть слабые сигналы -их пинаем...
-   if((0==ticket)&&(type==NewOrderWaitBuy||type==NewOrderWaitSell))return(false);  
+// если нет паники, а есть слабые сигналы -их пинаем...
+   if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell))return(false);
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) return(false);;
    if(price==0)
@@ -133,10 +133,10 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
       else
         {
-         if(type==NewOrderBuy) price=lasttick.bid;
-         if(type==NewOrderWaitBuy) price=lasttick.bid;
-         if(type==NewOrderWaitSell) price=lasttick.ask;
-         if(type==NewOrderSell) price=lasttick.ask;
+         if(type==NewOrderBuy) price=lasttick.bid+3*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitBuy) price=lasttick.bid+3*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitSell) price=lasttick.ask-3*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderSell) price=lasttick.ask-3*SymbolInfoDouble(smb,SYMBOL_POINT);
         }
      }
    if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
@@ -165,11 +165,11 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.type=ORDER_TYPE_SELL_LIMIT;
      }
    OrderSend(trReq,trRez);
-   if(10009!=trRez.retcode) 
-   {
+   if(10009!=trRez.retcode)
+     {
       Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
-     if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");  
-   }
+      if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
+     }
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -363,7 +363,7 @@ bool Trailing()
             trReq.deviation=3;                                    // Maximal possible deviation from the requested price
             trReq.tp=0;                                    // Maximal possible deviation from the requested price
             OrderSend(trReq,trRez);
-            if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=", SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+            if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=",SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
             else
               {
                trReq.order=ticket;
@@ -406,8 +406,8 @@ bool Trailing()
          else
            {
             newsl=lasttick.ask+1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if((PositionGetDouble(POSITION_SL)>newsl)&&((PositionGetDouble(POSITION_SL)-newsl)>SymbolInfoDouble(smb,SYMBOL_POINT)))
-               {
+            if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>SymbolInfoDouble(smb,SYMBOL_POINT)))
+              {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl=newsl;
                trReq.tp=0;
@@ -427,7 +427,7 @@ bool Trailing()
          else
            {
             newsl=lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if((PositionGetDouble(POSITION_SL)<newsl)&&((newsl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)))
+            if((PositionGetDouble(POSITION_SL)<newsl) && ((newsl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl= newsl;
