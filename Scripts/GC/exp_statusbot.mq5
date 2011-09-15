@@ -9,6 +9,8 @@
 input string statusfilename = "status.txt";
 input string spamfilename   = "notify.txt";
 input string reportfilename = "report.txt";
+input string commandsfilename = "commands.txt";
+
 //---- vars
 string expname="statusbot";
 string ar_sSTATUScur[];
@@ -57,6 +59,7 @@ void OnTick()
    WriteStatus();
    WriteNotify();
    WriteReport();
+   ReadCommands();
   }
 //+------------------------------------------------------------------+
 void WriteStatus()
@@ -209,3 +212,31 @@ void WriteReport()
 //---
   }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void ReadCommands()
+  {
+   //commandsfilename
+   string filename=expname+"\\"+commandsfilename,comstr;
+   int filehandle=FileOpen(filename,FILE_READ|FILE_TXT|FILE_ANSI,'\t',codepage);
+   if(filehandle!=INVALID_HANDLE)
+     {
+      if( FileSize(filehandle)<10) 
+      {
+         //Print("Open  command ",filename);
+         FileClose(filehandle);
+         return;
+      }
+
+      //Print("Open  command ",filename);
+      comstr=FileReadString(filehandle);
+      FileClose(filehandle);
+      filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
+      FileClose(filehandle);
+      if (StringLen(comstr)>10)
+       {
+         Print("Run command ",comstr);
+       }
+     }
+   //else Print("Не удалось открыть файл ",spamfilename,", ошибка",GetLastError());
+  }
