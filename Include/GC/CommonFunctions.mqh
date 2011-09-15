@@ -55,6 +55,12 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
+   if(""==smb)
+   {
+   Print("empty symbol");
+   return(false);
+   }
+   StringToUpper(smb);
    if(NewOrderWait==type || !_OpenNewPosition_) return(false);
    if(""==comment) comment=smb;
    ulong    ticket;
@@ -91,7 +97,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    // если нет паники, а есть слабые сигналы -их пинаем...
    if((0==ticket)&&(type==NewOrderWaitBuy||type==NewOrderWaitSell))return(false);  
    MqlTick lasttick;
-   SymbolInfoTick(smb,lasttick);
+   if(!SymbolInfoTick(smb,lasttick)) return(false);;
    if(price==0)
      {
       if(ticket!=0)

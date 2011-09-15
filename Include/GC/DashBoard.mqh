@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-#include <GC\MT5FANN.mqh>
+//#include <GC\MT5FANN.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
 
@@ -148,7 +148,7 @@ protected:
    int               window;
    string            prefix;
    datetime          LastRefresh;
-   CMT5FANN          fannExperts[30];
+   //CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
                     ~CDashBoard(){DeInit();}
@@ -273,7 +273,7 @@ bool CDashBoard::Init(void)
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       UseSymbol[SymbolIdx]=false;
-      fannExperts[SymbolIdx].Init("DashBoard",SymbolsArray[SymbolIdx]);
+      //fannExperts[SymbolIdx].Init("DashBoard",SymbolsArray[SymbolIdx]);
       //for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
         // Calc(SymbolIdx,iperiod);
      }
@@ -684,7 +684,7 @@ bool CDashBoard::Refresh(void)
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
             UseSymbol[SymbolIdx]=true;
-            NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),"");
+            //NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),"");
 //            if(fannExperts[SymbolIdx].GetVector())
 //              {
 //               fannExperts[SymbolIdx].run();

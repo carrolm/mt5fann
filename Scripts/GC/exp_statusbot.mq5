@@ -5,6 +5,7 @@
 #property copyright "Leonid Salavatov [MUSTADDON]© 2010"
 #property link      "mustaddon@gmail.com"
 #property version   "1.2"
+#include <gc\CommonFunctions.mqh>
 //---- inputs
 input string statusfilename = "status.txt";
 input string spamfilename   = "notify.txt";
@@ -217,8 +218,8 @@ void WriteReport()
 void ReadCommands()
   {
    //commandsfilename
-   string filename=expname+"\\"+commandsfilename,comstr;
-   int filehandle=FileOpen(filename,FILE_READ|FILE_TXT|FILE_ANSI,'\t',codepage);
+   string filename=expname+"\\"+commandsfilename,comstr,oper,smb;
+   int filehandle=FileOpen(filename,FILE_READ|FILE_CSV|FILE_ANSI,' ',codepage);
    if(filehandle!=INVALID_HANDLE)
      {
       if( FileSize(filehandle)<10) 
@@ -229,14 +230,22 @@ void ReadCommands()
       }
 
       //Print("Open  command ",filename);
-      comstr=FileReadString(filehandle);
-      FileClose(filehandle);
-      filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
-      FileClose(filehandle);
-      if (StringLen(comstr)>10)
+      comstr=FileReadString(filehandle);//StringToUpper(comstr);
+      if (0==StringCompare(comstr,"TRADE;sell",false))
        {
-         Print("Run command ",comstr);
+         //oper=FileReadString(filehandle);
+         smb=FileReadString(filehandle);
+         NewOrder(smb,NewOrderSell,"icq");
        }
+      else if (0==StringCompare(comstr,"TRADE;buy",false))
+       {
+         //oper=FileReadString(filehandle);
+         smb=FileReadString(filehandle);
+         NewOrder(smb,NewOrderBuy,"icq");
+       }
+      FileClose(filehandle);
+      filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,';',codepage);
+      FileClose(filehandle);
      }
    //else Print("Не удалось открыть файл ",spamfilename,", ошибка",GetLastError());
   }
