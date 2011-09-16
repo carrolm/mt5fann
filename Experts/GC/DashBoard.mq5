@@ -79,7 +79,7 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
          //close_price 
          if(sparam==prefix+"closepos_"+SymbolsArray[SymbolIdx])
            {
-            //Print("closepos");
+            Print("closepos");
             if(ObjectGetInteger(0,sparam,OBJPROP_STATE)) //проверим состояние кнопки
               {// туточки
                //if(PositionSelect(SymbolsArray[SymbolIdx],100)&&close_price[SymbolIdx]==0)

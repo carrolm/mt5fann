@@ -1,1 +1,1 @@
-Balance = 8936.49 USD
+Balance = 8750.29 USD

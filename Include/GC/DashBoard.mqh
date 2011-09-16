@@ -675,13 +675,7 @@ bool CDashBoard::Refresh(void)
          else ObjectSetString(0,name,OBJPROP_TEXT,"+ 0.1");
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
-            if(buy_order>0) buy_order=0;
-            else  if(p_type==POSITION_TYPE_SELL && buy_order==0)
-              {
-               if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
-               else NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT));
-              }
-            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,"Press DB",BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5);
+             NewOrder(SymbolsArray[SymbolIdx],NewOrderBuy,"Press DB");
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //else  buy_price[SymbolIdx]=0;
@@ -699,15 +693,7 @@ bool CDashBoard::Refresh(void)
            }
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {// продажа
-            if(sell_order>0) sell_order=0;
-            else  if(p_type==POSITION_TYPE_BUY && sell_order==0)
-              {
-               NewOrder(SymbolsArray[SymbolIdx],NewOrderWaitSell,"Press DB");
-               //if(PositionGetDouble(POSITION_PROFIT)>0) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0);
-               //else  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*2);
-              }
-            else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,"Press DB",BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.5);
-            //Print("Sell ...",sell_price[SymbolIdx]);
+            NewOrder(SymbolsArray[SymbolIdx],NewOrderSell,"Press DB");
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //       else  sell_price[SymbolIdx]=0;
