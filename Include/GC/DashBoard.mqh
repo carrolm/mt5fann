@@ -5,9 +5,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-//#include <GC\MT5FANN.mqh>
+#include <GC\CurrPairs.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
+#include <GC\MustWatcher.mqh>
 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
@@ -25,32 +26,10 @@
 
 // Major
 input bool _ShowInAllChart_=true;//Показать данные на всех окнах
+input bool _MustWather_=true;//Запустить обмен с ICQ
                                  //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 //input bool _OpenNewPosition_=false;//Разрешить входить в рынок
 //int TrailingStop=3;
-input bool _EURUSD_=true;//Euro vs US Dollar
-input bool _GBPUSD_=true;//Great Britain Pound vs US Dollar
-input bool _USDCHF_=true;//US Dollar vs Swiss Franc
-input bool _USDJPY_=true;//US Dollar vs Japanese Yen
-input bool _USDCAD_=true;//US Dollar vs Canadian Dollar
-input bool _AUDUSD_=true;//Australian Dollar vs US Dollar
-input bool _NZDUSD_=true;//New Zealand Dollar vs US Dollar
-//input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
-                          // crosses
-/////input bool _AUDNZD_=true;//Australian Dollar vs New Zealand Dollar
-/////input bool _AUDCAD_=true;//Australian Dollar vs Canadian Dollar
-//input bool _AUDCHF_=true;//Australian Dollar vs Swiss Franc
-input bool _AUDJPY_=true;//Australian Dollar vs Japanese Yen
-//input bool _CHFJPY_=false;//Swiss Frank vs Japanese Yen
-input bool _EURGBP_=true;//Euro vs Great Britain Pound 
-//input bool _EURAUD_=false;//Euro vs Australian Dollar
-input bool _EURCHF_=true;//Euro vs Swiss Franc
-input bool _EURJPY_=true;//Euro vs Japanese Yen
-//input bool _EURNZD_=false;//Euro vs New Zealand Dollar
-//input bool _EURCAD_=false;//Euro vs Canadian Dollar
-//input bool _GBPCHF_=false;//Great Britain Pound vs Swiss Franc
-//input bool _GBPJPY_=false;//Great Britain Pound vs Japanese Yen
-//input bool _CADCHF_=false;//Canadian Dollar vs Swiss Franc
 
 input int MaxPeriod=12; // Количество периодов
 
@@ -81,48 +60,12 @@ ENUM_TIMEFRAMES PeriodNumber[21]=
   };
 //{PERIOD_M1,PERIOD_M5,PERIOD_M15,PERIOD_M30,PERIOD_H1,PERIOD_H4,PERIOD_D1,PERIOD_W1,PERIOD_MN1};
 string PeriodName[21]={"M1","M5","M15","M30","H1","H2","H4","H6","H8","H12","D1","W1","MN"};
-int MaxSymbols=0;
-string SymbolsArray[30];//={"","USDCHF","GBPUSD","EURUSD","USDJPY","AUDUSD","USDCAD","EURGBP","EURAUD","EURCHF","EURJPY","GBPJPY","GBPCHF"};
 
 int Experts=0;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-//+------------------------------------------------------------------+
-//| СОЗДАЁТ СПИСОК ДОСТУПНЫХ ВАЛЮТНЫХ СИМВОЛОВ |
-//+------------------------------------------------------------------+
-int CreateSymbolList() // QC
-  {
-   MaxSymbols=0;
-   if(_EURUSD_) SymbolsArray[MaxSymbols++]="EURUSD";//Euro vs US Dollar
-   if(_GBPUSD_) SymbolsArray[MaxSymbols++]="GBPUSD";//Euro vs US Dollar
-   if(_AUDUSD_) SymbolsArray[MaxSymbols++]="AUDUSD";//Euro vs US Dollar
-   if(_NZDUSD_) SymbolsArray[MaxSymbols++]="NZDUSD";//Euro vs US Dollar
-   if(_USDCHF_) SymbolsArray[MaxSymbols++]="USDCHF";//Euro vs US Dollar
-   if(_USDJPY_) SymbolsArray[MaxSymbols++]="USDJPY";//Euro vs US Dollar
-   if(_USDCAD_) SymbolsArray[MaxSymbols++]="USDCAD";//Euro vs US Dollar
-//   if(_USDSEK_) SymbolsArray[MaxSymbols++]="USDSEK";//Euro vs US Dollar
-/////   if(_AUDNZD_) SymbolsArray[MaxSymbols++]="AUDNZD";//Euro vs US Dollar
-/////   if(_AUDCAD_) SymbolsArray[MaxSymbols++]="AUDCAD";//Euro vs US Dollar
-//   if(_AUDCHF_) SymbolsArray[MaxSymbols++]="AUDCHF";//Euro vs US Dollar
-   if(_AUDJPY_) SymbolsArray[MaxSymbols++]="AUDJPY";//Euro vs US Dollar
-//   if(_CHFJPY_) SymbolsArray[MaxSymbols++]="CHFJPY";//Euro vs US Dollar
-   if(_EURGBP_) SymbolsArray[MaxSymbols++]="EURGBP";//Euro vs US Dollar
-//   if(_EURAUD_) SymbolsArray[MaxSymbols++]="EURAUD";//Euro vs US Dollar
-   if(_EURCHF_) SymbolsArray[MaxSymbols++]="EURCHF";//Euro vs US Dollar
-   if(_EURJPY_) SymbolsArray[MaxSymbols++]="EURJPY";//Euro vs US Dollar
-//  if(_EURNZD_) SymbolsArray[MaxSymbols++]="EURNZD";//Euro vs US Dollar
-//   if(_EURCAD_) SymbolsArray[MaxSymbols++]="EURCAD";//Euro vs US Dollar
-//   if(_GBPCHF_) SymbolsArray[MaxSymbols++]="GBPCHF";//Euro vs US Dollar
-//   if(_GBPJPY_) SymbolsArray[MaxSymbols++]="GBPJPY";//Euro vs US Dollar
-//   if(_CADCHF_) SymbolsArray[MaxSymbols++]="CADCHF";//Euro vs US Dollar
-
-   return(MaxSymbols);
-  }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 struct prediction
   {
    string            symbol;// какая пара
@@ -148,12 +91,13 @@ protected:
    int               window;
    string            prefix;
    datetime          LastRefresh;
+   CMustWatcher      MustWatcher;
    //CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
                     ~CDashBoard(){DeInit();}
    void              OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam);
-   void              Trailing();
+   //void              Trailing();
    bool              Init();
    bool              DeInit();
    bool              Refresh();
@@ -217,6 +161,7 @@ CDashBoard::CDashBoard()
 //+------------------------------------------------------------------+
 bool CDashBoard::Init(void)
   {
+   //if (_MustWather_) MustWatcher = new CMustWatcher();
    TypeResult=0;
    ChartScale=1;
    window=ChartWindowOnDropped();
@@ -269,7 +214,8 @@ bool CDashBoard::Init(void)
 
    ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Ждите...");
    ChartRedraw();
-   MaxSymbols=CreateSymbolList();
+   CPInit();
+   //MaxSymbols=CreateSymbolList();
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       UseSymbol[SymbolIdx]=false;
@@ -310,6 +256,9 @@ bool CDashBoard::DeInit(void)
 //+------------------------------------------------------------------+
 bool CDashBoard::Refresh(void)
   {
+   if (_MustWather_) MustWatcher.OnTick();
+   Trailing();
+   
    string name; int SymbolIdx,RowPos;
    double BufferO[],BufferC[],BufferL[],BufferH[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);

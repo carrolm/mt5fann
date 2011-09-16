@@ -5,18 +5,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
-#property version   "000.001"
+//#property version   "000.001"
 
 #include <GC\DashBoard.mqh>
-// sell  фигня
-void CDashBoard::Trailing()
-  {
-   // теперь глобальная
-   
-   return;
-   
-   
-  }
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

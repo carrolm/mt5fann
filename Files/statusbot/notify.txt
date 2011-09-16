@@ -1,1 +1,1 @@
-[position closed] EURUSD  buy 0.10  1.70 USD
+[position closed] EURUSD  sell 2.00  -136.00 USD
