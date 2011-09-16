@@ -8,37 +8,6 @@
 #property version   "1.00"
 
 #include <gc\FANN2MQL5.mqh>
-//#import "fanndouble32.dll"
-////int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-//int f2M_create_standard(int num_layers,int l1num,int l2num,int l3num,int l4num);
-//int f2M_create_from_file(uchar& path[]);
-//int f2M_run(int ann,double &input_vector[]);
-//int f2M_destroy(int ann);
-//int f2M_destroy_all_anns();
-//
-//double f2M_get_output(int ann,int output);
-//int  f2M_get_num_input(int ann);
-//int  f2M_get_num_output(int ann);
-//
-//int f2M_train(int ann,double &input_vector[],double &output_vector[]);
-//int f2M_train_fast(int ann,double &input_vector[],double &output_vector[]);
-//int f2M_randomize_weights(int ann,double min_weight,double max_weight);
-//double f2M_get_MSE(int ann);
-//int f2M_save(int ann,char &path[]);
-//int f2M_reset_MSE(int ann);
-//int f2M_test(int ann,double &input_vector[],double &output_vector[]);
-//int f2M_set_act_function_layer(int ann,int activation_function,int layer);
-//int f2M_set_act_function_hidden(int ann,int activation_function);
-//int f2M_set_act_function_output(int ann,int activation_function);
-//
-///* Threads functions */
-//int f2M_threads_init(int num_threads);
-//int f2M_threads_deinit();
-//int f2M_parallel_init();
-//int f2M_parallel_deinit();
-//int f2M_run_threaded(int anns_count,int &anns[],double &input_vector[]);
-//int f2M_run_parallel(int anns_count,int &anns[],double &input_vector[]);
-//#import
 
 int ann;
 int input_count=4999;
@@ -64,7 +33,7 @@ int OnInit()
 //ann_prepare_input2(0);
    //f2M5_parallel_init();
    ann=CreateAnn();
-   Print("ann=",ann);
+   //Print("ann=",ann);
    //ann_save(ann,TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL5\\Files\\1.net");
    //ann_save(ann,"1");
    TrainNN();
@@ -121,7 +90,7 @@ int CreateAnn()
    f2M5_set_act_function_hidden(ann,6);
    f2M5_set_act_function_output(ann,6);
    f2M5_randomize_weights(ann,-0.7,0.7);
-   Print("ANN: created successfully with handler "+IntegerToString(ann));
+   //Print("ANN: created successfully with handler "+IntegerToString(ann));
    if(ann==-1) Print("ERROR INITIALIZING NETWORK!");
    return(ann);
   }
@@ -229,7 +198,8 @@ void ann_train(int fann,double &input_vector[],double &output_vector[])
 //+------------------------------------------------------------------+
 void ann_destroy()
   {
-   Print("f2M_destroy("+IntegerToString(ann)+") returned: "+IntegerToString(f2M5_destroy(ann)));
+   f2M5_destroy(ann);
+   //Print("f2M5_destroy("+IntegerToString(ann)+") returned: "+IntegerToString(f2M5_destroy(ann)));
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -302,7 +272,7 @@ void draw_line(double price)
    ChartRedraw(0);
 
   }
-//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+
 //| возвращает true если появился новый бар, иначе false             |
 //+------------------------------------------------------------------+
