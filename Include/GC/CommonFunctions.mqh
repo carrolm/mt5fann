@@ -210,32 +210,13 @@ bool Trailing()
      {
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
-      if(PositionSelect(smb))
-        {// есть открытые
-         if((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
-            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
-            (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
-            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT))
-           {
-            DeleteOrder(ticket);
-            //MqlTradeRequest request;
-            //request.order=ticket;
-            //request.action=TRADE_ACTION_REMOVE;
-            //OrderSend(request,trRez);
-            //if(10009!=trRez.retcode) Print(__FUNCTION__," 223:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-           }
-        }
-      else
+      if((OrderGetInteger(ORDER_TIME_EXPIRATION)==0)
+         || (PositionSelect(smb) && ((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+         OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
+         (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
+         OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT))))
         {
-         if(OrderGetInteger(ORDER_TIME_EXPIRATION)==0)
-           {
-            DeleteOrder(ticket);
-            //MqlTradeRequest request;
-            //request.order=ticket;
-            //request.action=TRADE_ACTION_REMOVE;
-            //OrderSend(request,trRez);
-            //if(10009!=trRez.retcode) Print(__FUNCTION__," 234:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-           }
+         DeleteOrder(ticket);
         }
      }
 // проверяем -стоит ли открыть новую позицию, или закрыть старую

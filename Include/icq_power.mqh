@@ -27,16 +27,16 @@ struct TOKEN_PRIVILEGES
 };
 
 //+------------------------------------------------------------------+
-#import "advapi32.dll"
-   bool OpenProcessToken(uint ProcessHandle, uint DesiredAccess, uint &TokenHandle);	
-   bool LookupPrivilegeValueW(string lpSystemName, string lpName, LUID &lpLuid);
-   bool AdjustTokenPrivileges(uint TokenHandle, bool DisableAllPrivileges, TOKEN_PRIVILEGES &NewState, uint BufferLength, uint PreviousState, uint ReturnLength);
-#import "user32.dll"
-   bool ExitWindowsEx(uint uFlags, uint dwReason);
-#import "kernel32.dll"
-   uint GetCurrentProcess(void);
-   uint GetLastError(void);
-#import
+//#import "advapi32.dll"
+//   bool OpenProcessToken(uint ProcessHandle, uint DesiredAccess, uint &TokenHandle);	
+//   bool LookupPrivilegeValueW(string lpSystemName, string lpName, LUID &lpLuid);
+//   bool AdjustTokenPrivileges(uint TokenHandle, bool DisableAllPrivileges, TOKEN_PRIVILEGES &NewState, uint BufferLength, uint PreviousState, uint ReturnLength);
+//#import "user32.dll"
+//   bool ExitWindowsEx(uint uFlags, uint dwReason);
+//#import "kernel32.dll"
+//   uint GetCurrentProcess(void);
+//   uint GetLastError(void);
+//#import
 //+------------------------------------------------------------------+
 #define TOKEN_ADJUST_PRIVILEGES  0x0020
 #define TOKEN_QUERY              0x0008
@@ -92,7 +92,7 @@ string ExtractSubString(string source, uint start_pos)
 };
 
 //+------------------------------------------------------------------+
-bool ParseString(string msg, string &part[5])//
+bool ParseString(string msg, string &part[])//&part[5])//
 //+------------------------------------------------------------------+
 {
  
@@ -175,24 +175,24 @@ bool ParseString(string msg, string &part[5])//
    return(true);
 }
 
-//+------------------------------------------------------------------+
-int ShutdownWindows()
-//+------------------------------------------------------------------+
-{
-
-  uint              hToken;
-  LUID              takeOwnershipValue;
-  TOKEN_PRIVILEGES  tkp;
-  
-  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, hToken)) return (0);
-  if (!LookupPrivilegeValueW("", SE_SHUTDOWN_NAME, takeOwnershipValue)) return(0);
-  
-      tkp.PrivilegeCount = 1;
-      tkp.Privileges[0].Luid = takeOwnershipValue;
-      tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-      
-  AdjustTokenPrivileges(hToken, false, tkp, sizeof(TOKEN_PRIVILEGES), 0, 0);
-  if (kernel32::GetLastError()) return (0);
-
-  return(ExitWindowsEx(EWX_FORCE | EWX_SHUTDOWN, 0));
-}
+////+------------------------------------------------------------------+
+//int ShutdownWindows()
+////+------------------------------------------------------------------+
+//{
+//
+//  uint              hToken;
+//  LUID              takeOwnershipValue;
+//  TOKEN_PRIVILEGES  tkp;
+//  
+//  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, hToken)) return (0);
+//  if (!LookupPrivilegeValueW("", SE_SHUTDOWN_NAME, takeOwnershipValue)) return(0);
+//  
+//      tkp.PrivilegeCount = 1;
+//      tkp.Privileges[0].Luid = takeOwnershipValue;
+//      tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+//      
+//  AdjustTokenPrivileges(hToken, false, tkp, sizeof(TOKEN_PRIVILEGES), 0, 0);
+//  if (kernel32::GetLastError()) return (0);
+//
+//  return(ExitWindowsEx(EWX_FORCE | EWX_SHUTDOWN, 0));
+//}
