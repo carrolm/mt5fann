@@ -6,9 +6,9 @@
 #property link      "mustaddon@gmail.com"
 #property version   "1.2"
 #include <gc\CommonFunctions.mqh>
+#include <gc\RemoteControl.mqh>
 //---- inputs
 input string statusfilename = "status.txt";
-input string spamfilename   = "notify.txt";
 input string reportfilename = "report.txt";
 input string commandsfilename="commands.txt";
 //+------------------------------------------------------------------+
@@ -26,14 +26,13 @@ private:
    int               pospast;
    string            Abzac;
    double            curbalance;
+   CRemoteControl    RemoteControl;
    //+------------------------------------------------------------------+
    //| Expert initialization function                                   |
    //+------------------------------------------------------------------+
 public:
-                     CMustWatcher(){OnInit();};
-                    ~CMustWatcher(){OnDeinit(0);};
-   int               OnInit();
-   void              OnDeinit(const int reason);
+                     CMustWatcher();
+                    ~CMustWatcher();
    void              OnTick();
 private:
    void              WriteStatus();
@@ -45,7 +44,7 @@ private:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CMustWatcher::OnInit()
+void CMustWatcher::CMustWatcher()
   {
    expname="statusbot";
    codepage=CP_ACP;
@@ -64,18 +63,25 @@ int CMustWatcher::OnInit()
       FileClose(filehandle);
      }
    else Print("Не удалось открыть файл ",spamfilename,", ошибка",GetLastError());
-   return(0);
 //---
   }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
-void CMustWatcher::OnDeinit(const int reason)
+void CMustWatcher::~CMustWatcher()
   {
 //---
    FileDelete(expname+"\\"+statusfilename);
    FileDelete(expname+"\\"+spamfilename);
    FileDelete(expname+"\\"+reportfilename);
+  string filename=expname+"\\"+spamfilename;
+   int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,'\t',codepage);
+   if(filehandle!=INVALID_HANDLE)
+     {
+      FileWrite(filehandle,"Stop expert '"+expname+"'");
+      FileClose(filehandle);
+     }
+ 
 //---
   }
 //+------------------------------------------------------------------+
@@ -244,7 +250,7 @@ void CMustWatcher::WriteReport()
 void CMustWatcher::ReadCommands()
   {
 //commandsfilename
-   string filename=expname+"\\"+commandsfilename,comstr,oper,smb;
+   string filename=expname+"\\"+commandsfilename,comstr,oper,smb,rc;
    int filehandle=FileOpen(filename,FILE_READ|FILE_CSV|FILE_ANSI,' ',codepage);
    if(filehandle!=INVALID_HANDLE)
      {
@@ -256,20 +262,30 @@ void CMustWatcher::ReadCommands()
         }
 
       //Print("Open  command ",filename);
+      rc="";
       comstr=FileReadString(filehandle);//StringToUpper(comstr);
+      rc+=StringSubstr(comstr,1+StringFind(comstr,";"));
       if(0==StringCompare(comstr,"TRADE;sell",false))
         {
          //oper=FileReadString(filehandle);
          smb=FileReadString(filehandle);
+         rc+=" "+smb;
          NewOrder(smb,NewOrderSell,"icq");
         }
       else if(0==StringCompare(comstr,"TRADE;buy",false))
         {
          //oper=FileReadString(filehandle);
          smb=FileReadString(filehandle);
+         rc+=" "+smb;
          NewOrder(smb,NewOrderBuy,"icq");
         }
+      else
+        {
+         smb=FileReadString(filehandle);
+         rc+=" "+smb;
+        }
       FileClose(filehandle);
+      Print(RemoteControl.Run("",rc));
       filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,';',codepage);
       FileClose(filehandle);
      }

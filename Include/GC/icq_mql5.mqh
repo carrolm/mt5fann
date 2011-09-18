@@ -146,6 +146,16 @@ COscarClient::COscarClient(void)// Конструктор
    server="login.icq.com";
    port= 5190;
    autocon= true;
+   // autoconnect if exist MustWatcher\data\set_bot
+   int filehandle=FileOpen("MustWatcher\data\set_bot",FILE_WRITE|FILE_TXT|FILE_ANSI,':',CP_ACP);
+    if(filehandle!=INVALID_HANDLE)
+     {
+      login = FileReadString(filehandle);
+      password = FileReadString(filehandle);
+      Connect();
+      FileClose(filehandle);
+     }
+
   }
 //+------------------------------------------------------------------+
 void PrintError(uint status)
