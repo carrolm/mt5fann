@@ -165,6 +165,7 @@ CDashBoard DashBoard;
 int OnInit()
   {
    if(!DashBoard.Init()) DashBoard.DeInit();
+   EventSetTimer(6);
 //   ChartRedraw();
    return(0);
   }
@@ -182,9 +183,17 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
-   if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
+   //if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
    DashBoard.Refresh();
   }
+  //+------------------------------------------------------------------+
+//| Timer function                                                   |
+//+------------------------------------------------------------------+
+void OnTimer()
+  {
+   DashBoard.Refresh();
+  }
+
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Expert tiimer function                                             |

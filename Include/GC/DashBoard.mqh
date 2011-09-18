@@ -8,7 +8,7 @@
 #include <GC\CurrPairs.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
-#include <GC\MustWatcher.mqh>
+#include <GC\Watcher.mqh>
 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
@@ -26,8 +26,8 @@
 
 // Major
 input bool _ShowInAllChart_=true;//Показать данные на всех окнах
-input bool _MustWather_=true;//Запустить обмен с ICQ
-                                 //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
+input bool _Wather_=true;//Запустить слежение (трейлинг и прочее)
+                             //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 //input bool _OpenNewPosition_=false;//Разрешить входить в рынок
 //int TrailingStop=3;
 
@@ -91,7 +91,7 @@ protected:
    int               window;
    string            prefix;
    datetime          LastRefresh;
-   CMustWatcher      MustWatcher;
+   CWatcher          Watcher;
    //CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
@@ -161,7 +161,7 @@ CDashBoard::CDashBoard()
 //+------------------------------------------------------------------+
 bool CDashBoard::Init(void)
   {
-   //if (_MustWather_) MustWatcher = new CMustWatcher();
+//if (_MustWather_) MustWatcher = new CMustWatcher();
    TypeResult=0;
    ChartScale=1;
    window=ChartWindowOnDropped();
@@ -215,17 +215,17 @@ bool CDashBoard::Init(void)
    ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Ждите...");
    ChartRedraw();
    CPInit();
-   //MaxSymbols=CreateSymbolList();
+//MaxSymbols=CreateSymbolList();
    for(int SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
      {
       UseSymbol[SymbolIdx]=false;
       //fannExperts[SymbolIdx].Init("DashBoard",SymbolsArray[SymbolIdx]);
       //for(int iperiod=0; iperiod<MaxPeriod;iperiod++) // по периодам
-        // Calc(SymbolIdx,iperiod);
+      // Calc(SymbolIdx,iperiod);
      }
    ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Обновление");
    Refresh();
-   //ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Таблица");
+//ObjectSetString(0,prefix+"ShowTable",OBJPROP_TEXT,"Таблица");
    ChartRedraw();
    return(true);
   }
@@ -256,9 +256,9 @@ bool CDashBoard::DeInit(void)
 //+------------------------------------------------------------------+
 bool CDashBoard::Refresh(void)
   {
-   if (_MustWather_) MustWatcher.OnTick();
-   Trailing();
-   
+   if(_Wather_) Watcher.Run();
+   //Trailing();
+
    string name; int SymbolIdx,RowPos;
    double BufferO[],BufferC[],BufferL[],BufferH[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
@@ -476,16 +476,16 @@ bool CDashBoard::Refresh(void)
          ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
          ObjectSetInteger(0,name,OBJPROP_SELECTABLE,0);
         }
-       if(ObjectGetInteger(0,name,OBJPROP_STATE))
-         {
-          int newstate = (ObjectGetInteger(0,prefix+"m_"+SymbolsArray[0],OBJPROP_STATE))?0:1;
-          for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+      if(ObjectGetInteger(0,name,OBJPROP_STATE))
+        {
+         int newstate = (ObjectGetInteger(0,prefix+"m_"+SymbolsArray[0],OBJPROP_STATE))?0:1;
+         for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
            {
             ObjectSetInteger(0,prefix+"m_"+SymbolsArray[SymbolIdx],OBJPROP_STATE,newstate);
             UseSymbol[SymbolIdx]=newstate;
            }
-           ObjectSetInteger(0,name,OBJPROP_STATE,0);
-         }
+         ObjectSetInteger(0,name,OBJPROP_STATE,0);
+        }
       name=prefix+"m_equity";
       if(ObjectFind(0,name)==-1)
         {
@@ -634,16 +634,16 @@ bool CDashBoard::Refresh(void)
            {
             UseSymbol[SymbolIdx]=true;
             //NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),"");
-//            if(fannExperts[SymbolIdx].GetVector())
-//              {
-//               fannExperts[SymbolIdx].run();
-//               fannExperts[SymbolIdx].get_output();
-//               //Print(_Symbol,fannExpert," ".OutputVector[0]);
-//               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-//               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-//
-//               //     Print(fannExpert.OutputVector[0]);
-//              }
+            //            if(fannExperts[SymbolIdx].GetVector())
+            //              {
+            //               fannExperts[SymbolIdx].run();
+            //               fannExperts[SymbolIdx].get_output();
+            //               //Print(_Symbol,fannExpert," ".OutputVector[0]);
+            //               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+            //               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
+            //
+            //               //     Print(fannExpert.OutputVector[0]);
+            //              }
 
            }
          else
@@ -675,7 +675,7 @@ bool CDashBoard::Refresh(void)
          else ObjectSetString(0,name,OBJPROP_TEXT,"+ 0.1");
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
-             NewOrder(SymbolsArray[SymbolIdx],NewOrderBuy,"Press DB");
+            NewOrder(SymbolsArray[SymbolIdx],NewOrderBuy,"Press DB");
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //else  buy_price[SymbolIdx]=0;
