@@ -39,8 +39,9 @@ public:
 
 public:
                      CWatcher(){Init();};
-                    ~CWatcher();
+                    ~CWatcher(){DeInit();};
    void              Init(void);
+   void              DeInit(void);
    bool              Trailing();
    bool              Notify();
    bool              SendNotify();
@@ -78,17 +79,43 @@ void CWatcher::Init()
          AddNotify(statstr);
          statstr=FileReadString(filehandle);
         }
-
-      SendNotify();
      }
+   FileClose(filehandle);
+   SendNotify();
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CWatcher::~CWatcher()
+void CWatcher::DeInit()
   {
    AddNotify("Stop watcher...");
+//SendNotify();
+//  SendStatus();
+   string filename=expname+"\\"+statusfilename;
+   int    filehandle=FileOpen(filename,FILE_READ|FILE_TXT|FILE_ANSI,'\t',CP_ACP);
+   if(filehandle!=INVALID_HANDLE)
+     {
+      if(FileSize(filehandle)<10)
+        {
+         FileClose(filehandle);
+         return;
+        }
+      string statstr;
+
+      statstr=FileReadString(filehandle);//StringToUpper(comstr);
+      while(StringLen(statstr)>0)
+        {
+         AddNotify(statstr);
+         statstr=FileReadString(filehandle);
+        }
+     }
+   FileClose(filehandle);
    SendNotify();
+   Sleep(5000);
+//FileDelete(expname+"\\"+spamfilename);
+   FileDelete(expname+"\\"+statusfilename);
+   FileDelete(expname+"\\"+reportfilename);
+   FileDelete(expname+"\\"+commandsfilename);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -535,7 +562,6 @@ bool CWatcher::Trailing()
            }
         }
      }
-//client.Disconnect();
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -578,8 +604,7 @@ bool CWatcher::ReadCommands()
         }
       FileClose(filehandle);
       //Print(RemoteControl.Run("",rc));
-      filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_ANSI,';',CP_ACP);
-      FileClose(filehandle);
+      FileDelete(expname+"\\"+commandsfilename);
      }
 //else Print("Не удалось открыть файл ",spamfilename,", ошибка",GetLastError());
    return(true);
