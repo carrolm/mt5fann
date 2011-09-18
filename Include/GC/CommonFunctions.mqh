@@ -9,6 +9,7 @@
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 input int _NumTS_=3;//Сколько спредов до стоплоса
+input string spamfilename   = "notify.txt";
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -273,11 +274,9 @@ bool Trailing()
                   trReq.order=ticket;
                   trReq.comment= OrderGetString(ORDER_COMMENT);
                   trReq.symbol = OrderGetString(ORDER_SYMBOL);
-                  //trReq.price=OrderGetDouble(ORDER_PRICE_);
                   trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
                   trReq.sl=OrderGetDouble(ORDER_SL);
                   trReq.magic=OrderGetInteger(ORDER_MAGIC);
-                  //if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
                   trReq.tp=newtp;
 
                   trReq.action=TRADE_ACTION_MODIFY;
@@ -293,7 +292,6 @@ bool Trailing()
                || (OrderGetDouble(ORDER_TP)<lasttick.ask && lasttick.ask<PositionGetDouble(POSITION_PRICE_OPEN))
                ))
               {
-               //       Print("closepos ",buy_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
                trReq.action=TRADE_ACTION_DEAL;
                trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
@@ -339,12 +337,6 @@ bool Trailing()
          if(666==OrderGetInteger(ORDER_MAGIC))
            {
             DeleteOrder(ticket);
-            //MqlTradeRequest request;
-            //request.order=ticket;
-            //request.action=TRADE_ACTION_REMOVE;
-            //OrderSend(request,trRez);
-            //if(10009!=trRez.retcode) Print(__FUNCTION__," 361:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
-
            }
          // открываем позиции
          trReq.price=0;
@@ -383,10 +375,6 @@ bool Trailing()
             else
               {
                DeleteOrder(ticket);
-               //trReq.order=ticket;
-               //trReq.action=TRADE_ACTION_REMOVE;
-               //OrderSend(trReq,trRez);
-               //if(10009!=trRez.retcode) Print(__FUNCTION__," (open-remove):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
               }
            }
         }
@@ -394,9 +382,6 @@ bool Trailing()
 /// traling open           
    double newsl=0;
    for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
-      //+------------------------------------------------------------------+
-      //|                                                                  |
-      //+------------------------------------------------------------------+
      {
       smb=PositionGetSymbol(i);
       newsl=0;
@@ -470,6 +455,8 @@ int DeleteOrder(ulong ticket)
    return(0);
   }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool ExportHistory(string fname,int from=0,int to=0)
   {
    HistorySelect(0,TimeCurrent());
@@ -489,7 +476,6 @@ bool ExportHistory(string fname,int from=0,int to=0)
      }
    return(true);
   }
-//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Функция обработки ошибок                                         |
 //+------------------------------------------------------------------+
