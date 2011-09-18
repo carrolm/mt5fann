@@ -72,7 +72,7 @@ public:
    string            login;          // номер учетной записи отправителя (UIN)
    string            password;       // пароль для UIN 
    string            server;         // имя сервера    
-   ushort              port;           // сетевой порт  
+   ushort            port;           // сетевой порт  
    uint              timeout;        // заданеи таймаута(в секундах) между попытками подключения к сервру
    bool              autocon;        // автоматическое восстановление соединения
 
@@ -144,18 +144,8 @@ COscarClient::COscarClient(void)// Конструктор
    StringInit(msg,4096,0);
    timeout=20;
    server="login.icq.com";
-   port= 5190;
-   autocon= true;
-   // autoconnect if exist MustWatcher\data\set_bot
-   int filehandle=FileOpen("MustWatcher\data\set_bot",FILE_WRITE|FILE_TXT|FILE_ANSI,':',CP_ACP);
-    if(filehandle!=INVALID_HANDLE)
-     {
-      login = FileReadString(filehandle);
-      password = FileReadString(filehandle);
-      Connect();
-      FileClose(filehandle);
-     }
-
+   port=5190;
+   autocon=true;
   }
 //+------------------------------------------------------------------+
 void PrintError(uint status)

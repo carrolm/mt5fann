@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 
-#include <icq_mql5.mqh>
+#include <gc\icq_mql5.mqh>
 
 COscarClient client;
 
@@ -17,11 +17,11 @@ int OnInit()
 {
    printf("Start ICQ Client");
    
-   client.login      = "610043094";     //<- логин
-   client.password   = "password";      //<- пароль
-   client.server     = "login.icq.com";
-   client.port       = 5190;
-   client.Connect();
+   //client.login      = "610043094";     //<- логин
+   //client.password   = "password";      //<- пароль
+   //client.server     = "login.icq.com";
+   //client.port       = 5190;
+   //client.Connect();
    
    return(0);
 }
