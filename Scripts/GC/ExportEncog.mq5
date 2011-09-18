@@ -1,20 +1,15 @@
 //+------------------------------------------------------------------+
-//|                                                ExportHistory.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                                                  ExportEncog.mq5 |
+//|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                           History_in_MathCAD.mq5 |
-//|                                                    Привалов С.В. |
-//|                           https://login.mql5.com/ru/users/Prival |
 //+------------------------------------------------------------------+
 
 //проверка на  потерю данных
 
-#property copyright "Привалов С.В."
+#property copyright "GreyCardinalRus"
 #property link      "https://login.mql5.com/ru/users/Prival"
-#property version   "1.08"
-//#include <Fractals.mqh>
+#property version   "1.000"
+
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //+------------------------------------------------------------------+
@@ -38,18 +33,14 @@ int Write_File(int train_qty,int test_qty,int Pers)
   {
    int shift=0;
 // test
-   shift=Write_File_fann_data("Forex_test.test",test_qty,Pers,shift);
-   shift=Write_File_fann_data("Forex_train.train",train_qty,Pers,shift);
-// чето ниже не работает :(
-   FileCopy("Forex_test.test",FILE_COMMON,"Forex_test.dat",FILE_REWRITE);
-   FileCopy("Forex_train.train",FILE_COMMON,"Forex_train.dat",FILE_REWRITE);
-//\
+//   shift=Write_File_fann_data("Forex_test.csv",test_qty,Pers,shift);
+   shift=Write_File_encog_data("Forex_train.csv",train_qty,Pers,shift);
    return(shift);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int Write_File_fann_data(string FileName,int qty,int Pers,int shift)
+int Write_File_encog_data(string FileName,int qty,int Pers,int shift)
   {
    int i;
    double IB[],OB[];
@@ -90,9 +81,9 @@ int Write_File_fann_data(string FileName,int qty,int Pers,int shift)
                  {
                   outstr=outstr+(string)(IB[ibj])+" ";
                  }
-
+               outstr=outstr+(string)(OB[0]);
                FileWrite(FileHandle,outstr);       // 
-               FileWrite(FileHandle,OB[0]); // 
+                                                   //FileWrite(FileHandle,OB[0]); // 
               }
         }
      }

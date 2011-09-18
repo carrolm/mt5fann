@@ -17,14 +17,14 @@ string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","
 //+------------------------------------------------------------------+
 double tanh(double x)
   {
-   x=1+MathExp(-2 *x);
-   if(0==0) return(0);
+//  x=1+MathExp(-2 *x);
+//  if(0==0) return(0);
 //return((x_-_x)/(x_+_x));
-   return -1+(2/(1+MathExp(-2 *x)));
-//double x_=MathExp(x);
-//double _x=MathExp(-x);
-//if(0==(x_+_x)) return(0);
-//return((x_-_x)/(x_+_x));
+//   return -1+(2/(1+MathExp(-2 *x)));
+   double x_=MathExp(x);
+   double _x=MathExp(-x);
+   if(0==(x_+_x)) return(0);
+   return((x_-_x)/(x_+_x));
   }
 //+------------------------------------------------------------------+
 //| Сигмоидальная логистическая функция                                          |
@@ -101,6 +101,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("Hour"==fn_name) return GetVector_Hour(smbl,tf,shift);
    if("Minute"==fn_name) return GetVector_Minute(smbl,tf,shift);
    if("EasyClose"==fn_name) return GetVector_EasyClose(smbl,tf,shift);
+   if("Easy"==fn_name) return GetVector_Easy(smbl,tf,shift);
    if("StochasticK"==fn_name) return GetVector_StochasticK(smbl,tf,shift);
    if("StochasticD"==fn_name) return GetVector_StochasticD(smbl,tf,shift);
    if("RSI"==fn_name) return GetVector_RSI(smbl,tf,shift);
@@ -324,6 +325,31 @@ double GetVector_EasyClose(string smb,ENUM_TIMEFRAMES tf,int shift)
       return(false);
      }
    return tanh(MathLog(Close[1]/Close[2])/TS);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_Easy(string smb,ENUM_TIMEFRAMES tf,int shift)
+  {// пара, период, смещение назад (для индикатора полезно)
+
+   double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+
+   double Close[];  ArraySetAsSeries(Close,true);
+   double High[];  ArraySetAsSeries(High,true);
+   double Low[];  ArraySetAsSeries(Low,true);
+// копируем историю
+   int maxcount=CopyClose(smb,tf,shift,3,Close);
+   int maxcountH=CopyHigh(smb,tf,shift,3,High);
+   int maxcountL=CopyLow(smb,tf,shift,3,Low);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+   if(maxcount<3)
+     {
+      Print("Shift = ",shift," maxcount = ",maxcount);
+      return(0);
+     }
+   return tanh(MathLog((2*Close[1]+High[1]+Low[1])/(2*Close[2]+High[1]+Low[1]))/TS);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |

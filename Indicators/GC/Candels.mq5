@@ -7,11 +7,11 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #property indicator_chart_window
-#include <Candels.mqh>
+#include <gc\Candels.mqh>
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
-input int ComeBack=100;// Сколько баров назад
+input int ComeBack=1000;// Сколько баров назад
 int OnInit()
   {
 //--- indicator buffers mapping
