@@ -57,6 +57,8 @@ public:
 //+------------------------------------------------------------------+
 void CWatcher::Init()
   {
+   ArrayResize(ar_sSTATUScur,10);
+   ArrayResize(ar_sSTATUSpast,10);
    expname="statusbot";
    pospast=0;
    ResetLastError();
@@ -135,8 +137,8 @@ bool CWatcher::Run(void)
    ReadCommands();
    Trailing();
    Notify();
-   SendNotify();
    SendStatus();
+   SendNotify();
    SendReport();
    return(true);
   }
@@ -257,22 +259,26 @@ bool CWatcher::Notify()
    bool ret=true;
    if(pospast==0 && PositionsTotal()==0) return(true);
 //--- ищем изменения в позициях
-//ArrayResize(ar_sSPAM,PositionsTotal()+pospast+changing);
+   ArrayResize(ar_sSPAM,PositionsTotal()+pospast+changing);
    int j;
 //changing=0;
    for(int i=0;i<PositionsTotal();i++)
      {
-      for(j=0;j<pospast;j++) {if(StringSubstr(ar_sSTATUScur[i],0,6)==StringSubstr(ar_sSTATUSpast[j],0,6))break;}
+      for(j=0;j<pospast && ArraySize(ar_sSTATUSpast)>=pospast;j++)
+        {
+         if(StringSubstr(ar_sSTATUScur[i],0,6)==StringSubstr(ar_sSTATUSpast[j],0,6))break;
+        }
       if(j==pospast)
         {
-         //         ar_sSPAM[changing]="[position added] "+ar_sSTATUScur[i];
-         AddNotify("[position open] ");//+ar_sSTATUScur[i];
-                                       //changing++;
+         AddNotify("[position open] ");
         }
      }
    for(int i=0;i<pospast;i++)
      {
-      for(j=0;j<PositionsTotal();j++){if(StringSubstr(ar_sSTATUScur[j],0,6)==StringSubstr(ar_sSTATUSpast[i],0,6))break;}
+      for(j=0;j<PositionsTotal() && ArraySize(ar_sSTATUScur)>j && ArraySize(ar_sSTATUSpast)>i;j++)
+        {
+         if(StringSubstr(ar_sSTATUScur[j],0,6)==StringSubstr(ar_sSTATUSpast[i],0,6))break;
+        }
       if(j==PositionsTotal())
         {
          AddNotify("[position closed] "+ar_sSTATUSpast[i]);
@@ -330,7 +336,7 @@ bool CWatcher::Trailing()
    ENUM_TIMEFRAMES per=PERIOD_M1;
    ulong  ticket;
 // Удаляем отложенные ордера без предела времени -паника, если нет открытых позиций -мусор в общем
-   for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
+   for(i=0;i<OrdTotal;i++)
      {
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -359,7 +365,6 @@ bool CWatcher::Trailing()
          ); else return(false);
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-      //if(TrailingStop<SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)) TrailingStop=(int)SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -376,11 +381,11 @@ bool CWatcher::Trailing()
                trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
-               trReq.deviation=5;                                    // Maximal possible deviation from the requested price
+               trReq.deviation=3;                                    // Maximal possible deviation from the requested price
                trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
                trReq.type=ORDER_TYPE_SELL;                           // Order type
-               trReq.sl=0;// trReq.price+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-               trReq.tp=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.sl=0;
+               trReq.tp=0;
                trReq.comment=OrderGetString(ORDER_COMMENT);
                OrderSend(trReq,trRez);
                if(10009!=trRez.retcode) Print(__FUNCTION__," sell:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
@@ -395,11 +400,12 @@ bool CWatcher::Trailing()
                if(OrderGetDouble(ORDER_TP)<newtp)
                  {
                   trReq.order=ticket;
-                  trReq.comment= OrderGetString(ORDER_COMMENT);
-                  trReq.symbol = OrderGetString(ORDER_SYMBOL);
-                  trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-                  trReq.sl=OrderGetDouble(ORDER_SL);
-                  trReq.magic=OrderGetInteger(ORDER_MAGIC);
+                  //trReq.comment= OrderGetString(ORDER_COMMENT);
+                  //trReq.symbol = OrderGetString(ORDER_SYMBOL);
+                  //trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+                  //trReq.sl=OrderGetDouble(ORDER_SL);
+                  //trReq.magic=OrderGetInteger(ORDER_MAGIC);
+                  trReq.sl=0;
                   trReq.tp=newtp;
 
                   trReq.action=TRADE_ACTION_MODIFY;
@@ -419,7 +425,7 @@ bool CWatcher::Trailing()
                trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
-               trReq.deviation=5;                     // Maximal possible deviation from the requested price
+               trReq.deviation=3;                     // Maximal possible deviation from the requested price
                trReq.sl=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.tp=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
@@ -439,12 +445,13 @@ bool CWatcher::Trailing()
                if(OrderGetDouble(ORDER_TP)>newtp)
                  {
                   trReq.order=ticket;
-                  trReq.comment= OrderGetString(ORDER_COMMENT);
-                  trReq.symbol = OrderGetString(ORDER_SYMBOL);
-                  trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-                  trReq.sl=OrderGetDouble(ORDER_SL);
-                  trReq.magic=OrderGetInteger(ORDER_MAGIC);
-                  //if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
+                  //trReq.comment= OrderGetString(ORDER_COMMENT);
+                  //trReq.symbol = OrderGetString(ORDER_SYMBOL);
+                  //trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+                  //trReq.sl=OrderGetDouble(ORDER_SL);
+                  //trReq.magic=OrderGetInteger(ORDER_MAGIC);
+                  ////if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
+                  trReq.sl=0;
                   trReq.tp=newtp;
 
                   trReq.action=TRADE_ACTION_MODIFY;
@@ -456,11 +463,11 @@ bool CWatcher::Trailing()
         }
       else
         {
-         // если был ордер на закрытие -то удаляем просто
-         if(666==OrderGetInteger(ORDER_MAGIC))
-           {
-            DeleteOrder(ticket);
-           }
+         //// если был ордер на закрытие -то удаляем просто
+         //if(666==OrderGetInteger(ORDER_MAGIC))
+         //  {
+         //   DeleteOrder(ticket);
+         //  }
          // открываем позиции
          trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
@@ -472,7 +479,7 @@ bool CWatcher::Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=0;//lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -480,7 +487,7 @@ bool CWatcher::Trailing()
             ))
            {
             trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.sl=lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl=0;//lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
            }
          // будем открываться...
@@ -492,7 +499,7 @@ bool CWatcher::Trailing()
             trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
             trReq.comment=OrderGetString(ORDER_COMMENT);
             trReq.deviation=3;                                    // Maximal possible deviation from the requested price
-            trReq.tp=0;                                    // Maximal possible deviation from the requested price
+            trReq.tp=0;  trReq.sl=0;                                  // Maximal possible deviation from the requested price
             OrderSend(trReq,trRez);
             if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=",SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
             else
@@ -507,6 +514,7 @@ bool CWatcher::Trailing()
    for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
      {
       smb=PositionGetSymbol(i);
+      ticket=PositionGetInteger(POSITION_IDENTIFIER);
       newsl=0;
       // текущая история
       if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
@@ -518,6 +526,7 @@ bool CWatcher::Trailing()
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
+      trReq.order=ticket;
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
@@ -530,8 +539,8 @@ bool CWatcher::Trailing()
            }
          else
            {
-            newsl=lasttick.ask+1.2*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>SymbolInfoDouble(smb,SYMBOL_POINT)))
+            newsl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl=newsl;
@@ -552,13 +561,41 @@ bool CWatcher::Trailing()
          else
            {
             newsl=lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            if((PositionGetDouble(POSITION_SL)<newsl) && ((newsl-PositionGetDouble(POSITION_SL))>SymbolInfoDouble(smb,SYMBOL_POINT)))
+            if((PositionGetDouble(POSITION_SL)<newsl) && ((newsl-PositionGetDouble(POSITION_SL))>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl= newsl;
                trReq.tp=0;
                OrderSend(trReq,BigDogModifResult);
               }
+           }
+        }
+     }
+// Двигаем отложенные ордера "на получше"
+   OrdTotal=OrdersTotal();   // ордеров
+   for(i=0;i<OrdTotal;i++)
+     {
+      ticket=OrderGetTicket(i);
+      smb=OrderGetString(ORDER_SYMBOL);
+      SymbolInfoTick(smb,lasttick);
+      trReq.action=TRADE_ACTION_MODIFY;
+      trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
+      trReq.order=ticket;
+
+      if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
+        {
+         trReq.tp=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(OrderGetDouble(ORDER_TP)>trReq.tp)
+           {
+            OrderSend(trReq,trRez);
+           }
+        }
+      if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)
+        {
+         trReq.tp=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(OrderGetDouble(ORDER_TP)<trReq.tp)
+           {
+            OrderSend(trReq,trRez);
            }
         }
      }

@@ -27,7 +27,7 @@
 // Major
 input bool _ShowInAllChart_=true;//Показать данные на всех окнах
 input bool _Wather_=true;//Запустить слежение (трейлинг и прочее)
-                             //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
+                         //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 //input bool _OpenNewPosition_=false;//Разрешить входить в рынок
 //int TrailingStop=3;
 
@@ -58,7 +58,6 @@ ENUM_TIMEFRAMES PeriodNumber[21]=
    PERIOD_M1,PERIOD_M5,PERIOD_M15,PERIOD_M30,PERIOD_H1,PERIOD_H2
       ,PERIOD_H4,PERIOD_H6,PERIOD_H8,PERIOD_H12,PERIOD_D1,PERIOD_W1,PERIOD_MN1
   };
-//{PERIOD_M1,PERIOD_M5,PERIOD_M15,PERIOD_M30,PERIOD_H1,PERIOD_H4,PERIOD_D1,PERIOD_W1,PERIOD_MN1};
 string PeriodName[21]={"M1","M5","M15","M30","H1","H2","H4","H6","H8","H12","D1","W1","MN"};
 
 int Experts=0;
@@ -257,7 +256,7 @@ bool CDashBoard::DeInit(void)
 bool CDashBoard::Refresh(void)
   {
    if(_Wather_) Watcher.Run();
-   //Trailing();
+//Trailing();
 
    string name; int SymbolIdx,RowPos;
    double BufferO[],BufferC[],BufferL[],BufferH[];
@@ -268,14 +267,14 @@ bool CDashBoard::Refresh(void)
    ulong ticket;
    double   profit;
    long currChart,prevChart=0;//ChartFirst();
-   int limit=100;i=0;
+   int limit=10;i=0;
 //Print("ChartFirst =",ChartSymbol(prevChart)," ID =",prevChart);
    MqlDateTime str1,str2;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
    if(_ShowInAllChart_)
-      while(i<limit)// у нас наверняка не больше 100 открытых графиков
+      while(i<limit)// у нас наверняка не больше 10 открытых графиков
         {
          currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
          if(currChart<0) break;          // достигли конца списка графиков
@@ -285,19 +284,17 @@ bool CDashBoard::Refresh(void)
          ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
          //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
          //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
+         // выведем спред на график
+         name=prefix+"chart_SI";
+         if(ObjectFind(currChart,name)==-1)
            {
-            // выведем спред на график
-            name=prefix+"chart_SI";
-            if(ObjectFind(currChart,name)==-1)
-              {
-               ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-               ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
-               ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*2);
-               ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
-               ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
-               ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
-               ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-              }
+            ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
+            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
+            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
+            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
            }
          profit=0;
          if(PositionSelect(ChartSymbol(currChart)))
@@ -551,7 +548,6 @@ bool CDashBoard::Refresh(void)
          if(PositionSelect(SymbolsArray[SymbolIdx]))
            {
             p_type=(int)PositionGetInteger(POSITION_TYPE);
-            //Print(SymbolsArray[SymbolIdx],p_type);
            }
          if(TypeResult==0)
            {
@@ -563,8 +559,7 @@ bool CDashBoard::Refresh(void)
          else
            {
             int DealsTotal=HistoryDealsTotal();
-            //           MqlDateTime str1;
-            datetime dtstart=TimeCurrent();// выбор периодов!
+             datetime dtstart=TimeCurrent();// выбор периодов!
             TimeToStruct(dtstart,str1);
             str1.hour=0; str1.min=0;str1.sec=0;
             if(TypeResult>1) str1.day=1;
@@ -607,12 +602,11 @@ bool CDashBoard::Refresh(void)
             //   if(PositionGetDouble(POSITION_PROFIT)>0) sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
             //   else buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT);
             //  }
-            //ObjectSetInteger(0,name,OBJPROP_STATE,false);
+            ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
          //      else {sell_price[SymbolIdx]=0; buy_price[SymbolIdx]=0;}
          //\ QC 
          name=prefix+"m_"+SymbolsArray[SymbolIdx];
-         //      ObjectDelete(0,name);
          if(ObjectFind(0,name)==-1)
            {
             ObjectCreate(0,name,OBJ_BUTTON,window,0,0);
@@ -633,18 +627,6 @@ bool CDashBoard::Refresh(void)
          if(ObjectGetInteger(0,name,OBJPROP_STATE))
            {
             UseSymbol[SymbolIdx]=true;
-            //NewOrder(SymbolsArray[SymbolIdx],fannExperts[SymbolIdx].forecast(),"");
-            //            if(fannExperts[SymbolIdx].GetVector())
-            //              {
-            //               fannExperts[SymbolIdx].run();
-            //               fannExperts[SymbolIdx].get_output();
-            //               //Print(_Symbol,fannExpert," ".OutputVector[0]);
-            //               if(fannExperts[SymbolIdx].OutputVector[0]>0.3 )  NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_BUY,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-            //               if(fannExperts[SymbolIdx].OutputVector[0]<-0.3 ) NewOrder(SymbolsArray[SymbolIdx],ORDER_TYPE_SELL,(string)(fannExperts[SymbolIdx].OutputVector[0]));
-            //
-            //               //     Print(fannExpert.OutputVector[0]);
-            //              }
-
            }
          else
            {
@@ -661,13 +643,13 @@ bool CDashBoard::Refresh(void)
             ObjectSetInteger(0,name,OBJPROP_BGCOLOR,Bg_Color);
             ObjectSetInteger(0,name,OBJPROP_FONTSIZE,FontSize);
            }
-         double buy_order=0;
-         double sell_order=0;
+         ulong buy_order=0;
+         ulong sell_order=0;
          for(int io=0;io<OrdersTotal();io++)
            {
             OrderGetTicket(io);
-            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)      sell_order=OrderGetDouble(ORDER_TP);
-            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)       buy_order=OrderGetDouble(ORDER_SL);
+            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)      sell_order=OrderGetTicket(io);
+            if(OrderGetString(ORDER_SYMBOL)==SymbolsArray[SymbolIdx]&&OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)       buy_order=OrderGetTicket(io);
            }
          if(buy_order>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
          else if(p_type==POSITION_TYPE_BUY) ObjectSetString(0,name,OBJPROP_TEXT,"ещё  +0.1 лот");
@@ -678,7 +660,6 @@ bool CDashBoard::Refresh(void)
             NewOrder(SymbolsArray[SymbolIdx],NewOrderBuy,"Press DB");
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
-         //else  buy_price[SymbolIdx]=0;
          name=prefix+"m_sell_"+SymbolsArray[SymbolIdx];
          if(ObjectFind(0,name)==-1)
            {
@@ -696,7 +677,6 @@ bool CDashBoard::Refresh(void)
             NewOrder(SymbolsArray[SymbolIdx],NewOrderSell,"Press DB");
             ObjectSetInteger(0,name,OBJPROP_STATE,false);
            }
-         //       else  sell_price[SymbolIdx]=0;
          if(sell_order>0) ObjectSetString(0,name,OBJPROP_TEXT,"отказаться");
          else if(p_type==POSITION_TYPE_BUY) ObjectSetString(0,name,OBJPROP_TEXT,"закрыть");
          else if(p_type==POSITION_TYPE_SELL) ObjectSetString(0,name,OBJPROP_TEXT,"ещё -0.1 лот");
