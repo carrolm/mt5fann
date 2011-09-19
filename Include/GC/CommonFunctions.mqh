@@ -134,10 +134,10 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
       else
         {
-         if(type==NewOrderBuy) price=lasttick.ask+3*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderWaitBuy) price=lasttick.ask+3*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderWaitSell) price=lasttick.bid-3*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderSell) price=lasttick.bid-3*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderBuy) price=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitBuy) price=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitSell) price=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderSell) price=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
         }
      }
    if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
@@ -148,7 +148,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.magic=magic;
    trReq.symbol=smb;                 // Trade symbol
    trReq.volume=0.1;      // Requested volume for a deal in lots
-   trReq.deviation=5;                                    // Maximal possible deviation from the requested price
+   trReq.deviation=3;                                    // Maximal possible deviation from the requested price
    trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
    trReq.tp=price;
    trReq.comment=comment;

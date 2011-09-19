@@ -165,7 +165,7 @@ CDashBoard DashBoard;
 int OnInit()
   {
    if(!DashBoard.Init()) DashBoard.DeInit();
-   EventSetTimer(6);
+   EventSetTimer(1);
 //   ChartRedraw();
    return(0);
   }
