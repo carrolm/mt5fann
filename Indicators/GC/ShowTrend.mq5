@@ -78,14 +78,9 @@ int OnCalculate(const int rates_total,
    double res;
 
    DelTrash();
-   //for(i=0;i<_TREND_;i++)
-   //  {
-   //   Label1Buffer[i]=0;
-   //   }
-
    for(i=1;i<_limit_;i++)
      {
-      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);
+      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/10);
       ExtVolumesBuffer[i+_TREND_]=res;
       ExtColorsBuffer[i+_TREND_]=2.0;
       if(res<-0.33)

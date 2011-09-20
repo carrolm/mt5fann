@@ -36,6 +36,7 @@ public:
    string            ar_sSTATUSpast[];
    string            Abzac;
    double            curbalance;
+   datetime          lastUpdate;
 
 public:
                      CWatcher(){Init();};
@@ -57,6 +58,7 @@ public:
 //+------------------------------------------------------------------+
 void CWatcher::Init()
   {
+   lastUpdate=TimeCurrent();
    ArrayResize(ar_sSTATUScur,10);
    ArrayResize(ar_sSTATUSpast,10);
    expname="statusbot";
@@ -256,39 +258,54 @@ bool CWatcher::SendStatus()
 //+------------------------------------------------------------------+
 bool CWatcher::Notify()
   {
-   bool ret=true;
-   if(pospast==0 && PositionsTotal()==0) return(true);
-//--- ищем изменения в позициях
-   ArrayResize(ar_sSPAM,PositionsTotal()+pospast+changing);
-   int j;
-//changing=0;
-   for(int i=0;i<PositionsTotal();i++)
+   bool ret=true; int i;
+   ulong tic =0;
+
+   HistorySelect(lastUpdate,TimeCurrent());
+   lastUpdate=TimeCurrent();
+   int deals=HistoryDealsTotal();
+   double profit;
+   for(i=0;i<deals;i++)
      {
-      for(j=0;j<pospast && ArraySize(ar_sSTATUSpast)>=pospast;j++)
-        {
-         if(StringSubstr(ar_sSTATUScur[i],0,6)==StringSubstr(ar_sSTATUSpast[j],0,6))break;
-        }
-      if(j==pospast)
-        {
-         AddNotify("[position open] ");
-        }
+      tic =HistoryDealGetTicket(i);
+      profit=HistoryDealGetDouble(tic,DEAL_PROFIT);
+      AddNotify("Result "+HistoryDealGetString(tic,DEAL_SYMBOL)+" "+(string)profit+", balance="+DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),2));
      }
-   for(int i=0;i<pospast;i++)
-     {
-      for(j=0;j<PositionsTotal() && ArraySize(ar_sSTATUScur)>j && ArraySize(ar_sSTATUSpast)>i;j++)
-        {
-         if(StringSubstr(ar_sSTATUScur[j],0,6)==StringSubstr(ar_sSTATUSpast[i],0,6))break;
-        }
-      if(j==PositionsTotal())
-        {
-         AddNotify("[position closed] "+ar_sSTATUSpast[i]);
-         //changing++;
-        }
-     }
-//---
-   ArrayResize(ar_sSTATUSpast,ArraySize(ar_sSTATUScur));
-   if(ArraySize(ar_sSTATUScur)>0) ArrayCopy(ar_sSTATUSpast,ar_sSTATUScur,0,0,WHOLE_ARRAY);
-   pospast=PositionsTotal();
+   return(ret);
+
+
+//   if(pospast==0 && PositionsTotal()==0) return(true);
+////--- ищем изменения в позициях
+//   ArrayResize(ar_sSPAM,PositionsTotal()+pospast+changing);
+//   int j;
+////changing=0;
+//   for( i=0;i<PositionsTotal();i++)
+//     {
+//      for(j=0;j<pospast && ArraySize(ar_sSTATUSpast)>=pospast;j++)
+//        {
+//         if(StringSubstr(ar_sSTATUScur[i],0,6)==StringSubstr(ar_sSTATUSpast[j],0,6))break;
+//        }
+//      if(j==pospast)
+//        {
+//         AddNotify("[position open] ");
+//        }
+//     }
+//   for( i=0;i<pospast;i++)
+//     {
+//      for(j=0;j<PositionsTotal() && ArraySize(ar_sSTATUScur)>j && ArraySize(ar_sSTATUSpast)>i;j++)
+//        {
+//         if(StringSubstr(ar_sSTATUScur[j],0,6)==StringSubstr(ar_sSTATUSpast[i],0,6))break;
+//        }
+//      if(j==PositionsTotal())
+//        {
+//         AddNotify("[position closed] "+ar_sSTATUSpast[i]);
+//         //changing++;
+//        }
+//     }
+////---
+//   ArrayResize(ar_sSTATUSpast,ArraySize(ar_sSTATUScur));
+//   if(ArraySize(ar_sSTATUScur)>0) ArrayCopy(ar_sSTATUSpast,ar_sSTATUScur,0,0,WHOLE_ARRAY);
+//   pospast=PositionsTotal();
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -352,7 +369,7 @@ bool CWatcher::Trailing()
         }
       else// отложеный
         {
-         if(PositionSelect(smb)&&((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+         if(PositionSelect(smb) && ((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
             || (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
@@ -456,7 +473,7 @@ bool CWatcher::Trailing()
               }
            }
         }
-      else
+      else if(OrderGetInteger(ORDER_TIME_EXPIRATION)!=0)// открытых нет
         {
          trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
@@ -537,6 +554,13 @@ bool CWatcher::Trailing()
                OrderSend(trReq,BigDogModifResult);
               }
            }
+         // если можно снять сливки -то двигаем стоплост ближе
+         if((lasttick.bid<
+            (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+           {
+            NewOrder(smb,NewOrderBuy,"Panic");
+           }
         }
       else
         {
@@ -558,6 +582,14 @@ bool CWatcher::Trailing()
                OrderSend(trReq,BigDogModifResult);
               }
            }
+         // если можно снять сливки -то двигаем стоплост ближе
+         if((lasttick.ask>
+            (PositionGetDouble(POSITION_PRICE_OPEN)+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+           {
+            NewOrder(smb,NewOrderSell,"Panic");
+           }
+
         }
      }
 // Двигаем отложенные ордера "на получше"
@@ -570,10 +602,15 @@ bool CWatcher::Trailing()
       trReq.action=TRADE_ACTION_MODIFY;
       trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
       trReq.order=ticket;
+      trReq.expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+      trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
 
       if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
         {
-         trReq.tp=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
+            trReq.tp=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         else
+            trReq.tp=lasttick.bid-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
          if(OrderGetDouble(ORDER_TP)>trReq.tp)
            {
             OrderSend(trReq,trRez);
@@ -581,7 +618,11 @@ bool CWatcher::Trailing()
         }
       if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)
         {
-         trReq.tp=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
+            trReq.tp=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         else
+            trReq.tp=lasttick.ask+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+
          if(OrderGetDouble(ORDER_TP)<trReq.tp)
            {
             OrderSend(trReq,trRez);
