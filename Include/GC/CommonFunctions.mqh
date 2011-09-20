@@ -99,6 +99,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell))return(false);
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) return(false);;
+   if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
    if(price==0)
      {
       if(ticket!=0)
@@ -129,8 +130,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
             else return(false);
            }
 
-         // трекинг на закрытие - этот одрер будет жить до закрытия открытой 
-         if(0==expiration) expiration=TimeCurrent()+PeriodSeconds(PERIOD_H4);
+         expiration=0;         // трекинг на закрытие - этот одрер будет жить до закрытия открытой 
         }
       else
         {
@@ -140,7 +140,6 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
          if(type==NewOrderSell) price=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
         }
      }
-   if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
 
    MqlTradeRequest trReq;
    MqlTradeResult trRez;
@@ -152,8 +151,11 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
    trReq.tp=price;
    trReq.comment=comment;
-   trReq.type_time=ORDER_TIME_SPECIFIED;
    trReq.expiration=expiration;
+   if(expiration==0)
+      trReq.type_time=ORDER_TIME_GTC;
+   else
+      trReq.type_time=ORDER_TIME_SPECIFIED;
 
    if(type==NewOrderBuy || type==NewOrderWaitBuy)
      {
