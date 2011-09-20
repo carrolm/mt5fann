@@ -110,9 +110,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
             if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
               {
                // если прибыль уже есть -то приближаем к идеалу
-               if(PositionGetDouble(POSITION_PROFIT)>0)
-                  price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
-               else// иначе ставим на мин прибыль
+               //if(PositionGetDouble(POSITION_PROFIT)>1)
+               //   price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
+               //else// иначе ставим на мин прибыль
                price=PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
               }
             else return(false);
@@ -121,15 +121,14 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            {
             if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
               {
-               // если прибыль уже есть -то приближаем к идеалу
-               if(PositionGetDouble(POSITION_PROFIT)>0)
-                  price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
-               else// иначе ставим на мин прибыль
-               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+               //// если прибыль уже есть -то приближаем к идеалу
+               //if(PositionGetDouble(POSITION_PROFIT)>1)
+               //   price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
+               //else// иначе ставим на мин прибыль
+               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
               }
             else return(false);
            }
-
          expiration=0;         // трекинг на закрытие - этот одрер будет жить до закрытия открытой 
         }
       else

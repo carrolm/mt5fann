@@ -202,8 +202,7 @@ void OnTimer()
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
    DashBoard.OnChartEvent(id,lparam,dparam,sparam);
-  }
-//+------------------------------------------------------------------+
+}
 //+------------------------------------------------------------------+
 //| OnTrade function                                                 |
 //+------------------------------------------------------------------+
