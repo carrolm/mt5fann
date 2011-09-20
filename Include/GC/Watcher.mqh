@@ -336,17 +336,27 @@ bool CWatcher::Trailing()
    ENUM_TIMEFRAMES per=PERIOD_M1;
    ulong  ticket;
 // Удаляем отложенные ордера без предела времени -паника, если нет открытых позиций -мусор в общем
-   for(i=0;i<OrdTotal;i++)
+   for(i=OrdTotal;i>0;i--)
      {
-      ticket=OrderGetTicket(i);
+      ticket=OrderGetTicket(i-1);
       smb=OrderGetString(ORDER_SYMBOL);
-      if((OrderGetInteger(ORDER_TIME_EXPIRATION)==0)
-         || (PositionSelect(smb) && ((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
-         OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
-         (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
-         OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT))))
+      if(OrderGetInteger(ORDER_TIME_EXPIRATION)==0)// паника
         {
-         DeleteOrder(ticket);
+         if(!(PositionSelect(smb)
+            || 
+            (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
+            (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
+            DeleteOrder(ticket);
+        }
+      else// отложеный
+        {
+         if(PositionSelect(smb)&&((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
+            || (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
+            DeleteOrder(ticket);
         }
      }
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
@@ -370,15 +380,12 @@ bool CWatcher::Trailing()
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
            { // смотрим есть ли заказ на закрытие
             if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
-               && (
-               (OrderGetInteger(ORDER_MAGIC)%10)==0 // немедленное закрытие
-               || (OrderGetDouble(ORDER_TP)>lasttick.bid && lasttick.bid>PositionGetDouble(POSITION_PRICE_OPEN)) // купят дороже чем хотим и дороже чем купили
-               )
+               && 
+               (OrderGetDouble(ORDER_TP)>lasttick.bid && lasttick.bid>PositionGetDouble(POSITION_PRICE_OPEN)) // купят дороже чем хотим и дороже чем купили
                )
               {// нашли на продажу - значит надо закрыться
-               //           Print("closepos ",sell_price[SymbolIdx]," ",lasttick.bid," ",PositionGetDouble(POSITION_PRICE_OPEN));
                trReq.action=TRADE_ACTION_DEAL;
-               trReq.magic=999;
+               //              trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
                trReq.deviation=3;                                    // Maximal possible deviation from the requested price
@@ -391,7 +398,7 @@ bool CWatcher::Trailing()
                if(10009!=trRez.retcode) Print(__FUNCTION__," sell:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
-                  //client.SendMessage("36770049",  smb+" закрыли "); //<- текст сообщения 
+                  DeleteOrder(ticket);
                  }
               }
             else
@@ -400,11 +407,6 @@ bool CWatcher::Trailing()
                if(OrderGetDouble(ORDER_TP)<newtp)
                  {
                   trReq.order=ticket;
-                  //trReq.comment= OrderGetString(ORDER_COMMENT);
-                  //trReq.symbol = OrderGetString(ORDER_SYMBOL);
-                  //trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-                  //trReq.sl=OrderGetDouble(ORDER_SL);
-                  //trReq.magic=OrderGetInteger(ORDER_MAGIC);
                   trReq.sl=0;
                   trReq.tp=newtp;
 
@@ -422,7 +424,7 @@ bool CWatcher::Trailing()
                ))
               {
                trReq.action=TRADE_ACTION_DEAL;
-               trReq.magic=999;
+               //              trReq.magic=999;
                trReq.symbol=smb;                 // Trade symbol
                trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
                trReq.deviation=3;                     // Maximal possible deviation from the requested price
@@ -435,8 +437,7 @@ bool CWatcher::Trailing()
                if(10009!=trRez.retcode) Print(__FUNCTION__," buy:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                else
                  {
-                  // client.SendMessage("36770049",//<- номер получателя 
-                  //                  smb+" закрыли "); //<- текст сообщения 
+                  DeleteOrder(ticket);
                  }
               }
             else
@@ -445,12 +446,6 @@ bool CWatcher::Trailing()
                if(OrderGetDouble(ORDER_TP)>newtp)
                  {
                   trReq.order=ticket;
-                  //trReq.comment= OrderGetString(ORDER_COMMENT);
-                  //trReq.symbol = OrderGetString(ORDER_SYMBOL);
-                  //trReq.price=0.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
-                  //trReq.sl=OrderGetDouble(ORDER_SL);
-                  //trReq.magic=OrderGetInteger(ORDER_MAGIC);
-                  ////if( (OrderGetDouble(ORDER_TP)>lasttick.bid)OrderGetString(ORDER_COMMENT);
                   trReq.sl=0;
                   trReq.tp=newtp;
 
@@ -463,12 +458,6 @@ bool CWatcher::Trailing()
         }
       else
         {
-         //// если был ордер на закрытие -то удаляем просто
-         //if(666==OrderGetInteger(ORDER_MAGIC))
-         //  {
-         //   DeleteOrder(ticket);
-         //  }
-         // открываем позиции
          trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
             && (
@@ -479,7 +468,7 @@ bool CWatcher::Trailing()
            {
             trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
             trReq.type=ORDER_TYPE_SELL;                           // Order type
-            trReq.sl=0;//lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+                                                                  //trReq.sl=0;//lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
            }
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
             && ((OrderGetInteger(ORDER_MAGIC)%10)==0
@@ -487,7 +476,7 @@ bool CWatcher::Trailing()
             ))
            {
             trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
-            trReq.sl=0;//lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+                                                        //trReq.sl=0;//lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             trReq.type=ORDER_TYPE_BUY;              // Order type
            }
          // будем открываться...
@@ -601,6 +590,9 @@ bool CWatcher::Trailing()
      }
    return(true);
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 bool CWatcher::ReadCommands()
   {

@@ -184,7 +184,7 @@ void OnTick()
   {
 //---
    //if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
-   DashBoard.Refresh();
+   //DashBoard.Refresh();
   }
   //+------------------------------------------------------------------+
 //| Timer function                                                   |
