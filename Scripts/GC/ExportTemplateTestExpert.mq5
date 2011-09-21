@@ -27,7 +27,7 @@ int Write_File(int qty)
   {
    int i;
    double res=0;
-   string outstr;
+   //string outstr;
    MqlRates rates[];
    MqlDateTime tm;
    //double IV[50],OV[10];
@@ -52,15 +52,15 @@ int Write_File(int qty)
              //if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
               {
             //   restanh=OV[0];
-               //restanh=tanh(res/5);
-               if(res<4 && res>-4) continue;
-               if(res>4) res=0.7;
-               else if(res>1) res=0.35;
-               else if(res>0.1) res=0;
-               else if(res>-0.1) res=0;
-               else if(res>-1) res=0;
-               else if(res>-4) res=-.35;
-               else res=-0.7;
+               res=tanh(res/5);
+               //if(res<4 && res>-4) continue;
+               //if(res>4) res=0.7;
+               //else if(res>1) res=0.35;
+               //else if(res>0.1) res=0;
+               //else if(res>-0.1) res=0;
+               //else if(res>-1) res=0;
+               //else if(res>-4) res=-.35;
+               //else res=-0.7;
                //               Print(tanh(res/5));
                // FileWrite(FileHandle," //" +(string)res+"="+restanh);
                FileWrite(FileHandle,"  if(smb==\""+SymbolsArray[SymbolIdx]+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)res+");");

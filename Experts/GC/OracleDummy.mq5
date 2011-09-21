@@ -9,7 +9,8 @@
 #include <GC\Oracle.mqh>
 #include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
-
+#include <GC\Watcher.mqh>
+CWatcher          Watcher;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -17,6 +18,7 @@
 //#include <GC\CommonFunctions.mqh>
 class CDummy:public COracleTemplate
   {
+  
 public:
    virtual double    forecast(string smbl="",int shift=0,bool train=false);
    virtual string    Name(){return("iEnvelopes");};
@@ -64,7 +66,7 @@ void OnTick()
 //   static double lastf=0;
    int SymbolIdx;
    double f;
-   if(_TrailingPosition_) Trailing();
+   Watcher.Run();//if(_TrailingPosition_) Trailing();
    if(isNewBar())
      {
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
@@ -72,6 +74,7 @@ void OnTick()
          f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false);
          NewOrder(SymbolsArray[SymbolIdx],f,(string)f);
         }
+        
      }
   }
 //+------------------------------------------------------------------+

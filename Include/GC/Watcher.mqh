@@ -259,20 +259,30 @@ bool CWatcher::SendStatus()
 bool CWatcher::Notify()
   {
    bool ret=true; int i;
-   ulong tic =0;
+   ulong tic=0;
 
    HistorySelect(lastUpdate,TimeCurrent());
-   lastUpdate=TimeCurrent();
    int deals=HistoryDealsTotal();
    double profit;
    for(i=0;i<deals;i++)
      {
-      tic =HistoryDealGetTicket(i);
+      tic=HistoryDealGetTicket(i);
+      if(HistoryDealGetInteger(tic,DEAL_ENTRY)!=DEAL_ENTRY_OUT) continue;
+      if(HistoryDealGetInteger(tic,DEAL_TYPE)!=DEAL_TYPE_BUY && HistoryDealGetInteger(tic,DEAL_TYPE)!=DEAL_TYPE_SELL) continue;
       profit=HistoryDealGetDouble(tic,DEAL_PROFIT);
       AddNotify("Result "+HistoryDealGetString(tic,DEAL_SYMBOL)+" "+(string)profit+", balance="+DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),2));
      }
+   string symset,order_type;
+   for(i=0;i<PositionsTotal();i++)
+     {
+      if(lastUpdate>PositionGetInteger(POSITION_TIME)) continue;
+      if(PositionGetInteger(POSITION_TYPE)==ORDER_TYPE_BUY) order_type="buy";
+      if(PositionGetInteger(POSITION_TYPE)==ORDER_TYPE_SELL)order_type="sell";
+      order_type+=" "+PositionGetSymbol(i)+" "+PositionGetString(POSITION_COMMENT);
+      AddNotify(order_type);
+     }
+   lastUpdate=TimeCurrent()+1;
    return(ret);
-
 
 //   if(pospast==0 && PositionsTotal()==0) return(true);
 ////--- ищем изменения в позициях
@@ -604,13 +614,14 @@ bool CWatcher::Trailing()
       trReq.order=ticket;
       trReq.expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
       trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+      trReq.sl=0;
 
       if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
         {
          if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
             trReq.tp=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
          else
-            trReq.tp=lasttick.bid-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.tp=lasttick.bid-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
          if(OrderGetDouble(ORDER_TP)>trReq.tp)
            {
             OrderSend(trReq,trRez);
@@ -621,7 +632,7 @@ bool CWatcher::Trailing()
          if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
             trReq.tp=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
          else
-            trReq.tp=lasttick.ask+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.tp=lasttick.ask+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
 
          if(OrderGetDouble(ORDER_TP)<trReq.tp)
            {
