@@ -1,2 +1,1 @@
-Stop watcher...
-Balance = 6929.49 USD
+Result EURUSD -7.6, balance=6549.59

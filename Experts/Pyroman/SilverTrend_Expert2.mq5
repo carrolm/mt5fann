@@ -15,8 +15,9 @@
 //+------------------------------------------------------------------+
 
 input double   Lot=0.1;
-input int      SL=100;
+input int      SL=150;
 input int      TP=0;
+input int      Slipage=0;
 
 /*//MACD signal 
 input int      MACD_F=2;
@@ -39,28 +40,19 @@ int               h_roc=0;
 double            roc_buffer[];
 //end ROC Signal
 
-*/
-/*//WPR signal 
-input int         WPR=30;
+//WPR signal 
+input int         WPR=14;
 int               h_wpr=0;
 double            wpr_buffer[];
 //end WPR Signal
-
-//Stochastic signal 
-input int         StochK=10;
-input int         StochD=3;
-input int         StochSlow=3;
-int               h_sth=0;
-double            sth_buffer_main[];
-double            sth_buffer_signal[];
-//end Stochastic Signal
 */
 
 //Smart signal 
-/*int               h_silver=0;
+int               h_silver=0;
 double            silver_buffer_buy[];
 double            silver_buffer_sell[];
-//end Smart Signal*/
+input int         Risk=5;
+//end Smart Signal
 
 /*//AMA signal 
 input int         AMA=2;
@@ -77,21 +69,11 @@ int               h_ma=0;
 double            ma_buffer[];
 //end MA Signal*/
 
-//Heiken_Ashi signal 
-int               h_ha=0;
-double            ha_buffer_o[];
-double            ha_buffer_h[];
-double            ha_buffer_l[];
-double            ha_buffer_c[];
-//end HA Signal
-
 
 //double SIGNAL[2]; //главная переменная. сформированный сигнал.
 //datetime POS_TIME; //время формирования сигнала
 
 int ARROW_ID=0;
-
-double open_buffer[], close_buffer[];
 
 CPositionInfo posinf;
 CTrade trade;
@@ -103,13 +85,11 @@ int OnInit()
 
 //---
 /*   h_macd=iMACD(Symbol(),Period(),MACD_F,MACD_S,MACD_A,PRICE_CLOSE);
-   h_roc=iCustom(Symbol(),Period(),"Examples\\ROC",ROC,PRICE_CLOSE);*/
-//   h_wpr=iWPR(Symbol(),Period(),WPR);
-//   h_sth=iStochastic(Symbol(),Period(),StochK,StochD,StochSlow,MODE_EMA,STO_LOWHIGH);
-//   h_silver=iCustom(Symbol(),Period(),"SilverTrend_Signal",PRICE_CLOSE);
+   h_roc=iCustom(Symbol(),Period(),"Examples\\ROC",ROC,PRICE_CLOSE);
+   h_wpr=iWPR(Symbol(),Period(),WPR);*/
+   h_silver=iCustom(Symbol(),Period(),"Pyroman\\SilverTrend_Signal",Risk);
 //   h_ama=iAMA(Symbol(),Period(),AMA,F_AMA,S_AMA,0,h_smart);
 //   h_ma=iMA(Symbol(),Period(),MA,0,MODE_EMA,h_smart);
-   h_ha=iCustom(Symbol(),Period(),"Examples\\Heiken_Ashi");
 
 //---
 
@@ -150,38 +130,22 @@ void OnTick()
    datetime dt[];
 //---
 
-/*   CopyBuffer(h_sth,MAIN_LINE,0,3,sth_buffer_main);
-   ArraySetAsSeries(sth_buffer_main,true);
-   CopyBuffer(h_sth,SIGNAL_LINE,0,3,sth_buffer_signal);
-   ArraySetAsSeries(sth_buffer_signal,true);
-*/   
-   CopyBuffer(h_ha,0,0,3,ha_buffer_o);
-   ArraySetAsSeries(ha_buffer_o,true);
-   CopyBuffer(h_ha,1,0,3,ha_buffer_h);
-   ArraySetAsSeries(ha_buffer_h,true);
-   CopyBuffer(h_ha,2,0,3,ha_buffer_l);
-   ArraySetAsSeries(ha_buffer_l,true);
-   CopyBuffer(h_ha,3,0,3,ha_buffer_c);
-   ArraySetAsSeries(ha_buffer_c,true);
-   
-   CopyOpen(Symbol(),Period(),0,3,open_buffer);
-   ArraySetAsSeries(open_buffer,true);
-   CopyClose(Symbol(),Period(),0,3,close_buffer);
-   ArraySetAsSeries(close_buffer,true);
+   CopyBuffer(h_silver,1,0,2,silver_buffer_buy);
+   ArraySetAsSeries(silver_buffer_buy,true);
+   CopyBuffer(h_silver,0,0,2,silver_buffer_sell);
+   ArraySetAsSeries(silver_buffer_sell,true);
 
 
 //------------------------------------------------
 
    if(!posinf.Select(_Symbol))
      {
-//            if((MathAbs(ama_buffer[1])>=1) && (ama_buffer[1]>0) && (ama_buffer[2]<=0))
-//         if((sth_buffer_main[1]>20) && (sth_buffer_main[2]<=20) && (sth_buffer_main[1]>sth_buffer_signal[1]))
-//         if(silver_buffer_buy[0]>=1)
-           if((ha_buffer_c[2]<ha_buffer_o[2]) && (close_buffer[2]>open_buffer[2]) && (ha_buffer_c[1]>ha_buffer_o[1]))           
+//         if((MathAbs(ama_buffer[1])>=1) && (ama_buffer[1]>0) && (ama_buffer[2]<=0))
+         if(silver_buffer_buy[0]>=1)
            {
             if(SL>0) sl=SymbolInfoDouble(_Symbol,SYMBOL_ASK)-SL*Point();
             if(TP>0) tp=SymbolInfoDouble(_Symbol,SYMBOL_ASK)+TP*Point();
-            if(trade.Buy(Lot,_Symbol,SymbolInfoDouble(_Symbol,SYMBOL_ASK),sl,tp))
+            if(trade.Buy(Lot,_Symbol,SymbolInfoDouble(_Symbol,SYMBOL_ASK),sl,tp,"SilverTrend_Expert2"))
               {
                ARROW_ID+=1;
                ObjectCreate(ChartID(),"AG_BAY_" + string(ARROW_ID),OBJ_ARROW_BUY,0,SymbolInfoInteger(_Symbol,SYMBOL_TIME),SymbolInfoDouble(_Symbol,SYMBOL_ASK));
@@ -196,12 +160,11 @@ void OnTick()
 
            }
 //         else if((MathAbs(ama_buffer[1])>=1) && (ama_buffer[1]<0) && (ama_buffer[2]>=0))
-//         else if((sth_buffer_main[1]<80) && (sth_buffer_main[2]>=80) && (sth_buffer_main[1]<sth_buffer_signal[1]))
-           if((ha_buffer_c[2]>ha_buffer_o[2]) && (close_buffer[2]<open_buffer[2]) && (ha_buffer_c[1]<ha_buffer_o[1]))           
+         else if(silver_buffer_sell[0]>=1) 
            {
             if(SL>0) sl=SymbolInfoDouble(_Symbol,SYMBOL_BID)+SL*Point();
             if(TP>0) tp=SymbolInfoDouble(_Symbol,SYMBOL_BID)-TP*Point();
-            if(trade.Sell(Lot,_Symbol,SymbolInfoDouble(_Symbol,SYMBOL_BID),sl,tp))
+            if(trade.Sell(Lot,_Symbol,SymbolInfoDouble(_Symbol,SYMBOL_BID),sl,tp,"SilverTrend_Expert2"))
               {
                ARROW_ID+=1;
                ObjectCreate(ChartID(),"AG_SELL_" + string(ARROW_ID),OBJ_ARROW_SELL,0,SymbolInfoInteger(_Symbol,SYMBOL_TIME),SymbolInfoDouble(_Symbol,SYMBOL_BID));
@@ -217,23 +180,21 @@ void OnTick()
 
            }
         }
-/*      else //когда позиция открыта
-/*        {  
-         if ((posinf.PositionType()==POSITION_TYPE_BUY) && (close_buffer[1]<open_buffer[1]))
+      else //когда позиция открыта
+        {  
+         if ((posinf.PositionType()==POSITION_TYPE_BUY) && ((silver_buffer_sell[1]>=1)))
          {
-            if (posinf.Profit()>0)
-               trade.PositionClose(_Symbol);
+            trade.PositionClose(_Symbol);
          }
-         else if ((posinf.PositionType()==POSITION_TYPE_SELL) && (close_buffer[1]<open_buffer[1]))
+         else if ((posinf.PositionType()==POSITION_TYPE_SELL) && ((silver_buffer_buy[1]>=1)))
          {
-            if (posinf.Profit()>0)
-               trade.PositionClose(_Symbol);
+            trade.PositionClose(_Symbol);
          }
             
-        }*/
+        }
         
-      ObjectSetString(NULL,"label1",OBJPROP_TEXT,"HA_Open ="+string(ha_buffer_o[0]));
-      ObjectSetString(NULL,"label2",OBJPROP_TEXT,"HA_Close = "+string(ha_buffer_c[0]));
+      ObjectSetString(NULL,"label1",OBJPROP_TEXT,"Buy="+string(silver_buffer_buy[0]));
+      ObjectSetString(NULL,"label2",OBJPROP_TEXT,"Sell="+string(silver_buffer_sell[0]));
 
      
 //докупка------------------------------------------------

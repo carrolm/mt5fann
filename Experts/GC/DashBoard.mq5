@@ -8,7 +8,6 @@
 //#property version   "000.001"
 
 #include <GC\DashBoard.mqh>
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -143,7 +142,7 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
             break;
          case KEY_NUMLOCK_MINUS:
             break;
-         default: ;             //  Print("Ќажата кака€-то неперечисленна€ клавиша");
+         default:;             //  Print("Ќажата кака€-то неперечисленна€ клавиша");
         }
       ChartRedraw();
      }
@@ -153,7 +152,6 @@ void CDashBoard::OnChartEvent(const int id,const long &lparam,const double &dpar
 
 //DashBoard.OnChartEvent(id,lparam, dparam, sparam);
   }
-
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -183,26 +181,23 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
-   //if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
-   //DashBoard.Refresh();
+//if(_TrailingPosition_) Trailing();//DashBoard.Trailing();
+//DashBoard.Refresh();
   }
-  //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
 void OnTimer()
   {
    DashBoard.Refresh();
   }
-
-//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Expert tiimer function                                             |
-//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
    DashBoard.OnChartEvent(id,lparam,dparam,sparam);
-}
+  }
 //+------------------------------------------------------------------+
 //| OnTrade function                                                 |
 //+------------------------------------------------------------------+
