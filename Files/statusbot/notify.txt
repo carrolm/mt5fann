@@ -1,1 +1,1 @@
-Result EURUSD -7.6, balance=6549.59
+Result EURUSD -4.5, balance=6258.69

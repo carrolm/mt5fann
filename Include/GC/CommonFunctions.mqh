@@ -9,7 +9,7 @@
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 input int _NumTS_=3;//Сколько спредов до стоплоса
-input string spamfilename   = "notify.txt";
+input string spamfilename="notify.txt";
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -178,13 +178,23 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool Order_Send(MqlTradeRequest &trReq,MqlTradeResult &trRez)
+  {
+   int Error=OrderSend(trReq,trRez);
+   if(10009!=trRez.retcode) Fun_Error(trRez.retcode);
+
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int DeleteOrder(ulong ticket)
   {
    MqlTradeRequest   trReq;
    MqlTradeResult    trRez;
    trReq.action    =TRADE_ACTION_REMOVE;
    trReq.order     =ticket;
-   if(!OrderSend(trReq,trRez)){};
+   if(!Order_Send(trReq,trRez)){};
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -210,43 +220,354 @@ bool ExportHistory(string fname,int from=0,int to=0)
    return(true);
   }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool Trailing()
+  {
+   int PosTotal=PositionsTotal();// открытых позицый
+   int OrdTotal=OrdersTotal();   // ордеров
+   int i,TrailingStop;
+   MqlTick lasttick;
+   MqlTradeRequest BigDogModif;
+   MqlTradeResult BigDogModifResult;
+   double BufferO[],BufferC[],BufferL[],BufferH[];
+   datetime dt[];
+   ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
+   ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
+   ArraySetAsSeries(dt,true);
+   int needcopy=5;
+   string smb;
+   MqlTradeRequest   trReq;
+   MqlTradeResult    trRez;
+
+   ENUM_TIMEFRAMES per=PERIOD_M1;
+   ulong  ticket;
+// Удаляем отложенные ордера без предела времени -паника, если нет открытых позиций -мусор в общем
+   for(i=OrdTotal;i>0;i--)
+     {
+      ticket=OrderGetTicket(i-1);
+      smb=OrderGetString(ORDER_SYMBOL);
+      if(OrderGetInteger(ORDER_TIME_EXPIRATION)==0)// паника
+        {
+         if(!(PositionSelect(smb)
+            || 
+            (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
+            (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
+            DeleteOrder(ticket);
+        }
+      else// отложеный
+        {
+         if(PositionSelect(smb) && ((PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
+            || (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
+            OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
+            DeleteOrder(ticket);
+        }
+     }
+// проверяем -стоит ли открыть новую позицию, или закрыть старую
+   for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
+     {// есть "заказы" и открытие разрешено
+      ticket=OrderGetTicket(i);
+      smb=OrderGetString(ORDER_SYMBOL);
+      ArrayInitialize(BufferC,0);ArrayInitialize(BufferO,0);
+      ArrayInitialize(BufferL,0);ArrayInitialize(BufferH,0);
+      // текущая история
+      if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
+         && (CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
+         && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
+         && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
+         && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
+         ); else return(false);
+      SymbolInfoTick(smb,lasttick);
+      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      if(PositionSelect(smb))
+        {// есть открытые
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
+           { // смотрим есть ли заказ на закрытие
+            if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)
+              {
+               if(
+                  (OrderGetDouble(ORDER_TP)>lasttick.bid && lasttick.bid>PositionGetDouble(POSITION_PRICE_OPEN)) // купят дороже чем хотим и дороже чем купили
+                  )
+                 {// нашли на продажу - значит надо закрыться
+                  trReq.action=TRADE_ACTION_DEAL;
+                  //              trReq.magic=999;
+                  trReq.symbol=smb;                 // Trade symbol
+                  trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
+                  trReq.deviation=2;                                    
+                  trReq.price=lasttick.bid;                             
+                  trReq.type=ORDER_TYPE_SELL;                           // Order type
+                  trReq.sl=0;
+                  trReq.tp=0;
+                  trReq.comment=OrderGetString(ORDER_COMMENT);
+                  Order_Send(trReq,trRez);
+                  if(10009!=trRez.retcode) Print(__FUNCTION__," sell:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                  else
+                    {
+                     DeleteOrder(ticket);
+                    }
+                 }
+               else
+                 { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
+                  double newtp=lasttick.bid-1.5*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT);
+                  if(OrderGetDouble(ORDER_TP)<newtp)
+                    {
+                     trReq.order=ticket;
+                     trReq.sl=0;
+                     trReq.tp=newtp;
+                     trReq.price = OrderGetDouble(ORDER_PRICE_OPEN);
+
+                     trReq.action=TRADE_ACTION_MODIFY;
+                     Order_Send(trReq,trRez);
+                     //if(10009!=trRez.retcode) Print(__FUNCTION__," sell sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                    }
+                 }
+              }
+           }
+
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+           {//sell
+            if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
+              {
+               if(((OrderGetInteger(ORDER_MAGIC)%10)==0
+                  || (OrderGetDouble(ORDER_TP)<lasttick.ask && lasttick.ask<PositionGetDouble(POSITION_PRICE_OPEN))
+                  ))
+                 {
+                  trReq.action=TRADE_ACTION_DEAL;
+                  //              trReq.magic=999;
+                  trReq.symbol=smb;                 // Trade symbol
+                  trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
+                  trReq.deviation=2;                     // Maximal possible deviation from the requested price
+                  trReq.sl=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+                  trReq.tp=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+                  trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
+                  trReq.type=ORDER_TYPE_BUY;              // Order type
+                  trReq.comment=OrderGetString(ORDER_COMMENT);
+                  Order_Send(trReq,trRez);
+                  if(10009!=trRez.retcode) Print(__FUNCTION__," buy:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                  else
+                    {
+                     DeleteOrder(ticket);
+                    }
+                 }
+               else
+                 { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
+                  double newtp=lasttick.ask+1.5*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT);
+                  if(OrderGetDouble(ORDER_TP)>newtp)
+                    {
+                     trReq.order=ticket;
+                     trReq.sl=0;
+                     trReq.tp=newtp;
+                     trReq.price = OrderGetDouble(ORDER_PRICE_OPEN);
+
+                     trReq.action=TRADE_ACTION_MODIFY;
+                     Order_Send(trReq,trRez);
+                     //if(10009!=trRez.retcode) Print(__FUNCTION__," buy sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                    }
+                 }
+              }
+           }
+        }
+      else if(OrderGetInteger(ORDER_TIME_EXPIRATION)!=0)// открытых нет
+        {
+         trReq.price=0;
+         if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
+            && (
+            (OrderGetInteger(ORDER_MAGIC)%10)==0
+            || (OrderGetDouble(ORDER_TP)>lasttick.bid)
+            )
+            )
+           {
+            trReq.price=lasttick.bid;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
+            trReq.type=ORDER_TYPE_SELL;                           // Order type
+                                                                  //trReq.sl=0;//lasttick.bid+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+           }
+         if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT
+            && ((OrderGetInteger(ORDER_MAGIC)%10)==0
+            || (OrderGetDouble(ORDER_TP)<lasttick.ask)
+            ))
+           {
+            trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
+                                                        //trReq.sl=0;//lasttick.ask-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.type=ORDER_TYPE_BUY;              // Order type
+           }
+         // будем открываться...
+         if(trReq.price>0)
+           {
+            trReq.action=TRADE_ACTION_DEAL;
+            trReq.magic=OrderGetInteger(ORDER_MAGIC);
+            trReq.symbol=OrderGetString(ORDER_SYMBOL);                 // Trade symbol
+            trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
+            trReq.comment=OrderGetString(ORDER_COMMENT);
+            trReq.deviation=2;                                    // Maximal possible deviation from the requested price
+            trReq.tp=0;  trReq.sl=0;                                  // Maximal possible deviation from the requested price
+            Order_Send(trReq,trRez);
+            if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=",SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+            else
+              {
+               DeleteOrder(ticket);
+              }
+           }
+        }
+     }
+/// traling open           
+   double newsl=0;
+   for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
+     {
+      smb=PositionGetSymbol(i);
+      ticket=PositionGetInteger(POSITION_IDENTIFIER);
+      newsl=0;
+      // текущая история
+      if((CopyOpen(smb,per,0,needcopy,BufferO)==needcopy)
+         && (CopyClose(smb,per,0,needcopy,BufferC)==needcopy)
+         && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
+         && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
+         && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
+         ){} else return(false);
+      SymbolInfoTick(smb,lasttick);
+      trReq.symbol=smb;
+      trReq.deviation=2;
+      trReq.order=ticket;
+      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+        {
+         if(0==PositionGetDouble(POSITION_SL))
+           {
+            trReq.action=TRADE_ACTION_SLTP;
+            trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.tp=0;
+            Order_Send(trReq,BigDogModifResult);
+           }
+         else
+           {
+            newsl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
+              {
+               trReq.action=TRADE_ACTION_SLTP;
+               trReq.sl=newsl;
+               trReq.tp=0;
+               Order_Send(trReq,BigDogModifResult);
+              }
+           }
+         // если можно снять сливки -то двигаем стоплост ближе
+         if((lasttick.bid<
+            (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+           {
+            NewOrder(smb,NewOrderBuy,"Panic");
+           }
+        }
+      else
+        {
+         if(0==PositionGetDouble(POSITION_SL))
+           {
+            trReq.action=TRADE_ACTION_SLTP;
+            trReq.sl= lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.tp=0;
+            Order_Send(trReq,BigDogModifResult);
+           }
+         else
+           {
+            newsl=lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            if((PositionGetDouble(POSITION_SL)<newsl) && ((newsl-PositionGetDouble(POSITION_SL))>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
+              {
+               trReq.action=TRADE_ACTION_SLTP;
+               trReq.sl= newsl;
+               trReq.tp=0;
+               Order_Send(trReq,BigDogModifResult);
+              }
+           }
+         // если можно снять сливки -то двигаем стоплост ближе
+         if((lasttick.ask>
+            (PositionGetDouble(POSITION_PRICE_OPEN)+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+           {
+            NewOrder(smb,NewOrderSell,"Panic");
+           }
+
+        }
+     }
+// Двигаем отложенные ордера "на получше"
+   OrdTotal=OrdersTotal();   // ордеров
+   for(i=0;i<OrdTotal;i++)
+     {
+      ticket=OrderGetTicket(i);
+      smb=OrderGetString(ORDER_SYMBOL);
+      if(PositionSelect(smb)) continue;
+      SymbolInfoTick(smb,lasttick);
+      trReq.action=TRADE_ACTION_MODIFY;
+      trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
+      trReq.order=ticket;
+      trReq.expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+      trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+      trReq.sl=0;
+
+      if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
+        {
+         if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
+            trReq.tp=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         else
+            trReq.tp=lasttick.bid-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(OrderGetDouble(ORDER_TP)>trReq.tp)
+           {
+            Order_Send(trReq,trRez);
+           }
+        }
+      if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)
+        {
+         if(OrderGetInteger(ORDER_TIME_EXPIRATION)>0)
+            trReq.tp=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
+         else
+            trReq.tp=lasttick.ask+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+
+         if(OrderGetDouble(ORDER_TP)<trReq.tp)
+           {
+            Order_Send(trReq,trRez);
+           }
+        }
+     }
+   return(true);
+  }
+//+------------------------------------------------------------------+
 //| Функция обработки ошибок                                         |
 //+------------------------------------------------------------------+
 int Fun_Error(int Error)
   {
    switch(Error)
      {
-      case 10004: Alert("Реквота");return(1);
-      case 10006: Alert("Запрос отвергнут");Sleep(3000);return(1);
-      case 10007: Alert("Запрос отменен трейдером");return(0);
-      case 10008: Alert("Ордер размещен");return(2);
-      case 10009: Alert("Заявка выполнена");return(2);
-      case 10010: Alert("Заявка выполнена частично");return(2);
-      case 10011: Alert("Ошибка обработки запроса");return(1);
-      case 10012: Alert("Запрос отменен по истечению времени");return(1);
-      case 10013: Alert("Неправильный запрос");return(0);
-      case 10014: Alert("Неправильный объем в запросе");return(0);
-      case 10015: Alert("Неправильная цена в запросе");return(0);
-      case 10016: Alert("Неправильные стопы в запросе");return(0);
-      case 10017: Alert("Торговля запрещена");return(0);
-      case 10018: Alert("Рынок закрыт");return(0);
-      case 10019: Alert("Нет достаточных денежных средств для выполнения запроса");return(0);
-      case 10020: Alert("Цены изменились");return(1);
-      case 10021: Alert("Отсутствуют котировки для обработки запроса");Sleep(3000);return(1);
-      case 10022: Alert("Неверная дата истечения ордера в запросе");return(0);
-      case 10023: Alert("Состояние ордера изменилось");return(2);
-      case 10024: Alert("Слишком частые запросы");return(0);
-      case 10025: Alert("В запросе нет изменений");Sleep(3000);return(1);
-      case 10026: Alert("Автотрейдинг запрещен сервером");return(0);
-      case 10027: Alert("Автотрейдинг запрещен клиентским терминалом");return(0);
-      case 10028: Alert("Запрос заблокирован для обработки");return(2);
-      case 10029: Alert("Ордер или позиция заморожены");return(2);
-      case 10030: Alert("Указан неподдерживаемый тип исполнения ордера по остатку");return(0);
-      case 10031: Alert("Нет соединения с торговым сервером");Sleep(3000);return(1);
-      case 10032: Alert("Операция разрешена только для реальных счетов");return(0);
-      case 10033: Alert("Достигнут лимит на количество отложенных ордеров");return(2);
-      case 10034: Alert("Достигнут лимит на объем ордеров и позиций для данного символа");return(2);
-      default:    Alert("Ошибка № - ",Error);return(0);
+      case 10004: Print("Реквота");return(1);
+      case 10006: Print("Запрос отвергнут");Sleep(3000);return(1);
+      case 10007: Print("Запрос отменен трейдером");return(0);
+      case 10008: Print("Ордер размещен");return(2);
+      case 10009: Print("Заявка выполнена");return(2);
+      case 10010: Print("Заявка выполнена частично");return(2);
+      case 10011: Print("Ошибка обработки запроса");return(1);
+      case 10012: Print("Запрос отменен по истечению времени");return(1);
+      case 10013: Print("Неправильный запрос");return(0);
+      case 10014: Print("Неправильный объем в запросе");return(0);
+      case 10015: Print("Неправильная цена в запросе");return(0);
+      case 10016: Print("Неправильные стопы в запросе");return(0);
+      case 10017: Print("Торговля запрещена");return(0);
+      case 10018: Print("Рынок закрыт");return(0);
+      case 10019: Print("Нет достаточных денежных средств для выполнения запроса");return(0);
+      case 10020: Print("Цены изменились");return(1);
+      case 10021: Print("Отсутствуют котировки для обработки запроса");Sleep(3000);return(1);
+      case 10022: Print("Неверная дата истечения ордера в запросе");return(0);
+      case 10023: Print("Состояние ордера изменилось");return(2);
+      case 10024: Print("Слишком частые запросы");return(0);
+      case 10025: Print("В запросе нет изменений");Sleep(3000);return(1);
+      case 10026: Print("Автотрейдинг запрещен сервером");return(0);
+      case 10027: Print("Автотрейдинг запрещен клиентским терминалом");return(0);
+      case 10028: Print("Запрос заблокирован для обработки");return(2);
+      case 10029: Print("Ордер или позиция заморожены");return(2);
+      case 10030: Print("Указан неподдерживаемый тип исполнения ордера по остатку");return(0);
+      case 10031: Print("Нет соединения с торговым сервером");Sleep(3000);return(1);
+      case 10032: Print("Операция разрешена только для реальных счетов");return(0);
+      case 10033: Print("Достигнут лимит на количество отложенных ордеров");return(2);
+      case 10034: Print("Достигнут лимит на объем ордеров и позиций для данного символа");return(2);
+      default:    Print("Ошибка № - ",Error);return(0);
      }
   }
 //+------------------------------------------------------------------+
