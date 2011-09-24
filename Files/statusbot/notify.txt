@@ -1,1 +1,2 @@
-Result EURUSD -4.5, balance=6258.69
+Starting watcher...
+Balance = 6258.69 USD

@@ -8,6 +8,7 @@
 //#include <icq_mql5.mqh>
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
+input bool _Carefull_=true;//Быть осторожным
 input int _NumTS_=3;//Сколько спредов до стоплоса
 input string spamfilename="notify.txt";
 //+------------------------------------------------------------------+
@@ -452,7 +453,7 @@ bool Trailing()
               }
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if((lasttick.bid<
+         if(_Carefull_&&(lasttick.bid<
             (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
            {

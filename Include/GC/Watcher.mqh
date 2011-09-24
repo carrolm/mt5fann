@@ -139,8 +139,10 @@ bool CWatcher::Run(void)
    ReadCommands();
    Trailing();
    Notify();
-   SendStatus();
    SendNotify();
+   if(AccountInfoDouble(ACCOUNT_BALANCE)==curbalance) return(true);
+   curbalance=AccountInfoDouble(ACCOUNT_BALANCE);
+   SendStatus();
    SendReport();
    return(true);
   }
@@ -149,7 +151,8 @@ bool CWatcher::Run(void)
 //+------------------------------------------------------------------+
 bool CWatcher::SendReport()
   {
-   if(AccountInfoDouble(ACCOUNT_BALANCE)==curbalance) return(true);
+   //if(AccountInfoDouble(ACCOUNT_BALANCE)==curbalance) return(true);
+   //curbalance=AccountInfoDouble(ACCOUNT_BALANCE);
 //--- request trade history
    HistorySelect(0,TimeCurrent());
    if(HistoryDealsTotal()<=0) return(true);

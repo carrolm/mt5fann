@@ -6,6 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\CommonFunctions.mqh>
+input bool _Debug_=false;//Быть осторожным
 string VectorFunctions[21]={"DayOfWeek","Hour","Minute","EasyClose","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC"};
 //+---------------------------------------------------------------------+
 //| входные вектора даются только на фракталах -пиках -90% что разворот |
@@ -41,6 +42,7 @@ double Sigmoid(double x)// вычисление логистической функции активации
 double Result2Neuro(double in,string smbl)
   {// in - количество спредов
    return(tanh(in));
+
    double res=0;
    double ac[];
    double EURUSD[]={-0.8634858714678669,-0.5181595398849712,-0.2567541885471368,0,0.2543535883970993,0.5113378344586146,0.8596049012253063};
@@ -69,8 +71,8 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
    int shift_history=15,ni=0;
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
-// вернем выход -если история
-   if(shift>shift_history>0) output_vector=GetTrend(shift_history,smbl,tf,shift-shift_history,false);
+// вернем выход -если история      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);
+   if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/15);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
    int start_pos=0,end_pos=0,shift_pos=0,add_shift;
@@ -291,7 +293,8 @@ double GetVector_Hour(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[1],tm);
-   return((double)tm.hour/12-1);
+   if(_Debug_) return((double)tm.hour);
+   else  return((double)tm.hour/12-1);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -303,7 +306,8 @@ double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[1],tm);
-   return((double)tm.min/30-1);
+   if(_Debug_)return((double)tm.min);
+   else  return((double)tm.min/30-1);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -465,10 +469,10 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
 // копируем историю
 // TF всегда минутка!
 //   tf=PERIOD_M1;
-   if(((shift_history+3)>CopyHigh(smb,tf,shift,shift_history+3,High))
-      || ((shift_history+3)>CopyClose(smb,tf,shift,shift_history+3,Close))
-      || ((shift_history+3)>CopyLow(smb,tf,shift,shift_history+3,Low))
-      || ((shift_history+3)>CopyTime(smb,tf,shift,shift_history+3,Time))
+   if(((shift_history+3)>CopyHigh(smb,tf,shift+1,shift_history+3,High))
+      || ((shift_history+3)>CopyClose(smb,tf,shift+1,shift_history+3,Close))
+      || ((shift_history+3)>CopyLow(smb,tf,shift+1,shift_history+3,Low))
+      || ((shift_history+3)>CopyTime(smb,tf,shift+1,shift_history+3,Time))
       )
      {
       Print(smb," ",shift);

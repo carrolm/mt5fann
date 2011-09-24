@@ -29,7 +29,22 @@ public:
    bool              ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid);
    bool              loadSettings(string filename);
    bool              saveSettings(string filename);
+   string            GetInputAsString(string smbl,int shift);
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+string COracleTemplate::GetInputAsString(string smbl,int shift)
+  {
+   int export_precision=5;
+   double Result=GetVectors(InputVector,inputSignals,smbl,0,shift);
+   string outstr="";
+   for(int j=0;j<num_input_signals;j++)
+     {
+      outstr+=DoubleToString(InputVector[j],export_precision)+",";
+     }
+   return(StringSubstr(outstr,0,StringLen(outstr)-1));
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -45,6 +60,18 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    double Result;
    int num_vals,prev_prg=0;
    string fnm="";
+   MqlRates rates[];
+   MqlDateTime tm;
+//double IV[50],OV[10];
+   ArraySetAsSeries(rates,true);
+   TimeToStruct(TimeCurrent(),tm);
+   int cm=tm.mon;
+   int FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+   if(FileHandleOC==INVALID_HANDLE)
+     {
+      Print("Error");
+      return(false);
+     }
    for(int ring=0;ring<3;ring++)
      {
       switch(ring)
@@ -65,11 +92,15 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             outstr+=",Result";
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
+            int copied=CopyRates(_Symbol,PERIOD_M1,0,shift+num_vals,rates);
+            FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
+            FileWrite(FileHandleOC," {");
+
             for(i=shift;i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,inputSignals,smbl,0,i);
                //отнормируем
-               Result=Result2Neuro(Result,smbl);
+               //Result=Result2Neuro(Result,smbl);
                // отнормируем
                //if(Result==0) continue;
                outstr="";need_exp=true;
@@ -89,8 +120,15 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                outstr+=DoubleToString(Result,export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
+               if(Result>0.33 || Result<-0.33)
+                 {
+                  FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
+                 }
               }
             FileClose(FileHandle);
+            FileWrite(FileHandleOC,"  return(0);");
+            FileWrite(FileHandleOC," }");
+            FileClose(FileHandleOC);
             Print("Created.",fnm);
            }
          shift+=num_vals;
@@ -138,7 +176,7 @@ bool COracleTemplate::saveSettings(string filename)
   {
    if(""==filename) filename=Name()+".ini";
    int FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
-   //string fr;
+//string fr;
    if(FileHandle!=INVALID_HANDLE)
      {
       FileWrite(FileHandle,"inputSignals",inputSignals);
@@ -148,13 +186,15 @@ bool COracleTemplate::saveSettings(string filename)
   }
 
 COracleTemplate *AllOracles[];
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 class CEasy:public COracleTemplate
   {
- //  virtual double    forecast(string smbl,int shift,bool train);
-  // virtual double    forecast(string smbl,datetime startdt,bool train);
+   //  virtual double    forecast(string smbl,int shift,bool train);
+   // virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("Easy");};
   };
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
