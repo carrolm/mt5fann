@@ -8,9 +8,11 @@
 #property version   "1.00"
 #include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
+#include <GC\Watcher.mqh>
 //COracleTemplate *Oracles[];
-input int _NEDATA_=100000;// cколько выгрузить
+input int _NEDATA_=10000;// cколько выгрузить
 int nOracles;
+CWatcher watcher;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -21,9 +23,10 @@ int OnInit()
    AllOracles[nOracles++]=new CEasy;//COracleTemplate;
    AllOracles[0].Init();
    AllOracles[0].ExportHistoryENCOG("","",_NEDATA_,0,0);
+   Print(AllOracles[0].GetInputAsString(_Symbol,0));
 //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
-   double            InputVector[];ArrayResize(InputVector,20);
-   GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);
+//   double            InputVector[];ArrayResize(InputVector,20);
+//   GetVectors(InputVector,AllOracles[0].inputSignals,_Symbol,0,0);
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -39,13 +42,18 @@ void OnDeinit(const int reason)
 void OnTick()
   {
    return;
-   //if(_TrailingPosition_) Trailing();
+   if(_TrailingPosition_) Trailing();
    int io;
    double   res=0;
    for(io=0;io<nOracles;io++)
      {
       res+=AllOracles[io].forecast(_Symbol,0,false);
+      Print(AllOracles[io].GetInputAsString(_Symbol,0));
+      watcher.AddNotify("");
+      watcher.SendNotify();
      }
+
+//
    NewOrder(_Symbol,res,"");
   }
 //+------------------------------------------------------------------+

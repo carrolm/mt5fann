@@ -27,12 +27,12 @@ int Write_File(int qty)
   {
    int i;
    double res=0;
-   //string outstr;
+//string outstr;
    MqlRates rates[];
    MqlDateTime tm;
-   //double IV[50],OV[10];
+//double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
-   TimeToStruct( TimeCurrent(),tm);
+   TimeToStruct(TimeCurrent(),tm);
    int cm=tm.mon;
    int FileHandle=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
    if(FileHandle!=INVALID_HANDLE)
@@ -49,9 +49,9 @@ int Write_File(int qty)
             TimeToStruct(rates[i].time,tm);
             if(tm.mon!=cm) break;
             res=GetTrend(15,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
-             //if(GetVectors(IV,OV,0,1,"Easy",SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_))
+            if(res!=0)
               {
-            //   restanh=OV[0];
+               //   restanh=OV[0];
                res=tanh(res/5);
                //if(res<4 && res>-4) continue;
                //if(res>4) res=0.7;
