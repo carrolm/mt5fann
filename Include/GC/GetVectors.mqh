@@ -68,7 +68,27 @@ double Result2Neuro(double in,string smbl)
 double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    double output_vector=0;
-   int shift_history=15,ni=0;
+ 
+ // только фрактал попробуем...
+    double Close[]; ArraySetAsSeries(Close,true);
+   double High[]; ArraySetAsSeries(High,true);
+   double Low[]; ArraySetAsSeries(Low,true);
+   datetime Time[]; ArraySetAsSeries(Time,true);
+   int RatioTP_SL=5;
+// копируем историю
+// TF всегда минутка!
+//   tf=PERIOD_M1;
+   if(((1+3)>CopyHigh(smbl,tf,shift+1,1+3,High))
+      || ((1+3)>CopyClose(smbl,tf,shift+1,1+3,Close))
+      || ((1+3)>CopyLow(smbl,tf,shift+1,1+3,Low))
+      || ((1+3)>CopyTime(smbl,tf,shift+1,1+3,Time))
+      )
+     {return(-100);}
+  if((High[1+1]>High[1+0] && High[1+1]>High[1+2])
+      || (Low[1+1]<Low[1+0] && Low[1+1]<Low[1+2]))
+     {}
+     else return(-100);
+  int shift_history=15,ni=0;
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);

@@ -38,6 +38,7 @@ string COracleTemplate::GetInputAsString(string smbl,int shift)
   {
    int export_precision=5;
    double Result=GetVectors(InputVector,inputSignals,smbl,0,shift);
+   if(-100==Result) return("");
    string outstr="";
    for(int j=0;j<num_input_signals;j++)
      {
