@@ -223,6 +223,26 @@ bool ExportHistory(string fname,int from=0,int to=0)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool ExportRates(string smb)
+  {
+   if(!isNewBar()) return(false);
+   int FileHandle=FileOpen("statusbot\\"+smb+".csv",FILE_WRITE|FILE_ANSI|FILE_CSV,',');
+   if(FileHandle!=INVALID_HANDLE)
+   {
+      //for(int idt=0;idt<deals;idt++)
+      //  {
+      //   if((bool)(ticket=HistoryDealGetTicket(idt)))
+      //     {
+      //      FileWrite(FileHandle,HistoryDealGetString(ticket,DEAL_SYMBOL),HistoryDealGetDouble(ticket,DEAL_PROFIT));
+      //     }
+      //  }
+      FileClose(FileHandle);
+     }
+     return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool Trailing()
   {
    int PosTotal=PositionsTotal();// открытых позицый
@@ -297,8 +317,8 @@ bool Trailing()
                   //              trReq.magic=999;
                   trReq.symbol=smb;                 // Trade symbol
                   trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
-                  trReq.deviation=2;                                    
-                  trReq.price=lasttick.bid;                             
+                  trReq.deviation=2;
+                  trReq.price=lasttick.bid;
                   trReq.type=ORDER_TYPE_SELL;                           // Order type
                   trReq.sl=0;
                   trReq.tp=0;
@@ -318,7 +338,7 @@ bool Trailing()
                      trReq.order=ticket;
                      trReq.sl=0;
                      trReq.tp=newtp;
-                     trReq.price = OrderGetDouble(ORDER_PRICE_OPEN);
+                     trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
 
                      trReq.action=TRADE_ACTION_MODIFY;
                      Order_Send(trReq,trRez);
@@ -361,7 +381,7 @@ bool Trailing()
                      trReq.order=ticket;
                      trReq.sl=0;
                      trReq.tp=newtp;
-                     trReq.price = OrderGetDouble(ORDER_PRICE_OPEN);
+                     trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
 
                      trReq.action=TRADE_ACTION_MODIFY;
                      Order_Send(trReq,trRez);
@@ -453,7 +473,7 @@ bool Trailing()
               }
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if(_Carefull_&&(lasttick.bid<
+         if(_Carefull_ && (lasttick.bid<
             (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
            {
