@@ -26,7 +26,7 @@ public:
    virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return("Prpototype");};
-   bool              ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid);
+   bool              ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
    bool              saveSettings(string filename);
    string            GetInputAsString(string smbl,int shift);
@@ -49,10 +49,10 @@ string COracleTemplate::GetInputAsString(string smbl,int shift)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid)
+bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid,int num_work)
   {
    int export_precision=5;
-   if(num_train==0 && 0==num_test && 0==num_valid) return(false);
+   if(num_train==0 && 0==num_test && 0==num_valid && 0==num_work) return(false);
    if(""==smbl) smbl=_Symbol;
    if(""==fname) fname=Name();
    int FileHandle=-1;
@@ -63,23 +63,28 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    string fnm="";
    MqlRates rates[];
    MqlDateTime tm;
+   if(num_work>0) shift=0;
 //double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    TimeToStruct(TimeCurrent(),tm);
-   int cm=tm.mon;
-   int FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
-   if(FileHandleOC==INVALID_HANDLE)
-     {
-      Print("Error");
-      return(false);
+   int cm=tm.mon;int FileHandleOC;
+   if(num_train>0)
+    {
+       FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+      if(FileHandleOC==INVALID_HANDLE)
+      {
+       Print("Error open file for write OracleDummy_fc.mqh");
+       return(false);
+      }
      }
-   for(int ring=0;ring<3;ring++)
+   for(int ring=0;ring<4;ring++)
      {
       switch(ring)
         {
          case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_test_data.csv";  break;
          case 1: num_vals=num_valid;fnm=fname+"_"+smbl+"_valid_data.csv";  break;
          case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_train_data.csv";  break;
+         case 3: num_vals=num_work;fnm=fname+"_"+smbl+"_prediction_data.csv";  break;
          default: num_vals=0;
         }
       if(num_vals>0)
@@ -94,7 +99,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
             int copied=CopyRates(_Symbol,PERIOD_M1,0,shift+num_vals,rates);
-            FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
+            if(num_train>0) FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
             FileWrite(FileHandleOC," {");
 
             for(i=shift;i<(shift+num_vals);i++)
@@ -123,15 +128,21 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                FileWrite(FileHandle,outstr);
                if(Result>0.33 || Result<-0.33)
                  {
-                  FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
+                  if(num_train>0)FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                  }
               }
             FileClose(FileHandle);
-            FileWrite(FileHandleOC,"  return(0);");
-            FileWrite(FileHandleOC," }");
-            FileClose(FileHandleOC);
-            Print("Created.",fnm);
+            if(num_train>0)FileWrite(FileHandleOC,"  return(0);");
+            if(num_train>0)FileWrite(FileHandleOC," }");
+            if(num_train>0)FileClose(FileHandleOC);
+            if(ring==3 && Result!=0)
+              {
+               FileDelete(fnm);
+              }
+            else Print("Created.",fnm);
            }
+         else
+           {Print("Error open for write ",fnm);}
          shift+=num_vals;
         }
      }
