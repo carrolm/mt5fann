@@ -228,7 +228,7 @@ bool ExportRates(string smb)
    if(!isNewBar()) return(false);
    int FileHandle=FileOpen("statusbot\\"+smb+".csv",FILE_WRITE|FILE_ANSI|FILE_CSV,',');
    if(FileHandle!=INVALID_HANDLE)
-   {
+     {
       //for(int idt=0;idt<deals;idt++)
       //  {
       //   if((bool)(ticket=HistoryDealGetTicket(idt)))
@@ -238,7 +238,7 @@ bool ExportRates(string smb)
       //  }
       FileClose(FileHandle);
      }
-     return(true);
+   return(true);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -317,7 +317,7 @@ bool Trailing()
                   //              trReq.magic=999;
                   trReq.symbol=smb;                 // Trade symbol
                   trReq.volume=PositionGetDouble(POSITION_VOLUME);      // Requested volume for a deal in lots
-                  trReq.deviation=2;
+                  trReq.deviation=3;
                   trReq.price=lasttick.bid;
                   trReq.type=ORDER_TYPE_SELL;                           // Order type
                   trReq.sl=0;
@@ -339,7 +339,8 @@ bool Trailing()
                      trReq.sl=0;
                      trReq.tp=newtp;
                      trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
-
+                     trReq.deviation=0;
+                     trReq.type_time=ORDER_TIME_GTC;
                      trReq.action=TRADE_ACTION_MODIFY;
                      Order_Send(trReq,trRez);
                      //if(10009!=trRez.retcode) Print(__FUNCTION__," sell sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
@@ -360,7 +361,7 @@ bool Trailing()
                   //              trReq.magic=999;
                   trReq.symbol=smb;                 // Trade symbol
                   trReq.volume=PositionGetDouble(POSITION_VOLUME);   // Requested volume for a deal in lots
-                  trReq.deviation=2;                     // Maximal possible deviation from the requested price
+                  trReq.deviation=3;                     // Maximal possible deviation from the requested price
                   trReq.sl=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                   trReq.tp=0;//lasttick.ask+1.1*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                   trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
@@ -382,7 +383,8 @@ bool Trailing()
                      trReq.sl=0;
                      trReq.tp=newtp;
                      trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
-
+                     trReq.deviation=0;
+                     trReq.type_time=ORDER_TIME_GTC;
                      trReq.action=TRADE_ACTION_MODIFY;
                      Order_Send(trReq,trRez);
                      //if(10009!=trRez.retcode) Print(__FUNCTION__," buy sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
@@ -422,7 +424,7 @@ bool Trailing()
             trReq.symbol=OrderGetString(ORDER_SYMBOL);                 // Trade symbol
             trReq.volume=OrderGetDouble(ORDER_VOLUME_INITIAL);      // Requested volume for a deal in lots
             trReq.comment=OrderGetString(ORDER_COMMENT);
-            trReq.deviation=2;                                    // Maximal possible deviation from the requested price
+            trReq.deviation=3;                                    // Maximal possible deviation from the requested price
             trReq.tp=0;  trReq.sl=0;                                  // Maximal possible deviation from the requested price
             Order_Send(trReq,trRez);
             if(10009!=trRez.retcode) Print(__FUNCTION__," (open):",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," StopLevel=",SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
@@ -449,7 +451,7 @@ bool Trailing()
          ){} else return(false);
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
-      trReq.deviation=2;
+      trReq.deviation=3;
       trReq.order=ticket;
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)

@@ -83,9 +83,9 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
       || ((1+3)>CopyLow(smbl,tf,shift+1,1+3,Low))
       || ((1+3)>CopyTime(smbl,tf,shift+1,1+3,Time))
       )
-     {return(-100);}
-  if((High[1+1]>High[1+0] && High[1+1]>High[1+2])
-      || (Low[1+1]<Low[1+0] && Low[1+1]<Low[1+2]))
+     {return(-200);}
+  if((High[0+1]>High[0+0] && High[0+1]>High[0+2])
+      || (Low[0+1]<Low[0+0] && Low[0+1]<Low[0+2]))
      {}
      else return(-100);
   int shift_history=15,ni=0;
@@ -107,7 +107,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
          start_pos=shift_pos+1;
         }
       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
-      InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift-1);
+      if(0<(shift+add_shift-1)) InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift-1);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
    while(start_pos>0);
