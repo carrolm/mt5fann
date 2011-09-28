@@ -10,7 +10,7 @@
 #include <GC\CommonFunctions.mqh>
 #include <GC\Watcher.mqh>
 //COracleTemplate *Oracles[];
-input int _NEDATA_=10000;// cколько выгрузить
+input int _NEDATA_=1444;//0000;// cколько выгрузить
 int nOracles;
 CWatcher watcher;
 //+------------------------------------------------------------------+
@@ -22,7 +22,7 @@ int OnInit()
    nOracles=0;//AllOracles();
    AllOracles[nOracles++]=new CEasy;//COracleTemplate;
    AllOracles[0].Init();
-//AllOracles[0].ExportHistoryENCOG("","",_NEDATA_,0,0);
+   AllOracles[0].ExportHistoryENCOG("","",_NEDATA_,0,0,0);
  //  Print(AllOracles[0].GetInputAsString(_Symbol,0));
 //for(int i=0;i<nOracles;i++) Print(AllOracles[i].Name()," Ready!");
 //   double            InputVector[];ArrayResize(InputVector,20);

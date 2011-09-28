@@ -58,7 +58,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    int FileHandle=-1;
    int i,j,shift=15;
    string outstr;
-   double Result;
+   double Result=0;
    int num_vals,prev_prg=0;
    string fnm="";
    MqlRates rates[];
@@ -67,7 +67,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
 //double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    TimeToStruct(TimeCurrent(),tm);
-   int cm=tm.mon;int FileHandleOC;
+   int cm=tm.mon;int FileHandleOC=-1;
    if(num_train>0)
     {
        FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
@@ -100,11 +100,12 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             bool need_exp=true;
             int copied=CopyRates(_Symbol,PERIOD_M1,0,shift+num_vals,rates);
             if(num_train>0) FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
-            FileWrite(FileHandleOC," {");
+            if(num_train>0) FileWrite(FileHandleOC," {");
 
             for(i=shift;i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+               if(Result==-100) Result=0;
                //отнормируем
                //Result=Result2Neuro(Result,smbl);
                // отнормируем
@@ -126,7 +127,8 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                outstr+=DoubleToString(Result,export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
-               if(Result>0.33 || Result<-0.33)
+               //if(Result>-2&&(Result>0.33 || Result<-0.33))
+               if(Result>-2&&(Result>0.66 || Result<-0.66))
                  {
                   if(num_train>0)FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                  }
