@@ -95,19 +95,21 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
    if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/15);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
-   int start_pos=0,end_pos=0,shift_pos=0,add_shift;
+   int start_pos=0,end_pos=0,shift_pos=0,add_shift,sp_pos;
    end_pos=StringFind(fn_names," ",start_pos);
    do //while(end_pos>0)
      {
       add_shift=0;
       shift_pos= StringFind(fn_names,"-",start_pos);
+      sp_pos = StringFind(fn_names," ",start_pos); 
+      if(-1<sp_pos&&sp_pos<shift_pos) shift_pos=-1;
       if(shift_pos>0 && (shift_pos<end_pos || -1==end_pos))
         {
          add_shift=(int)StringToInteger(StringSubstr(fn_names,start_pos,shift_pos-start_pos));
          start_pos=shift_pos+1;
         }
       //      Print("-"+StringSubstr(fn_names,start_pos,end_pos-start_pos)+"-");
-      if(0<(shift+add_shift-1)) InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift-1);
+      if(0<=(shift+add_shift)) InputVector[ni++]=GetVectorByName(StringSubstr(fn_names,start_pos,end_pos-start_pos),smbl,tf,shift+add_shift);
       start_pos=end_pos+1;    end_pos=StringFind(fn_names," ",start_pos);
      }
    while(start_pos>0);
@@ -325,7 +327,7 @@ double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
    CopyTime(smb,tf,shift,3,Time);
    MqlDateTime tm;
 
-   TimeToStruct(Time[1],tm);
+   TimeToStruct(Time[0],tm);
    if(_Debug_)return((double)tm.min);
    else  return((double)tm.min/30-1);
   }
