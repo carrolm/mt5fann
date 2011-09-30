@@ -443,6 +443,8 @@ public:
    bool              Y_Size(int Y);
    color             BackColor() const;
    bool              BackColor(color new_color);
+   color             BorderColor() const;
+   bool              BorderColor(color new_color);
    bool              ReadOnly() const;
    bool              ReadOnly(bool flag);
    //--- change of angle is blocked
@@ -530,6 +532,32 @@ bool CChartObjectEdit::BackColor(color new_color)
    if(m_chart_id==-1) return(false);
 //---
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,new_color));
+  }
+//+------------------------------------------------------------------+
+//| Get border color.                                                |
+//| INPUT:  no.                                                      |
+//| OUTPUT: border color.                                            |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+color CChartObjectEdit::BorderColor() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(CLR_NONE);
+//---
+   return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BORDER_COLOR));
+  }
+//+------------------------------------------------------------------+
+//| Set border color.                                                |
+//| INPUT:  new_color - new border color.                            |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectEdit::BorderColor(color new_color)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BORDER_COLOR,new_color));
   }
 //+------------------------------------------------------------------+
 //| Get the "Read only" property.                                    |

@@ -683,7 +683,7 @@ bool CTrade::IsStopped(string function)
   {
    if(!IsStopped()) return(false);
 //--- MQL5 program is stopped
-   printf("MQL5 program is stopped. Trading is disabled");
+   printf("%s: MQL5 program is stopped. Trading is disabled",function);
    m_result.retcode=TRADE_RETCODE_CLIENT_DISABLES_AT;
    return(true);
   }
