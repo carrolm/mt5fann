@@ -487,19 +487,19 @@ string CSymbolInfo::TradeModeDescription() const
    switch(m_trade_mode)
      {
       case SYMBOL_TRADE_MODE_DISABLED:
-         str="Trading symbol on the disabled";
+         str="Disabled";
          break;
       case SYMBOL_TRADE_MODE_LONGONLY:
-         str="Allowed only long positions";
+         str="Long only";
          break;
       case SYMBOL_TRADE_MODE_SHORTONLY:
-         str="Allowed only short positions";
+         str="Short only";
          break;
       case SYMBOL_TRADE_MODE_CLOSEONLY:
-         str="Allowed only close positions";
+         str="Close only";
          break;
       case SYMBOL_TRADE_MODE_FULL:
-         str="No restrictions on trading";
+         str="Full access";
          break;
       default:
          str="Unknown trade mode";

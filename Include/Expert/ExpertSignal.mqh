@@ -494,7 +494,7 @@ double CExpertSignal::Direction()
    long           mask;
    double         direction;
    double         result=m_weight*(LongCondition()-ShortCondition());
-   int            number=0;      // number of "voted"
+   int            number=1;      // number of "voted"
 //---
    int            total=m_filters.Total();
 //--- for debugging
@@ -516,7 +516,7 @@ double CExpertSignal::Direction()
       number++;
      }
 //--- normalization
-   if(number!=0) result/=number;
+   result/=number;
 //--- return the result
    return(result);
   }
