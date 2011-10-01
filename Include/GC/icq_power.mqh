@@ -38,12 +38,12 @@ struct TOKEN_PRIVILEGES
 //   uint GetLastError(void);
 //#import
 //+------------------------------------------------------------------+
-#define TOKEN_ADJUST_PRIVILEGES  0x0020
-#define TOKEN_QUERY              0x0008
-#define SE_SHUTDOWN_NAME "SeShutdownPrivilege"
-#define SE_PRIVILEGE_ENABLED     0x00000002
-#define EWX_SHUTDOWN             0x00000001
-#define EWX_FORCE                0x00000004
+//#define TOKEN_ADJUST_PRIVILEGES  0x0020
+//#define TOKEN_QUERY              0x0008
+//#define SE_SHUTDOWN_NAME "SeShutdownPrivilege"
+//#define SE_PRIVILEGE_ENABLED     0x00000002
+//#define EWX_SHUTDOWN             0x00000001
+//#define EWX_FORCE                0x00000004
 
 const string  op[2]={"?","!"};
 const string cmd[8]={"HELP","INFO","SYMB","ORDS","PARAM","ALERT","CLOSE","SHDWN"};

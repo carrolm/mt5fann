@@ -6,8 +6,8 @@
 #property copyright "Copyright 2011, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
-#include <GC\Watcher.mqh>
-CWatcher Watcher;
+#include <GC\WatcherICQ.mqh>
+CWatcherICQ Watcher;
 //#include <GC\WatcherFile.mqh>
 //CWatcherFile Watcher;
 //#include <GC\WatcherICQ.mqh>
