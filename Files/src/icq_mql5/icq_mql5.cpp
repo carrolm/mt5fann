@@ -299,8 +299,8 @@ void BuildQuery_SendMsg_Unicode(RAWPKT* Pkt, USHORT seq, wchar_t *UIN, wchar_t *
 	
 	RAWPKT pmsg;
 	
-	char *body1 = {"<HTML><BODY dir=\"ltr\"><FONT face=\"Arial\" color=\"#000000\" size=\"2\">"};
-	char *body2 = {"</FONT></BODY></HTML>"};
+	char *body1 ={""};// {"<HTML><BODY dir=\"ltr\"><FONT face=\"Arial\" color=\"#000000\" size=\"2\">"};
+	char *body2 ={""};// {"</FONT></BODY></HTML>"};
 	
 	// malloc not working, using new
 	wchar_t *bd1 = new wchar_t[strlen(body1)+1];		
