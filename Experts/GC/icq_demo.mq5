@@ -22,7 +22,7 @@ int OnInit()
    //client.server     = "login.icq.com";
    //client.port       = 5190;
    client.Connect();
-   
+    EventSetTimer(6);  
    return(0);
 }
   
@@ -35,9 +35,9 @@ void OnDeinit(const int reason)
 }
   
 //+------------------------------------------------------------------+
-void OnTick()
+//void OnTick()
 //+------------------------------------------------------------------+
-{
+void OnTimer(){
    string text;
    static datetime time_out;
    MqlTick last_tick;
@@ -57,7 +57,7 @@ void OnTick()
       text = Symbol()+" BID:"+DoubleToString(last_tick.bid, Digits())+
                   " ASK:"+DoubleToString(last_tick.ask, Digits()); 
       
-      if (client.SendMessage("266690424",  //<- номер получателя 
+      if (client.SendMessage("622662116",  //<- номер получателя 
                           text))           //<- текст сообщения 
          printf("Send: " + text);
    }
