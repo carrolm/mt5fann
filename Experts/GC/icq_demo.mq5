@@ -17,11 +17,11 @@ int OnInit()
 {
    printf("Start ICQ Client");
    
-   //client.login      = "610043094";     //<- логин
-   //client.password   = "password";      //<- пароль
+   client.login      = "645990858";     //<- логин
+   client.password   = "Forex7";      //<- пароль
    //client.server     = "login.icq.com";
    //client.port       = 5190;
-   //client.Connect();
+   client.Connect();
    
    return(0);
 }
