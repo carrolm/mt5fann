@@ -33,27 +33,27 @@ void CWatcherICQ::~CWatcherICQ(void)
 //+------------------------------------------------------------------+
 void CWatcherICQ::CWatcherICQ(void)
   {
-   CWatcher::Init();SendNotify();
+   CWatcher::Init();//SendNotify();
    int filehandle=FileOpen("MustWatcher\data\set_bot",FILE_READ|FILE_CSV|FILE_ANSI,':',CP_ACP);
-   if(filehandle!=INVALID_HANDLE)
-     {
-      client.login=StringSubstr(FileReadString(filehandle),3);//"645990858";
-      client.password=FileReadString(filehandle);//"Forex7";
-      client.Connect();
-      FileClose(filehandle);
-     }
-   else
-     {
+   //if(filehandle!=INVALID_HANDLE)
+   //  {
+   //   client.login=StringSubstr(FileReadString(filehandle),3);//"645990858";
+   //   client.password=FileReadString(filehandle);//"Forex7";
+   //   client.Connect();
+   //   FileClose(filehandle);
+   //  }
+   //else
+   //  {
       client.login="645990858";
       client.password="Forex7";
       client.Connect();
-     }
+ //    }
 
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool              CWatcherICQ::Run()
+bool     CWatcherICQ::Run()
   {
 // чтение сообщений
    while(client.ReadMessage(client.uin,client.msg,client.len))
@@ -71,11 +71,12 @@ bool   CWatcherICQ::SendNotify(string UIN)
   {
    bool ret=true;
    if(changing==0) return(true);
+   if(""==UIN) UIN="622662116";
 //--- если изменения есть то пишем файл notify.txt
    ResetLastError();
    for(int i=0;i<changing;i++)
      {
-      client.SendMessage("36770049",ar_sSPAM[i]);
+      if(""!=ar_sSPAM[i]) client.SendMessage(UIN,ar_sSPAM[i]);
      }
    changing=0;
 
@@ -95,7 +96,7 @@ void CWatcherICQ::Comm(string UIN,string cmdstr)
    MqlDateTime dt;
    MqlTradeRequest request;
    MqlTradeResult result;
-   //CTrade trade;
+//CTrade trade;
 
    if(ParseString(cmdstr,part))
      {
@@ -195,20 +196,20 @@ void CWatcherICQ::Comm(string UIN,string cmdstr)
            }
 
          //--------------------------------------------------------
-//         else if(part[1]==cmd[4]) //param
-//         //--------------------------------------------------------
-//           {
-//            if(part[2]== "")  text = StringFormat("sl=%i; tp=%i; p0=%.5f; p1=%.5f; p2=%.5f", s_l, t_p, p0, p1, p2);
-//            else if(part[2]=="SL") text = StringFormat("sl= %i"  , s_l);
-//            else if(part[2]=="TP") text = StringFormat("tp= %i"  , t_p);
-//            else if(part[2]=="P0") text = StringFormat("p0= %.5f", p0);
-//            else if(part[2]=="P1") text = StringFormat("p1= %.5f", p1);
-//            else if(part[2]=="P2") text = StringFormat("p2= %.5f", p2);
-//            else text=StringFormat("%s - неверный параметр",part[2]);
-//
-//            client.SendMessage(UIN,resp+text);
-//
-//           }
+         //         else if(part[1]==cmd[4]) //param
+         //         //--------------------------------------------------------
+         //           {
+         //            if(part[2]== "")  text = StringFormat("sl=%i; tp=%i; p0=%.5f; p1=%.5f; p2=%.5f", s_l, t_p, p0, p1, p2);
+         //            else if(part[2]=="SL") text = StringFormat("sl= %i"  , s_l);
+         //            else if(part[2]=="TP") text = StringFormat("tp= %i"  , t_p);
+         //            else if(part[2]=="P0") text = StringFormat("p0= %.5f", p0);
+         //            else if(part[2]=="P1") text = StringFormat("p1= %.5f", p1);
+         //            else if(part[2]=="P2") text = StringFormat("p2= %.5f", p2);
+         //            else text=StringFormat("%s - неверный параметр",part[2]);
+         //
+         //            client.SendMessage(UIN,resp+text);
+         //
+         //           }
         }
       //--------------------------------------------------------
       else if(part[0]==op[1]) //!
