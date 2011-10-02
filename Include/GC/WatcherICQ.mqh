@@ -34,7 +34,7 @@ void CWatcherICQ::~CWatcherICQ(void)
 void CWatcherICQ::CWatcherICQ(void)
   {
    CWatcher::Init();//SendNotify();
-   int filehandle=FileOpen("MustWatcher\data\set_bot",FILE_READ|FILE_CSV|FILE_ANSI,':',CP_ACP);
+   //int filehandle=FileOpen("MustWatcher\data\set_bot",FILE_READ|FILE_CSV|FILE_ANSI,':',CP_ACP);
    //if(filehandle!=INVALID_HANDLE)
    //  {
    //   client.login=StringSubstr(FileReadString(filehandle),3);//"645990858";
@@ -44,8 +44,8 @@ void CWatcherICQ::CWatcherICQ(void)
    //  }
    //else
    //  {
-      client.login="645990858";
-      client.password="Forex7";
+      //client.login="645990858";
+      //client.password="Forex7";
       client.Connect();
  //    }
 
@@ -71,7 +71,7 @@ bool   CWatcherICQ::SendNotify(string UIN)
   {
    bool ret=true;
    if(changing==0) return(true);
-   if(""==UIN) UIN="622662116";
+   if(""==UIN) UIN=ICQ_Master;
 //--- если изменения есть то пишем файл notify.txt
    ResetLastError();
    for(int i=0;i<changing;i++)

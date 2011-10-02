@@ -8,7 +8,7 @@
 #include <GC\CurrPairs.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
-#include <GC\Watcher.mqh>
+//#include <GC\Watcher.mqh>
 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
@@ -90,7 +90,7 @@ protected:
    int               window;
    string            prefix;
    datetime          LastRefresh;
-   CWatcher          Watcher;
+   //CWatcher          Watcher;
    //CMT5FANN          fannExperts[30];
 public:
                      CDashBoard();
@@ -255,7 +255,7 @@ bool CDashBoard::DeInit(void)
 //+------------------------------------------------------------------+
 bool CDashBoard::Refresh(void)
   {
-   if(_Wather_) Watcher.Run();
+   //if(_Wather_) Watcher.Run();
 //Trailing();
 
    string name; int SymbolIdx,RowPos;

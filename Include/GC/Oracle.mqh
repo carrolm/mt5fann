@@ -39,7 +39,7 @@ string COracleTemplate::GetInputAsString(string smbl,int shift)
    int export_precision=5;
    double Result=GetVectors(InputVector,inputSignals,smbl,0,shift);
    if(-100==Result) return("");
-   string outstr="";
+   string outstr=""+smbl+",";
    for(int j=0;j<num_input_signals;j++)
      {
       outstr+=DoubleToString(InputVector[j],export_precision)+",";
@@ -952,9 +952,6 @@ double CiIchimoku::forecast(string smbl,int shift,bool train)
 //--- возвращаем торговый сигнал
    return(sig);
   }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
