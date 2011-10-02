@@ -245,6 +245,7 @@ bool ExportRates(string smb)
 //+------------------------------------------------------------------+
 bool Trailing()
   {
+   if(!_TrailingPosition_) return(false);
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
    int i,TrailingStop;

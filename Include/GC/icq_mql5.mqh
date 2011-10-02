@@ -16,6 +16,13 @@
 // значения для ICQ_CLIENT.status
 #define ICQ_CLIENT_STATUS_CONNECTED		      1
 #define ICQ_CLIENT_STATUS_DISCONNECTED	      2
+
+#define ICQ_Login "645990858" 
+#define ICQ_Password "Forex7"
+#define ICQ_Expert "622662116"
+//#define ICQ_Expert "36770049"
+#define ICQ_Master "36770049"
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -92,6 +99,7 @@ bool COscarClient::ReadMessage(string &uin,string &msg,uint &len)
 //+------------------------------------------------------------------+
   {
    bool res=false;
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED&&autocon) Connect();
 
    if(ICQReadMsg(client,uin,msg,len)) res=true;
    else if(client.status!=ICQ_CLIENT_STATUS_CONNECTED)
@@ -105,6 +113,8 @@ bool COscarClient::SendMessage(string UIN,string message)
 //+------------------------------------------------------------------+
   {
    bool ret=true;
+   if(""==message) return(ret);
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED&&autocon) Connect();
    if(!ICQSendMsg(client,UIN,message))
      {
       ret=false;
@@ -116,7 +126,7 @@ bool COscarClient::SendMessage(string UIN,string message)
 bool COscarClient::Connect()
 //+------------------------------------------------------------------+
   {
-
+   
    if((TimeLocal()-timesave)>=timeout)
      {
       timesave= TimeLocal();
@@ -142,10 +152,13 @@ COscarClient::COscarClient(void)// Конструктор
   {
    StringInit(uin,10,0);
    StringInit(msg,4096,0);
+   login=ICQ_Login;
+   password=ICQ_Password;
    timeout=20;
    server="login.icq.com";
    port=5190;
    autocon=true;
+   Connect();
   }
 //+------------------------------------------------------------------+
 void PrintError(uint status)

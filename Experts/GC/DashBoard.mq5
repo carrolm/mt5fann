@@ -8,6 +8,8 @@
 //#property version   "000.001"
 
 #include <GC\DashBoard.mqh>
+#include <GC\WatcherICQ.mqh>
+CWatcherICQ watcher;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -190,6 +192,9 @@ void OnTick()
 void OnTimer()
   {
    DashBoard.Refresh();
+   watcher.Run();
+   Trailing();
+
   }
 //+------------------------------------------------------------------+
 //| Expert tiimer function                                             |
