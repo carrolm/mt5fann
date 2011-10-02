@@ -5,17 +5,19 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <windows.h>
+#include <intrin.h>
 #include "icq_mql5.h"
 
 #pragma comment(lib, "ws2_32.lib")
+#pragma intrinsic(__rdtsc)
 
-
+ 
 //--------------------------------------------------------------------------//
-int find_wcstr(wchar_t *src, const wchar_t *mask)
+_int32 find_wcstr(wchar_t *src, const wchar_t *mask)
 //--------------------------------------------------------------------------//
 {
-	int pos=-1;
-	size_t srclen,masklen;
+	_int32 pos=-1;
+	_int32 srclen,masklen;
 	
 	srclen = wcslen(src);
 	masklen = wcslen(mask);
@@ -42,7 +44,7 @@ void ParseHTML(wchar_t *text)
 {
 	size_t pos_begin, pos_end;
 	
-	for(int i=0;i<6;i++) if (find_wcstr(text,tag[i])<0) return;
+	for(_int32 i=0;i<6;i++) if (find_wcstr(text,tag[i])<0) return;
 	
 	pos_begin = wcschr(text + find_wcstr(text,tag[4]) ,'>') - text + 1;
 	pos_end = find_wcstr(text,tag[5]);
@@ -52,10 +54,10 @@ void ParseHTML(wchar_t *text)
 }
 
 //--------------------------------------------------------------------------//
-void ReverseWord(char * msg, int len)
+void ReverseWord(char * msg, _int32 len)
 //--------------------------------------------------------------------------//
 {
-	int x;
+	_int32 x;
 	BYTE b;
 
 	for (x = 0; x < len; x+=2)
@@ -67,10 +69,10 @@ void ReverseWord(char * msg, int len)
 }
 
 //--------------------------------------------------------------------------//
-void ReverseWord2(wchar_t *msg, int len)
+void ReverseWord2(wchar_t *msg, _int32 len)
 //--------------------------------------------------------------------------//
 {
-	int x;
+	_int32 x;
 	for (x = 0; x < len; x++)
 	msg[x]= HTONS(msg[x]);
 }
@@ -110,18 +112,20 @@ ULONG Host2Ip(char * host)
 ULONG my_rand()
 //--------------------------------------------------------------------------//
 {
-	_asm
+	return __rdtsc();
+	//return((ULONG)rand()*(ULONG)rand());
+//	_asm
 	{
-		rdtsc
+	//	rdtsc
 	}
 }
 
 
 //--------------------------------------------------------------------------//
-void XorPass(char * buf, int len)
+void XorPass(char * buf, _int32 len)
 //--------------------------------------------------------------------------//
 {
-    int i;
+    _int32 i;
 	for (i = 0; i < len; i++)
 	{
 		buf[i] = key[i] ^ buf[i];
@@ -129,7 +133,7 @@ void XorPass(char * buf, int len)
 }
 
 //--------------------------------------------------------------------------//
-ULONG GetTVL(char * buf, int buflen, USHORT type, char * data,  int* len)
+ULONG GetTVL(char * buf, _int32 buflen, USHORT type, char * data,  _int32* len)
 //--------------------------------------------------------------------------//
 {
 	ULONG ret = 0;
@@ -154,7 +158,7 @@ ULONG GetTVL(char * buf, int buflen, USHORT type, char * data,  int* len)
 	return ret;
 }
 
-
+ 
 //--------------------------------------------------------------------------//
 ULONG ConnectToServer(char * host, USHORT port)
 //--------------------------------------------------------------------------//
@@ -229,13 +233,13 @@ ULONG GetFLAP(ULONG sock, PRAWPKT Pkt, ULONG timeout)
 }
 
 //--------------------------------------------------------------------------//
-void PktMemCpy(void* desc, void* src, int len)
+void PktMemCpy(void* desc, void* src, _int32 len)
 //--------------------------------------------------------------------------//
 {
 	my_memcpy(desc, src, len);
 }
 //--------------------------------------------------------------------------//
-void PktInt(PRAWPKT Pkt, ULONG val, int len)
+void PktInt(PRAWPKT Pkt, ULONG val, _int32 len)
 //--------------------------------------------------------------------------//
 {
 	PktMemCpy(Pkt->Data + Pkt->Len, &val, len);
@@ -243,7 +247,7 @@ void PktInt(PRAWPKT Pkt, ULONG val, int len)
 }
 
 //--------------------------------------------------------------------------//
-void PktStrU(PRAWPKT Pkt, wchar_t * str, int len)
+void PktStrU(PRAWPKT Pkt, wchar_t * str, _int32 len)
 //--------------------------------------------------------------------------//
 {
 	my_memcpy(Pkt->Data + Pkt->Len, str,len*2);
@@ -251,7 +255,7 @@ void PktStrU(PRAWPKT Pkt, wchar_t * str, int len)
 }
 
 //--------------------------------------------------------------------------//
-void PktStr(PRAWPKT Pkt, char* str, int len)
+void PktStr(PRAWPKT Pkt, char* str, _int32 len)
 //--------------------------------------------------------------------------//
 {
 	PktMemCpy(Pkt->Data + Pkt->Len, str, len);
@@ -295,7 +299,7 @@ void PktFinish(PRAWPKT Pkt)
 void BuildQuery_SendMsg_Unicode(RAWPKT* Pkt, USHORT seq, wchar_t *UIN, wchar_t * msg)
 //--------------------------------------------------------------------------//
 {
-	int len;
+	_int32 len;
 	
 	RAWPKT pmsg;
 	
@@ -314,9 +318,9 @@ void BuildQuery_SendMsg_Unicode(RAWPKT* Pkt, USHORT seq, wchar_t *UIN, wchar_t *
 	wcstombs(uin1, UIN, wcslen(UIN) + 1);
 	wcscpy(msg1,msg);
 
-	ReverseWord2(bd1, (int)strlen(body1)+1);
-	ReverseWord2(bd2, (int)strlen(body2)+1);
-	ReverseWord2(msg1, (int)wcslen(msg1)+1);
+	ReverseWord2(bd1, (_int32)strlen(body1)+1);
+	ReverseWord2(bd2, (_int32)strlen(body2)+1);
+	ReverseWord2(msg1, (_int32)wcslen(msg1)+1);
 	
 	PktInit(Pkt, 2, seq);//2A 02 xx 00
 	PktSnac(Pkt, 4, 6,(my_rand()&0xFF0000)|0x0006, 0);//0004 0006 0000 xxxx 0006
@@ -325,15 +329,15 @@ void BuildQuery_SendMsg_Unicode(RAWPKT* Pkt, USHORT seq, wchar_t *UIN, wchar_t *
 	PktInt(Pkt, HTOHL(my_rand() % 0xFFFFAA), 4); // xxxx
 	PktInt(Pkt, HTONS(1), 2); //0001
 	
-	len = (int)strlen(uin1);
+	len = (_int32)strlen(uin1);
 	PktInt(Pkt, len, 1); //09
 	PktStr(Pkt, uin1, len);
 
 	// msg
 	pmsg.Len = 0;
-	PktStrU(&pmsg, bd1, (int)wcslen(bd1)); // msg
-	PktStrU(&pmsg, msg1, (int)wcslen(msg1)); // msg
-	PktStrU(&pmsg, bd2, (int)wcslen(bd2)); // msg
+	PktStrU(&pmsg, bd1, (_int32)wcslen(bd1)); // msg
+	PktStrU(&pmsg, msg1, (_int32)wcslen(msg1)); // msg
+	PktStrU(&pmsg, bd2, (_int32)wcslen(bd2)); // msg
 	
 	PktInt(Pkt, HTONS(2), 2); //0002
 	PktInt(Pkt, HTONS(pmsg.Len + 14), 2); //len + 14
@@ -366,18 +370,18 @@ void BuildQuery_SendMsg_Unicode(RAWPKT* Pkt, USHORT seq, wchar_t *UIN, wchar_t *
 void BuildQuery_Auth(RAWPKT* Pkt, USHORT seq, char * login, char * pass)
 //--------------------------------------------------------------------------//
 {
-	int len;
+	_int32 len;
 
 	PktInit(Pkt, 1, seq);
 	PktInt(Pkt, HTOHL(1), 4); //0001
 	
 	PktInt(Pkt, HTONS(ICQ_DATA_TYPE_UIN), 2); //01
-	len = (int)strlen(login);
+	len = (_int32)strlen(login);
 	PktInt(Pkt, HTONS(len), 2);//len UIN //09
 	PktStr(Pkt, login, len);//UIN
 
 	PktInt(Pkt, HTONS(ICQ_DATA_TYPE_DATA), 2);//0002
-	len = (int)strlen(pass);
+	len = (_int32)strlen(pass);
 	PktInt(Pkt, HTONS(len), 2);// len pass //06
 	PktStr(Pkt, pass, len);// pass
 	XorPass(Pkt->Data + Pkt->Len - len, len);
@@ -443,9 +447,9 @@ ULONG _stdcall ICQConnect(PICQ_CLIENT client, wchar_t * host1, USHORT port, wcha
 	ULONG ret;
 	RAWPKT Pkt;
 
-	int len;
+	_int32 len;
 	char * tmp;
-	int ServerLen;
+	_int32 ServerLen;
 	char Cookie[512];
 	char NewServer[64];
 	
@@ -594,7 +598,7 @@ ULONG _stdcall ICQConnect(PICQ_CLIENT client, wchar_t * host1, USHORT port, wcha
 
 
 //--------------------------------------------------------------------------//
-ULONG _stdcall ICQReadMsg(PICQ_CLIENT client, wchar_t *UIN, wchar_t *msg, int* msglen)
+ULONG _stdcall ICQReadMsg(PICQ_CLIENT client, wchar_t *UIN, wchar_t *msg, _int32* msglen)
 //--------------------------------------------------------------------------//
 {
 	ULONG ret = 0;
@@ -602,7 +606,7 @@ ULONG _stdcall ICQReadMsg(PICQ_CLIENT client, wchar_t *UIN, wchar_t *msg, int* m
 	RAWPKT Pkt;
 	USHORT TVL;
 	char * data;
-	int x, len;
+	_int32 x, len;
 
 		
 	if (client->status == ICQ_CLIENT_STATUS_CONNECTED)
