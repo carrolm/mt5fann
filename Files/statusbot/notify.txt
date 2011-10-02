@@ -1,2 +1,2 @@
 Stop watcher...
-Balance = 6237.89 USD
+Balance = 10000.00 USD
