@@ -8,6 +8,7 @@
 #property version   "1.000"
 #include <gc\CommonFunctions.mqh>
 
+
 input string statusfilename = "status.txt";
 input string reportfilename = "report.txt";
 input string commandsfilename="commands.txt";
@@ -58,6 +59,7 @@ public:
 //+------------------------------------------------------------------+
 void CWatcher::Init()
   {
+   //GlobalVariableTemp();
    lastUpdate=TimeCurrent();
    ArrayResize(ar_sSTATUScur,10);
    ArrayResize(ar_sSTATUSpast,10);

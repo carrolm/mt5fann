@@ -53,7 +53,7 @@ void CWatcherICQ::CWatcherICQ(void)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool     CWatcherICQ::Run()
+bool  CWatcherICQ::Run()
   {
 // чтение сообщений
    while(client.ReadMessage(client.uin,client.msg,client.len))
