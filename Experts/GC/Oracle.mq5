@@ -62,7 +62,7 @@ void OnTick()
   {
    if(_TrailingPosition_) Trailing();
    if(!isNewBar(_Symbol)) return;
-    int io;
+   int io;
    double   res=0;
    for(io=0;io<nOracles;io++)
      {

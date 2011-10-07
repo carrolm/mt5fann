@@ -8,8 +8,8 @@
 //#property version   "000.001"
 
 #include <GC\DashBoard.mqh>
-#include <GC\WatcherICQ.mqh>
-CWatcherICQ watcher;
+#include <GC\Watcher.mqh>
+CWatcher watcher;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
