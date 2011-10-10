@@ -195,7 +195,7 @@ int DeleteOrder(ulong ticket)
    MqlTradeResult    trRez;
    trReq.action    =TRADE_ACTION_REMOVE;
    trReq.order     =ticket;
-   if(!Order_Send(trReq,trRez)){};
+   if(!Order_Send(trReq,trRez)){Print("Error delete!");};
    return(0);
   }
 //+------------------------------------------------------------------+

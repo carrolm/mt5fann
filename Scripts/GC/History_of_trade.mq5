@@ -28,9 +28,17 @@ void OnStart()
    datetime open_time; datetime t2;
    long pos_id;
    color colir;
+   MqlDateTime str1;
    ENUM_OBJECT type_obj = OBJ_ARROW;   
-     
-   HistorySelect(0,TimeCurrent());    
+    datetime dtstart=TimeCurrent();// выбор периодов!
+            TimeToStruct(dtstart,str1);
+            str1.hour=0; str1.min=0;str1.sec=0;
+            //if(TypeResult>1) str1.day=1;
+            //if(TypeResult>2) str1.mon=1;
+            //if(TypeResult>2) str1.year=2005;
+
+            dtstart=StructToTime(str1); 
+   HistorySelect(dtstart,TimeCurrent());    
    int deals=HistoryDealsTotal();
    
    for(i=0;i<deals;i++)
@@ -46,7 +54,7 @@ void OnStart()
      //----
      nam = "pos "+DoubleToString(pos_id,0)+" "+txt; 
      ObjectCreate(0,nam,type_obj,0,open_time,open_price);
-     nam = "   IN "+txt+" LOT = "+DoubleToString(volums,2);
+     nam =" ";// "   IN "+txt+" LOT = "+DoubleToString(volums,2);
      TxT(DoubleToString(tic,0),nam,open_time, open_price,DodgerBlue);
      //----
      if(SymbolInfoTick(Symbol(),last_tick))
@@ -71,17 +79,17 @@ void OnStart()
             ObjectCreate(0,nam,OBJ_TREND,0,open_time,open_price,t2,p2);
             ObjectSetInteger(0,nam,OBJPROP_WIDTH,2);
             ObjectSetInteger(0,nam,OBJPROP_COLOR,colir);
-            nam = "   OUT "+"PROFIT = "+DoubleToString(HistoryDealGetDouble(deal_ticket,DEAL_PROFIT),1)+" $";            
+            nam = "    "+DoubleToString(HistoryDealGetDouble(deal_ticket,DEAL_PROFIT),1)+" $";            
             TxT(DoubleToString(deal_ticket,0),nam,t2, p2,colir);            
           }
         }     
       }
    }
    //----
-   nam = "Всего сделок = "+DoubleToString(count,0);   
-   OnSUM(20, nam);
-   nam = "Из них прибыльных  = "+DoubleToString(coun2,0);   
-   OnSUM(40, nam);OnSUM(65, "yuriytokman@gmail.com");   
+   //nam = "Всего сделок = "+DoubleToString(count,0);   
+   //OnSUM(20, nam);
+   //nam = "Из них прибыльных  = "+DoubleToString(coun2,0);   
+   //OnSUM(40, nam);//OnSUM(65, "yuriytokman@gmail.com");   
    //----   
   }
 //+------------------------------------------------------------------+
@@ -107,7 +115,7 @@ void OnSUM(int x, string tx)
    string label_name=tx;
    if(ObjectFind(0,label_name)<0)
      {
-      Print("Object ",label_name," not found. Error code = ",GetLastError());
+      //Print("Object ",label_name," not found. Error code = ",GetLastError());
       ObjectCreate(0,label_name,OBJ_LABEL,0,0,0);           
       ObjectSetInteger(0,label_name,OBJPROP_XDISTANCE,20);
       ObjectSetInteger(0,label_name,OBJPROP_YDISTANCE,x);
