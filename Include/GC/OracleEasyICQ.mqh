@@ -36,10 +36,12 @@ double CEasyICQ::forecast(string smbl,int shift,bool train)
    if(client.len>0 &&0<StringFind(client.msg,smbl,0))
       {
       Print(client.msg);
-      if(0==StringFind(client.msg,"!Sell",0)) res=-1;
-      if(0==StringFind(client.msg,"!Buy",0)) res=1;
-//      if(0==StringFind(client.msg,"!Sell",0) return(-1);
-//      if(0==StringFind(client.msg,"!Sell",0) return(-1);
+      if(0==StringFind(client.msg,"!Sell",0)) res=-0.99;
+      if(0==StringFind(client.msg,"!Buy",0)) res=0.99;
+//    
+      if(0==StringFind(client.msg,"!CloseSell",0)) res=0.99;
+      if(0==StringFind(client.msg,"!CloseBuy",0)) res=-0.99;
+//      
       
 //      res = StringToDouble(client.msg);// есть ответ
       client.msg="";         
