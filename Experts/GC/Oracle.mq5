@@ -6,14 +6,15 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
-//#include <GC\Oracle.mqh>
+#include <GC\Oracle.mqh>
 #include <GC\OracleEasyICQ.mqh>
 #include <GC\CommonFunctions.mqh>
-#include <GC\WatcherICQ.mqh>
-//COracleTemplate *Oracles[];
+//#include <GC\OracleSocket.mqh>
+//#include <GC\WatcherICQ.mqh>
+COracleTemplate *Oracles[];
 input int _NEDATA_=1444;//0000;// cколько выгрузить
 int nOracles;
-CWatcherICQ watcher;
+//CWatcherICQ watcher;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -62,7 +63,7 @@ void OnTick()
   {
    if(_TrailingPosition_) Trailing();
    if(!isNewBar(_Symbol)) return;
-    int io;
+   int io;
    double   res=0;
    for(io=0;io<nOracles;io++)
      {
@@ -72,34 +73,5 @@ void OnTick()
      }
 
 //
-   NewOrder(_Symbol,res,"");
+   NewOrder(_Symbol,res,""+(string)res);
   }
-//+------------------------------------------------------------------+
-void OnChartEvent(const int id,         // идентификатор события  
-                  const long& lparam,   // параметр события типа long
-                  const double& dparam, // параметр события типа double
-                  const string& sparam  // параметр события типа string
-                  )
-  {
-//if(id==(int)CHARTEVENT_CLICK)
-//  {
-//   Print("Координаты щелчка мышки на графике: x=",lparam,"  y=",dparam);
-//  };
-   if(id==(int)CHARTEVENT_OBJECT_CLICK)
-     {
-      datetime dt=(datetime)ObjectGetInteger(0,sparam,OBJPROP_TIME);
-      //Print("Координаты щелчка мышки на объекте: x=",lparam,"  y=",dparam," ",sparam," ",dt);
-      int io;
-      double   res=0,tres=0;
-      Print("For ",dt);
-      for(io=0;io<nOracles;io++)
-        {
-         res=AllOracles[io].forecast(Symbol(),dt,false);
-         tres+=res;
-         if(0!=res) Print(AllOracles[io].Name()," ",res);
-        }
-
-     };
-
-  }
-//+------------------------------------------------------------------+

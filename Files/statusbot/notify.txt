@@ -1,2 +1,1 @@
-Stop watcher...
-Balance = 10000.00 USD
+Result EURUSD 1, balance=6164.29
