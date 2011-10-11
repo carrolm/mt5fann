@@ -53,5 +53,9 @@ uint SocketReadString(
                        SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 
                        string str        // строка
                        );
+uint SocketSendReceive(
+                       SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 
+                       string send_str,        // строка
+                       string &recv_str);        // строка
 
 #import

@@ -40,25 +40,25 @@ void OnTimer()
   {
    static int nm=0;
    string str_out,str_in;
-   int r=0;
+   uint r=0;
    if(SymbolInfoTick(_Symbol,tick))
      {
 
       str_out=StringFormat("%s %s %s %s %s",IntegerToString(nm++),_Symbol,TimeToString(tick.time,TIME_DATE|TIME_SECONDS),
                            DoubleToString(tick.bid,_Digits),DoubleToString(tick.ask,_Digits));
 
-      if(SocketWriteString(client,str_out+"\n")==SOCKET_CONNECT_STATUS__ERROR)
+      if((r=SocketSendReceive(client,str_out+"\n",str_in))==SOCKET_CONNECT_STATUS__ERROR)
         {
          Print("Error, connection failed");
          Sleep(3000);
          if(SocketOpen(client,host,port)==SOCKET_CONNECT_STATUS_OK)
             Print("Opened Socket");
         }
-      else Print(str_out);
+      else Print("get:",r," <",str_in,">");
      }
-   if((r=SocketReadString(client,str_in))>0)
-     {
-      Print("get...",r," ",str_in);
-     }
+   //if((r=SocketReadString(client,str_in))>0)
+   //  {
+   //   Print("get...",r," ",str_in);
+   //  }
   }
 //+------------------------------------------------------------------+
