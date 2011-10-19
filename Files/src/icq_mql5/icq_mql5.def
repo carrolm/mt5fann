@@ -3,4 +3,8 @@ EXPORTS
 	ICQClose 
 	ICQReadMsg
 	ICQSendMsg
+	SocketOpen
+	SocketClose
+	SocketWriteString
+	SocketReadString
 	
