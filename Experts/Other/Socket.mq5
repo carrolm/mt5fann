@@ -8,7 +8,7 @@
 #property version   "1.00"
 
 //#include <GC\Socket.mqh>
-#include <GC\icq_mql5.mqh>
+#include <GC\mt5_connect.mqh>
 
 //#define host "encogserver"
 #define host "192.168.2.104"
