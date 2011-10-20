@@ -10,9 +10,9 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CEasyICQ:public COracleTemplate
+class CEasySocket:public COracleTemplate
   {
-   COscarClient      client;
+   CSocketClient      client;
    virtual double    forecast(string smbl,int shift,bool train);
    //virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("Easy");};
@@ -20,19 +20,19 @@ class CEasyICQ:public COracleTemplate
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CEasyICQ::forecast(string smbl,int shift,bool train)
+double CEasySocket::forecast(string smbl,int shift,bool train)
   {
    double res=0;
    int i=0;
    string msg=GetInputAsString(smbl,shift);
    //if(""==msg) return(res);
-   client.SendMessage(ICQ_Expert,GetInputAsString(smbl,shift));
+   client.SendMessage(GetInputAsString(smbl,shift));
    //for(i=0;i<100||client.ReadMessage(client.uin,client.msg,client.len);i++)
       {
-        Sleep(500);
+        //Sleep(500);
         //client.ReadMessage(client.uin,client.msg,client.len);
       }
-      client.ReadMessage(client.uin,client.msg,client.len);
+      client.len=client.ReadMessage(client.msg);
    if(client.len>0 &&0<StringFind(client.msg,smbl,0))
       {
       Print(client.msg);
