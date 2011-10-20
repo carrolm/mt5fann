@@ -25,8 +25,9 @@ struct SOCKET_CLIENT
 //| DLL imports                                                      |
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
-//#import "socket_mql5_x32.dll"
-#import "SocketMQL5DLL.dll"
+#import "icq_mql5_x64.dll"
+//#import "socket_mql5_x64.dll"
+//#import "SocketMQL5DLL_x64"
 //+------------------------------------------------------------------+   
 uint SocketOpen(
                 SOCKET_CLIENT &cl,// переменная для хранения данных о подключении
@@ -38,13 +39,6 @@ void SocketClose(
                  SOCKET_CLIENT &cl // переменная для хранения данных о подключении
                  );
 
-//uint SocketWriteData(
-//                     SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 
-//                     string symbol,    // валютная пара
-//                     datetime dt,      // время прихода тика
-//                     double bid,       // Bid
-//                     double ask        // Ask
-//                     );
 
 uint SocketWriteString(
                        SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 
@@ -52,7 +46,7 @@ uint SocketWriteString(
                        );
 uint SocketReadString(
                        SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 
-                       string str        // строка
+                       string &str        // строка
                        );
 uint SocketSendReceive(
                        SOCKET_CLIENT &cl,// переменная для хранения данных о подключении 

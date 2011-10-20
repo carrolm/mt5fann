@@ -23,6 +23,19 @@
 //#define ICQ_Expert "36770049"
 #define ICQ_Master "36770049"
 
+#define SOCKET_CONNECT_STATUS_OK				0
+#define SOCKET_CONNECT_STATUS__ERROR		1000
+
+#define SOCKET_CLIENT_STATUS_CONNECTED		1
+#define SOCKET_CLIENT_STATUS_DISCONNECTED	2
+
+struct SOCKET_CLIENT
+  {
+   uchar             status;   // код состо€ни€ подключени€ 
+   ushort            sequence; // счетчик последовательности 
+   uint              sock;     // номер сокета
+  };
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -33,7 +46,8 @@ struct ICQ_CLIENT
    uint              sock;     // номер сокета
   };
 //+------------------------------------------------------------------+
-#import "icq_mql5_x32.dll"
+//#import "icq_mql5_x32.dll"
+#import "icq_mql5_x64.dll"
 //+------------------------------------------------------------------+   
 uint ICQConnect(
                 ICQ_CLIENT &cl,// переменна€ дл€ хранени€ данных о подключении
@@ -60,7 +74,48 @@ uint ICQReadMsg(
                 uint &len   // количество прин€тых символов в сообщении
                 );
 
+uint SocketOpen(
+                SOCKET_CLIENT &cl,// переменна€ дл€ хранени€ данных о подключении
+                string host,      // им€ сервера
+                ushort port       // порт сервера
+                );
+
+void SocketClose(
+                 SOCKET_CLIENT &cl // переменна€ дл€ хранени€ данных о подключении
+                 );
+
+uint SocketWriteString(
+                       SOCKET_CLIENT &cl,// переменна€ дл€ хранени€ данных о подключении 
+                       string str        // строка
+                       );
+uint SocketReadString(
+                      SOCKET_CLIENT &cl,// переменна€ дл€ хранени€ данных о подключении 
+                      string &str        // строка
+                      );
 #import
+class CSocketClient
+  {
+private:
+   SOCKET_CLIENT        client;        // хранение данных о подключении
+   uint              connect;      // флаг состо€ни€ подключени€
+   datetime          timesave;     // хранение последнего времени подключени€ к серверу
+   datetime          time_in;      // хранение последнего времени чтени€ сообщений
+
+public:
+   string            msg;            // буффер дл€ хранени€ текста прин€того сообщени€
+   uint              len;            // количество символов в прин€том сообщении
+   string            server;         // им€ сервера    
+   ushort            port;           // сетевой порт  
+   uint              timeout;        // заданеи таймаута(в секундах) между попытками подключени€ к сервру
+   bool              autocon;        // автоматическое восстановление соединени€
+                     CSocketClient();   // конструктор дл€ инициализации переменных класса
+   void              Init(void);
+   bool              Connect(void);    // ”становка соединени€ с сервером
+   void              Disconnect(void); // –азрыв соединени€ с сервером
+   int              SendMessage(string  msg); // ќтсылка сообщени€  
+   int              ReadMessage(string &msg); // ѕрием сообщени€
+  };
+
 //+------------------------------------------------------------------+
 class COscarClient
 //+------------------------------------------------------------------+
@@ -93,13 +148,80 @@ public:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool CSocketClient::Connect()
+//+------------------------------------------------------------------+
+  {
+
+   if((TimeLocal()-timesave)>=timeout)
+     {
+      timesave= TimeLocal();
+//      if(SocketOpen(client,server,port)==SOCKET_CONNECT_STATUS_OK)
+      connect = SocketOpen(client,server,port);
+
+      PrintError(connect);
+     }
+
+   if(connect==ICQ_CONNECT_STATUS_OK) return(true);
+   else return(false);
+
+  };
+
+//+------------------------------------------------------------------+
+CSocketClient::Disconnect()
+//+------------------------------------------------------------------+
+  {
+   connect=SOCKET_CLIENT_STATUS_DISCONNECTED;
+   SocketClose(client);
+  }
+
+//+------------------------------------------------------------------+
+CSocketClient::CSocketClient(void)//  онструктор
+//+------------------------------------------------------------------+
+  {
+   StringInit(msg,4096,0);
+   timeout=20;
+   server="192.168.2.104";
+   port=7777;
+   autocon=true;
+   Connect();
+  }
+
+
+//+------------------------------------------------------------------+
+int CSocketClient::ReadMessage(string &msg)
+//+------------------------------------------------------------------+
+  {
+   //bool res=false;
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
+
+   return((int)SocketReadString(client,msg));
+//   else if(client.status!=ICQ_CLIENT_STATUS_CONNECTED)
+//                          if(autocon) Connect();
+
+//   Sleep(100);
+   //return(res);
+  };
+//+------------------------------------------------------------------+
+int CSocketClient::SendMessage(string message)
+//+------------------------------------------------------------------+
+  {
+   bool ret=true;
+   if(""==message) return(ret);
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
+   if(!SocketWriteString(client,message+"\n"))
+     {
+      ret=false;
+      if(autocon) Connect();
+     }
+   return(ret);
+  };
 
 //+------------------------------------------------------------------+
 bool COscarClient::ReadMessage(string &uin,string &msg,uint &len)
 //+------------------------------------------------------------------+
   {
    bool res=false;
-   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED&&autocon) Connect();
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
 
    if(ICQReadMsg(client,uin,msg,len)) res=true;
    else if(client.status!=ICQ_CLIENT_STATUS_CONNECTED)
@@ -114,7 +236,7 @@ bool COscarClient::SendMessage(string UIN,string message)
   {
    bool ret=true;
    if(""==message) return(ret);
-   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED&&autocon) Connect();
+   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
    if(!ICQSendMsg(client,UIN,message))
      {
       ret=false;
@@ -126,7 +248,7 @@ bool COscarClient::SendMessage(string UIN,string message)
 bool COscarClient::Connect()
 //+------------------------------------------------------------------+
   {
-   
+
    if((TimeLocal()-timesave)>=timeout)
      {
       timesave= TimeLocal();

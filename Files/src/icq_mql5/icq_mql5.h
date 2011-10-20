@@ -34,7 +34,29 @@
 #define ICQ_DATA_TYPE_CLI_LESSER_VER		0x19
 #define ICQ_DATA_TYPE_CLI_BUILD_NUMBER		0x1A
 
+#define SOCKET_CLIENT_STATUS_CONNECTED		1
+#define SOCKET_CLIENT_STATUS_DISCONNECTED	2
+#define SOCKET_CONNECT_STATUS_ERROR			1000
+#define SOCKET_CONNECT_STATUS_OK			0
+
+#define HTONS(a) (((0xFF&a)<<8) + ((0xFF00&a)>>8))
+#define CELL_SIZE  8
+
+
 #pragma pack(1)
+
+typedef struct _SOCKET_CLIENT
+{
+	BYTE status;
+	USHORT sequence;
+	ULONG32 sock;
+} SOCKET_CLIENT, *PSOCKET_CLIENT;
+
+typedef struct _SINGLE_FD_SET
+{
+	UINT32 fd_count;
+    ULONG32 fd_sock;
+} SINGLE_FD_SET, *PSINGLE_FD_SET;
 
 
 typedef struct _ICQ_HEADER
@@ -73,11 +95,6 @@ typedef struct _RAWPKT
 	USHORT Len;
 } RAWPKT, *PRAWPKT;
 
-typedef struct _SINGLE_FD_SET
-{
-	ULONG fd_count;
-    ULONG fd_sock;
-} SINGLE_FD_SET, *PSINGLE_FD_SET;
 
 #pragma pack()
 

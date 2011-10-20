@@ -5,6 +5,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <windows.h>
+#include <stdio.h>
 #include <intrin.h>
 #include "icq_mql5.h"
 
@@ -19,15 +20,15 @@ _int32 find_wcstr(wchar_t *src, const wchar_t *mask)
 	_int32 pos=-1;
 	_int32 srclen,masklen;
 	
-	srclen = wcslen(src);
-	masklen = wcslen(mask);
+	srclen = (_int32)wcslen(src);
+	masklen = (_int32)wcslen(mask);
 	
 	if (srclen < masklen) return(pos);
 
-	for (size_t i=0; i <= srclen-masklen ; i++)
+	for (ULONG i=0; i <= (ULONG)(srclen-masklen) ; i++)
 	{
 		pos = i;
-		for (size_t j = 0; j < wcslen(mask);j++)
+		for (ULONG j = 0; j < wcslen(mask);j++)
 		{
 			if ( *(src+i+j)!=*(mask+j) ){pos =-1; break;}
 		}
@@ -112,7 +113,7 @@ ULONG Host2Ip(char * host)
 ULONG my_rand()
 //--------------------------------------------------------------------------//
 {
-	return __rdtsc();
+	return (ULONG)__rdtsc();
 	//return((ULONG)rand()*(ULONG)rand());
 //	_asm
 	{
@@ -166,7 +167,7 @@ ULONG ConnectToServer(char * host, USHORT port)
 	struct sockaddr_in addr;
 	
 	ULONG ip;
-	ULONG sock = INVALID_SOCKET;
+	ULONG sock = (ULONG)INVALID_SOCKET;
 	
 	ip = Host2Ip(host);
 	if (ip != INADDR_NONE)
@@ -184,7 +185,7 @@ ULONG ConnectToServer(char * host, USHORT port)
 				if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)))
 				{
 					closesocket(sock);
-					sock = INVALID_SOCKET;
+					sock = (ULONG)INVALID_SOCKET;
 				}
 			}
 		}
@@ -685,6 +686,128 @@ ULONG _stdcall ICQReadMsg(PICQ_CLIENT client, wchar_t *UIN, wchar_t *msg, _int32
 
 	return ret;
 }
+
+
+//--------------------------------------------------------------------------//
+ ULONG __stdcall SocketOpen(PSOCKET_CLIENT client, wchar_t * wc_host, USHORT port)
+//--------------------------------------------------------------------------//
+{
+	ULONG ret;
+
+	char *host  = new char[wcslen(wc_host) + 1]; 
+	//wcstombs_s(wcslen(wc_host),	host, wc_host, (size_t)(wcslen(wc_host) + 1));
+	wcstombs(host, wc_host, (size_t)wcslen(wc_host) + 1);
+	
+	client->status = SOCKET_CLIENT_STATUS_DISCONNECTED;
+	client->sequence = (USHORT)my_rand();
+	
+	client->sock = ConnectToServer(host, port);
+	
+	if (client->sock == INVALID_SOCKET)
+	{	
+		ret = SOCKET_CONNECT_STATUS_ERROR;
+		closesocket(client->sock);
+	}
+	else
+	{
+		client->status = SOCKET_CLIENT_STATUS_CONNECTED;
+		ret = SOCKET_CONNECT_STATUS_OK;
+	}
+	delete(host);
+
+	return(ret);
+}
+//--------------------------------------------------------------------------//
+ void __stdcall SocketClose(PSOCKET_CLIENT client)
+//--------------------------------------------------------------------------//
+{
+	if (client->status == SOCKET_CLIENT_STATUS_CONNECTED)
+	{
+		closesocket(client->sock);
+		client->status = SOCKET_CLIENT_STATUS_DISCONNECTED;
+	}
+}
+
+USHORT __stdcall SocketReadString(PSOCKET_CLIENT client, wchar_t *resv_wstr)
+//--------------------------------------------------------------------------//
+	{
+	
+	USHORT ret = 0;
+	USHORT TotalRet=0;
+	char RetStr[1024];
+	TIMEVAL tv;
+//	SINGLE_FD_SET  sfd_set;
+//	sfd_set.fd_count = 1;//fd_set
+//	sfd_set.fd_sock = client->sock;
+	FD_SET fd = {1, client->sock};
+	tv.tv_usec = 0;
+	tv.tv_sec = 10;
+	int select_ret=0;
+	char  str[512]; 
+ mbstowcs(resv_wstr, "Error: Receive abort",50);
+	select_ret=select(0, &fd, 0, 0, &tv);	
+	if (select_ret == 1)
+	 {
+	  mbstowcs(resv_wstr, "Error: enter",50);
+      //do
+      //{
+       TotalRet=recv(client->sock, RetStr, 500, 0);
+       if(TotalRet>0)
+        {
+			for(USHORT i=0;i<TotalRet;i++) str[ret++]=RetStr[i];
+        }
+      //} while (TotalRet>0&&str[ret-1]!='\n'&&ret<10);
+//      } while (TotalRet>0&&ret<256);
+	}
+	else
+	{
+		sprintf(str,"WSAGetLastError= %i",WSAGetLastError());//select_ret);
+         ret = 30;//mbstowcs(resv_wstr,str,20);          // 
+	}
+     if(ret>0)
+       {
+         str[ret++]=0;
+		   mbstowcs(resv_wstr,str,ret);          // 
+       }
+     else
+       { 
+         mbstowcs(resv_wstr, "Error: Receive abort",50);
+       }
+		//resv_wstr[wcslen(resv_wstr)]=0x00;
+
+     return (USHORT)wcslen(resv_wstr);
+}
+
+//--------------------------------------------------------------------------//
+ULONG __stdcall SocketWriteString(PSOCKET_CLIENT client, wchar_t *wstr)
+//--------------------------------------------------------------------------//
+{
+	
+	ULONG ret = SOCKET_CONNECT_STATUS_ERROR;
+	
+	char * str  = new char[wcslen(wstr) + 1]; 
+	wcstombs(str, wstr, wcslen(wstr) + 1);
+
+	if (client->status == SOCKET_CLIENT_STATUS_CONNECTED)
+	{
+		// отправка сообщения
+		if (send(client->sock, str, (int)strlen(str), 0) != (int)(strlen(str)))
+		{
+			client->status = SOCKET_CLIENT_STATUS_DISCONNECTED;
+			ret = SOCKET_CONNECT_STATUS_ERROR;
+			closesocket(client->sock);
+			
+		}
+		else
+		{
+			ret = SOCKET_CONNECT_STATUS_OK;
+		}
+	}
+
+	delete (str);
+	return ret;
+}
+
 
 
 //--------------------------------------------------------------------------//
