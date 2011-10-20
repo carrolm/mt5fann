@@ -81,10 +81,10 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
      {
       switch(ring)
         {
-         case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_test_data.csv";  break;
-         case 1: num_vals=num_valid;fnm=fname+"_"+smbl+"_valid_data.csv";  break;
-         case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_train_data.csv";  break;
-         case 3: num_vals=num_work;fnm=fname+"_"+smbl+"_prediction_data.csv";  break;
+         case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_M1_test_data.csv";  break;
+         case 1: num_vals=num_valid;fnm=fname+"_"+smbl+"_M1_valid_data.csv";  break;
+         case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_M1_train_data.csv";  break;
+         case 3: num_vals=num_work;fnm=fname+"_"+smbl+"_M1_prediction_data.csv";  break;
          default: num_vals=0;
         }
       if(num_vals>0)

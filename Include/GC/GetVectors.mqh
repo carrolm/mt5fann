@@ -559,7 +559,8 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
             res=mB;if(4*TS<res && draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
            }
          //Print(res+"/"+(TS));
-         res=_NumTS_*res/TS;
+//         res=_NumTS_*res/TS;
+         res=res/TS;
         }
       else
         {
