@@ -39,7 +39,7 @@ string COracleTemplate::GetInputAsString(string smbl,int shift)
    int export_precision=5;
    double Result=GetVectors(InputVector,inputSignals,smbl,0,shift);
    if(-100==Result) return("");
-   string outstr=""+smbl+",";
+   string outstr=""+smbl+",M1,";
    for(int j=0;j<num_input_signals;j++)
      {
       outstr+=DoubleToString(InputVector[j],export_precision)+",";
@@ -69,13 +69,13 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
    TimeToStruct(TimeCurrent(),tm);
    int cm=tm.mon;int FileHandleOC=-1;
    if(num_train>0)
-    {
-       FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+     {
+      FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
       if(FileHandleOC==INVALID_HANDLE)
-      {
-       Print("Error open file for write OracleDummy_fc.mqh");
-       return(false);
-      }
+        {
+         Print("Error open file for write OracleDummy_fc.mqh");
+         return(false);
+        }
      }
    for(int ring=0;ring<4;ring++)
      {
@@ -128,7 +128,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
-               if(Result>-2&&(Result>0.66 || Result<-0.66))
+               if(Result>-2 && (Result>0.66 || Result<-0.66))
                  {
                   if(num_train>0)FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                  }
@@ -179,6 +179,16 @@ bool COracleTemplate::loadSettings(string filename)
            }
         }
       FileClose(FileHandle);
+     }
+   else
+     {
+      FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV|FILE_COMMON,'=');
+      if(FileHandle!=INVALID_HANDLE)
+        {
+         FileWrite(FileHandle,"inputSignals",inputSignals);
+
+         FileClose(FileHandle);
+        }
      }
    Print(Name()," ready!");
    return(true);

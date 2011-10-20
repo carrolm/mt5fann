@@ -47,8 +47,8 @@ struct ICQ_CLIENT
    uint              sock;     // номер сокета
   };
 //+------------------------------------------------------------------+
-#import "mt5_connect_x64.dll"
-//#import "mt5_connect_x32.dll"
+//#import "mt5_connect_x64.dll"
+#import "mt5_connect_x32.dll"
 //+------------------------------------------------------------------+   
 uint ICQConnect(
                 ICQ_CLIENT &cl,// переменна€ дл€ хранени€ данных о подключении
@@ -182,20 +182,23 @@ CSocketClient::Disconnect()
 CSocketClient::CSocketClient(void)//  онструктор
 //+------------------------------------------------------------------+
   {
-   StringInit(msg,4096,0);
+   StringInit(msg,1025,0);
    timeout=20;
    server="192.168.2.104";
    port=7777;
    autocon=true;
+   //msg="                                                                                                                                                                    ";
    connect= SOCKET_CLIENT_STATUS_DISCONNECTED;
    Connect();
   }
 //+------------------------------------------------------------------+
-int CSocketClient::ReadMessage(string &msg)
+int CSocketClient::ReadMessage(string &message)
 //+------------------------------------------------------------------+
   {
    Connect();
-   return((int)SocketReadString(client,msg));
+   StringInit(message,1025,0);
+   message="                                                                                                                                                   ";
+   return((int)SocketReadString(client,message));
   };
 //+------------------------------------------------------------------+
 int CSocketClient::SendMessage(string message)
