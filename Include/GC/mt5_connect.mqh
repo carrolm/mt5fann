@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                     icq_mql5.mqh |
+//|                                                     mt5_connect.mqh |
 //|              Copyright Copyright 2010, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -28,14 +28,15 @@
 
 #define SOCKET_CLIENT_STATUS_CONNECTED		1
 #define SOCKET_CLIENT_STATUS_DISCONNECTED	2
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 struct SOCKET_CLIENT
   {
    uchar             status;   // код состояния подключения 
    ushort            sequence; // счетчик последовательности 
    uint              sock;     // номер сокета
   };
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -46,8 +47,8 @@ struct ICQ_CLIENT
    uint              sock;     // номер сокета
   };
 //+------------------------------------------------------------------+
-//#import "icq_mql5_x32.dll"
-#import "icq_mql5_x64.dll"
+#import "mt5_connect_x64.dll"
+//#import "mt5_connect_x32.dll"
 //+------------------------------------------------------------------+   
 uint ICQConnect(
                 ICQ_CLIENT &cl,// переменная для хранения данных о подключении
@@ -93,10 +94,13 @@ uint SocketReadString(
                       string &str        // строка
                       );
 #import
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 class CSocketClient
   {
 private:
-   SOCKET_CLIENT        client;        // хранение данных о подключении
+   SOCKET_CLIENT     client;        // хранение данных о подключении
    uint              connect;      // флаг состояния подключения
    datetime          timesave;     // хранение последнего времени подключения к серверу
    datetime          time_in;      // хранение последнего времени чтения сообщений
@@ -112,10 +116,9 @@ public:
    void              Init(void);
    bool              Connect(void);    // Установка соединения с сервером
    void              Disconnect(void); // Разрыв соединения с сервером
-   int              SendMessage(string  msg); // Отсылка сообщения  
-   int              ReadMessage(string &msg); // Прием сообщения
+   int               SendMessage(string  msg); // Отсылка сообщения  
+   int               ReadMessage(string &msg); // Прием сообщения
   };
-
 //+------------------------------------------------------------------+
 class COscarClient
 //+------------------------------------------------------------------+
@@ -152,20 +155,22 @@ bool CSocketClient::Connect()
 //+------------------------------------------------------------------+
   {
 
-   if((TimeLocal()-timesave)>=timeout)
+   if((connect!=SOCKET_CONNECT_STATUS_OK) && (TimeLocal()-timesave)>=timeout)
      {
-      timesave= TimeLocal();
-//      if(SocketOpen(client,server,port)==SOCKET_CONNECT_STATUS_OK)
-      connect = SocketOpen(client,server,port);
+      timesave=TimeLocal();
+      //      if(SocketOpen(client,server,port)==SOCKET_CONNECT_STATUS_OK)
+      connect=SocketOpen(client,server,port);
+      Print("Socket connect...");
 
-      PrintError(connect);
+      //PrintError(connect);
      }
-
-   if(connect==ICQ_CONNECT_STATUS_OK) return(true);
+   if(connect==SOCKET_CONNECT_STATUS_OK)
+     {
+      return(true);
+     }
    else return(false);
 
   };
-
 //+------------------------------------------------------------------+
 CSocketClient::Disconnect()
 //+------------------------------------------------------------------+
@@ -173,7 +178,6 @@ CSocketClient::Disconnect()
    connect=SOCKET_CLIENT_STATUS_DISCONNECTED;
    SocketClose(client);
   }
-
 //+------------------------------------------------------------------+
 CSocketClient::CSocketClient(void)// Конструктор
 //+------------------------------------------------------------------+
@@ -183,23 +187,15 @@ CSocketClient::CSocketClient(void)// Конструктор
    server="192.168.2.104";
    port=7777;
    autocon=true;
+   connect= SOCKET_CLIENT_STATUS_DISCONNECTED;
    Connect();
   }
-
-
 //+------------------------------------------------------------------+
 int CSocketClient::ReadMessage(string &msg)
 //+------------------------------------------------------------------+
   {
-   //bool res=false;
-   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
-
+   Connect();
    return((int)SocketReadString(client,msg));
-//   else if(client.status!=ICQ_CLIENT_STATUS_CONNECTED)
-//                          if(autocon) Connect();
-
-//   Sleep(100);
-   //return(res);
   };
 //+------------------------------------------------------------------+
 int CSocketClient::SendMessage(string message)
@@ -207,15 +203,13 @@ int CSocketClient::SendMessage(string message)
   {
    bool ret=true;
    if(""==message) return(ret);
-   if(client.status!=ICQ_CLIENT_STATUS_CONNECTED && autocon) Connect();
+   Connect();
    if(!SocketWriteString(client,message+"\n"))
      {
       ret=false;
-      if(autocon) Connect();
      }
    return(ret);
   };
-
 //+------------------------------------------------------------------+
 bool COscarClient::ReadMessage(string &uin,string &msg,uint &len)
 //+------------------------------------------------------------------+

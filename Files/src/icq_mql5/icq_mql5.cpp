@@ -733,31 +733,17 @@ USHORT __stdcall SocketReadString(PSOCKET_CLIENT client, wchar_t *resv_wstr)
 	{
 	
 	USHORT ret = 0;
-	USHORT TotalRet=0;
-	char RetStr[1024];
+//	USHORT TotalRet=0;
 	TIMEVAL tv;
-//	SINGLE_FD_SET  sfd_set;
-//	sfd_set.fd_count = 1;//fd_set
-//	sfd_set.fd_sock = client->sock;
 	FD_SET fd = {1, client->sock};
 	tv.tv_usec = 0;
 	tv.tv_sec = 10;
 	int select_ret=0;
-	char  str[512]; 
- mbstowcs(resv_wstr, "Error: Receive abort",50);
+	char  str[1024]; 
 	select_ret=select(0, &fd, 0, 0, &tv);	
 	if (select_ret == 1)
 	 {
-	  mbstowcs(resv_wstr, "Error: enter",50);
-      //do
-      //{
-       TotalRet=recv(client->sock, RetStr, 500, 0);
-       if(TotalRet>0)
-        {
-			for(USHORT i=0;i<TotalRet;i++) str[ret++]=RetStr[i];
-        }
-      //} while (TotalRet>0&&str[ret-1]!='\n'&&ret<10);
-//      } while (TotalRet>0&&ret<256);
+       ret=recv(client->sock, str, 1024, 0);
 	}
 	else
 	{
@@ -773,7 +759,7 @@ USHORT __stdcall SocketReadString(PSOCKET_CLIENT client, wchar_t *resv_wstr)
        { 
          mbstowcs(resv_wstr, "Error: Receive abort",50);
        }
-		//resv_wstr[wcslen(resv_wstr)]=0x00;
+	resv_wstr[wcslen(resv_wstr)-1]=0x00;
 
      return (USHORT)wcslen(resv_wstr);
 }
