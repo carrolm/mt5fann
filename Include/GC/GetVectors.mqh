@@ -68,9 +68,9 @@ double Result2Neuro(double in,string smbl)
 double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    double output_vector=0;
- 
+   //if(__Debug__) Print("GV: "+fn_names);
  // только фрактал попробуем...
-    double Close[]; ArraySetAsSeries(Close,true);
+   double Close[]; ArraySetAsSeries(Close,true);
    double High[]; ArraySetAsSeries(High,true);
    double Low[]; ArraySetAsSeries(Low,true);
    datetime Time[]; ArraySetAsSeries(Time,true);
@@ -88,6 +88,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
       || (Low[0+1]<Low[0+0] && Low[0+1]<Low[0+2]))
      {}
      else return(-100);
+  //if(__Debug__) Print("Get vector");
   int shift_history=15,ni=0;
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);

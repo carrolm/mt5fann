@@ -6,6 +6,8 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //#include <icq_mql5.mqh>
+input bool __Debug__=false;//Показывать отладочную информацию
+
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 input bool _Carefull_=true;//Быть осторожным
@@ -22,6 +24,7 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
    if(lastTime==0 || lastTime!=lastbarTime)
      {
       lastTime=lastbarTime;
+      //if(__Debug__) Print("New bar");
       return(true);
      }
    return(false);
