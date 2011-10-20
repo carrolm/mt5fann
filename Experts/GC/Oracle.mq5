@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #include <GC\Oracle.mqh>
-#include <GC\OracleEasyICQ.mqh>
+#include <GC\OracleEasySocket.mqh>
 #include <GC\CommonFunctions.mqh>
 //#include <GC\OracleSocket.mqh>
 //#include <GC\WatcherICQ.mqh>
@@ -22,7 +22,7 @@ int OnInit()
   {
    ArrayResize(AllOracles,20);
    nOracles=0;//AllOracles();
-   AllOracles[nOracles++]=new CEasyICQ;//COracleTemplate;
+   AllOracles[nOracles++]=new CEasySocket;//COracleTemplate;
    AllOracles[0].Init();
 //   AllOracles[0].ExportHistoryENCOG("","",_NEDATA_,0,0,0);
  //  Print(AllOracles[0].GetInputAsString(_Symbol,0));
