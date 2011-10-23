@@ -14,14 +14,14 @@
 #include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
 //COracleTemplate *Oracles[];
-input int _NEDATA_=100000;// cколько выгрузить
+input int _NEDATA_=300000;// cколько выгрузить
 
 void OnStart()
   {
 
-   COracleTemplate* MyOracles=new COracleTemplate;
+   COracleTemplate* MyOracles=new CEasy;//OracleTemplate;
    MyOracles.Init();
-   MyOracles.ExportHistoryENCOG("","",_NEDATA_,0,0);
+   MyOracles.ExportHistoryENCOG(_Symbol,"",_NEDATA_,0,0,0);
    delete  MyOracles;
    Print("Indicator data exported."); 
   }

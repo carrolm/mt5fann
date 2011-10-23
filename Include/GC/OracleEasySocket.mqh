@@ -40,10 +40,9 @@ double CEasySocket::forecast(string smbl,int shift,bool train)
       if(0==StringFind(client.msg,"!Sell",0)) res=-0.99;
       if(0==StringFind(client.msg,"!Buy",0)) res=0.99;
 //    
-      if(0==StringFind(client.msg,"!CloseSell",0)) res=0.99;
-      if(0==StringFind(client.msg,"!CloseBuy",0)) res=-0.99;
+      //if(0==StringFind(client.msg,"!CloseSell",0)) res=0.99;
+      //if(0==StringFind(client.msg,"!CloseBuy",0)) res=-0.99;
 //      
-      
 //      res = StringToDouble(client.msg);// есть ответ
       client.msg="";         
       }   
