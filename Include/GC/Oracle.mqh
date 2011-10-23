@@ -99,13 +99,17 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
             int copied=CopyRates(_Symbol,PERIOD_M1,0,shift+num_vals,rates);
-            if(num_train>0) FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
-            if(num_train>0) FileWrite(FileHandleOC," {");
+            if(num_train>0)
+              {
+               FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
+               FileWrite(FileHandleOC," {");
+              }
 
             for(i=shift;i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,inputSignals,smbl,0,i);
-               if(Result==-100) Result=0;
+               if(__Debug__) Comment(fnm+" "+(string)i);
+               if(Result==-100 || Result==-200) Result=0;
                //отнормируем
                //Result=Result2Neuro(Result,smbl);
                // отнормируем
@@ -128,15 +132,18 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
-               if(Result>-2 && (Result>0.66 || Result<-0.66))
+               if((num_train>0) && Result>-2 && (Result>0.66 || Result<-0.66))
                  {
-                  if(num_train>0)FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
+                  FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                  }
               }
             FileClose(FileHandle);
-            if(num_train>0)FileWrite(FileHandleOC,"  return(0);");
-            if(num_train>0)FileWrite(FileHandleOC," }");
-            if(num_train>0)FileClose(FileHandleOC);
+            if(num_train>0)
+              {
+               FileWrite(FileHandleOC,"  return(0);");
+               FileWrite(FileHandleOC," }");
+               FileClose(FileHandleOC);
+              }
             if(ring==3 && Result!=0)
               {
                FileDelete(fnm);
@@ -182,13 +189,13 @@ bool COracleTemplate::loadSettings(string filename)
      }
    else
      {
-      FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV|FILE_COMMON,'=');
-      if(FileHandle!=INVALID_HANDLE)
-        {
-         FileWrite(FileHandle,"inputSignals",inputSignals);
-
-         FileClose(FileHandle);
-        }
+      //      FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV|FILE_COMMON,'=');
+      //      if(FileHandle!=INVALID_HANDLE)
+      //        {
+      //         FileWrite(FileHandle,"inputSignals",inputSignals);
+      //
+      //         FileClose(FileHandle);
+      //        }
      }
    Print(Name()," ready!");
    return(true);
@@ -1288,7 +1295,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
 //n_vectors=(n_vectors-pos_in);
    for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
      {
-      if(GetVectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
+      if(Get_Vectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
         {
          // приведем к общему знаменателю
          double si=1;
@@ -1304,7 +1311,7 @@ bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
          //   }
         }
      }
-   if(train && GetVectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
+   if(train && Get_Vectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
      {
       for(i=0;i<n_o_vectors;i++)
         {

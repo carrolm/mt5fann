@@ -93,7 +93,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);
-   if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/15);
+   if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/5);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
    int start_pos=0,end_pos=0,shift_pos=0,add_shift,sp_pos;
@@ -426,7 +426,7 @@ double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
+bool Get_Vectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);
