@@ -67,7 +67,8 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
 //double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    TimeToStruct(TimeCurrent(),tm);
-   int cm=tm.mon;int FileHandleOC=-1;
+   int cm=tm.mon;int FileHandleOC=-1;int FileHandleStat=-1;
+   int QPRF=0,QS=0,QCB=0,QZ=0,QCS=0,QB=0,Q=0;
    if(num_train>0)
      {
       FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
@@ -76,6 +77,16 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
          Print("Error open file for write OracleDummy_fc.mqh");
          return(false);
         }
+      FileHandleStat=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+      if(FileHandleStat==INVALID_HANDLE)
+        {
+         Print("Error open file for write stat.csv");
+         return(false);
+        }
+      FileWrite(FileHandleStat,// записываем в файл шапку
+                //                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
+                "Symbol","SumTotalInSpread","QPRF","QS","QCB","QZ","QCS","QB","Q","MQS","MQCB","MQZ","MQCS","MQB");
+
      }
    for(int ring=0;ring<4;ring++)
      {
@@ -103,6 +114,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
               {
                FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
                FileWrite(FileHandleOC," {");
+
               }
 
             for(i=shift;i<(shift+num_vals);i++)
@@ -111,7 +123,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                if(__Debug__) Comment(fnm+" "+(string)i);
                if(Result==-100 || Result==-200) Result=0;
                //отнормируем
-               //Result=Result2Neuro(Result,smbl);
+//               Result=Result2Neuro(Result,smbl);
                // отнормируем
                //if(Result==0) continue;
                outstr="";need_exp=true;
@@ -120,21 +132,30 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                   outstr+=DoubleToString(InputVector[j],export_precision)+",";
                   if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
                  }
-               //if(Result>0.66) outstr+="""QB""";
-               //else if(Result>0.33) outstr+="""QCS""";
-               //else if(Result>0.1) outstr+="""QWCS""";
-               //else if(Result>-0.1) outstr+="""QZ""";
-               //else if(Result>-0.33) outstr+="""QWCB""";
-               //else if(Result>-0.66) outstr+="""QCB""";
-               //else outstr+="""QS""";
+               if(Result>0.66) outstr+="""Buy""";
+               else if(Result>0.33) outstr+="""CloseSell""";
+               else if(Result>-0.33) outstr+="""Wait""";
+               else if(Result>-0.66) outstr+="""CloseBuy""";
+               else outstr+="""Sell""";
 
-               outstr+=DoubleToString(Result,export_precision);
+               //outstr+=DoubleToString(Result,export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
-               if((num_train>0) && Result>-2 && (Result>0.66 || Result<-0.66))
+               if(2==ring)
                  {
-                  FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
+                  if(Result>-2 && (Result>0.66 || Result<-0.66))
+                    {
+                     FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
+                    }
+
+                  if(Result>0.66) QB++;
+                  else if(Result>.33) QCS++;
+                  //else if(res>0.1) QWCS++;
+                  else if(Result>-0.33) QZ++;
+                  //else if(res>-.33) QWCB++;
+                  else if(Result>-.66) QCB++;
+                  else QS++;
                  }
               }
             FileClose(FileHandle);
@@ -143,6 +164,16 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                FileWrite(FileHandleOC,"  return(0);");
                FileWrite(FileHandleOC," }");
                FileClose(FileHandleOC);
+               Q=QS+QCB+QZ+QCS+QB;
+               FileWrite(FileHandleStat,
+                         smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
+                         -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
+                         //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
+                         ,0
+                         //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
+                         ,1-2*(double)QB/Q-(double)QCS/Q,
+                         1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
+               FileClose(FileHandleStat);
               }
             if(ring==3 && Result!=0)
               {

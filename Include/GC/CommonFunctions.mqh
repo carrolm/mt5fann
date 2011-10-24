@@ -62,11 +62,19 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
   {
    if(""==smb)
      {
-      Print("empty symbol");
+//      Print("empty symbol");
       return(false);
      }
-   StringToUpper(smb);
    if(NewOrderWait==type || !_OpenNewPosition_) return(false);
+   string gvn="gc_NewOrder";
+   // check what run once
+   if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
+   double gvv;
+   if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
+   if(gvv>0) return(false);// startin
+   GlobalVariableSet(gvn,1);
+   
+   StringToUpper(smb);
    if(""==comment) comment=smb;
    ulong    ticket;
    ticket=0;
@@ -100,9 +108,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
      }
 // если нет паники, а есть слабые сигналы -их пинаем...
-   if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell))return(false);
+   if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell)){ GlobalVariableSet(gvn,0); return(false);}
    MqlTick lasttick;
-   if(!SymbolInfoTick(smb,lasttick)) return(false);;
+   if(!SymbolInfoTick(smb,lasttick)) { GlobalVariableSet(gvn,0); return(false);}
    if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
    if(price==0)
      {
@@ -177,6 +185,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
       if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
      }
+   GlobalVariableSet(gvn,0);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -249,6 +258,14 @@ bool ExportRates(string smb)
 bool Trailing()
   {
    if(!_TrailingPosition_) return(false);
+   string gvn="gc_Trailing";
+   // check what run once
+   if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
+   double gvv;
+   if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
+   if(gvv>0) return(false);// startin
+   GlobalVariableSet(gvn,1);
+   
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
    int i,TrailingStop;
@@ -304,7 +321,7 @@ bool Trailing()
          && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
          && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
-         ); else return(false);
+         ); else { GlobalVariableSet(gvn,0); return(false);}
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionSelect(smb))
@@ -452,7 +469,7 @@ bool Trailing()
          && (CopyLow(smb,per,0,needcopy,BufferL)==needcopy)
          && (CopyHigh(smb,per,0,needcopy,BufferH)==needcopy)
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
-         ){} else return(false);
+         ){} else {GlobalVariableSet(gvn,0);return(false);}
       SymbolInfoTick(smb,lasttick);
       trReq.symbol=smb;
       trReq.deviation=3;
@@ -555,6 +572,7 @@ bool Trailing()
            }
         }
      }
+   GlobalVariableSet(gvn,0);
    return(true);
   }
 //+------------------------------------------------------------------+
