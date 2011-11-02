@@ -21,13 +21,13 @@ public:
                      CChartObject();
                     ~CChartObject();
    //--- methods of access to protected data
-   long              ChartId() const       { return(m_chart_id);   }
-   int               Window() const        { return(m_window);     }
-   string            Name() const          { return(m_name);       }
+   long              ChartId()                   const { return(m_chart_id);   }
+   int               Window()                    const { return(m_window);     }
+   string            Name()                      const { return(m_name);       }
    bool              Name(const string name);
-   int               NumPoints() const     { return(m_num_points); }
+   int               NumPoints()                 const { return(m_num_points); }
    //--- method of identifying the object
-   virtual int       Type() const          { return(0x8888);       }
+   virtual int       Type()                      const { return(0x8888);       }
    //--- methods of filling the object
    bool              Attach(long chart_id,string name,int window,int points);
    bool              SetPoint(int point,datetime time,double price);
@@ -35,52 +35,54 @@ public:
    bool              Delete();
    void              Detach();
    //--- methods of access to properties of the object
-   datetime          Time(int point) const;
+   datetime          Time(int point)             const;
    bool              Time(int point,datetime time);
-   double            Price(int point) const;
+   double            Price(int point)            const;
    bool              Price(int point,double price);
-   color             Color() const;
+   color             Color()                     const;
    bool              Color(color new_color);
-   ENUM_LINE_STYLE   Style() const;
+   ENUM_LINE_STYLE   Style()                     const;
    bool              Style(ENUM_LINE_STYLE new_style);
-   int               Width() const;
+   int               Width()                     const;
    bool              Width(int new_width);
-   bool              Background() const;
+   bool              Background()                const;
    bool              Background(bool new_back);
-   bool              Selected() const;
+   long              Z_Order()                   const;
+   bool              Z_Order(long value);
+   bool              Selected()                  const;
    bool              Selected(bool new_sel);
-   bool              Selectable() const;
+   bool              Selectable()                const;
    bool              Selectable(bool new_sel);
-   string            Description() const;
+   string            Description()               const;
    bool              Description(const string new_text);
-   string            Tooltip() const;
+   string            Tooltip()                   const;
    bool              Tooltip(const string new_text);
-   int               Timeframes() const;
+   int               Timeframes()                const;
    virtual bool      Timeframes(int timeframes);
-   datetime          CreateTime() const;
-   int               LevelsCount() const;
+   datetime          CreateTime()                const;
+   int               LevelsCount()               const;
    bool              LevelsCount(int new_count);
    //--- methods to access the properties of levels of objects
-   color             LevelColor(int level) const;
+   color             LevelColor(int level)       const;
    bool              LevelColor(int level,color new_color);
-   ENUM_LINE_STYLE   LevelStyle(int level) const;
+   ENUM_LINE_STYLE   LevelStyle(int level)       const;
    bool              LevelStyle(int level,ENUM_LINE_STYLE new_style);
-   int               LevelWidth(int level) const;
+   int               LevelWidth(int level)       const;
    bool              LevelWidth(int level,int new_width);
-   double            LevelValue(int level) const;
+   double            LevelValue(int level)       const;
    bool              LevelValue(int level,double new_value);
    string            LevelDescription(int level) const;
    bool              LevelDescription(int level,const string new_text);
    //--- access methods to the API functions of MQL5
-   long              GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier=-1) const;
+   long              GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier=-1)          const;
    bool              GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long& value) const;
    bool              SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long value);
    bool              SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,long value);
-   double            GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier=-1) const;
+   double            GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier=-1)            const;
    bool              GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double& value) const;
    bool              SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double value);
    bool              SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,double value);
-   string            GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier=-1) const;
+   string            GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier=-1)            const;
    bool              GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string& value) const;
    bool              SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string value);
    bool              SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,string value);
@@ -361,6 +363,32 @@ bool CChartObject::Background(bool new_back)
    if(m_chart_id==-1) return(false);
 //---
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BACK,new_back));
+  }
+//+------------------------------------------------------------------+
+//| Get the "Z-order" property.                                      |
+//| INPUT:  no.                                                      |
+//| OUTPUT: the "Z-order" property.                                  |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+long CChartObject::Z_Order() const
+  {
+//--- checking
+   if(m_chart_id==-1) return(0);
+//---
+   return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_ZORDER));
+  }
+//+------------------------------------------------------------------+
+//| Set the "Z-order" property.                                      |
+//| INPUT:  value - new "Z-order" property.                          |
+//| OUTPUT: true if successful, false if not.                        |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+bool CChartObject::Z_Order(long value)
+  {
+//--- checking
+   if(m_chart_id==-1) return(false);
+//---
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_ZORDER,value));
   }
 //+------------------------------------------------------------------+
 //| Get the "selected" flag.                                         |
