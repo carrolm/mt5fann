@@ -41,26 +41,26 @@ double Sigmoid(double x)// вычисление логистической функции активации
 //+------------------------------------------------------------------+
 double Result2Neuro(double in,string smbl)
   {// in - количество спредов
-   return(tanh(in));
-
-   double res=0;
+   //return(tanh(in));
+   //in = tanh(in);
+   //double res=0;
    double ac[];
-   double EURUSD[]={-0.8634858714678669,-0.5181595398849712,-0.2567541885471368,0,0.2543535883970993,0.5113378344586146,0.8596049012253063};
+   //double EURUSD[]={-0.8634858714678669,-0.5181595398849712,-0.2567541885471368,0,0.2543535883970993,0.5113378344586146,0.8596049012253063};
+   double EURUSD[]={-0.9955444444444445,	-0.95972,	0,	0.9598422222222222,	0.9954711111111111};
+
 //EURUSD;79895;3;73337.27777777761;6558.555555555656;13648;20876;5258;10322;4910;20782;14036;89832;-0.8480719565410989;-0.4637545640751625;-0.1728337340813964;0;0.1701620803277229;0.4561626146584736;0.8437527829726601
 //GBPUSD;31380;3;28091.64285714257;3289.321428571481;6210;14897;5486;22955;5656;15352;6366;76922;-0.9192688697641767;-0.6448740282363954;-0.3798913184784587;0;0.3617950651309119;0.634902888640441;0.9172408413717792
 //AUDUSD;15838;3;13962.26666666666;1876.2333333334;3646;11917;6214;27916;6056;12135;3353;71237;-0.9488187318387916;-0.730350800847874;-0.4758341872903126;0;0.4801577831744739;0.7355166556705083;0.9529317629883347
    if("EURUSD"==smbl) ArrayCopy(ac,EURUSD);
-   else { Print("Not data for ",smbl);return 0;}
+   else { Print("Not data for ",smbl);return in;}
    if(in==0) return 0;
-   if(in>4) return ac[6];
-   else if(in>1) return ac[5];
-   else if(in>0.1) return ac[4];
-   else if(in>-0.1) return ac[3];
-   else if(in>-1) return ac[2];
-   else if(in>-4) return ac[1];
+   if(in>0.66) return ac[4];
+   else if(in>0.33) return ac[3];
+   else if(in>-0.33) return ac[2];
+   else if(in>-0.66) return ac[1];
    else return ac[0];
 
-   return res;
+   //return res;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -93,7 +93,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //if(shift<shift_history) shift_history=0;
    ArrayInitialize(InputVector,0);
 // вернем выход -если история      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);
-   if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/15);
+   if(shift>shift_history>0) output_vector=tanh(GetTrend(shift_history,smbl,tf,shift-shift_history,false)/5);
    if(StringLen(fn_names)<5) return output_vector;
 // разберем строку...
    int start_pos=0,end_pos=0,shift_pos=0,add_shift,sp_pos;
@@ -426,7 +426,7 @@ double GetVector_RSI(string smb,ENUM_TIMEFRAMES tf,int shift)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool GetVectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
+bool Get_Vectors(double &InputVector[],double &OutputVector[],int num_inputvectors,int num_outputvectors,string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    bool ret=false;
    if(0==num_inputvectors && 0==num_outputvectors) return(false);

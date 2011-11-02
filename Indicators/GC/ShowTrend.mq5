@@ -17,7 +17,7 @@
 #property indicator_buffers 2
 #property indicator_plots   1
 #property indicator_type1   DRAW_COLOR_HISTOGRAM
-#property indicator_color1  clrRed,clrYellow,clrBlue,clrLime
+#property indicator_color1  clrRed,clrYellow,,clrBlack,clrBlue,clrLime
 #property indicator_style1  0
 #property indicator_width1  1
 //--- indicator buffers
@@ -80,17 +80,19 @@ int OnCalculate(const int rates_total,
    DelTrash();
    for(i=1;i<_limit_;i++)
      {
-      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/15);
+      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/5);
       ExtVolumesBuffer[i+_TREND_]=res;
       ExtColorsBuffer[i+_TREND_]=2.0;
-      if(res<-0.33)
-         ExtColorsBuffer[i+_TREND_]=1.0;
-      if(res>0.33)
-         ExtColorsBuffer[i+_TREND_]=1.0;
       if(res<-0.66)
          ExtColorsBuffer[i+_TREND_]=0.0;
-      if(res>0.66)
+      else if(res<-0.33)
+         ExtColorsBuffer[i+_TREND_]=1.0;
+      else if(res<0.33)
+         ExtColorsBuffer[i+_TREND_]=2.0;
+      else if(res<0.66)
          ExtColorsBuffer[i+_TREND_]=3.0;
+       else   
+         ExtColorsBuffer[i+_TREND_]=4.0;
      }
      //if (res>0)  Label1Buffer[i+_TREND_]=res;
       //else Label2Buffer[i+_TREND_]=res;

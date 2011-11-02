@@ -17,7 +17,7 @@
 //проверка на  потерю данных
 
 #property copyright "GreyCardinal"
-#property version   "0.01"
+#property version   "1.01"
 //#include <Fractals.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
@@ -36,7 +36,7 @@
 void OnStart()
   {
 //   CPInit();   Write_File(100000-25); //
-   CPInit();   Write_File(100000-25); //
+   CPInit();   Write_File(500000-25); //
 
                                       //   CPInit();   Write_File(900,_Pers_); //
 //   Write_File(SymbolsArray,MaxSymbols,100,_Pers_); //
@@ -72,15 +72,15 @@ int Write_File(int qty)
          Print(SymbolIdx+1," of ",MaxSymbols);
          for(i=0;i<qty;i++)
            {
-            res=GetTrend(20,SymbolsArray[SymbolIdx],PERIOD_M1,i,false);
+            res=tanh(GetTrend(15,SymbolsArray[SymbolIdx],PERIOD_M1,i,false)/5);
             outstr="";
 //            if(res==0) continue;
-            if(res>4) {QB++;SumBuy+=(res-2);}
-            else if(res>1) QCS++;
-            else if(res>0.1) QWCS++;
-            else if(res>-0.1) QZ++;
-            else if(res>-1) QWCB++;
-            else if(res>-4) {QCB++;SumSell-=(res+2);}
+            if(res>0.66) QB++;
+            else if(res>.33) QCS++;
+            //else if(res>0.1) QWCS++;
+            else if(res>-0.33) QZ++;
+            //else if(res>-.33) QWCB++;
+            else if(res>-.66) QCB++;
             else QS++;
            }
 
