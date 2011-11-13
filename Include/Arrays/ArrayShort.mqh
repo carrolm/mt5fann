@@ -56,6 +56,7 @@ public:
    int               SearchLessOrEqual(short element) const;
    int               SearchFirst(short element) const;
    int               SearchLast(short element) const;
+   int               SearchLinear(short element) const;
 protected:
    virtual void      QuickSort(int beg,int end,int mode=0);
    int               QuickSearch(short element) const;
@@ -550,6 +551,22 @@ bool CArrayShort::InsertSort(short element)
    m_sort_mode=0;
 //---
    return(true);
+  }
+//+------------------------------------------------------------------+
+//| Search of position of element in a array.                        |
+//| INPUT:  element - search value.                                  |
+//| OUTPUT: position of the found element in the array.              |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CArrayShort::SearchLinear(short element) const
+  {
+//--- checking
+   if(m_data_total==0) return(-1);
+//---
+   for(int i=0;i<m_data_total;i++)
+      if(m_data[i]==element) return(i);
+//---
+   return(-1);
   }
 //+------------------------------------------------------------------+
 //| Quick search of position of element in a sorted array.           |
