@@ -562,6 +562,7 @@ void CExpert::DeinitMoney()
 //+------------------------------------------------------------------+
 void CExpert::DeinitIndicators()
   {
+   m_indicators.Clear();
   }
 //+------------------------------------------------------------------+
 //| Refreshing data for processing                                   |
@@ -1481,7 +1482,7 @@ bool CExpert::CheckTradeState()
 //--- establishment of the checkpoint history of the trade
    HistoryPoint(true);
 //---
-   return(true);
+   return(res);
   }
 //+------------------------------------------------------------------+
 //| Add timeframe for checked                                        |

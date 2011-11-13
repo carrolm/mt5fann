@@ -132,13 +132,14 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
                   outstr+=DoubleToString(InputVector[j],export_precision)+",";
                   if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
                  }
-               if(Result>0.66) outstr+="""Buy""";
-               else if(Result>0.33) outstr+="""CloseSell""";
-               else if(Result>-0.33) outstr+="""Wait""";
-               else if(Result>-0.66) outstr+="""CloseBuy""";
-               else outstr+="""Sell""";
+               
+               //if(Result>0.66) outstr+="""Buy""";
+               //else if(Result>0.33) outstr+="""CloseSell""";
+               //else if(Result>-0.33) outstr+="""Wait""";
+               //else if(Result>-0.66) outstr+="""CloseBuy""";
+               //else outstr+="""Sell""";
 
-               //outstr+=DoubleToString(Result,export_precision);
+               outstr+=DoubleToString(Result2Neuro(Result,smbl),export_precision);
                //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
