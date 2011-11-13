@@ -60,6 +60,7 @@ public:
    int               SearchLessOrEqual(const CObject *element) const;
    int               SearchFirst(const CObject *element) const;
    int               SearchLast(const CObject *element) const;
+
 protected:
    void              QuickSort(int beg,int end,int mode);
    int               QuickSearch(const CObject *element) const;

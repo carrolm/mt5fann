@@ -14,7 +14,7 @@
 #include <GC\Oracle.mqh>
 #include <GC\CommonFunctions.mqh>
 //COracleTemplate *Oracles[];
-input int _NEDATA_=450000;// cколько выгрузить
+input int _NEDATA_=500000;// cколько выгрузить
 
 void OnStart()
   {

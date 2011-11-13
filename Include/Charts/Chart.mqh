@@ -189,7 +189,7 @@ long CChart::Open(const string symbol_name,ENUM_TIMEFRAMES timeframe)
 ENUM_CHART_MODE CChart::Mode() const
   {
 //--- checking
-   if(m_chart_id<=0) return(WRONG_VALUE);
+   if(m_chart_id==-1) return(WRONG_VALUE);
 //---
    return((ENUM_CHART_MODE)ChartGetInteger(m_chart_id,CHART_MODE));
   }
@@ -202,7 +202,7 @@ ENUM_CHART_MODE CChart::Mode() const
 bool CChart::Mode(ENUM_CHART_MODE mode)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_MODE,mode));
   }
@@ -215,7 +215,7 @@ bool CChart::Mode(ENUM_CHART_MODE mode)
 bool CChart::Foreground() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_FOREGROUND));
   }
@@ -228,7 +228,7 @@ bool CChart::Foreground() const
 bool CChart::Foreground(bool foreground)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_FOREGROUND,foreground));
   }
@@ -241,7 +241,7 @@ bool CChart::Foreground(bool foreground)
 bool CChart::Shift() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHIFT));
   }
@@ -254,7 +254,7 @@ bool CChart::Shift() const
 bool CChart::Shift(bool shift)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHIFT,shift));
   }
@@ -267,7 +267,7 @@ bool CChart::Shift(bool shift)
 double CChart::ShiftSize() const
   {
 //--- checking
-   if(m_chart_id<=0) return(DBL_MAX);
+   if(m_chart_id==-1) return(DBL_MAX);
 //---
    return(ChartGetDouble(m_chart_id,CHART_SHIFT_SIZE));
   }
@@ -280,7 +280,7 @@ double CChart::ShiftSize() const
 bool CChart::ShiftSize(double shift)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
    if(shift<10) shift=10;
    if(shift>50) shift=50;
 //---
@@ -295,7 +295,7 @@ bool CChart::ShiftSize(double shift)
 bool CChart::AutoScroll() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_AUTOSCROLL));
   }
@@ -308,7 +308,7 @@ bool CChart::AutoScroll() const
 bool CChart::AutoScroll(bool auto_scroll)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_AUTOSCROLL,auto_scroll));
   }
@@ -321,7 +321,7 @@ bool CChart::AutoScroll(bool auto_scroll)
 int CChart::Scale() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_SCALE));
   }
@@ -334,7 +334,7 @@ int CChart::Scale() const
 bool CChart::Scale(int shift)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
    if(shift<0)  shift=0;
    if(shift>32) shift=32;
 //---
@@ -349,7 +349,7 @@ bool CChart::Scale(int shift)
 bool CChart::ScaleFix() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SCALEFIX));
   }
@@ -362,7 +362,7 @@ bool CChart::ScaleFix() const
 bool CChart::ScaleFix(bool scale_fix)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SCALEFIX,scale_fix));
   }
@@ -375,7 +375,7 @@ bool CChart::ScaleFix(bool scale_fix)
 bool CChart::ScaleFix_11() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SCALEFIX_11));
   }
@@ -388,7 +388,7 @@ bool CChart::ScaleFix_11() const
 bool CChart::ScaleFix_11(bool scale_fix_11)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SCALEFIX_11,scale_fix_11));
   }
@@ -401,7 +401,7 @@ bool CChart::ScaleFix_11(bool scale_fix_11)
 double CChart::FixedMax() const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,CHART_FIXED_MAX));
   }
@@ -414,7 +414,7 @@ double CChart::FixedMax() const
 bool CChart::FixedMax(double fixed_max)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetDouble(m_chart_id,CHART_FIXED_MAX,fixed_max));
   }
@@ -427,7 +427,7 @@ bool CChart::FixedMax(double fixed_max)
 double CChart::FixedMin() const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,CHART_FIXED_MIN));
   }
@@ -440,7 +440,7 @@ double CChart::FixedMin() const
 bool CChart::FixedMin(double fixed_min)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetDouble(m_chart_id,CHART_FIXED_MIN,fixed_min));
   }
@@ -453,7 +453,7 @@ bool CChart::FixedMin(double fixed_min)
 bool CChart::ScalePPB() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SCALE_PT_PER_BAR));
   }
@@ -466,7 +466,7 @@ bool CChart::ScalePPB() const
 bool CChart::ScalePPB(bool scale_ppb)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SCALE_PT_PER_BAR,scale_ppb));
   }
@@ -479,7 +479,7 @@ bool CChart::ScalePPB(bool scale_ppb)
 double CChart::PointsPerBar() const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,CHART_POINTS_PER_BAR));
   }
@@ -492,7 +492,7 @@ double CChart::PointsPerBar() const
 bool CChart::PointsPerBar(double points_per_bar)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetDouble(m_chart_id,CHART_POINTS_PER_BAR,points_per_bar));
   }
@@ -505,7 +505,7 @@ bool CChart::PointsPerBar(double points_per_bar)
 bool CChart::ShowOHLC() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_OHLC));
   }
@@ -518,7 +518,7 @@ bool CChart::ShowOHLC() const
 bool CChart::ShowOHLC(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_OHLC,show));
   }
@@ -531,7 +531,7 @@ bool CChart::ShowOHLC(bool show)
 bool CChart::ShowLineBid() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_BID_LINE));
   }
@@ -544,7 +544,7 @@ bool CChart::ShowLineBid() const
 bool CChart::ShowLineBid(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_BID_LINE,show));
   }
@@ -557,7 +557,7 @@ bool CChart::ShowLineBid(bool show)
 bool CChart::ShowLineAsk() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_ASK_LINE));
   }
@@ -570,7 +570,7 @@ bool CChart::ShowLineAsk() const
 bool CChart::ShowLineAsk(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_ASK_LINE,show));
   }
@@ -583,7 +583,7 @@ bool CChart::ShowLineAsk(bool show)
 bool CChart::ShowLastLine() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_LAST_LINE));
   }
@@ -596,7 +596,7 @@ bool CChart::ShowLastLine() const
 bool CChart::ShowLastLine(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_LAST_LINE,show));
   }
@@ -609,7 +609,7 @@ bool CChart::ShowLastLine(bool show)
 bool CChart::ShowPeriodSep() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_PERIOD_SEP));
   }
@@ -622,7 +622,7 @@ bool CChart::ShowPeriodSep() const
 bool CChart::ShowPeriodSep(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_PERIOD_SEP,show));
   }
@@ -635,7 +635,7 @@ bool CChart::ShowPeriodSep(bool show)
 bool CChart::ShowGrid() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_GRID));
   }
@@ -648,7 +648,7 @@ bool CChart::ShowGrid() const
 bool CChart::ShowGrid(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_GRID,show));
   }
@@ -661,7 +661,7 @@ bool CChart::ShowGrid(bool show)
 ENUM_CHART_VOLUME_MODE CChart::ShowVolumes() const
   {
 //--- checking
-   if(m_chart_id<=0) return(WRONG_VALUE);
+   if(m_chart_id==-1) return(WRONG_VALUE);
 //---
    return((ENUM_CHART_VOLUME_MODE)ChartGetInteger(m_chart_id,CHART_SHOW_VOLUMES));
   }
@@ -674,7 +674,7 @@ ENUM_CHART_VOLUME_MODE CChart::ShowVolumes() const
 bool CChart::ShowVolumes(ENUM_CHART_VOLUME_MODE show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_VOLUMES,show));
   }
@@ -687,7 +687,7 @@ bool CChart::ShowVolumes(ENUM_CHART_VOLUME_MODE show)
 bool CChart::ShowObjectDescr() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_SHOW_OBJECT_DESCR));
   }
@@ -700,7 +700,7 @@ bool CChart::ShowObjectDescr() const
 bool CChart::ShowObjectDescr(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_OBJECT_DESCR,show));
   }
@@ -713,7 +713,7 @@ bool CChart::ShowObjectDescr(bool show)
 bool CChart::ShowDateScale(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_DATE_SCALE,show));
   }
@@ -726,7 +726,7 @@ bool CChart::ShowDateScale(bool show)
 bool CChart::ShowPriceScale(bool show)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_SHOW_PRICE_SCALE,show));
   }
@@ -739,7 +739,7 @@ bool CChart::ShowPriceScale(bool show)
 color CChart::ColorBackground() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_BACKGROUND));
   }
@@ -752,7 +752,7 @@ color CChart::ColorBackground() const
 bool CChart::ColorBackground(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_BACKGROUND,new_color));
   }
@@ -765,7 +765,7 @@ bool CChart::ColorBackground(color new_color)
 color CChart::ColorForeground() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_FOREGROUND));
   }
@@ -778,7 +778,7 @@ color CChart::ColorForeground() const
 bool CChart::ColorForeground(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_FOREGROUND,new_color));
   }
@@ -791,7 +791,7 @@ bool CChart::ColorForeground(color new_color)
 color CChart::ColorGrid() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_GRID));
   }
@@ -804,7 +804,7 @@ color CChart::ColorGrid() const
 bool CChart::ColorGrid(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_GRID,new_color));
   }
@@ -817,7 +817,7 @@ bool CChart::ColorGrid(color new_color)
 color CChart::ColorBarUp() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_CHART_UP));
   }
@@ -830,7 +830,7 @@ color CChart::ColorBarUp() const
 bool CChart::ColorBarUp(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_CHART_UP,new_color));
   }
@@ -843,7 +843,7 @@ bool CChart::ColorBarUp(color new_color)
 color CChart::ColorBarDown() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_CHART_DOWN));
   }
@@ -856,7 +856,7 @@ color CChart::ColorBarDown() const
 bool CChart::ColorBarDown(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_CHART_DOWN,new_color));
   }
@@ -869,7 +869,7 @@ bool CChart::ColorBarDown(color new_color)
 color CChart::ColorCandleBull() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_CANDLE_BULL));
   }
@@ -882,7 +882,7 @@ color CChart::ColorCandleBull() const
 bool CChart::ColorCandleBull(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_CANDLE_BULL,new_color));
   }
@@ -895,7 +895,7 @@ bool CChart::ColorCandleBull(color new_color)
 color CChart::ColorCandleBear() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_CANDLE_BEAR));
   }
@@ -908,7 +908,7 @@ color CChart::ColorCandleBear() const
 bool CChart::ColorCandleBear(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_CANDLE_BEAR,new_color));
   }
@@ -921,7 +921,7 @@ bool CChart::ColorCandleBear(color new_color)
 color CChart::ColorChartLine() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_CHART_LINE));
   }
@@ -934,7 +934,7 @@ color CChart::ColorChartLine() const
 bool CChart::ColorChartLine(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_CHART_LINE,new_color));
   }
@@ -947,7 +947,7 @@ bool CChart::ColorChartLine(color new_color)
 color CChart::ColorVolumes() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_VOLUME));
   }
@@ -960,7 +960,7 @@ color CChart::ColorVolumes() const
 bool CChart::ColorVolumes(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_VOLUME,new_color));
   }
@@ -973,7 +973,7 @@ bool CChart::ColorVolumes(color new_color)
 color CChart::ColorLineBid() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_BID));
   }
@@ -986,7 +986,7 @@ color CChart::ColorLineBid() const
 bool CChart::ColorLineBid(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_BID,new_color));
   }
@@ -999,7 +999,7 @@ bool CChart::ColorLineBid(color new_color)
 color CChart::ColorLineAsk() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_ASK));
   }
@@ -1012,7 +1012,7 @@ color CChart::ColorLineAsk() const
 bool CChart::ColorLineAsk(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_ASK,new_color));
   }
@@ -1025,7 +1025,7 @@ bool CChart::ColorLineAsk(color new_color)
 color CChart::ColorLineLast() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_LAST));
   }
@@ -1038,7 +1038,7 @@ color CChart::ColorLineLast() const
 bool CChart::ColorLineLast(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_LAST,new_color));
   }
@@ -1051,7 +1051,7 @@ bool CChart::ColorLineLast(color new_color)
 color CChart::ColorStopLevels() const
   {
 //--- checking
-   if(m_chart_id<=0) return(CLR_NONE);
+   if(m_chart_id==-1) return(CLR_NONE);
 //---
    return((color)ChartGetInteger(m_chart_id,CHART_COLOR_STOP_LEVEL));
   }
@@ -1064,7 +1064,7 @@ color CChart::ColorStopLevels() const
 bool CChart::ColorStopLevels(color new_color)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_COLOR_STOP_LEVEL,new_color));
   }
@@ -1077,7 +1077,7 @@ bool CChart::ColorStopLevels(color new_color)
 bool CChart::BringToTop()
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_BRING_TO_TOP,true));
   }
@@ -1090,7 +1090,7 @@ bool CChart::BringToTop()
 bool CChart::EventObjectCreate(bool flag)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_EVENT_OBJECT_CREATE,flag));
   }
@@ -1103,7 +1103,7 @@ bool CChart::EventObjectCreate(bool flag)
 bool CChart::EventObjectDelete(bool flag)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,CHART_EVENT_OBJECT_DELETE,flag));
   }
@@ -1116,7 +1116,7 @@ bool CChart::EventObjectDelete(bool flag)
 int CChart::VisibleBars() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_WIDTH_IN_BARS));
   }
@@ -1129,7 +1129,7 @@ int CChart::VisibleBars() const
 int CChart::WindowsTotal() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_WINDOWS_TOTAL));
   }
@@ -1142,7 +1142,7 @@ int CChart::WindowsTotal() const
 bool CChart::WindowIsVisible(int num) const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,CHART_WINDOW_IS_VISIBLE,num));
   }
@@ -1155,7 +1155,7 @@ bool CChart::WindowIsVisible(int num) const
 int CChart::WindowHandle() const
   {
 //--- checking
-   if(m_chart_id<=0) return(INVALID_HANDLE);
+   if(m_chart_id==-1) return(INVALID_HANDLE);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_WINDOW_HANDLE));
   }
@@ -1168,7 +1168,7 @@ int CChart::WindowHandle() const
 int CChart::FirstVisibleBar() const
   {
 //--- checking
-   if(m_chart_id<=0) return(-1);
+   if(m_chart_id==-1) return(-1);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_FIRST_VISIBLE_BAR));
   }
@@ -1181,7 +1181,7 @@ int CChart::FirstVisibleBar() const
 int CChart::WidthInBars() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_WIDTH_IN_BARS));
   }
@@ -1194,7 +1194,7 @@ int CChart::WidthInBars() const
 int CChart::WidthInPixels() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_WIDTH_IN_PIXELS));
   }
@@ -1207,7 +1207,7 @@ int CChart::WidthInPixels() const
 int CChart::HeightInPixels(int num) const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return((int)ChartGetInteger(m_chart_id,CHART_HEIGHT_IN_PIXELS,num));
   }
@@ -1220,7 +1220,7 @@ int CChart::HeightInPixels(int num) const
 double CChart::PriceMin(int num) const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,CHART_PRICE_MIN,num));
   }
@@ -1233,7 +1233,7 @@ double CChart::PriceMin(int num) const
 double CChart::PriceMax(int num) const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,CHART_PRICE_MAX,num));
   }
@@ -1263,7 +1263,7 @@ void CChart::Close()
 bool CChart::Navigate(ENUM_CHART_POSITION position,int shift)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartNavigate(m_chart_id,position,shift));
   }
@@ -1277,7 +1277,7 @@ bool CChart::Navigate(ENUM_CHART_POSITION position,int shift)
 long CChart::GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int subwindow) const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartGetInteger(m_chart_id,prop_id,subwindow));
   }
@@ -1293,7 +1293,7 @@ long CChart::GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int subwindow) const
 bool CChart::GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int subwindow,long& value) const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetInteger(m_chart_id,prop_id,subwindow,value));
   }
@@ -1307,7 +1307,7 @@ bool CChart::GetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,int subwindow,long& 
 bool CChart::SetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,long value)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetInteger(m_chart_id,prop_id,value));
   }
@@ -1321,7 +1321,7 @@ bool CChart::SetInteger(ENUM_CHART_PROPERTY_INTEGER prop_id,long value)
 double CChart::GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int subwindow) const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartGetDouble(m_chart_id,prop_id,subwindow));
   }
@@ -1337,7 +1337,7 @@ double CChart::GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int subwindow) const
 bool CChart::GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int subwindow,double& value) const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartGetDouble(m_chart_id,prop_id,subwindow,value));
   }
@@ -1351,7 +1351,7 @@ bool CChart::GetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,int subwindow,double& 
 bool CChart::SetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,double value)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetDouble(m_chart_id,prop_id,value));
   }
@@ -1364,7 +1364,7 @@ bool CChart::SetDouble(ENUM_CHART_PROPERTY_DOUBLE prop_id,double value)
 string CChart::GetString(ENUM_CHART_PROPERTY_STRING prop_id) const
   {
 //--- checking
-   if(m_chart_id<=0) return("");
+   if(m_chart_id==-1) return("");
 //---
    return(ChartGetString(m_chart_id,prop_id));
   }
@@ -1379,7 +1379,7 @@ string CChart::GetString(ENUM_CHART_PROPERTY_STRING prop_id) const
 bool CChart::GetString(ENUM_CHART_PROPERTY_STRING prop_id,string& value) const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartGetString(m_chart_id,prop_id,value));
   }
@@ -1393,7 +1393,7 @@ bool CChart::GetString(ENUM_CHART_PROPERTY_STRING prop_id,string& value) const
 bool CChart::SetString(ENUM_CHART_PROPERTY_STRING prop_id,const string value)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetString(m_chart_id,prop_id,value));
   }
@@ -1407,7 +1407,7 @@ bool CChart::SetString(ENUM_CHART_PROPERTY_STRING prop_id,const string value)
 bool CChart::SetSymbolPeriod(const string symbol,ENUM_TIMEFRAMES period)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartSetSymbolPeriod(m_chart_id,symbol,period));
   }
@@ -1420,7 +1420,7 @@ bool CChart::SetSymbolPeriod(const string symbol,ENUM_TIMEFRAMES period)
 bool CChart::ApplyTemplate(const string filename)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartApplyTemplate(m_chart_id,filename));
   }
@@ -1437,7 +1437,7 @@ bool CChart::ApplyTemplate(const string filename)
 bool CChart::ScreenShot(const string filename,int width,int height,ENUM_ALIGN_MODE align_mode) const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartScreenShot(m_chart_id,filename,width,height,align_mode));
   }
@@ -1450,7 +1450,7 @@ bool CChart::ScreenShot(const string filename,int width,int height,ENUM_ALIGN_MO
 int CChart::WindowOnDropped() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartWindowOnDropped());
   }
@@ -1464,7 +1464,7 @@ int CChart::WindowOnDropped() const
 double CChart::PriceOnDropped() const
   {
 //--- checking
-   if(m_chart_id<=0) return(EMPTY_VALUE);
+   if(m_chart_id==-1) return(EMPTY_VALUE);
 //---
    return(ChartPriceOnDropped());
   }
@@ -1477,7 +1477,7 @@ double CChart::PriceOnDropped() const
 datetime CChart::TimeOnDropped() const
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartTimeOnDropped());
   }
@@ -1490,7 +1490,7 @@ datetime CChart::TimeOnDropped() const
 int CChart::XOnDropped() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartXOnDropped());
   }
@@ -1503,7 +1503,7 @@ int CChart::XOnDropped() const
 int CChart::YOnDropped() const
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartYOnDropped());
   }
@@ -1517,7 +1517,7 @@ int CChart::YOnDropped() const
 bool CChart::IndicatorAdd(int subwin,int handle)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartIndicatorAdd(m_chart_id,subwin,handle));
   }
@@ -1531,7 +1531,7 @@ bool CChart::IndicatorAdd(int subwin,int handle)
 bool CChart::IndicatorDelete(int subwin,const string name)
   {
 //--- checking
-   if(m_chart_id<=0) return(false);
+   if(m_chart_id==-1) return(false);
 //---
    return(ChartIndicatorDelete(m_chart_id,subwin,name));
   }
@@ -1544,7 +1544,7 @@ bool CChart::IndicatorDelete(int subwin,const string name)
 int CChart::IndicatorsTotal(int subwin)
   {
 //--- checking
-   if(m_chart_id<=0) return(0);
+   if(m_chart_id==-1) return(0);
 //---
    return(ChartIndicatorsTotal(m_chart_id,subwin));
   }
@@ -1558,7 +1558,7 @@ int CChart::IndicatorsTotal(int subwin)
 string CChart::IndicatorName(int subwin,int index)
   {
 //--- checking
-   if(m_chart_id<=0) return("");
+   if(m_chart_id==-1) return("");
 //---
    return(ChartIndicatorName(m_chart_id,subwin,index));
   }
@@ -1575,7 +1575,7 @@ bool CChart::Save(int file_handle)
    int    work_int;
 //--- checking
    if(file_handle<=0) return(false);
-   if(m_chart_id<=0)  return(false);
+   if(m_chart_id==-1) return(false);
 //--- writing
 //--- writing start marker - 0xFFFFFFFFFFFFFFFF
    if(FileWriteLong(file_handle,-1)!=sizeof(long)) return(false);
@@ -1645,7 +1645,7 @@ bool CChart::Load(int file_handle)
    int    work_int;
 //--- checking
    if(file_handle<=0) return(false);
-   if(m_chart_id<=0)  return(false);
+   if(m_chart_id==-1) return(false);
 //--- reading
 //--- reading and checking start marker - 0xFFFFFFFFFFFFFFFF
    if(FileReadLong(file_handle)!=-1) return(false);
