@@ -59,6 +59,7 @@ public:
    int               SearchLessOrEqual(float element) const;
    int               SearchFirst(float element) const;
    int               SearchLast(float element) const;
+   int               SearchLinear(float element) const;
 protected:
    virtual void      QuickSort(int beg,int end,int mode=0);
    int               QuickSearch(float element) const;
@@ -554,6 +555,22 @@ bool CArrayFloat::InsertSort(float element)
    m_sort_mode=0;
 //---
    return(true);
+  }
+//+------------------------------------------------------------------+
+//| Search of position of element in a array.                        |
+//| INPUT:  element - search value.                                  |
+//| OUTPUT: position of the found element in the array.              |
+//| REMARK: no.                                                      |
+//+------------------------------------------------------------------+
+int CArrayFloat::SearchLinear(float element) const
+  {
+//--- checking
+   if(m_data_total==0) return(-1);
+//---
+   for(int i=0;i<m_data_total;i++)
+      if(MathAbs(m_data[i]-element)<=m_delta) return(i);
+//---
+   return(-1);
   }
 //+------------------------------------------------------------------+
 //| Quick search of position of element in a sorted array.           |
