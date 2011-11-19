@@ -1,0 +1,24 @@
+[Common]
+LastStart=2011.01.14 23:00:07
+[FunctionsArray]
+Fractals=0
+Easy=0
+RSI=0
+IMA=0
+Stochastic=0
+HL=0
+High=0
+Low=0
+MACD=0
+CCI=0
+WPR=4
+AMA=0
+AO=0
+Ichimoku=0
+Envelopes=0
+[Custom]
+AnnType=CGGNGCANN
+max_E=0.001 // maximum error
+[Neurons]
+18998=109 0.672 0 0 0 0 0 0 0 0
+3164=1 -0.311 0 0 0 0 0 0 0 0
