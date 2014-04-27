@@ -35,7 +35,7 @@
 //|    ct - цвет текста                                                                               |
 //+---------------------------------------------------------------------------------------------------+
 void SetLabel(string nm,string tx,ENUM_BASE_CORNER cn,ENUM_ANCHOR_POINT cr,int xd,int yd,string fn,int fs,double yg,color ct)export
-  {
+  { 
    if(fs<1)fs=1;
    if(ObjectFind(0,nm)<0)ObjectCreate(0,nm,OBJ_LABEL,0,0,0);  //--- создадим объект Label
    ObjectSetString (0,nm,OBJPROP_TEXT,tx);                    //--- установим текст для объекта Label 
