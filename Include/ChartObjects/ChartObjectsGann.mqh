@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             ChartObjectsGann.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All Gann tools.                                                  |
 //+------------------------------------------------------------------+
@@ -15,112 +14,104 @@
 class CChartObjectGannLine : public CChartObjectTrendByAngle
   {
 public:
+                     CChartObjectGannLine(void);
+                    ~CChartObjectGannLine(void);
    //--- methods of access to properties of the object
-   double            PipsPerBar() const;
-   bool              PipsPerBar(double ppb);
+   double            PipsPerBar(void) const;
+   bool              PipsPerBar(const double ppb) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double ppb);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_GANNLINE); }
+   virtual int       Type(void) const { return(OBJ_GANNLINE); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Gann Line".                                       |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         ppb      - scale.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectGannLine::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb)
+CChartObjectGannLine::CChartObjectGannLine(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_GANNLINE,window,time1,price1,time2,0.0);
-//---
-   if(result)
-     {
-      result&=Attach(chart_id,name,window,2);
-      result&=PipsPerBar(ppb);
-     }
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the "PipsPerBar" property.                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "PipsPerBar" property.                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectGannLine::PipsPerBar() const
+CChartObjectGannLine::~CChartObjectGannLine(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Gann Line"                                        |
+//+------------------------------------------------------------------+
+bool CChartObjectGannLine::Create(long chart_id,const string name,const int window,
+                                  const datetime time1,const double price1,
+                                  const datetime time2,const double ppb)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_GANNLINE,window,time1,price1,time2,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+   if(!PipsPerBar(ppb))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the "PipsPerBar" property                           |
+//+------------------------------------------------------------------+
+double CChartObjectGannLine::PipsPerBar(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "PipsPerBar" property.                          |
-//| INPUT:  ppb - new value for the "PipsPerBar" property.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "PipsPerBar" property                          |
 //+------------------------------------------------------------------+
-bool CChartObjectGannLine::PipsPerBar(double ppb)
+bool CChartObjectGannLine::PipsPerBar(const double ppb) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,ppb));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing file.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectGannLine::Save(int file_handle)
+bool CChartObjectGannLine::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectTrend::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "PipsPerBar"
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectTrend::Save(file_handle))
+      return(false);
+//--- write value of the "PipsPerBar"
+   if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading file.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectGannLine::Load(int file_handle)
+bool CChartObjectGannLine::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectTrend::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "PipsPerBar" property
-      if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectTrend::Load(file_handle))
+      return(false);
+//--- read value of the "PipsPerBar" property
+   if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectGannFan.                                       |
@@ -130,144 +121,134 @@ bool CChartObjectGannLine::Load(int file_handle)
 class CChartObjectGannFan : public CChartObjectTrend
   {
 public:
+                     CChartObjectGannFan(void);
+                    ~CChartObjectGannFan(void);
    //--- methods of access to properties of the object
-   double            PipsPerBar() const;
-   bool              PipsPerBar(double ppb);
-   bool              Downtrend() const;
-   bool              Downtrend(bool downtrend);
+   double            PipsPerBar(void) const;
+   bool              PipsPerBar(const double ppb) const;
+   bool              Downtrend(void) const;
+   bool              Downtrend(const bool downtrend) const;
    //--- method of create the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double ppb);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_GANNFAN); }
+   virtual int       Type(void) const { return(OBJ_GANNFAN); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Gann Fan".                                        |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         ppb      - scale.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb)
+CChartObjectGannFan::CChartObjectGannFan(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_GANNFAN,window,time1,price1,time2,0.0);
-//---
-   if(result)
-     {
-      result&=Attach(chart_id,name,window,2);
-      result&=PipsPerBar(ppb);
-     }
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the "PipsPerBar" property.                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "PipsPerBar" property.                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectGannFan::PipsPerBar() const
+CChartObjectGannFan::~CChartObjectGannFan(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Gann Fan"                                         |
+//+------------------------------------------------------------------+
+bool CChartObjectGannFan::Create(long chart_id,const string name,const int window,
+                                 const datetime time1,const double price1,
+                                 const datetime time2,const double ppb)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_GANNFAN,window,time1,price1,time2,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+   if(!PipsPerBar(ppb))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the "PipsPerBar" property                           |
+//+------------------------------------------------------------------+
+double CChartObjectGannFan::PipsPerBar(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "PipsPerBar" property.                         |
-//| INPUT:  ppb - new value for the "PipsPerBar" property.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "PipsPerBar" property                          |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::PipsPerBar(double ppb)
+bool CChartObjectGannFan::PipsPerBar(const double ppb) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,ppb));
   }
 //+------------------------------------------------------------------+
-//| Get value of the "Downtrend" property.                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of "Downtrend" property.                           |
-//| REMARK: no.                                                      |
+//| Get value of the "Downtrend" property                            |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::Downtrend() const
+bool CChartObjectGannFan::Downtrend(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "Downtrend" property.                          |
-//| INPUT:  new_ray - new value for the "Downtrend" property.        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "Downtrend" property                           |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::Downtrend(bool downtrend)
+bool CChartObjectGannFan::Downtrend(const bool downtrend) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,downtrend));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::Save(int file_handle)
+bool CChartObjectGannFan::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectTrend::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "PipsPerBar" property
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double)) return(false);
-      //--- writing value of the "Downtrend" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION),CHAR_VALUE)!=sizeof(char)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectTrend::Save(file_handle))
+      return(false);
+//--- write value of the "PipsPerBar" property
+   if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double))
+      return(false);
+//--- write value of the "Downtrend" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading object parameters from file.                             |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading object parameters from file                              |
 //+------------------------------------------------------------------+
-bool CChartObjectGannFan::Load(int file_handle)
+bool CChartObjectGannFan::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectTrend::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "PipsPerBar"  property
-      if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle))) return(false);
-      //--- reading value of the "Downtrend"  property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectTrend::Load(file_handle))
+      return(false);
+//--- read value of the "PipsPerBar"  property
+   if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle)))
+      return(false);
+//--- read value of the "Downtrend"  property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectGannGrid.                                      |
@@ -277,143 +258,133 @@ bool CChartObjectGannFan::Load(int file_handle)
 class CChartObjectGannGrid : public CChartObjectTrend
   {
 public:
+                     CChartObjectGannGrid(void);
+                    ~CChartObjectGannGrid(void);
    //--- methods of access to properties of the object
-   double            PipsPerBar() const;
-   bool              PipsPerBar(double ppb);
-   bool              Downtrend() const;
-   bool              Downtrend(bool downtrend);
+   double            PipsPerBar(void) const;
+   bool              PipsPerBar(const double ppb) const;
+   bool              Downtrend(void) const;
+   bool              Downtrend(const bool downtrend) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double ppb);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_GANNGRID); }
+   virtual int       Type(void) const { return(OBJ_GANNGRID); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Gann Grid".                                       |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         ppb      - scale.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double ppb)
+CChartObjectGannGrid::CChartObjectGannGrid(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_GANNGRID,window,time1,price1,time2,0.0);
-//---
-   if(result)
-     {
-      result&=Attach(chart_id,name,window,2);
-      result&=PipsPerBar(ppb);
-     }
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the"PipsPerBar" property.                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "PipsPerBar" property.                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectGannGrid::PipsPerBar() const
+CChartObjectGannGrid::~CChartObjectGannGrid(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Gann Grid"                                        |
+//+------------------------------------------------------------------+
+bool CChartObjectGannGrid::Create(long chart_id,const string name,const int window,
+                                  const datetime time1,const double price1,
+                                  const datetime time2,const double ppb)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_GANNGRID,window,time1,price1,time2,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+   if(!PipsPerBar(ppb))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the"PipsPerBar" property                            |
+//+------------------------------------------------------------------+
+double CChartObjectGannGrid::PipsPerBar(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "PipsPerBar" property.                         |
-//| INPUT:  ppb - new value for the "PipsPerBar" property.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "PipsPerBar" property                          |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::PipsPerBar(double ppb)
+bool CChartObjectGannGrid::PipsPerBar(const double ppb) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,ppb));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "Downtrend".                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "Downtrend".                          |
-//| REMARK: no.                                                      |
+//| Get the property value "Downtrend"                               |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::Downtrend() const
+bool CChartObjectGannGrid::Downtrend(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION));
   }
 //+------------------------------------------------------------------+
-//| Set the property value "Downtrend".                              |
-//| INPUT:  new_ray -new the property value "Downtrend".             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Set the property value "Downtrend"                               |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::Downtrend(bool downtrend)
+bool CChartObjectGannGrid::Downtrend(const bool downtrend) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,downtrend));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::Save(int file_handle)
+bool CChartObjectGannGrid::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectTrend::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "PipsPerBar" property
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double)) return(false);
-      //--- writing value of the "Downtrend" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION),CHAR_VALUE)!=sizeof(char)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectTrend::Save(file_handle))
+      return(false);
+//--- write value of the "PipsPerBar" property
+   if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_SCALE))!=sizeof(double))
+      return(false);
+//--- write value of the "Downtrend" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DIRECTION),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading paprameters of object from file.                         |
-//| INPUT:  file_handle - handle of fiel previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading paprameters of object from file                          |
 //+------------------------------------------------------------------+
-bool CChartObjectGannGrid::Load(int file_handle)
+bool CChartObjectGannGrid::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectTrend::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "PipsPerBar" property
-      if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle))) return(false);
-      //--- reading value of the "Downtrend" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectTrend::Load(file_handle))
+      return(false);
+//--- read value of the "PipsPerBar" property
+   if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_SCALE,FileReadDouble(file_handle)))
+      return(false);
+//--- read value of the "Downtrend" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DIRECTION,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

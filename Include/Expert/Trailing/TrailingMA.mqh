@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   TrailingMA.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.12 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertTrailing.mqh>
 // wizard description start
@@ -35,54 +34,42 @@ protected:
    ENUM_APPLIED_PRICE m_ma_applied;
 
 public:
-                     CTrailingMA();
-                    ~CTrailingMA();
+                     CTrailingMA(void);
+                    ~CTrailingMA(void);
    //--- methods of initialization of protected data
    void              Period(int period)                  { m_ma_period=period;   }
    void              Shift(int shift)                    { m_ma_shift=shift;     }
    void              Method(ENUM_MA_METHOD method)       { m_ma_method=method;   }
    void              Applied(ENUM_APPLIED_PRICE applied) { m_ma_applied=applied; }
-   virtual bool      InitIndicators(CIndicators* indicators);
-   virtual bool      ValidationSettings();
+   virtual bool      InitIndicators(CIndicators *indicators);
+   virtual bool      ValidationSettings(void);
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp);
-   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double &sl,double &tp);
+   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double &sl,double &tp);
   };
 //+------------------------------------------------------------------+
-//| Constructor CTrailingMA.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CTrailingMA::CTrailingMA()
+void CTrailingMA::CTrailingMA(void) : m_MA(NULL),
+                                      m_ma_period(12),
+                                      m_ma_shift(0),
+                                      m_ma_method(MODE_SMA),
+                                      m_ma_applied(PRICE_CLOSE)
   {
-//--- initialize protected data
-   m_MA        =NULL;
-//--- set default inputs
-   m_ma_period =12;
-   m_ma_shift  =0;
-   m_ma_method =MODE_SMA;
-   m_ma_applied=PRICE_CLOSE;
   }
 //+------------------------------------------------------------------+
-//| Destructor CTrailingMA.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-void CTrailingMA::~CTrailingMA()
+void CTrailingMA::~CTrailingMA(void)
   {
-//---
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::ValidationSettings()
+bool CTrailingMA::ValidationSettings(void)
   {
-   if(!CExpertTrailing::ValidationSettings()) return(false);
+   if(!CExpertTrailing::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_ma_period<=0)
      {
@@ -94,16 +81,12 @@ bool CTrailingMA::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Checking for input parameters and setting protected data.        |
-//| INPUT:  symbol         -pointer to the CSymbolInfo,              |
-//|         period         -working period,                          |
-//|         adjusted_point -adjusted point value.                    |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::InitIndicators(CIndicators* indicators)
+bool CTrailingMA::InitIndicators(CIndicators *indicators)
   {
 //--- check
-   if(indicators==NULL)       return(false);
+   if(indicators==NULL)
+      return(false);
 //--- create MA indicator
    if(m_MA==NULL)
       if((m_MA=new CiMA)==NULL)
@@ -130,49 +113,43 @@ bool CTrailingMA::InitIndicators(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for long position.          |
-//| INPUT:  position - pointer for position object,                  |
-//|         sl       - refernce for new stop loss,                   |
-//|         tp       - refernce for new take profit.                 |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)
+bool CTrailingMA::CheckTrailingStopLong(CPositionInfo *position,double &sl,double &tp)
   {
 //--- check
-   if(position==NULL) return(false);
+   if(position==NULL)
+      return(false);
 //---
    double level =NormalizeDouble(m_symbol.Bid()-m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
    double new_sl=NormalizeDouble(m_MA.Main(1),m_symbol.Digits());
    double pos_sl=position.StopLoss();
-   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double base  =(pos_sl==0.0) ? position.PriceOpen() : pos_sl;
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(new_sl>base && new_sl<level) sl=new_sl;
+   if(new_sl>base && new_sl<level)
+      sl=new_sl;
 //---
    return(sl!=EMPTY_VALUE);
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for short position.         |
-//| INPUT:  position - pointer for position object,                  |
-//|         sl       - refernce for new stop loss,                   |
-//|         tp       - refernce for new take profit.                 |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingMA::CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp)
+bool CTrailingMA::CheckTrailingStopShort(CPositionInfo *position,double &sl,double &tp)
   {
 //--- check
-   if(position==NULL) return(false);
+   if(position==NULL)
+      return(false);
 //---
    double level =NormalizeDouble(m_symbol.Ask()+m_symbol.StopsLevel()*m_symbol.Point(),m_symbol.Digits());
    double new_sl=NormalizeDouble(m_MA.Main(1)+m_symbol.Spread()*m_symbol.Point(),m_symbol.Digits());
    double pos_sl=position.StopLoss();
-   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double base  =(pos_sl==0.0) ? position.PriceOpen() : pos_sl;
 //---
    sl=EMPTY_VALUE;
    tp=EMPTY_VALUE;
-   if(new_sl<base && new_sl>level) sl=new_sl;
+   if(new_sl<base && new_sl>level)
+      sl=new_sl;
 //---
    return(sl!=EMPTY_VALUE);
   }

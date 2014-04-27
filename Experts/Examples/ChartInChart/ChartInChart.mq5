@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                                 ChartInChart.mq5 |
-//|                        Copyright 2009, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2009, MetaQuotes Software Corp."
-#property link      "http://www.metaquotes.net"
+#property copyright "2009-2013, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
 //--- inputs
 input color TextColor=White;
 input color BGColor=SteelBlue;

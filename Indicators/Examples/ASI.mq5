@@ -54,15 +54,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- check for bars count
    if(rates_total<2) return(0);
@@ -76,17 +77,17 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       pos=1;
       ExtASIBuffer[0]=0.0;
       ExtSIBuffer[0]=0.0;
-      ExtTRBuffer[0]=High[0]-Low[0];
+      ExtTRBuffer[0]=high[0]-low[0];
      }
 //--- main cycle
    for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get some data
-      double dPrevClose=Close[i-1];
-      double dPrevOpen=Open[i-1];
-      double dClose=Close[i];
-      double dHigh=High[i];
-      double dLow=Low[i];
+      double dPrevClose=close[i-1];
+      double dPrevOpen=open[i-1];
+      double dClose=close[i];
+      double dHigh=high[i];
+      double dLow=low[i];
       //--- fill TR buffer
       ExtTRBuffer[i]=MathMax(dHigh,dPrevClose)-MathMin(dLow,dPrevClose);
       double ER=0.0;
@@ -100,7 +101,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       double R=ExtTRBuffer[i]-0.5*ER+0.25*SH;
       //--- calculate SI value
       if(R==0.0 || ExtTpoints==0.0) ExtSIBuffer[i]=0.0;
-      else     ExtSIBuffer[i]=50*(dClose-dPrevClose+0.5*(dClose-Open[i])+
+      else     ExtSIBuffer[i]=50*(dClose-dPrevClose+0.5*(dClose-open[i])+
                               0.25*(dPrevClose-dPrevOpen))*(K/ExtTpoints)/R;
       //--- write down ASI buffer value
       ExtASIBuffer[i]=ExtASIBuffer[i-1]+ExtSIBuffer[i];

@@ -1,11 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                              TestAccountInfo.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "2010, MetaQuotes Software Corp."
-#property link      "http://www.metaquotes.net"
+#property copyright "2009-2013, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
 //---
 #include <Trade\AccountInfo.mqh>
 #include <ChartObjects\ChartObjectsTxtControls.mqh>
@@ -27,22 +26,34 @@ protected:
    CChartObjectLabel m_label_info[19];
 
 public:
-   bool              Init();
-   void              Deinit();
-   void              Processing();
+                     CAccountInfoSample(void);
+                    ~CAccountInfoSample(void);
+   //---
+   bool              Init(void);
+   void              Deinit(void);
+   void              Processing(void);
 
 private:
-   void              AccountInfoToChart();
+   void              AccountInfoToChart(void);
   };
 //---
 CAccountInfoSample ExtScript;
 //+------------------------------------------------------------------+
-//| Method Init.                                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CAccountInfoSample::Init()
+CAccountInfoSample::CAccountInfoSample(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CAccountInfoSample::~CAccountInfoSample(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Method Init.                                                     |
+//+------------------------------------------------------------------+
+bool CAccountInfoSample::Init(void)
   {
    int   i,sy=10;
    int   dy=16;
@@ -52,7 +63,8 @@ bool CAccountInfoSample::Init()
    color_info =(color)(ChartGetInteger(0,CHART_COLOR_BACKGROUND)^0xFFFFFF);
    color_label=(color)(color_info^0x202020);
 //---
-   if(ChartGetInteger(0,CHART_SHOW_OHLC)) sy+=16;
+   if(ChartGetInteger(0,CHART_SHOW_OHLC))
+      sy+=16;
 //--- creation Labels[]
    for(i=0;i<19;i++)
      {
@@ -74,20 +86,14 @@ bool CAccountInfoSample::Init()
   }
 //+------------------------------------------------------------------+
 //| Method Deinit.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CAccountInfoSample::Deinit()
+void CAccountInfoSample::Deinit(void)
   {
   }
 //+------------------------------------------------------------------+
 //| Method Processing.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CAccountInfoSample::Processing()
+void CAccountInfoSample::Processing(void)
   {
    AccountInfoToChart();
 //--- redraw chart
@@ -96,11 +102,8 @@ void CAccountInfoSample::Processing()
   }
 //+------------------------------------------------------------------+
 //| Method InfoToChart.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: display account info.                                    |
 //+------------------------------------------------------------------+
-void CAccountInfoSample::AccountInfoToChart()
+void CAccountInfoSample::AccountInfoToChart(void)
   {
    m_label_info[0].Description((string)m_account.Login());
    m_label_info[1].Description(m_account.TradeModeDescription());
@@ -125,13 +128,14 @@ void CAccountInfoSample::AccountInfoToChart()
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
-void OnStart()
+void OnStart(void)
   {
 //--- call init function
    if(ExtScript.Init()==0)
      {
       //--- cycle until the script is not halted
-      while(!IsStopped()) ExtScript.Processing();
+      while(!IsStopped())
+         ExtScript.Processing();
      }
 //--- call deinit function
    ExtScript.Deinit();

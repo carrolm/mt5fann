@@ -1,11 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                  ExpertMoney.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| ¬ключаемые файлы.                                                |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "ExpertBase.mqh"
 //+------------------------------------------------------------------+
@@ -20,37 +16,37 @@ protected:
    double            m_percent;
 
 public:
-                     CExpertMoney();
+                     CExpertMoney(void);
+                    ~CExpertMoney(void);
    //--- methods of setting adjustable parameters
-   void              Percent(double percent)    { m_percent=percent; }
+   void              Percent(double percent) { m_percent=percent; }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
-   virtual double    CheckReverse(CPositionInfo* position,double sl);
-   virtual double    CheckClose(CPositionInfo* position);
+   virtual double    CheckReverse(CPositionInfo *position,double sl);
+   virtual double    CheckClose(CPositionInfo *position);
   };
 //+------------------------------------------------------------------+
-//| Constructor CExpertMoney.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CExpertMoney::CExpertMoney()
+void CExpertMoney::CExpertMoney(void) : m_percent(10.0)
   {
-//--- set default inputs
-   m_percent       =10.0;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CExpertMoney::~CExpertMoney(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpertMoney::ValidationSettings()
   {
-   if(!CExpertBase::ValidationSettings()) return(false);
+   if(!CExpertBase::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_percent<0.0 || m_percent>100.0)
      {
@@ -62,49 +58,44 @@ bool CExpertMoney::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertMoney::CheckOpenLong(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //---
    double lot;
    if(price==0.0)
       lot=m_account.MaxLotCheck(m_symbol.Name(),ORDER_TYPE_BUY,m_symbol.Ask(),m_percent);
    else
       lot=m_account.MaxLotCheck(m_symbol.Name(),ORDER_TYPE_BUY,price,m_percent);
-   if(lot<m_symbol.LotsMin()) return(0.0);
+   if(lot<m_symbol.LotsMin())
+      return(0.0);
 //---
    return(m_symbol.LotsMin());
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertMoney::CheckOpenShort(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //---
    double lot;
    if(price==0.0)
-      lot=m_account.MaxLotCheck(m_symbol.Name(),ORDER_TYPE_SELL,m_symbol.Ask(),m_percent);
+      lot=m_account.MaxLotCheck(m_symbol.Name(),ORDER_TYPE_SELL,m_symbol.Bid(),m_percent);
    else
       lot=m_account.MaxLotCheck(m_symbol.Name(),ORDER_TYPE_SELL,price,m_percent);
-   if(lot<m_symbol.LotsMin()) return(0.0);
+   if(lot<m_symbol.LotsMin())
+      return(0.0);
 //---
    return(m_symbol.LotsMin());
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for reverse.                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CExpertMoney::CheckReverse(CPositionInfo* position,double sl)
+double CExpertMoney::CheckReverse(CPositionInfo *position,double sl)
   {
    double lots=0.0;
 //---
@@ -119,17 +110,14 @@ double CExpertMoney::CheckReverse(CPositionInfo* position,double sl)
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for close.                                      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CExpertMoney::CheckClose(CPositionInfo* position)
+double CExpertMoney::CheckClose(CPositionInfo *position)
   {
    if(m_percent==0.0)
-     return(0.0);
+      return(0.0);
 //---
    if(-position.Profit()>m_account.Balance()*m_percent/100.0)
-     return(position.Volume());
+      return(position.Volume());
 //---
    return(0.0);
   }

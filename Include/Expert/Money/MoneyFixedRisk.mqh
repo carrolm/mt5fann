@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                               MoneyFixedRisk.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertMoney.mqh>
 // wizard description start
@@ -24,19 +23,32 @@
 class CMoneyFixedRisk : public CExpertMoney
   {
 public:
+                     CMoneyFixedRisk(void);
+                    ~CMoneyFixedRisk(void);
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
+   virtual double    CheckClose(CPositionInfo *position) { return(0.0); }
   };
 //+------------------------------------------------------------------+
+//| Constructor                                                      |
+//+------------------------------------------------------------------+
+void CMoneyFixedRisk::CMoneyFixedRisk(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CMoneyFixedRisk::~CMoneyFixedRisk(void)
+  {
+  }
+//+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyFixedRisk::CheckOpenLong(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    double minvol=m_symbol.LotsMin();
@@ -53,22 +65,22 @@ double CMoneyFixedRisk::CheckOpenLong(double price,double sl)
       lot=MathFloor(m_account.Balance()*m_percent/loss/100.0/stepvol)*stepvol;
      }
 //---
-   if(lot<minvol) lot=minvol;
+   if(lot<minvol)
+      lot=minvol;
 //---
    double maxvol=m_symbol.LotsMax();
-   if(lot>maxvol) lot=maxvol;
+   if(lot>maxvol)
+      lot=maxvol;
 //--- return trading volume
    return(lot);
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyFixedRisk::CheckOpenShort(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    double minvol=m_symbol.LotsMin();
@@ -85,10 +97,12 @@ double CMoneyFixedRisk::CheckOpenShort(double price,double sl)
       lot=MathFloor(m_account.Balance()*m_percent/loss/100.0/stepvol)*stepvol;
      }
 //---
-   if(lot<minvol) lot=minvol;
+   if(lot<minvol)
+      lot=minvol;
 //---
    double maxvol=m_symbol.LotsMax();
-   if(lot>maxvol) lot=maxvol;
+   if(lot>maxvol)
+      lot=maxvol;
 //--- return trading volume
    return(lot);
   }

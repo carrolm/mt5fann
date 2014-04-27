@@ -31,15 +31,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| On Balance Volume                                                |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- variables
    int    pos;
@@ -53,14 +54,14 @@ int OnCalculate(const int rates_total,const int prev_calculated,
      {
       pos=1;
       if(InpVolumeType==VOLUME_TICK)
-         ExtOBVBuffer[0]=(double)TickVolume[0];
-      else ExtOBVBuffer[0]=(double)Volume[0];
+         ExtOBVBuffer[0]=(double)tick_volume[0];
+      else ExtOBVBuffer[0]=(double)volume[0];
      }
 //--- main cycle
    if(InpVolumeType==VOLUME_TICK)
-      CalculateOBV(pos,rates_total,Close,TickVolume);
+      CalculateOBV(pos,rates_total,close,tick_volume);
    else
-      CalculateOBV(pos,rates_total,Close,Volume);
+      CalculateOBV(pos,rates_total,close,volume);
 //---- OnCalculate done. Return new prev_calculated.
    return(rates_total);
   }

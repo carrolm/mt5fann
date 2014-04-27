@@ -1,9 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                              Moving Averages.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2010, MetaQuotes Software Corp."
+#property copyright "Copyright 2009-2013, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 
@@ -23,9 +23,12 @@ double TradeSizeOptimized(void)
    double price=0.0;
    double margin=0.0;
 //--- select lot size
-   if(!SymbolInfoDouble(_Symbol,SYMBOL_ASK,price))               return(0.0);
-   if(!OrderCalcMargin(ORDER_TYPE_BUY,_Symbol,1.0,price,margin)) return(0.0);
-   if(margin<=0.0)                                               return(0.0);
+   if(!SymbolInfoDouble(_Symbol,SYMBOL_ASK,price))
+      return(0.0);
+   if(!OrderCalcMargin(ORDER_TYPE_BUY,_Symbol,1.0,price,margin))
+      return(0.0);
+   if(margin<=0.0)
+      return(0.0);
 
    double lot=NormalizeDouble(AccountInfoDouble(ACCOUNT_FREEMARGIN)*MaximumRisk/margin,2);
 //--- calculate number of losses orders without a break
@@ -46,31 +49,37 @@ double TradeSizeOptimized(void)
             break;
            }
          //--- check symbol
-         if(HistoryDealGetString(ticket,DEAL_SYMBOL)!=_Symbol) continue;
+         if(HistoryDealGetString(ticket,DEAL_SYMBOL)!=_Symbol)
+            continue;
          //--- check profit
          double profit=HistoryDealGetDouble(ticket,DEAL_PROFIT);
-         if(profit>0.0) break;
-         if(profit<0.0) losses++;
+         if(profit>0.0)
+            break;
+         if(profit<0.0)
+            losses++;
         }
       //---
-      if(losses>1) lot=NormalizeDouble(lot-lot*losses/DecreaseFactor,1);
+      if(losses>1)
+         lot=NormalizeDouble(lot-lot*losses/DecreaseFactor,1);
      }
 //--- normalize and check limits
    double stepvol=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);
    lot=stepvol*NormalizeDouble(lot/stepvol,0);
 
    double minvol=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
-   if(lot<minvol) lot=minvol;
+   if(lot<minvol)
+      lot=minvol;
 
    double maxvol=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
-   if(lot>maxvol) lot=maxvol;
+   if(lot>maxvol)
+      lot=maxvol;
 //--- return trading volume
    return(lot);
   }
 //+------------------------------------------------------------------+
 //| Check for open position conditions                               |
 //+------------------------------------------------------------------+
-void CheckForOpen()
+void CheckForOpen(void)
   {
    MqlRates rt[2];
 //--- go trading only for first ticks of new bar
@@ -79,7 +88,8 @@ void CheckForOpen()
       Print("CopyRates of ",_Symbol," failed, no history");
       return;
      }
-   if(rt[1].tick_volume>1) return;
+   if(rt[1].tick_volume>1)
+      return;
 //--- get current Moving Average 
    double   ma[1];
    if(CopyBuffer(ExtHandle,0,0,1,ma)!=1)
@@ -90,9 +100,13 @@ void CheckForOpen()
 //--- check signals
    ENUM_ORDER_TYPE signal=WRONG_VALUE;
 
-   if(rt[0].open>ma[0] && rt[0].close<ma[0]) signal=ORDER_TYPE_SELL;    // sell conditions
+   if(rt[0].open>ma[0] && rt[0].close<ma[0])
+      signal=ORDER_TYPE_SELL;    // sell conditions
    else
-      if(rt[0].open<ma[0] && rt[0].close>ma[0]) signal=ORDER_TYPE_BUY;  // buy conditions
+     {
+      if(rt[0].open<ma[0] && rt[0].close>ma[0])
+         signal=ORDER_TYPE_BUY;  // buy conditions
+     }
 //--- additional checking
    if(signal!=WRONG_VALUE)
       if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
@@ -108,7 +122,7 @@ void CheckForOpen()
 //+------------------------------------------------------------------+
 //| Check for close position conditions                              |
 //+------------------------------------------------------------------+
-void CheckForClose()
+void CheckForClose(void)
   {
    MqlRates rt[2];
 //--- go trading only for first ticks of new bar
@@ -117,7 +131,8 @@ void CheckForClose()
       Print("CopyRates of ",_Symbol," failed, no history");
       return;
      }
-   if(rt[1].tick_volume>1) return;
+   if(rt[1].tick_volume>1)
+      return;
 //--- get current Moving Average 
    double   ma[1];
    if(CopyBuffer(ExtHandle,0,0,1,ma)!=1)
@@ -129,8 +144,10 @@ void CheckForClose()
    bool signal=false;
    long type=PositionGetInteger(POSITION_TYPE);
 
-   if(type==(long)POSITION_TYPE_BUY   && rt[0].open>ma[0] && rt[0].close<ma[0]) signal=true;
-   if(type==(long)POSITION_TYPE_SELL  && rt[0].open<ma[0] && rt[0].close>ma[0]) signal=true;
+   if(type==(long)POSITION_TYPE_BUY   && rt[0].open>ma[0] && rt[0].close<ma[0])
+      signal=true;
+   if(type==(long)POSITION_TYPE_SELL  && rt[0].open<ma[0] && rt[0].close>ma[0])
+      signal=true;
 //--- additional checking
    if(signal)
       if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
@@ -144,26 +161,28 @@ void CheckForClose()
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-int OnInit()
+int OnInit(void)
   {
 //---
    ExtHandle=iMA(_Symbol,_Period,MovingPeriod,MovingShift,MODE_SMA,PRICE_CLOSE);
    if(ExtHandle==INVALID_HANDLE)
      {
       printf("Error creating MA indicator");
-      return(-1);
+      return(INIT_FAILED);
      }
 //---
-   return(0);
+   return(INIT_SUCCEEDED);
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-void OnTick()
+void OnTick(void)
   {
 //---
-   if(PositionSelect(_Symbol)) CheckForClose();
-   else                        CheckForOpen();
+   if(PositionSelect(_Symbol))
+      CheckForClose();
+   else
+      CheckForOpen();
 //---
   }
 //+------------------------------------------------------------------+

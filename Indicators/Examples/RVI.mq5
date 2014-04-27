@@ -45,15 +45,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Relative Vigor Index                                             |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int    i,j,nLimit;
    double dValueUp,dValueDown,dNum,dDeNum;
@@ -78,8 +79,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       dDeNum=0.0;
       for(j=i;j>i-InpRVIPeriod;j--)
         {
-         dValueUp=Close[j]-Open[j]+2*(Close[j-1]-Open[j-1])+2*(Close[j-2]-Open[j-2])+Close[j-3]-Open[j-3];
-         dValueDown=High[j]-Low[j]+2*(High[j-1]-Low[j-1])+2*(High[j-2]-Low[j-2])+High[j-3]-Low[j-3];
+         dValueUp=close[j]-open[j]+2*(close[j-1]-open[j-1])+2*(close[j-2]-open[j-2])+close[j-3]-open[j-3];
+         dValueDown=high[j]-low[j]+2*(high[j-1]-low[j-1])+2*(high[j-2]-low[j-2])+high[j-3]-low[j-3];
          dNum+=dValueUp;
          dDeNum+=dValueDown;
         }

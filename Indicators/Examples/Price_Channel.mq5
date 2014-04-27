@@ -81,15 +81,16 @@ double Lowest(const double &array[],int range,int fromIndex)
 //+------------------------------------------------------------------+
 //| Price Channell                                                   |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //--- check for rates
@@ -102,8 +103,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- the main loop of calculations
    for(i=limit;i<rates_total && !IsStopped();i++)
      {
-      ExtHighBuffer[i]=Highest(High,InpChannelPeriod,i);
-      ExtLowBuffer[i]=Lowest(Low,InpChannelPeriod,i);
+      ExtHighBuffer[i]=Highest(high,InpChannelPeriod,i);
+      ExtLowBuffer[i]=Lowest(low,InpChannelPeriod,i);
       ExtMiddBuffer[i]=(ExtHighBuffer[i]+ExtLowBuffer[i])/2.0;;
      }
 //--- OnCalculate done. Return new prev_calculated.

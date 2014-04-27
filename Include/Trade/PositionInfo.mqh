@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                 PositionInfo.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.05.14 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 #include "SymbolInfo.mqh"
@@ -21,231 +20,212 @@ protected:
    double            m_take_profit;
 
 public:
+                     CPositionInfo(void);
+                    ~CPositionInfo(void);
    //--- fast access methods to the integer position propertyes
-   datetime           Time()            const;
-   ENUM_POSITION_TYPE PositionType()    const;
-   string             TypeDescription() const;
-   long               Magic()           const;
-   long               Identifier()      const;
+   datetime          Time(void) const;
+   ulong             TimeMsc(void) const;
+   datetime          TimeUpdate(void) const;
+   ulong             TimeUpdateMsc(void) const;
+   ENUM_POSITION_TYPE PositionType(void) const;
+   string            TypeDescription(void) const;
+   long              Magic(void) const;
+   long              Identifier(void) const;
    //--- fast access methods to the double position propertyes
-   double            Volume()           const;
-   double            PriceOpen()        const;
-   double            StopLoss()         const;
-   double            TakeProfit()       const;
-   double            PriceCurrent()     const;
-   double            Commission()       const;
-   double            Swap()             const;
-   double            Profit()           const;
+   double            Volume(void) const;
+   double            PriceOpen(void) const;
+   double            StopLoss(void) const;
+   double            TakeProfit(void) const;
+   double            PriceCurrent(void) const;
+   double            Commission(void) const;
+   double            Swap(void) const;
+   double            Profit(void) const;
    //--- fast access methods to the string position propertyes
-   string            Symbol()           const;
-   string            Comment()          const;
+   string            Symbol(void) const;
+   string            Comment(void) const;
    //--- access methods to the API MQL5 functions
-   bool              InfoInteger(ENUM_POSITION_PROPERTY_INTEGER prop_id,long& var) const;
-   bool              InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var) const;
-   bool              InfoString(ENUM_POSITION_PROPERTY_STRING prop_id,string& var) const;
+   bool              InfoInteger(const ENUM_POSITION_PROPERTY_INTEGER prop_id,long &var) const;
+   bool              InfoDouble(const ENUM_POSITION_PROPERTY_DOUBLE prop_id,double &var) const;
+   bool              InfoString(const ENUM_POSITION_PROPERTY_STRING prop_id,string &var) const;
    //--- info methods
-   string            FormatType(string& str,const uint type)                       const;
-   string            FormatPosition(string& str)                                   const;
+   string            FormatType(string &str,const uint type) const;
+   string            FormatPosition(string &str) const;
    //--- methods for select position
    bool              Select(const string symbol);
-   bool              SelectByIndex(int index);
+   bool              SelectByIndex(const int index);
    //---
-   void              StoreState();
-   bool              CheckState();
+   void              StoreState(void);
+   bool              CheckState(void);
   };
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_TIME".                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_TIME".                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-datetime CPositionInfo::Time() const
+CPositionInfo::CPositionInfo(void) : m_type(WRONG_VALUE),
+                                     m_volume(0.0),
+                                     m_price(0.0),
+                                     m_stop_loss(0.0),
+                                     m_take_profit(0.0)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CPositionInfo::~CPositionInfo(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "POSITION_TIME"                           |
+//+------------------------------------------------------------------+
+datetime CPositionInfo::Time(void) const
   {
    return((datetime)PositionGetInteger(POSITION_TIME));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_TYPE".                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_TYPE".                      |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_TIME_MSC"                       |
 //+------------------------------------------------------------------+
-ENUM_POSITION_TYPE CPositionInfo::PositionType() const
+ulong CPositionInfo::TimeMsc(void) const
+  {
+   return((datetime)PositionGetInteger(POSITION_TIME_MSC));
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "POSITION_TIME_UPDATE"                    |
+//+------------------------------------------------------------------+
+datetime CPositionInfo::TimeUpdate(void) const
+  {
+   return((datetime)PositionGetInteger(POSITION_TIME_UPDATE));
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "POSITION_TIME_UPDATE_MSC"                |
+//+------------------------------------------------------------------+
+ulong CPositionInfo::TimeUpdateMsc(void) const
+  {
+   return((datetime)PositionGetInteger(POSITION_TIME_UPDATE_MSC));
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "POSITION_TYPE"                           |
+//+------------------------------------------------------------------+
+ENUM_POSITION_TYPE CPositionInfo::PositionType(void) const
   {
    return((ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_TYPE" as string.                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_TYPE" as string.            |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_TYPE" as string                 |
 //+------------------------------------------------------------------+
-string CPositionInfo::TypeDescription() const
+string CPositionInfo::TypeDescription(void) const
   {
    string str;
 //---
    return(FormatType(str,PositionType()));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_MAGIC".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_MAGIC".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_MAGIC"                          |
 //+------------------------------------------------------------------+
-long CPositionInfo::Magic() const
+long CPositionInfo::Magic(void) const
   {
    return(PositionGetInteger(POSITION_MAGIC));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_IDENTIFIER".                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_IDENTIFIER".                |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_IDENTIFIER"                     |
 //+------------------------------------------------------------------+
-long CPositionInfo::Identifier() const
+long CPositionInfo::Identifier(void) const
   {
    return(PositionGetInteger(POSITION_IDENTIFIER));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_VOLUME".                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_VOLUME".                    |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_VOLUME"                         |
 //+------------------------------------------------------------------+
-double CPositionInfo::Volume() const
+double CPositionInfo::Volume(void) const
   {
    return(PositionGetDouble(POSITION_VOLUME));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_PRICE_OPEN".                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_PRICE_OPEN".                |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_PRICE_OPEN"                     |
 //+------------------------------------------------------------------+
-double CPositionInfo::PriceOpen() const
+double CPositionInfo::PriceOpen(void) const
   {
    return(PositionGetDouble(POSITION_PRICE_OPEN));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_SL".                            |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_SL".                        |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_SL"                             |
 //+------------------------------------------------------------------+
-double CPositionInfo::StopLoss() const
+double CPositionInfo::StopLoss(void) const
   {
    return(PositionGetDouble(POSITION_SL));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_TP".                            |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_TP".                        |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_TP"                             |
 //+------------------------------------------------------------------+
-double CPositionInfo::TakeProfit() const
+double CPositionInfo::TakeProfit(void) const
   {
    return(PositionGetDouble(POSITION_TP));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_PRICE_CURRENT".                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_PRICE_CURRENT".             |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_PRICE_CURRENT"                  |
 //+------------------------------------------------------------------+
-double CPositionInfo::PriceCurrent() const
+double CPositionInfo::PriceCurrent(void) const
   {
    return(PositionGetDouble(POSITION_PRICE_CURRENT));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_COMMISSION".                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_COMMISSION".                |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_COMMISSION"                     |
 //+------------------------------------------------------------------+
-double CPositionInfo::Commission() const
+double CPositionInfo::Commission(void) const
   {
    return(PositionGetDouble(POSITION_COMMISSION));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_SWAP".                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_SWAP".                      |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_SWAP"                           |
 //+------------------------------------------------------------------+
-double CPositionInfo::Swap() const
+double CPositionInfo::Swap(void) const
   {
    return(PositionGetDouble(POSITION_SWAP));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_PROFIT".                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_PROFIT".                    |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_PROFIT"                         |
 //+------------------------------------------------------------------+
-double CPositionInfo::Profit() const
+double CPositionInfo::Profit(void) const
   {
    return(PositionGetDouble(POSITION_PROFIT));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_SYMBOL".                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_SYMBOL".                    |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_SYMBOL"                         |
 //+------------------------------------------------------------------+
-string CPositionInfo::Symbol() const
+string CPositionInfo::Symbol(void) const
   {
    return(PositionGetString(POSITION_SYMBOL));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "POSITION_COMMENT".                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "POSITION_COMMENT".                   |
-//| REMARK: no.                                                      |
+//| Get the property value "POSITION_COMMENT"                        |
 //+------------------------------------------------------------------+
-string CPositionInfo::Comment() const
+string CPositionInfo::Comment(void) const
   {
    return(PositionGetString(POSITION_COMMENT));
   }
 //+------------------------------------------------------------------+
-//| Access functions PositionGetInteger(...).                        |
-//| INPUT:  prop_id  -identifier integer properties,                 |
-//|         var     -reference to a variable to value.               |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Access functions PositionGetInteger(...)                         |
 //+------------------------------------------------------------------+
-bool CPositionInfo::InfoInteger(ENUM_POSITION_PROPERTY_INTEGER prop_id,long& var) const
+bool CPositionInfo::InfoInteger(const ENUM_POSITION_PROPERTY_INTEGER prop_id,long &var) const
   {
    return(PositionGetInteger(prop_id,var));
   }
 //+------------------------------------------------------------------+
-//| Access functions PositionGetDouble(...).                         |
-//| INPUT:  prop_id  -identifier double properties,                  |
-//|         var     -reference to a variable to value.               |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Access functions PositionGetDouble(...)                          |
 //+------------------------------------------------------------------+
-bool CPositionInfo::InfoDouble(ENUM_POSITION_PROPERTY_DOUBLE prop_id,double& var) const
+bool CPositionInfo::InfoDouble(const ENUM_POSITION_PROPERTY_DOUBLE prop_id,double &var) const
   {
    return(PositionGetDouble(prop_id,var));
   }
 //+------------------------------------------------------------------+
-//| Access functions PositionGetString(...).                         |
-//| INPUT:  prop_id  -identifier string properties,                  |
-//|         var     -reference to a variable to value.               |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Access functions PositionGetString(...)                          |
 //+------------------------------------------------------------------+
-bool CPositionInfo::InfoString(ENUM_POSITION_PROPERTY_STRING prop_id,string& var) const
+bool CPositionInfo::InfoString(const ENUM_POSITION_PROPERTY_STRING prop_id,string &var) const
   {
    return(PositionGetString(prop_id,var));
   }
 //+------------------------------------------------------------------+
-//| Converts the position type to text.                              |
-//| INPUT:  str  - receiving string,                                 |
-//|         type - position type.                                    |
-//| OUTPUT: formatted string.                                        |
-//| REMARK: no.                                                      |
+//| Converts the position type to text                               |
 //+------------------------------------------------------------------+
-string CPositionInfo::FormatType(string& str,const uint type) const
+string CPositionInfo::FormatType(string &str,const uint type) const
   {
 //--- clean
    str="";
@@ -254,22 +234,15 @@ string CPositionInfo::FormatType(string& str,const uint type) const
      {
       case POSITION_TYPE_BUY : str="buy";  break;
       case POSITION_TYPE_SELL: str="sell"; break;
-
-      default:
-         str="unknown position type "+(string)type;
-         break;
+      default                : str="unknown position type "+(string)type;
      }
 //--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Converts the position parameters to text.                        |
-//| INPUT:  str      - receiving string,                             |
-//|         position - pointer at the class instance.                |
-//| OUTPUT: formatted string.                                        |
-//| REMARK: no.                                                      |
+//| Converts the position parameters to text                         |
 //+------------------------------------------------------------------+
-string CPositionInfo::FormatPosition(string& str) const
+string CPositionInfo::FormatPosition(string &str) const
   {
    string      tmp,type;
    CSymbolInfo symbol;
@@ -285,41 +258,41 @@ string CPositionInfo::FormatPosition(string& str) const
 //--- add stops if there are any
    double sl=StopLoss();
    double tp=TakeProfit();
-   if(sl) { tmp=StringFormat(" sl: %s",DoubleToString(sl,digits)); str+=tmp; }
-   if(tp) { tmp=StringFormat(" tp: %s",DoubleToString(tp,digits)); str+=tmp; }
+   if(sl!=0.0)
+     {
+      tmp=StringFormat(" sl: %s",DoubleToString(sl,digits));
+      str+=tmp;
+     }
+   if(tp!=0.0)
+     {
+      tmp=StringFormat(" tp: %s",DoubleToString(tp,digits));
+      str+=tmp;
+     }
 //--- return the result
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Access functions PositionSelect(...).                            |
-//| INPUT:  symbol -symbol name for select position.                 |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Access functions PositionSelect(...)                             |
 //+------------------------------------------------------------------+
 bool CPositionInfo::Select(const string symbol)
   {
    return(PositionSelect(symbol));
   }
 //+------------------------------------------------------------------+
-//| Select a position on the index.                                  |
-//| INPUT:  index - position index.                                  |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Select a position on the index                                   |
 //+------------------------------------------------------------------+
-bool CPositionInfo::SelectByIndex(int index)
+bool CPositionInfo::SelectByIndex(const int index)
   {
    string name=PositionGetSymbol(index);
-   if(name=="") return(false);
+   if(name=="")
+      return(false);
 //---
    return(PositionSelect(name));
   }
 //+------------------------------------------------------------------+
-//| Stored position's current state.                                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Stored position's current state                                  |
 //+------------------------------------------------------------------+
-void CPositionInfo::StoreState()
+void CPositionInfo::StoreState(void)
   {
    m_type       =PositionType();
    m_volume     =Volume();
@@ -328,20 +301,17 @@ void CPositionInfo::StoreState()
    m_take_profit=TakeProfit();
   }
 //+------------------------------------------------------------------+
-//| Check position change.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: true - if position changed.                              |
+//| Check position change                                            |
 //+------------------------------------------------------------------+
-bool CPositionInfo::CheckState()
+bool CPositionInfo::CheckState(void)
   {
-   if(m_type==PositionType()  &&
-      m_volume==Volume()      &&
-      m_price==PriceOpen()    &&
-      m_stop_loss==StopLoss() &&
+   if(m_type==PositionType() && 
+      m_volume==Volume() && 
+      m_price==PriceOpen() && 
+      m_stop_loss==StopLoss() && 
       m_take_profit==TakeProfit())
       return(false);
-   else
-      return(true);
+//---
+   return(true);
   }
 //+------------------------------------------------------------------+

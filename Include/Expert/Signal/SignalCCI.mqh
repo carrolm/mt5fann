@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                    SignalCCI.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -43,7 +42,8 @@ protected:
    uint              m_extr_map;       // resulting bit-map of ratio of extremums of the oscillator and the price
 
 public:
-                     CSignalCCI();
+                     CSignalCCI(void);
+                    ~CSignalCCI(void);
    //--- methods of setting adjustable parameters
    void              PeriodCCI(int value)              { m_periodCCI=value;           }
    void              Applied(ENUM_APPLIED_PRICE value) { m_applied=value;             }
@@ -53,16 +53,16 @@ public:
    void              Pattern_2(int value)              { m_pattern_2=value;           }
    void              Pattern_3(int value)              { m_pattern_3=value;           }
    //--- method of verification of settings
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
-   virtual int       ShortCondition();
+   virtual int       LongCondition(void);
+   virtual int       ShortCondition(void);
 
 protected:
    //--- method of initialization of the oscillator
-   bool              InitStoch(CIndicators* indicators);
+   bool              InitStoch(CIndicators *indicators);
    //--- methods of getting data
    double            CCI(int ind)                      { return(m_cci.Main(ind));     }
    double            Diff(int ind)                     { return(CCI(ind)-CCI(ind+1)); }
@@ -71,33 +71,32 @@ protected:
    bool              CompareMaps(int map,int count,bool minimax=false,int start=0);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalCCI.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalCCI::CSignalCCI()
+CSignalCCI::CSignalCCI(void) : m_periodCCI(14),
+                               m_applied(PRICE_CLOSE),
+                               m_pattern_0(90),
+                               m_pattern_1(60),
+                               m_pattern_2(100),
+                               m_pattern_3(50)
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_HIGH+USE_SERIES_LOW;
-//--- setting default values for the oscillator parameters
-   m_periodCCI  =14;
-//--- setting default "weights" of the market models
-   m_pattern_0  =90;         // model 0 "the oscillator has required direction"
-   m_pattern_1  =60;         // model 1 "reverse behind the level of overbuying/overselling"
-   m_pattern_2  =100;        // model 3 "divergence of the oscillator and price"
-   m_pattern_3  =50;         // model 4 "double divergence of the oscillator and price"
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalCCI::~CSignalCCI(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCCI::ValidationSettings()
+bool CSignalCCI::ValidationSettings(void)
   {
 //--- validation settings of additional filters
-   if(!CExpertSignal::ValidationSettings()) return(false);
+   if(!CExpertSignal::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_periodCCI<=0)
      {
@@ -109,31 +108,29 @@ bool CSignalCCI::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCCI::InitIndicators(CIndicators* indicators)
+bool CSignalCCI::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize CCI oscillator
-   if(!InitStoch(indicators))                     return(false);
+   if(!InitStoch(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialize CCI oscillators.                                      |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalCCI::InitStoch(CIndicators* indicators)
+bool CSignalCCI::InitStoch(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add object to collection
    if(!indicators.Add(GetPointer(m_cci)))
      {
@@ -151,12 +148,6 @@ bool CSignalCCI::InitStoch(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Check of the oscillator state.                                   |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: absolute value - number of time intervals                |
-//|         passed from the moment of reverse of the oscillator,     |
-//|         sign: <0 - the oscillator has turned downwards,          |
-//|               >0 - the oscillator has turned upwards.            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 int CSignalCCI::State(int ind)
   {
@@ -165,35 +156,35 @@ int CSignalCCI::State(int ind)
 //---
    for(int i=ind;;i++)
      {
-      if(CCI(i+1)==EMPTY_VALUE) break;
+      if(CCI(i+1)==EMPTY_VALUE)
+         break;
       var=Diff(i);
       if(res>0)
         {
-         if(var<0) break;
+         if(var<0)
+            break;
          res++;
          continue;
         }
       if(res<0)
         {
-         if(var>0) break;
+         if(var>0)
+            break;
          res--;
          continue;
         }
-      if(var>0) res++;
-      if(var<0) res--;
+      if(var>0)
+         res++;
+      if(var<0)
+         res--;
      }
 //--- return the result
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Extended check of the oscillator state.                          |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: true if the model corresponds to a pattern,              |
-//|         otherwise - false.                                       |
-//| REMARK: Extended check of the oscillator state                   |
-//|         consists in forming a bit-map                            |
-//|         according to certain rules, which                        |
-//|         shows ratios of extremums of the oscillator and price.   |
+//| Extended check of the oscillator state consists                  |
+//| in forming a bit-map according to certain rules,                 |
+//| which shows ratios of extremums of the oscillator and price.     |
 //+------------------------------------------------------------------+
 bool CSignalCCI::ExtState(int ind)
   {
@@ -236,8 +227,10 @@ bool CSignalCCI::ExtState(int ind)
             m_extr_pr[i]=m_low.MinValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]<m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]<m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]<m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]<m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -255,8 +248,10 @@ bool CSignalCCI::ExtState(int ind)
             m_extr_pr[i]=m_high.MaxValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]>m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]>m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]>m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]>m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -269,20 +264,14 @@ bool CSignalCCI::ExtState(int ind)
   }
 //+------------------------------------------------------------------+
 //| Comparing the bit-map of extremums with pattern.                 |
-//| INPUT:  map     - pattern of bit-map,                            |
-//|         count   - number of analyzed extremums,                  |
-//|         minimax - 'all' flag,                                    |
-//|         start   - starting extremum.                             |
-//| OUTPUT: true if the analyzed map corresponds to the pattern,     |
-//|         otherwise - false.                                       |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CSignalCCI::CompareMaps(int map,int count,bool minimax,int start)
   {
    int step =(minimax)?4:8;
    int total=step*(start+count);
 //--- check input parameters for a possible going out of range of the bit-map
-   if(total>32) return(false);
+   if(total>32)
+      return(false);
 //--- bit-map of the patter is an "array" of 4-bit fields
 //--- each "element of the array" definitely describes the desired ratio
 //--- of current extremums of the oscillator and the price with previous ones
@@ -312,26 +301,26 @@ bool CSignalCCI::CompareMaps(int map,int count,bool minimax,int start)
         {
          //--- "take" two bits of the corresponding extremum of the price (higher-order bit is always 0)
          check_map=(m_extr_map>>i)&3;
-         if(inp_map!=check_map) return(false);
+         if(inp_map!=check_map)
+            return(false);
         }
       //--- "take" two bits - pattern of the corresponding oscillator extremum
       inp_map=(map>>(j+2))&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
-      if(inp_map>=2) continue;
+      if(inp_map>=2)
+         continue;
       //--- "take" two bits of the corresponding oscillator extremum (higher-order bit is always 0)
       check_map=(m_extr_map>>(i+2))&3;
-      if(inp_map!=check_map) return(false);
+      if(inp_map!=check_map)
+         return(false);
      }
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalCCI::LongCondition()
+int CSignalCCI::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
@@ -339,7 +328,8 @@ int CSignalCCI::LongCondition()
    if(Diff(idx)>0.0)
      {
       //--- the oscillator is directed upwards confirming the possibility of price growth
-      if(IS_PATTERN_USAGE(0)) result=m_pattern_0;      // "confirming" signal number 0
+      if(IS_PATTERN_USAGE(0))
+         result=m_pattern_0;      // "confirming" signal number 0
       //--- if the model 1 is used, search for a reverse of the oscillator upwards behind the level of overselling
       if(IS_PATTERN_USAGE(1) && Diff(idx+1)<0.0 && CCI(idx+1)<-100.0)
          result=m_pattern_1;      // signal number 1
@@ -348,10 +338,10 @@ int CSignalCCI::LongCondition()
         {
          ExtState(idx);
          //--- if the model 2 is used, search for the "divergence" signal
-         if(IS_PATTERN_USAGE(2) && CompareMaps(1,1))      // 00000001b
+         if(IS_PATTERN_USAGE(2) && CompareMaps(1,1)) // 00000001b
             result=m_pattern_2;   // signal number 2
          //--- if the model 3 is used, search for the "double divergence" signal
-         if(IS_PATTERN_USAGE(3) && CompareMaps(0x11,2))   // 00010001b
+         if(IS_PATTERN_USAGE(3) && CompareMaps(0x11,2)) // 00010001b
             return(m_pattern_3);  // signal number 3
         }
      }
@@ -360,11 +350,8 @@ int CSignalCCI::LongCondition()
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will fall.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalCCI::ShortCondition()
+int CSignalCCI::ShortCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
@@ -372,7 +359,8 @@ int CSignalCCI::ShortCondition()
    if(Diff(idx)<0.0)
      {
       //--- the oscillator is directed downwards confirming the possibility of falling of price
-      if(IS_PATTERN_USAGE(0)) result=m_pattern_0;      // "confirming" signal number 0
+      if(IS_PATTERN_USAGE(0))
+         result=m_pattern_0;      // "confirming" signal number 0
       //--- if the model 1 is used, search for a reverse of the oscillator downwards behind the level of overbuying
       if(IS_PATTERN_USAGE(1) && Diff(idx+1)>0.0 && CCI(idx+1)>100.0)
          result=m_pattern_1;      // signal number 1
@@ -381,10 +369,10 @@ int CSignalCCI::ShortCondition()
         {
          ExtState(idx);
          //--- if the model 2 is used, search for the "divergence" signal
-         if(IS_PATTERN_USAGE(2) && CompareMaps(1,1))      // 00000001b
+         if(IS_PATTERN_USAGE(2) && CompareMaps(1,1)) // 00000001b
             result=m_pattern_2;   // signal number 2
          //--- if the model 3 is used, search for the "double divergence" signal
-         if(IS_PATTERN_USAGE(3) && CompareMaps(0x11,2))   // 00010001b
+         if(IS_PATTERN_USAGE(3) && CompareMaps(0x11,2)) // 00010001b
             return(m_pattern_3);  // signal number 3
         }
      }

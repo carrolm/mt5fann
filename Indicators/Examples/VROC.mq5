@@ -50,15 +50,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| VROC iteration function                                          |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- check for rates count
    if(rates_total<ExtPeriodVROC)
@@ -69,9 +70,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(pos<ExtPeriodVROC-1) pos=ExtPeriodVROC-1;
 //--- main cycle by volume type
    if(InpVolumeType==VOLUME_TICK)
-      CalculateVROC(pos,rates_total,TickVolume);
+      CalculateVROC(pos,rates_total,tick_volume);
    else
-      CalculateVROC(pos,rates_total,Volume);
+      CalculateVROC(pos,rates_total,volume);
 //---- OnCalculate done. Return new prev_calculated.
    return(rates_total);
   }

@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                               ExpertTrailing.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "ExpertBase.mqh"
 //+------------------------------------------------------------------+
@@ -13,8 +12,22 @@
 class CExpertTrailing : public CExpertBase
   {
 public:
+                     CExpertTrailing(void);
+                    ~CExpertTrailing(void);
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double& sl,double& tp)  { return(false); }
-   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double& sl,double& tp) { return(false); }
+   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double &sl,double &tp)  { return(false); }
+   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double &sl,double &tp) { return(false); }
   };
+//+------------------------------------------------------------------+
+//| Constructor                                                      |
+//+------------------------------------------------------------------+
+CExpertTrailing::CExpertTrailing(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CExpertTrailing::~CExpertTrailing(void)
+  {
+  }
 //+------------------------------------------------------------------+

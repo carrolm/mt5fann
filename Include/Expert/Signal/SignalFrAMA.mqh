@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                  SignalFrAMA.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -40,7 +39,8 @@ protected:
    int               m_pattern_3;      // model 3 "piercing"
 
 public:
-                     CSignalFrAMA();
+                     CSignalFrAMA(void);
+                    ~CSignalFrAMA(void);
    //--- methods of setting adjustable parameters
    void              PeriodMA(int value)                 { m_ma_period=value;          }
    void              Shift(int value)                    { m_ma_shift=value;           }
@@ -51,16 +51,16 @@ public:
    void              Pattern_2(int value)                { m_pattern_2=value;          }
    void              Pattern_3(int value)                { m_pattern_3=value;          }
    //--- method of verification of settings
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
-   virtual int       ShortCondition();
+   virtual int       LongCondition(void);
+   virtual int       ShortCondition(void);
 
 protected:
    //--- method of initialization of the indicator
-   bool              InitMA(CIndicators* indicators);
+   bool              InitMA(CIndicators *indicators);
    //--- methods of getting data
    double            MA(int ind)                         { return(m_ma.Main(ind));     }
    double            DiffMA(int ind)                     { return(MA(ind)-MA(ind+1));  }
@@ -70,35 +70,33 @@ protected:
    double            DiffCloseMA(int ind)                { return(Close(ind)-MA(ind)); }
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalFrAMA.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalFrAMA::CSignalFrAMA()
+CSignalFrAMA::CSignalFrAMA(void) : m_ma_period(12),
+                                   m_ma_shift(0),
+                                   m_ma_applied(PRICE_CLOSE),
+                                   m_pattern_0(90),
+                                   m_pattern_1(100),
+                                   m_pattern_2(80),
+                                   m_pattern_3(60)
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
-//--- setting default values for the indicator parameters
-   m_ma_period =12;
-   m_ma_shift  =0;
-   m_ma_applied=PRICE_CLOSE;
-//--- setting default "weights" of the market models
-   m_pattern_0 =90;          // model 0 "price is on the necessary side from the indicator"
-   m_pattern_1 =100;         // model 1 "price crossed the indicator with opposite direction"
-   m_pattern_2 =80;          // model 2 "price crossed the indicator with the same direction"
-   m_pattern_3 =60;          // model 3 "piercing"
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalFrAMA::~CSignalFrAMA(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalFrAMA::ValidationSettings()
+bool CSignalFrAMA::ValidationSettings(void)
   {
 //--- call of the method of the parent class
-   if(!CExpertSignal::ValidationSettings()) return(false);
+   if(!CExpertSignal::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_ma_period<=0)
      {
@@ -110,31 +108,29 @@ bool CSignalFrAMA::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators -pointer of indicator collection.             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalFrAMA::InitIndicators(CIndicators* indicators)
+bool CSignalFrAMA::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize FrAMA indicator
-   if(!InitMA(indicators))                        return(false);
+   if(!InitMA(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Create MA indicators.                                            |
-//| INPUT:  indicators -pointer of indicator collection.             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalFrAMA::InitMA(CIndicators* indicators)
+bool CSignalFrAMA::InitMA(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add indicator to collection
    if(!indicators.Add(GetPointer(m_ma)))
      {
@@ -152,11 +148,8 @@ bool CSignalFrAMA::InitMA(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalFrAMA::LongCondition()
+int CSignalFrAMA::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
@@ -209,11 +202,8 @@ int CSignalFrAMA::LongCondition()
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will fall.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalFrAMA::ShortCondition()
+int CSignalFrAMA::ShortCondition(void)
   {
    int result=0;
    int idx   =StartIndex();

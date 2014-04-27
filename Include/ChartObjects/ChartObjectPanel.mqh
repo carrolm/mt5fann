@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             ChartObjectPanel.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <ChartObjects\ChartObjectsTxtControls.mqh>
 #include <Arrays\ArrayObj.mqh>
@@ -24,41 +23,31 @@ public:
                     ~CChartObjectPanel();
    //--- method for attaching objects
    bool              Attach(CChartObjectLabel *chart_object);
-   bool              X_Distance(int X);
-   bool              Y_Distance(int Y);
+   bool              X_Distance(const int X);
+   bool              Y_Distance(const int Y);
    int               X_Size() const;
    int               Y_Size() const;
-   virtual bool      Timeframes(int timeframes);
-   bool              State(bool state);
+   virtual bool      Timeframes(const int timeframes);
+   bool              State(const bool state);
    bool              CheckState();
 
 protected:
   };
 //+------------------------------------------------------------------+
-//| Constructor.                                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CChartObjectPanel::CChartObjectPanel(void)
+void CChartObjectPanel::CChartObjectPanel(void) : m_expanded(true)
   {
-   m_expanded=true;
   }
 //+------------------------------------------------------------------+
 //| Destructor.                                                      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void CChartObjectPanel::~CChartObjectPanel(void)
   {
 //--- All objects added by the method Add(), deleted automatically
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method Attach                                                    |
 //+------------------------------------------------------------------+
 bool CChartObjectPanel::Attach(CChartObjectLabel *chart_object)
   {
@@ -79,12 +68,9 @@ bool CChartObjectPanel::Attach(CChartObjectLabel *chart_object)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method X_Distance                                                |
 //+------------------------------------------------------------------+
-bool CChartObjectPanel::X_Distance(int X)
+bool CChartObjectPanel::X_Distance(const int X)
   {
    CChartObjectLabel *chart_object;
 //---
@@ -97,12 +83,9 @@ bool CChartObjectPanel::X_Distance(int X)
    return(CChartObjectButton::X_Distance(X));
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method Y_Distance                                                |
 //+------------------------------------------------------------------+
-bool CChartObjectPanel::Y_Distance(int Y)
+bool CChartObjectPanel::Y_Distance(const int Y)
   {
    CChartObjectLabel *chart_object;
 //---
@@ -115,10 +98,7 @@ bool CChartObjectPanel::Y_Distance(int Y)
    return(CChartObjectButton::Y_Distance(Y));
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method X_Size                                                    |
 //+------------------------------------------------------------------+
 int CChartObjectPanel::X_Size() const
   {
@@ -128,23 +108,16 @@ int CChartObjectPanel::X_Size() const
    if(m_expanded)
      {
       for(int i=0;i<m_attachment.Total();i++)
-        {
          if((chart_object=m_attachment.At(i))!=NULL)
-           {
             if(max_x<chart_object.X_Distance()+chart_object.X_Size())
                max_x=chart_object.X_Distance()+chart_object.X_Size();
-           }
-        }
       return(max_x-X_Distance()+2);
      }
 //---
    return(CChartObjectButton::X_Size()+2);
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method Y_Size                                                    |
 //+------------------------------------------------------------------+
 int CChartObjectPanel::Y_Size() const
   {
@@ -154,46 +127,36 @@ int CChartObjectPanel::Y_Size() const
    if(m_expanded)
      {
       for(int i=0;i<m_attachment.Total();i++)
-        {
          if((chart_object=m_attachment.At(i))!=NULL)
-           {
             if(max_y<chart_object.Y_Distance()+chart_object.Y_Size())
                max_y=chart_object.Y_Distance()+chart_object.Y_Size();
-           }
-        }
       return(max_y-Y_Distance()+2);
      }
 //---
    return(CChartObjectButton::Y_Size()+2);
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method Timeframes                                                |
 //+------------------------------------------------------------------+
-bool CChartObjectPanel::Timeframes(int timeframes)
+bool CChartObjectPanel::Timeframes(const int timeframes)
   {
    int                i;
    bool               res=CChartObject::Timeframes(timeframes);
    CChartObjectLabel *chart_object;
 //---
    if(m_expanded)
-   for(i=0;i<m_attachment.Total();i++)
-     {
-      chart_object=m_attachment.At(i);
-      res&=chart_object.Timeframes(timeframes);
-     }
+      for(i=0;i<m_attachment.Total();i++)
+        {
+         chart_object=m_attachment.At(i);
+         res&=chart_object.Timeframes(timeframes);
+        }
 //---
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method State                                                     |
 //+------------------------------------------------------------------+
-bool CChartObjectPanel::State(bool state)
+bool CChartObjectPanel::State(const bool state)
   {
    if(CChartObjectButton::State(state))
      {
@@ -204,10 +167,7 @@ bool CChartObjectPanel::State(bool state)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Method CheckPanelModes.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Method CheckState                                                |
 //+------------------------------------------------------------------+
 bool CChartObjectPanel::CheckState(void)
   {
@@ -217,23 +177,19 @@ bool CChartObjectPanel::CheckState(void)
    if(m_expanded!=State())
      {
       if(m_expanded=State())
-        {
          //--- make all objects visible
          for(i=0;i<m_attachment.Total();i++)
            {
             chart_object=m_attachment.At(i);
             chart_object.Timeframes(-1);
            }
-        }
       else
-        {
          //--- make all objects invisible
          for(i=0;i<m_attachment.Total();i++)
            {
             chart_object=m_attachment.At(i);
             chart_object.Timeframes(0x100000);
            }
-        }
       return(true);
      }
 //---

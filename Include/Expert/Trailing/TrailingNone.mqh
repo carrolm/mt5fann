@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                 TrailingNone.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertTrailing.mqh>
 // wizard description start
@@ -23,7 +22,19 @@
 class CTrailingNone : public CExpertTrailing
   {
 public:
-   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)  { return (false); }
-   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp) { return (false); }
+                     CTrailingNone(void);
+                    ~CTrailingNone(void);
   };
+//+------------------------------------------------------------------+
+//| Constructor                                                      |
+//+------------------------------------------------------------------+
+CTrailingNone::CTrailingNone(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CTrailingNone::~CTrailingNone(void)
+  {
+  }
 //+------------------------------------------------------------------+

@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                                  VirtualKeys.mqh |
-//|                        Copyright 2009, MetaQuotes Software Corp. |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #property copyright "2009, MetaQuotes Software Corp."

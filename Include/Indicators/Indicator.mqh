@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                    Indicator.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.07.07 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Series.mqh"
 //+------------------------------------------------------------------+
@@ -18,52 +17,45 @@ protected:
    string            m_name;             // name of buffer
 
 public:
-                     CIndicatorBuffer();
+                     CIndicatorBuffer(void);
+                    ~CIndicatorBuffer(void);
    //--- methods of access to protected data
-   int               Offset()      const { return(m_offset); }
-   void              Offset(int offset)  { m_offset=offset;  }
-   string            Name()        const { return(m_name);   }
-   void              Name(string name)   { m_name=name;      }
+   int               Offset(void)        const { return(m_offset); }
+   void              Offset(const int offset)  { m_offset=offset;  }
+   string            Name(void)          const { return(m_name);   }
+   void              Name(const string name)   { m_name=name;      }
    //--- methods of access to data
-   double            At(int index) const;
+   double            At(const int index) const;
    //--- method of refreshing of data in buffer
-   bool              Refresh(int handle,int num);
-   bool              RefreshCurrent(int handle,int num);
+   bool              Refresh(const int handle,const int num);
+   bool              RefreshCurrent(const int handle,const int num);
   };
 //+------------------------------------------------------------------+
-//| Constructor CIndicatorBuffer.                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CIndicatorBuffer::CIndicatorBuffer()
+CIndicatorBuffer::CIndicatorBuffer(void) : m_offset(0),
+                                           m_name("")
   {
-//--- initialize protected data
-   m_size  =DEFAULT_BUFFER_SIZE;
-   m_offset=0;
-   m_name  ="";
-   ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
-//| Access to data in a specified position.                          |
-//| INPUT:  index - position of element.                             |
-//| OUTPUT: element in the specified position or EMPTY_VALUE.        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CIndicatorBuffer::At(int index) const
+CIndicatorBuffer::~CIndicatorBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Access to data in a specified position                           |
+//+------------------------------------------------------------------+
+double CIndicatorBuffer::At(const int index) const
   {
    return(CDoubleBuffer::At(index+m_offset));
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data in buffer.                                    |
-//| INPUT:  handle - indicator handle,                               |
-//|         num    - number of buffer of indicator.                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data in buffer                                     |
 //+------------------------------------------------------------------+
-bool CIndicatorBuffer::Refresh(int handle,int num)
+bool CIndicatorBuffer::Refresh(const int handle,const int num)
   {
-//--- checking
+//--- check
    if(handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -75,16 +67,12 @@ bool CIndicatorBuffer::Refresh(int handle,int num)
    return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data in buffer.                                |
-//| INPUT:  handle - indicator handle,                               |
-//|         num    - number of buffer of indicator.                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of the data in buffer                                 |
 //+------------------------------------------------------------------+
-bool CIndicatorBuffer::RefreshCurrent(int handle,int num)
+bool CIndicatorBuffer::RefreshCurrent(const int handle,const int num)
   {
    double array[1];
-//--- checking
+//--- check
    if(handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -110,62 +98,60 @@ protected:
    int               m_handle;           // indicator handle
    string            m_status;           // status of creation
    bool              m_full_release;     // flag
+   bool              m_redrawer;         // flag
 
 public:
-                     CIndicator();
-                    ~CIndicator();
+                     CIndicator(void);
+                    ~CIndicator(void);
    //--- methods of access to protected data
-   int               Handle()         const { return(m_handle);    }
-   string            Status()         const { return(m_status);    }
-   void              FullRelease(bool flag) { m_full_release=flag; }
+   int               Handle(void)                const { return(m_handle);    }
+   string            Status(void)                const { return(m_status);    }
+   void              FullRelease(const bool flag=true) { m_full_release=flag; }
+   void              Redrawer(const bool flag=true)    { m_redrawer=flag;     }
    //--- method for creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int num_params,MqlParam &params[]);
-   virtual bool      BufferResize(int size);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
+   virtual bool      BufferResize(const int size);
    //--- methods of access to data
-   double            GetData(int buffer_num,int index)                                               const;
-   int               GetData(int start_pos,int count,int buffer_num,double& buffer[])                const;
-   int               GetData(datetime start_time,int count,int buffer_num,double& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,int buffer_num,double& buffer[]) const;
+   int               BarsCalculated(void) const;
+   double            GetData(const int buffer_num,const int index) const;
+   int               GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]) const;
    //--- methods for find extremum
-   int               Minimum(int buffer_num,int start,int count)             const;
-   double            MinValue(int buffer_num,int start,int count,int& index) const;
-   int               Maximum(int buffer_num,int start,int count)             const;
-   double            MaxValue(int buffer_num,int start,int count,int& index) const;
+   int               Minimum(const int buffer_num,const int start,const int count) const;
+   double            MinValue(const int buffer_num,const int start,const int count,int &index) const;
+   int               Maximum(const int buffer_num,const int start,const int count) const;
+   double            MaxValue(const int buffer_num,const int start,const int count,int &index) const;
    //--- method of "freshening" of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
    //--- methods for working with chart
-   bool              AddToChart(long chart,int subwin);
-   bool              DeleteFromChart(long chart,int subwin);
+   bool              AddToChart(const long chart,const int subwin);
+   bool              DeleteFromChart(const long chart,const int subwin);
    //--- methods of conversion of constants to strings
-   string            MethodDescription(int val) const;
-   string            PriceDescription(int val)  const;
-   string            VolumeDescription(int val) const;
+   string            MethodDescription(const int val) const;
+   string            PriceDescription(const int val) const;
+   string            VolumeDescription(const int val) const;
 
 protected:
    //--- methods of tuning
-   bool              CreateBuffers(string symbol,ENUM_TIMEFRAMES period,int buffers);
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]) {return(false);}
+   bool              CreateBuffers(const string symbol,const ENUM_TIMEFRAMES period,const int buffers);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int num_params,const MqlParam &params[]) {return(false);}
   };
 //+------------------------------------------------------------------+
-//| Constructor CIndicator.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CIndicator::CIndicator()
+void CIndicator::CIndicator(void) : m_handle(INVALID_HANDLE),
+                                    m_status(""),
+                                    m_full_release(false),
+                                    m_redrawer(false)
   {
-//--- initialize protected data
-   m_handle      =INVALID_HANDLE;
-   m_status      ="";
-   m_full_release=false;
   }
 //+------------------------------------------------------------------+
-//| Destructor CIndicator.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-void CIndicator::~CIndicator()
+void CIndicator::~CIndicator(void)
   {
 //--- indicator handle release
    if(m_full_release && m_handle!=INVALID_HANDLE)
@@ -175,23 +161,19 @@ void CIndicator::~CIndicator()
      }
   }
 //+------------------------------------------------------------------+
-//| Creation of the indicator with universal parameters.             |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         type      - indicator type,                              |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Creation of the indicator with universal parameters              |
 //+------------------------------------------------------------------+
-bool CIndicator::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int num_params,MqlParam &params[])
+bool CIndicator::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                        const ENUM_INDICATOR type,const int num_params,const MqlParam &params[])
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=IndicatorCreate(symbol,period,type,num_params,params);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- idicator successfully created
    if(!Initialize(symbol,period,num_params,params))
      {
@@ -201,23 +183,29 @@ bool CIndicator::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type
       return(false);
      }
 //--- ok
-  return(true);
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Returns the amount of calculated indicator data                  |
+//+------------------------------------------------------------------+
+int CIndicator::BarsCalculated(void) const
+  {
+   if(m_handle==INVALID_HANDLE)
+      return(-1);
+//---
+   return(BarsCalculated(m_handle));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying an element of indicator buffer        |
-//| by specifying number of buffer and position of element".         |        
-//| INPUT:  buffer_num - buffer number,                              |
-//|         index      - position of element in the buffer.          |
-//| OUTPUT: value of element if successful, EMPTY_VALUE if not.      |
-//| REMARK: no.                                                      |
+//| by specifying number of buffer and position of element"          |        
 //+------------------------------------------------------------------+
-double CIndicator::GetData(int buffer_num,int index) const
+double CIndicator::GetData(const int buffer_num,const int index) const
   {
    CIndicatorBuffer *buffer=At(buffer_num);
-//--- checking
+//--- check
    if(buffer==NULL)
      {
-      Print("CIndicator::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(EMPTY_VALUE);
      }
 //---
@@ -225,18 +213,11 @@ double CIndicator::GetData(int buffer_num,int index) const
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the buffer of indicator by specifying |
-//| a start position and number of elements".                        |
-//| INPUT:  start_pos  - position of start element in the buffer,    |
-//|         count      - number of elements to be copied,            |
-//|         buffer_num - buffer number,                              |
-//|         buffer     - reference to a dynamic array of             |
-//|                      double values.                              |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| a start position and number of elements"                         |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(int start_pos,int count,int buffer_num,double& buffer[]) const
+int CIndicator::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) const
   {
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -252,18 +233,11 @@ int CIndicator::GetData(int start_pos,int count,int buffer_num,double& buffer[])
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the buffer of indicator by specifying |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element of the buffer,        |
-//|         count      - number of elements to be copied,            |
-//|         buffer_num - buffer number,                              |
-//|         buffer     - reference to a dynamic array of             |
-//|                      double values.                              |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(datetime start_time,int count,int buffer_num,double& buffer[]) const
+int CIndicator::GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]) const
   {
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -279,19 +253,11 @@ int CIndicator::GetData(datetime start_time,int count,int buffer_num,double& buf
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the buffer of indicator by specifying |
-//| start and end time.                                              |
-//| and final time".                                                 |
-//| INPUT:  start_time - time of start element of the buffer,        |
-//|         stop_time  - time of end element of the buffer,          |
-//|         buffer_num - buffer number,                              |
-//|         buffer     - reference to a dynamic array of             |
-//|                      double values.                              |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and final time                                             |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(datetime start_time,datetime stop_time,int buffer_num,double& buffer[]) const
+int CIndicator::GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]) const
   {
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -306,16 +272,11 @@ int CIndicator::GetData(datetime start_time,datetime stop_time,int buffer_num,do
    return(CopyBuffer(m_handle,buffer_num,start_time,stop_time,buffer));
   }
 //+------------------------------------------------------------------+
-//| Find minimum of a specified buffer.                              |
-//| INPUT:  buffer_num - buffer number,                              |
-//|         start      - start element for searching,                |
-//|         count      - size of search interval.                    |
-//| OUTPUT: position of element, or -1.                              |
-//| REMARK: no.                                                      |
+//| Find minimum of a specified buffer                               |
 //+------------------------------------------------------------------+
-int CIndicator::Minimum(int buffer_num,int start,int count) const
+int CIndicator::Minimum(const int buffer_num,const int start,const int count) const
   {
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -328,25 +289,19 @@ int CIndicator::Minimum(int buffer_num,int start,int count) const
      }
 //---
    CIndicatorBuffer *buffer=At(buffer_num);
-   if(buffer==NULL) return(-1);
+   if(buffer==NULL)
+      return(-1);
 //---
    return(buffer.Minimum(start,count));
   }
 //+------------------------------------------------------------------+
-//| Find minimum of a specified buffer.                              |
-//| INPUT:  buffer_num - buffer number,                              |
-//|         start      - start element for searching,                |
-//|         count      - number of elements,                         |
-//|         index      - reference to variable for the value         |
-//|                      of index.                                   |
-//| OUTPUT: value of element, or EMPTY_VALUE.                        |
-//| REMARK: no.                                                      |
+//| Find minimum of a specified buffer                               |
 //+------------------------------------------------------------------+
-double CIndicator::MinValue(int buffer_num,int start,int count,int& index) const
+double CIndicator::MinValue(const int buffer_num,const int start,const int count,int &index) const
   {
    int    idx=Minimum(buffer_num,start,count);
    double res=EMPTY_VALUE;
-//--- checking
+//--- check
    if(idx!=-1)
      {
       CIndicatorBuffer *buffer=At(buffer_num);
@@ -357,16 +312,11 @@ double CIndicator::MinValue(int buffer_num,int start,int count,int& index) const
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Find maximum of a specified buffer.                              |
-//| INPUT:  buffer_num - buffer number,                              |
-//|         start      - start element for searching,                |
-//|         count      - number of elements.                         |
-//| OUTPUT: position of element, or -1.                              |
-//| REMARK: no.                                                      |
+//| Find maximum of a specified buffer                               |
 //+------------------------------------------------------------------+
-int CIndicator::Maximum(int buffer_num,int start,int count) const
+int CIndicator::Maximum(const int buffer_num,const int start,const int count) const
   {
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
@@ -379,25 +329,19 @@ int CIndicator::Maximum(int buffer_num,int start,int count) const
      }
 //---
    CIndicatorBuffer *buffer=At(buffer_num);
-   if(buffer==NULL) return(-1);
+   if(buffer==NULL)
+      return(-1);
 //---
    return(buffer.Maximum(start,count));
   }
 //+------------------------------------------------------------------+
-//| Find maximum of specified buffer.                                |
-//| INPUT:  buffer_num - buffer number,                              |
-//|         start      - start element for searching,                |
-//|         count      - number of elements,                         |
-//|         index      - reference to variable for the value         |
-//|                      of index.                                   |
-//| OUTPUT: value of element, or EMPTY_VALUE.                        |
-//| REMARK: no.                                                      |
+//| Find maximum of specified buffer                                 |
 //+------------------------------------------------------------------+
-double CIndicator::MaxValue(int buffer_num,int start,int count,int& index) const
+double CIndicator::MaxValue(const int buffer_num,const int start,const int count,int &index) const
   {
    int    idx=Maximum(buffer_num,start,count);
    double res=EMPTY_VALUE;
-//--- checking
+//--- check
    if(idx!=-1)
      {
       CIndicatorBuffer *buffer=At(buffer_num);
@@ -408,24 +352,21 @@ double CIndicator::MaxValue(int buffer_num,int start,int count,int& index) const
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Creating data buffers of indicator.                              |
-//| INPUT:  symbol  - symbol,                                        |
-//|         period  - period,                                        |
-//|         buffers - number of buffers.                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Creating data buffers of indicator                               |
 //+------------------------------------------------------------------+
-bool CIndicator::CreateBuffers(string symbol,ENUM_TIMEFRAMES period,int buffers)
+bool CIndicator::CreateBuffers(const string symbol,const ENUM_TIMEFRAMES period,const int buffers)
   {
    bool result=true;
-//--- checking
+//--- check
    if(m_handle==INVALID_HANDLE)
      {
       SetUserError(ERR_USER_INVALID_HANDLE);
       return(false);
      }
-   if(buffers==0)        return(false);
-   if(!Reserve(buffers)) return(false);
+   if(buffers==0)
+      return(false);
+   if(!Reserve(buffers))
+      return(false);
 //---
    for(int i=0;i<buffers;i++)
       result&=Add(new CIndicatorBuffer);
@@ -436,33 +377,29 @@ bool CIndicator::CreateBuffers(string symbol,ENUM_TIMEFRAMES period,int buffers)
    return(result);
   }
 //+------------------------------------------------------------------+
-//| Set size of buffers of indicator.                                |
-//| INPUT:  size - size of buffers.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size of buffers of indicator                                 |
 //+------------------------------------------------------------------+
-bool CIndicator::BufferResize(int size)
+bool CIndicator::BufferResize(const int size)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    int total=Total();
    for(int i=0;i<total;i++)
      {
       CIndicatorBuffer *buff=At(i);
       //--- check pointer
-      if(buff==NULL) return(false);
+      if(buff==NULL)
+         return(false);
       buff.Size(size);
      }
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing data of indicator.                                    |
-//| INPUT:  flags - flags of updating of timeframes.                 |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
-void CIndicator::Refresh(int flags)
+void CIndicator::Refresh(const int flags)
   {
    int               i;
    CIndicatorBuffer *buff;
@@ -470,21 +407,24 @@ void CIndicator::Refresh(int flags)
    for(i=0;i<Total();i++)
      {
       buff=At(i);
+      if(m_redrawer)
+        {
+         buff.Refresh(m_handle,i);
+         continue;
+        }
       if(!(flags&m_timeframe_flags))
         {
-         if(m_refresh_current) buff.RefreshCurrent(m_handle,i);
+         if(m_refresh_current)
+            buff.RefreshCurrent(m_handle,i);
         }
-      else                     buff.Refresh(m_handle,i);
+      else
+         buff.Refresh(m_handle,i);
      }
   }
 //+------------------------------------------------------------------+
-//| Adds indicator to chart.                                         |
-//| INPUT:  chart  - chart id,                                       |
-//|         subwin - number of chart subwindow.                      |
-//| OUTPUT: true- if successful, false if not.                       |
-//| REMARK: no.                                                      |
+//| Adds indicator to chart                                          |
 //+------------------------------------------------------------------+
-bool CIndicator::AddToChart(long chart,int subwin)
+bool CIndicator::AddToChart(const long chart,const int subwin)
   {
    if(ChartIndicatorAdd(chart,subwin,m_handle))
      {
@@ -495,82 +435,76 @@ bool CIndicator::AddToChart(long chart,int subwin)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Deletes indicator from chart.                                    |
-//| INPUT:  chart  - chart id,                                       |
-//|         subwin - number of chart subwindow.                      |
-//| OUTPUT: true- if successful, false if not.                       |
-//| REMARK: no.                                                      |
+//| Deletes indicator from chart                                     |
 //+------------------------------------------------------------------+
-bool CIndicator::DeleteFromChart(long chart,int subwin)
+bool CIndicator::DeleteFromChart(const long chart,const int subwin)
   {
    return(ChartIndicatorDelete(chart,subwin,m_name));
   }
 //+------------------------------------------------------------------+
 //| Converting value of ENUM_MA_METHOD into string                   |
-//| INPUT:  val - value for conversion.                              |
-//| OUTPUT: conversion result.                                       |
-//| REMARK: the parameter val has the int type for the               |
-//|         possibility of transmission of error values.             |
 //+------------------------------------------------------------------+
-string CIndicator::MethodDescription(int val) const
+string CIndicator::MethodDescription(const int val) const
   {
    string str;
 //--- array for conversion of ENUM_MA_METHOD to string
    static string _m_str[]={"SMA","EMA","SMMA","LWMA"};
-//--- checking
-   if(val<0) return("ERROR");
+//--- check
+   if(val<0)
+      return("ERROR");
 //---
-   if(val<4) str=_m_str[val];
-   else      if(val<10) str="METHOD_UNKNOWN="+IntegerToString(val);
+   if(val<4)
+      str=_m_str[val];
+   else
+   if(val<10)
+      str="METHOD_UNKNOWN="+IntegerToString(val);
 //---
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Converting value of ENUM_APPLIED_PRICE into string.              |
-//| INPUT:  val - value for conversion.                              |
-//| OUTPUT: conversion result.                                       |
-//| REMARK: the parameter val has the int type for the               |
-//|         possibility of transmission of error values.             |
+//| Converting value of ENUM_APPLIED_PRICE into string               |
 //+------------------------------------------------------------------+
-string CIndicator::PriceDescription(int val) const
+string CIndicator::PriceDescription(const int val) const
   {
    string str;
 //--- array for conversion of ENUM_APPLIED_PRICE to string
    static string _a_str[]={"Close","Open","High","Low","Median","Typical","Weighted"};
-//--- checking
-   if(val<0) return("Unknown");
+//--- check
+   if(val<0)
+      return("Unknown");
 //---
    if(val<7)
       str=_a_str[val];
    else
      {
-      if(val<10) str="PriceUnknown="+IntegerToString(val);
-      else       str="AppliedHandle="+IntegerToString(val);
+      if(val<10)
+         str="PriceUnknown="+IntegerToString(val);
+      else
+         str="AppliedHandle="+IntegerToString(val);
      }
 //---
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Converting value of ENUM_APPLIED_VOLUME into string.             |
-//| INPUT:  val - value for conversion.                              |
-//| OUTPUT: conversion result.                                       |
-//| REMARK: the parameter val has the int type for the               |
-//|         possibility of transmission of error values.             |
+//| Converting value of ENUM_APPLIED_VOLUME into string              |
 //+------------------------------------------------------------------+
-string CIndicator::VolumeDescription(int val) const
+string CIndicator::VolumeDescription(const int val) const
   {
    string str;
 //--- array for conversion of ENUM_APPLIED_VOLUME to string
    static string _v_str[]={"None","Tick","Real"};
-//--- checking
-   if(val<0) return("Unknown");
+//--- check
+   if(val<0)
+      return("Unknown");
 //---
    if(val<3)
       str=_v_str[val];
    else
      {
-      if(val<10) str="VolumeUnknown="+IntegerToString(val);
-      else       str="AppliedHandle="+IntegerToString(val);
+      if(val<10)
+         str="VolumeUnknown="+IntegerToString(val);
+      else
+         str="AppliedHandle="+IntegerToString(val);
      }
 //---
    return(str);

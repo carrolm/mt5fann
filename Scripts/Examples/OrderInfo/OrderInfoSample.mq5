@@ -1,11 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                              OrderInfoSample.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "2010, MetaQuotes Software Corp."
-#property link      "http://www.metaquotes.net"
+#property copyright "2009-2013, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
 //---
 #include <Trade\OrderInfo.mqh>
 #include <ChartObjects\ChartObjectsTxtControls.mqh>
@@ -25,39 +24,42 @@ protected:
    //--- chart objects
    CChartObjectButton m_button_prev;
    CChartObjectButton m_button_next;
-   CChartObjectLabel  m_label[20];
-   CChartObjectLabel  m_label_info[20];
+   CChartObjectLabel m_label[20];
+   CChartObjectLabel m_label_info[20];
    //---
    int               m_curr_ord;
    int               m_total_ord;
 
 public:
-                     COrderInfoSample();
-   bool              Init();
-   void              Deinit();
-   void              Processing();
+                     COrderInfoSample(void);
+                    ~COrderInfoSample(void);
+   //---
+   bool              Init(void);
+   void              Deinit(void);
+   void              Processing(void);
 
 private:
-   void              InfoToChart();
+   void              InfoToChart(void);
   };
 //---
-
 COrderInfoSample ExtScript;
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-COrderInfoSample::COrderInfoSample()
+COrderInfoSample::COrderInfoSample(void) : m_curr_ord(-1),
+                                           m_total_ord(-1)
   {
-   m_curr_ord =-1;
-   m_total_ord=-1;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+COrderInfoSample::~COrderInfoSample(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Method Init.                                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool COrderInfoSample::Init()
+bool COrderInfoSample::Init(void)
   {
    int   i,sy=10;
    int   dy=16;
@@ -67,7 +69,8 @@ bool COrderInfoSample::Init()
    color_info =(color)(ChartGetInteger(0,CHART_COLOR_BACKGROUND)^0xFFFFFF);
    color_label=(color)(color_info^0x202020);
 //---
-   if(ChartGetInteger(0,CHART_SHOW_OHLC)) sy+=16;
+   if(ChartGetInteger(0,CHART_SHOW_OHLC))
+      sy+=16;
 //--- creation Buttons
    m_button_prev.Create(0,"ButtonPrev",0,10,sy,100,20);
    m_button_prev.Description("Prev Order");
@@ -101,18 +104,12 @@ bool COrderInfoSample::Init()
   }
 //+------------------------------------------------------------------+
 //| Method Deinit.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void COrderInfoSample::Deinit()
+void COrderInfoSample::Deinit(void)
   {
   }
 //+------------------------------------------------------------------+
 //| Method Processing.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void COrderInfoSample::Processing(void)
   {
@@ -131,8 +128,10 @@ void COrderInfoSample::Processing(void)
       else
         {
          m_label_info[0].Description(IntegerToString(m_total_ord));
-         if(m_curr_ord==-1) m_curr_ord=0;
-         if(m_curr_ord>=m_total_ord) m_curr_ord=m_total_ord-1;
+         if(m_curr_ord==-1)
+            m_curr_ord=0;
+         if(m_curr_ord>=m_total_ord)
+            m_curr_ord=m_total_ord-1;
          m_label_info[1].Description(IntegerToString(m_curr_ord));
         }
      }
@@ -148,20 +147,20 @@ void COrderInfoSample::Processing(void)
       if(m_curr_ord<m_total_ord-1)
          m_label_info[1].Description(IntegerToString(++m_curr_ord));
      }
-   OrderSelect(ticket=OrderGetTicket(m_curr_ord));
-   m_label_info[2].Description(IntegerToString(ticket));
-   InfoToChart();
+   ticket=OrderGetTicket(m_curr_ord);
+   if(OrderSelect(ticket))
+     {
+      m_label_info[2].Description(IntegerToString(ticket));
+      InfoToChart();
+     }
 //--- redraw chart
    ChartRedraw();
    Sleep(250);
   }
 //+------------------------------------------------------------------+
 //| Method InfoToChart.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: display order info.                                      |
 //+------------------------------------------------------------------+
-void COrderInfoSample::InfoToChart()
+void COrderInfoSample::InfoToChart(void)
   {
    m_label_info[3].Description(m_order.Symbol());
    m_label_info[4].Description(TimeToString(m_order.TimeSetup()));
@@ -184,13 +183,14 @@ void COrderInfoSample::InfoToChart()
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
-int OnStart()
+int OnStart(void)
   {
 //--- call init function
    if(ExtScript.Init()==0)
      {
       //--- cycle until the script is not halted
-      while(!IsStopped()) ExtScript.Processing();
+      while(!IsStopped())
+         ExtScript.Processing();
      }
 //--- call deinit function
    ExtScript.Deinit();

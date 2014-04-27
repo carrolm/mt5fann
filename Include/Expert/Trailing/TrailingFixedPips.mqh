@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                            TrailingFixedPips.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertTrailing.mqh>
 // wizard description start
@@ -30,36 +29,36 @@ protected:
    int               m_profit_level;
 
 public:
-                     CTrailingFixedPips();
+                     CTrailingFixedPips(void);
+                    ~CTrailingFixedPips(void);
    //--- methods of initialization of protected data
    void              StopLevel(int stop_level)     { m_stop_level=stop_level;     }
    void              ProfitLevel(int profit_level) { m_profit_level=profit_level; }
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //---
-   virtual bool      CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp);
-   virtual bool      CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp);
+   virtual bool      CheckTrailingStopLong(CPositionInfo *position,double &sl,double &tp);
+   virtual bool      CheckTrailingStopShort(CPositionInfo *position,double &sl,double &tp);
   };
 //+------------------------------------------------------------------+
-//| Constructor CTrailingFixedPips.                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CTrailingFixedPips::CTrailingFixedPips()
+void CTrailingFixedPips::CTrailingFixedPips(void) : m_stop_level(30),
+                                                    m_profit_level(50)
   {
-//--- set default inputs
-   m_stop_level  =30;
-   m_profit_level=50;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CTrailingFixedPips::~CTrailingFixedPips(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingFixedPips::ValidationSettings()
+bool CTrailingFixedPips::ValidationSettings(void)
   {
-   if(!CExpertTrailing::ValidationSettings()) return(false);
+   if(!CExpertTrailing::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_profit_level!=0 && m_profit_level*(m_adjusted_point/m_symbol.Point())<m_symbol.StopsLevel())
      {
@@ -76,21 +75,18 @@ bool CTrailingFixedPips::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for long position.          |
-//| INPUT:  position - pointer for position object,                  |
-//|         sl       - refernce for new stop loss,                   |
-//|         tp       - refernce for new take profit.                 |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo* position,double& sl,double& tp)
+bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo *position,double &sl,double &tp)
   {
 //--- check
-   if(position==NULL)  return(false);
-   if(m_stop_level==0) return(false);
+   if(position==NULL)
+      return(false);
+   if(m_stop_level==0)
+      return(false);
 //---
    double delta;
    double pos_sl=position.StopLoss();
-   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double base  =(pos_sl==0.0) ? position.PriceOpen() : pos_sl;
    double price =m_symbol.Bid();
 //---
    sl=EMPTY_VALUE;
@@ -106,21 +102,18 @@ bool CTrailingFixedPips::CheckTrailingStopLong(CPositionInfo* position,double& s
   }
 //+------------------------------------------------------------------+
 //| Checking trailing stop and/or profit for short position.         |
-//| INPUT:  position - pointer for position object,                  |
-//|         sl       - refernce for new stop loss,                   |
-//|         tp       - refernce for new take profit.                 |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CTrailingFixedPips::CheckTrailingStopShort(CPositionInfo* position,double& sl,double& tp)
+bool CTrailingFixedPips::CheckTrailingStopShort(CPositionInfo *position,double &sl,double &tp)
   {
 //--- check
-   if(position==NULL)  return(false);
-   if(m_stop_level==0) return(false);
+   if(position==NULL)
+      return(false);
+   if(m_stop_level==0)
+      return(false);
 //---
    double delta;
    double pos_sl=position.StopLoss();
-   double base  =(pos_sl==0.0)?position.PriceOpen():pos_sl;
+   double base  =(pos_sl==0.0) ? position.PriceOpen() : pos_sl;
    double price =m_symbol.Ask();
 //---
    sl=EMPTY_VALUE;

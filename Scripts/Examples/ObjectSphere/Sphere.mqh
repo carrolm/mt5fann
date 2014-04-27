@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                       Sphere.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Arrays\ArrayObj.mqh>
 #include <ChartObjects\ChartObjectsTxtControls.mqh>
@@ -12,7 +11,7 @@
 //+------------------------------------------------------------------+
 class CSphere : public CArrayObj
   {
-protected:
+private:
    int               m_id;              // sphere idintifier
    color             m_color;           // sphere color
    int               m_num_parallel;    // number of parallels
@@ -28,96 +27,79 @@ protected:
    double            m_d_fi_orb;        // angular velocity of the orbit
    //--- working variables
    double            m_fi_orb;
-   double            fi_x;
-   double            fi_y;
-   double            fi_z;
+   double            m_fi_x;
+   double            m_fi_y;
+   double            m_fi_z;
+
 public:
-                     CSphere();
+                     CSphere(void);
+                    ~CSphere(void);
    //--- methods of access to protected data
-   int               Id() { return(m_id); }
-   void              Id(int id) { m_id=id; }
-   color             Color() { return(m_color); }
-   void              Color(color c) { m_color=c; }
-   int               Parallel() { return(m_num_parallel); }
-   void              Parallel(int num) { m_num_parallel=num; }
-   int               Meridian() { return(m_num_meridian); }
-   void              Meridian(int num) { m_num_meridian=num; }
-   int               Radius() { return(m_radius); }
-   void              Radius(int r) { m_radius=r; }
-   int               CenterX() { return(m_center_X); }
-   void              CenterX(int x) { m_center_X=x; }
-   int               CenterY() { return(m_center_Y); }
-   void              CenterY(int y) { m_center_Y=y; }
+   int               CenterX(void) const { return(m_center_X); }
+   int               CenterY(void) const { return(m_center_Y); }
    //---
-   bool              Create(int id,color c,int x,int y,int r,int p,int m,string str);
-   void              SetOrbite(CSphere *sun,double fi_x,double fi_y,double fi_z,double d_fi_orb);
-   void              Recalculate();
+   bool              Create(const int id,const color c,const int x,const int y,const int r,const int p,const int m,const string str);
+   void              SetOrbite(CSphere *sun,const double fi_x,const double fi_y,const double fi_z,const double d_fi_orb);
+   void              Recalculate(void);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSphere.                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CSphere::CSphere()
+CSphere::CSphere(void) : m_id(0),
+                         m_color(0),
+                         m_num_parallel(0),
+                         m_num_meridian(0),
+                         m_radius(0),
+                         m_center_X(0),
+                         m_center_Y(0),
+                         m_orbite_center(NULL),
+                         m_orbite_radius(0.0),
+                         m_orbite_fi_X(0.0),
+                         m_orbite_fi_Y(0.0),
+                         m_orbite_fi_Z(0.0),
+                         m_d_fi_orb(0.0),
+                         m_fi_orb(0.0),
+                         m_fi_x(0.0),
+                         m_fi_y(0.0),
+                         m_fi_z(0.0)
   {
-//--- initialize variables
-   m_id=0;
-   m_color=0;
-   m_num_parallel=0;
-   m_num_meridian=0;
-   m_radius=0;
-   m_center_X=0;
-   m_center_Y=0;
-   m_orbite_center=NULL;
-   m_orbite_radius=0.0;
-   m_orbite_fi_X=0.0;
-   m_orbite_fi_Y=0.0;
-   m_orbite_fi_Z=0.0;
-   m_d_fi_orb=0.0;
-   m_fi_orb=0.0;
-   fi_x=0.0;
-   fi_y=0.0;
-   fi_z=0.0;
   }
 //+------------------------------------------------------------------+
-//| Создание объекта класса CSphere.                                 |
-//| INPUT:  id-idintifier,                                           |
-//|         с -color,                                                |
-//|         x -coordinate of the center,                             |
-//|         y -coordinate of the center,                             |
-//|         r -radius,                                               |
-//|         p -number of parallels,                                  |
-//|         m -number of meridians.                                  |
-//| OUTPUT: true if OK, false if failure.                            |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CSphere::Create(int id,color c,int x,int y,int r,int p,int m,string str)
+CSphere::~CSphere(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object                                                    |
+//+------------------------------------------------------------------+
+bool CSphere::Create(const int id,const color c,const int x,const int y,const int r,const int p,const int m,const string str)
   {
    CArrayObj *arr;
    CChartObjectLabel *label;
 //---
    m_id=id;
-   Color(c);
-   if(p>r/3) Parallel(r/3);
-   else      Parallel(p);
-   if(m>r/3) Meridian(r/3);
-   else      Meridian(m);
-   Radius(r);
-   CenterX(x);
-   CenterY(y);
+   m_color       =c;
+   m_num_parallel=(p>r/3) ? r/3 : p;
+   m_num_meridian=(m>r/3) ? r/3 : m;
+   m_radius      =r;
+   m_center_X    =x;
+   m_center_Y    =y;
    if(!Reserve(p)) return(false);
 //--- loop parallels
    for(int i=0;i<p;i++)
      {
       arr=new CArrayObj;
-      if(arr==NULL) return(false);
-      if(!arr.Reserve(m))  return(false);
+      if(arr==NULL)
+         return(false);
+      if(!arr.Reserve(m))
+         return(false);
       //--- loop meridians
       for(int j=0;j<m;j++)
         {
          label=new CChartObjectLabel;
-         if(label==NULL) return(false);
+         if(label==NULL)
+            return(false);
          label.Create(0,"ar"+string(id)+"_"+string(j)+"_"+string(i),0,0,0);
          label.Color(m_color);
          label.Description(str);
@@ -128,16 +110,9 @@ bool CSphere::Create(int id,color c,int x,int y,int r,int p,int m,string str)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Установка параметров орбиты.                                     |
-//| INPUT:  sun      -pointer of the "sun" orbit dynamic center,     |
-//|         fi_x     -angle of inclination of the orbit,             |
-//|         fi_y     -angle of inclination of the orbit,             |
-//|         fi_z     -angle of inclination of the orbit,             |
-//|         d_fi_orb -velocity in orbit.                             |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Setting                                                          |
 //+------------------------------------------------------------------+
-void CSphere::SetOrbite(CSphere *sun,double fi_x,double fi_y,double fi_z,double d_fi_orb)
+void CSphere::SetOrbite(CSphere *sun,const double fi_x,const double fi_y,const double fi_z,const double d_fi_orb)
   {
    m_orbite_center=sun;
    m_orbite_fi_X=fi_x;
@@ -148,11 +123,8 @@ void CSphere::SetOrbite(CSphere *sun,double fi_x,double fi_y,double fi_z,double 
   }
 //+------------------------------------------------------------------+
 //| Recalculation of the sphere.                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CSphere::Recalculate()
+void CSphere::Recalculate(void)
   {
    CArrayObj         *arr;
    CChartObjectLabel *label;
@@ -189,14 +161,14 @@ void CSphere::Recalculate()
          z=m_radius*MathCos(d_fi_m*i)*MathCos(d_fi_p*q);
          //--- recalculation of the coordinates of the point of view of traffic
          label=arr.At(i);
-         label.X_Distance(m_center_X+x2d_(x,y,z,fi_x,fi_y,fi_z));
-         label.Y_Distance(m_center_Y+y2d_(x,y,z,fi_x,fi_y,fi_z));
+         label.X_Distance(m_center_X+x2d_(x,y,z,m_fi_x,m_fi_y,m_fi_z));
+         label.Y_Distance(m_center_Y+y2d_(x,y,z,m_fi_x,m_fi_y,m_fi_z));
         }
       idx3=idx3+0.5*m_id;
      }
-   //---
-   fi_z=fi_z+MathSin(idx3*0.08)/32+MathCos(idx3*0.16)*0.01;
-   fi_x=fi_x+MathCos(idx3*0.08)*0.016+MathCos(idx3*0.12)*0.008;
+//---
+   m_fi_z=m_fi_z+MathSin(idx3*0.08)/32+MathCos(idx3*0.16)*0.01;
+   m_fi_x=m_fi_x+MathCos(idx3*0.08)*0.016+MathCos(idx3*0.12)*0.008;
   }
 //+------------------------------------------------------------------+
 //| auxiliary function                                               |

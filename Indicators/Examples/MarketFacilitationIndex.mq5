@@ -35,9 +35,9 @@ void OnInit()
 //|                                                                  |
 //+------------------------------------------------------------------+
 void CalculateMFI(const int start,const int rates_total,
-                  const double &High[],
-                  const double &Low[],
-                  const long &Volume[])
+                  const double &high[],
+                  const double &low[],
+                  const long &volume[])
   {
    int  i=start;
    bool mfi_up=true,vol_up=true;
@@ -55,8 +55,8 @@ void CalculateMFI(const int start,const int rates_total,
       n=i;
       while(n>0)
         {
-         if(Volume[n]>Volume[n-1]) { vol_up=true;  break; }
-         if(Volume[n]<Volume[n-1]) { vol_up=false; break; }
+         if(volume[n]>volume[n-1]) { vol_up=true;  break; }
+         if(volume[n]<volume[n-1]) { vol_up=false; break; }
          //--- if real volumes are equal continue
          n--;
         }
@@ -64,19 +64,19 @@ void CalculateMFI(const int start,const int rates_total,
 //---
    while(i<rates_total && !IsStopped())
      {
-      if(Volume[i]==0)
+      if(volume[i]==0)
         {
          if(i>0) ExtMFIBuffer[i]=ExtMFIBuffer[i-1];
          else    ExtMFIBuffer[i]=0;
         }
-      else ExtMFIBuffer[i]=(High[i]-Low[i])/_Point/Volume[i];
+      else ExtMFIBuffer[i]=(high[i]-low[i])/_Point/volume[i];
       //--- calculate changes
       if(i>0)
         {
          if(ExtMFIBuffer[i]>ExtMFIBuffer[i-1]) mfi_up=true;
          if(ExtMFIBuffer[i]<ExtMFIBuffer[i-1]) mfi_up=false;
-         if(Volume[i]>Volume[i-1])             vol_up=true;
-         if(Volume[i]<Volume[i-1])             vol_up=false;
+         if(volume[i]>volume[i-1])             vol_up=true;
+         if(volume[i]<volume[i-1])             vol_up=false;
         }
       //--- set colors
       if(mfi_up && vol_up)   ExtColorBuffer[i]=0.0;
@@ -89,15 +89,16 @@ void CalculateMFI(const int start,const int rates_total,
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //---
    int start=0;
@@ -105,13 +106,13 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(start<prev_calculated) start=prev_calculated-1;
 //--- calculate with tick or real volumes
    if(InpVolumeType==VOLUME_TICK)
-      CalculateMFI(start,rates_total,High,Low,TickVolume);
+      CalculateMFI(start,rates_total,high,low,tick_volume);
    else
-      CalculateMFI(start,rates_total,High,Low,Volume);
+      CalculateMFI(start,rates_total,high,low,volume);
 //--- normalize last mfi value
    if(rates_total>1)
      {
-      datetime ctm=TimeTradeServer(),lasttm=Time[rates_total-1],nexttm=lasttm+datetime(PeriodSeconds());
+      datetime ctm=TimeTradeServer(),lasttm=time[rates_total-1],nexttm=lasttm+datetime(PeriodSeconds());
       if(ctm<nexttm && ctm>=lasttm && nexttm!=lasttm)
         {
          double correction_koef=double(1+ctm-lasttm)/double(nexttm-lasttm);

@@ -40,15 +40,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Force Index                                                      |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //--- check for rates total
@@ -84,12 +85,12 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(InpAppliedVolume==VOLUME_TICK)
      {
       for(i=limit;i<rates_total && !IsStopped();i++)
-         ExtForceBuffer[i]=TickVolume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
+         ExtForceBuffer[i]=tick_volume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
      }
    else
      {
       for(i=limit;i<rates_total && !IsStopped();i++)
-         ExtForceBuffer[i]=Volume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
+         ExtForceBuffer[i]=volume[i]*(ExtMABuffer[i]-ExtMABuffer[i-1]);
      }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

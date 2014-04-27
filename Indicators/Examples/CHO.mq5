@@ -80,14 +80,14 @@ void AverageOnArray(const int mode,const int rates_total,const int prev_calculat
 //+------------------------------------------------------------------+
 int OnCalculate(const int rates_total,
                 const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //--- check for rates total
@@ -99,9 +99,9 @@ int OnCalculate(const int rates_total,
       limit=1;
       //--- first values
       if(InpVolumeType==VOLUME_TICK)
-         ExtADBuffer[0]=AD(High[0],Low[0],Close[0],TickVolume[0]);
+         ExtADBuffer[0]=AD(high[0],low[0],close[0],tick_volume[0]);
       else
-         ExtADBuffer[0]=AD(High[0],Low[0],Close[0],Volume[0]);
+         ExtADBuffer[0]=AD(high[0],low[0],close[0],volume[0]);
       ExtSlowEMABuffer[0]=ExtADBuffer[0];
       ExtFastEMABuffer[0]=ExtADBuffer[0];
      }
@@ -110,12 +110,12 @@ int OnCalculate(const int rates_total,
    if(InpVolumeType==VOLUME_TICK)
      {
       for(i=limit;i<rates_total && !IsStopped();i++)
-         ExtADBuffer[i]=ExtADBuffer[i-1]+AD(High[i],Low[i],Close[i],TickVolume[i]);
+         ExtADBuffer[i]=ExtADBuffer[i-1]+AD(high[i],low[i],close[i],tick_volume[i]);
      }
    else
      {
       for(i=limit;i<rates_total && !IsStopped();i++)
-         ExtADBuffer[i]=ExtADBuffer[i-1]+AD(High[i],Low[i],Close[i],Volume[i]);
+         ExtADBuffer[i]=ExtADBuffer[i-1]+AD(high[i],low[i],close[i],volume[i]);
      }
 //--- calculate EMA on array ExtADBuffer
    AverageOnArray(InpSmoothMethod,rates_total,prev_calculated,0,InpSlowMA,ExtADBuffer,ExtSlowEMABuffer,weightslow);

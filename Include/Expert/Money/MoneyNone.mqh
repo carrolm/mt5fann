@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                    MoneyNone.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertMoney.mqh>
 // wizard description start
@@ -23,30 +22,40 @@
 class CMoneyNone : public CExpertMoney
   {
 public:
-   virtual bool      ValidationSettings();
+                     CMoneyNone(void);
+                    ~CMoneyNone(void);
+   //---
+   virtual bool      ValidationSettings(void);
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
   };
 //+------------------------------------------------------------------+
-//| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CMoneyNone::ValidationSettings()
+void CMoneyNone::CMoneyNone(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CMoneyNone::~CMoneyNone(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Validation settings protected data.                              |
+//+------------------------------------------------------------------+
+bool CMoneyNone::ValidationSettings(void)
   {
    Percent(100.0);
 //--- initial data checks
-   if(!CExpertMoney::ValidationSettings()) return(false);
+   if(!CExpertMoney::ValidationSettings())
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: minimum lot.                                             |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyNone::CheckOpenLong(double price,double sl)
   {
@@ -54,9 +63,6 @@ double CMoneyNone::CheckOpenLong(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: minimum lot.                                             |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyNone::CheckOpenShort(double price,double sl)
   {

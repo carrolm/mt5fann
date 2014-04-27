@@ -1,11 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                           PositionInfoSample.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "2010, MetaQuotes Software Corp."
-#property link      "http://www.metaquotes.net"
+#property copyright "2009-2013, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
 //---
 #include <Trade\PositionInfo.mqh>
 #include <ChartObjects\ChartObjectsTxtControls.mqh>
@@ -25,14 +24,16 @@ protected:
    //--- chart objects
    CChartObjectButton m_button_prev;
    CChartObjectButton m_button_next;
-   CChartObjectLabel  m_label[19];
-   CChartObjectLabel  m_label_info[19];
+   CChartObjectLabel m_label[19];
+   CChartObjectLabel m_label_info[19];
    //---
    int               curr_pos;
    int               total_pos;
 
 public:
-                     CPositionInfoSample();
+                     CPositionInfoSample(void);
+                    ~CPositionInfoSample(void);
+   //---
    bool              Init();
    void              Deinit();
    void              Processing();
@@ -46,18 +47,20 @@ CPositionInfoSample ExtScript;
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CPositionInfoSample::CPositionInfoSample()
+CPositionInfoSample::CPositionInfoSample(void) : curr_pos(-1),
+                                                 total_pos(-1)
   {
-   curr_pos =-1;
-   total_pos=-1;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CPositionInfoSample::~CPositionInfoSample(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Method Init.                                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CPositionInfoSample::Init()
+bool CPositionInfoSample::Init(void)
   {
    int   i,sy=10;
    int   dy=16;
@@ -67,7 +70,8 @@ bool CPositionInfoSample::Init()
    color_info =(color)(ChartGetInteger(0,CHART_COLOR_BACKGROUND)^0xFFFFFF);
    color_label=(color)(color_info^0x202020);
 //---
-   if(ChartGetInteger(0,CHART_SHOW_OHLC)) sy+=16;
+   if(ChartGetInteger(0,CHART_SHOW_OHLC))
+      sy+=16;
 //--- creation Buttons
    m_button_prev.Create(0,"ButtonPrev",0,10,sy,100,20);
    m_button_prev.Description("Prev Position");
@@ -101,18 +105,12 @@ bool CPositionInfoSample::Init()
   }
 //+------------------------------------------------------------------+
 //| Method Deinit.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CPositionInfoSample::Deinit()
+void CPositionInfoSample::Deinit(void)
   {
   }
 //+------------------------------------------------------------------+
 //| Method Processing.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void CPositionInfoSample::Processing(void)
   {
@@ -129,30 +127,29 @@ void CPositionInfoSample::Processing(void)
       else
         {
          m_label_info[0].Description(IntegerToString(total_pos));
-         if(curr_pos==-1) curr_pos=0;
-         if(curr_pos>=total_pos) curr_pos=total_pos-1;
+         if(curr_pos==-1)
+            curr_pos=0;
+         if(curr_pos>=total_pos)
+            curr_pos=total_pos-1;
          m_label_info[1].Description(IntegerToString(curr_pos));
         }
      }
    CheckButtons();
    PositionSelect(PositionGetSymbol(curr_pos));
    InfoToChart();
-   //--- redraw chart
+//--- redraw chart
    ChartRedraw();
    Sleep(250);
   }
 //+------------------------------------------------------------------+
 //| Method InfoToChart.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: display position info.                                   |
 //+------------------------------------------------------------------+
-void CPositionInfoSample::CheckButtons()
+void CPositionInfoSample::CheckButtons(void)
   {
    if(m_button_prev.State())
      {
       m_button_prev.State(false);
-      if(curr_pos>=0)
+      if(curr_pos>0)
          m_label_info[1].Description(IntegerToString(--curr_pos));
      }
    if(m_button_next.State())
@@ -165,7 +162,7 @@ void CPositionInfoSample::CheckButtons()
 //+------------------------------------------------------------------+
 //| Function for display position info                               |
 //+------------------------------------------------------------------+
-void CPositionInfoSample::InfoToChart()
+void CPositionInfoSample::InfoToChart(void)
   {
    m_label_info[2].Description(m_position.Symbol());
    m_label_info[3].Description(TimeToString(m_position.Time()));
@@ -182,13 +179,14 @@ void CPositionInfoSample::InfoToChart()
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
-int OnStart()
+int OnStart(void)
   {
 //--- call init function
    if(ExtScript.Init()==0)
      {
       //--- cycle until the script is not halted
-      while(!IsStopped()) ExtScript.Processing();
+      while(!IsStopped())
+         ExtScript.Processing();
      }
 //--- call deinit function
    ExtScript.Deinit();

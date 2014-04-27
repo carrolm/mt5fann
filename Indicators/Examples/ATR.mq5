@@ -50,14 +50,14 @@ void OnInit()
 //+------------------------------------------------------------------+
 int OnCalculate(const int rates_total,
                 const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //--- check for bars count
@@ -70,7 +70,7 @@ int OnCalculate(const int rates_total,
       ExtATRBuffer[0]=0.0;
       //--- filling out the array of True Range values for each period
       for(i=1;i<rates_total && !IsStopped();i++)
-         ExtTRBuffer[i]=MathMax(High[i],Close[i-1])-MathMin(Low[i],Close[i-1]);
+         ExtTRBuffer[i]=MathMax(high[i],close[i-1])-MathMin(low[i],close[i-1]);
       //--- first AtrPeriod values of the indicator are not calculated
       double firstValue=0.0;
       for(i=1;i<=ExtPeriodATR;i++)
@@ -87,7 +87,7 @@ int OnCalculate(const int rates_total,
 //--- the main loop of calculations
    for(i=limit;i<rates_total && !IsStopped();i++)
      {
-      ExtTRBuffer[i]=MathMax(High[i],Close[i-1])-MathMin(Low[i],Close[i-1]);
+      ExtTRBuffer[i]=MathMax(high[i],close[i-1])-MathMin(low[i],close[i-1]);
       ExtATRBuffer[i]=ExtATRBuffer[i-1]+(ExtTRBuffer[i]-ExtTRBuffer[i-ExtPeriodATR])/ExtPeriodATR;
      }
 //--- return value of prev_calculated for next call

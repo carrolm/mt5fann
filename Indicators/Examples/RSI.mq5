@@ -84,7 +84,15 @@ int OnCalculate(const int rates_total,
       //--- calculate first visible value
       ExtPosBuffer[ExtPeriodRSI]=SumP/ExtPeriodRSI;
       ExtNegBuffer[ExtPeriodRSI]=SumN/ExtPeriodRSI;
-      ExtRSIBuffer[ExtPeriodRSI]=100.0-(100.0/(1.0+ExtPosBuffer[ExtPeriodRSI]/ExtNegBuffer[ExtPeriodRSI]));
+      if(ExtNegBuffer[ExtPeriodRSI]!=0.0)
+         ExtRSIBuffer[ExtPeriodRSI]=100.0-(100.0/(1.0+ExtPosBuffer[ExtPeriodRSI]/ExtNegBuffer[ExtPeriodRSI]));
+      else
+        {
+         if(ExtPosBuffer[ExtPeriodRSI]!=0.0)
+            ExtRSIBuffer[ExtPeriodRSI]=100.0;
+         else
+            ExtRSIBuffer[ExtPeriodRSI]=50.0;
+        }
       //--- prepare the position value for main calculation
       pos=ExtPeriodRSI+1;
      }
@@ -94,7 +102,15 @@ int OnCalculate(const int rates_total,
       diff=price[i]-price[i-1];
       ExtPosBuffer[i]=(ExtPosBuffer[i-1]*(ExtPeriodRSI-1)+(diff>0.0?diff:0.0))/ExtPeriodRSI;
       ExtNegBuffer[i]=(ExtNegBuffer[i-1]*(ExtPeriodRSI-1)+(diff<0.0?-diff:0.0))/ExtPeriodRSI;
-      ExtRSIBuffer[i]=100.0-100.0/(1+ExtPosBuffer[i]/ExtNegBuffer[i]);
+      if(ExtNegBuffer[i]!=0.0)
+         ExtRSIBuffer[i]=100.0-100.0/(1+ExtPosBuffer[i]/ExtNegBuffer[i]);
+      else
+        {
+         if(ExtPosBuffer[i]!=0.0)
+            ExtRSIBuffer[i]=100.0;
+         else
+            ExtRSIBuffer[i]=50.0;
+        }
      }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);

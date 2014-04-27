@@ -82,15 +82,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- checking for bars count
    if(rates_total<ExtADXWPeriod)
@@ -119,11 +120,11 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(int i=start;i<rates_total && !IsStopped();i++)
      {
       //--- get some data
-      double Hi    =High[i];
-      double prevHi=High[i-1];
-      double Lo    =Low[i];
-      double prevLo=Low[i-1];
-      double prevCl=Close[i-1];
+      double Hi    =high[i];
+      double prevHi=high[i-1];
+      double Lo    =low[i];
+      double prevLo=low[i-1];
+      double prevCl=close[i-1];
       //--- fill main positive and main negative buffers
       double dTmpP=Hi-prevHi;
       double dTmpN=prevLo-Lo;

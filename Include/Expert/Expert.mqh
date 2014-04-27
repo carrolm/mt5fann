@@ -1,11 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                       Expert.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Include files.                                                   |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "ExpertBase.mqh"
 #include "ExpertTrade.mqh"
@@ -66,7 +62,7 @@ protected:
    CExpertTrade     *m_trade;                    // trading object
    CExpertSignal    *m_signal;                   // trading signals object
    CExpertMoney     *m_money;                    // money manager object
-   CExpertTrailing  *m_trailing;                 // trailing stops object
+   CExpertTrailing *m_trailing;                 // trailing stops object
    //--- indicators
    CIndicators       m_indicators;               // indicator collection to fast recalculations
    //--- market objects
@@ -80,166 +76,160 @@ protected:
    bool              m_on_book_event_process;    // OnBookEvent will be processed  (default false)
 
 public:
-                     CExpert();
-                    ~CExpert()                              { Deinit();                       }
+                     CExpert(void);
+                    ~CExpert(void);
    //--- initialization
    bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic=0);
    void              Magic(ulong value);
    //--- initialization trading objects
-   virtual bool      InitSignal(CExpertSignal* signal=NULL);
-   virtual bool      InitTrailing(CExpertTrailing* trailing=NULL);
-   virtual bool      InitMoney(CExpertMoney* money=NULL);
-   virtual bool      InitTrade(ulong magic,CExpertTrade* trade=NULL);
+   virtual bool      InitSignal(CExpertSignal *signal=NULL);
+   virtual bool      InitTrailing(CExpertTrailing *trailing=NULL);
+   virtual bool      InitMoney(CExpertMoney *money=NULL);
+   virtual bool      InitTrade(ulong magic,CExpertTrade *trade=NULL);
    //--- deinitialization
-   virtual void      Deinit();
+   virtual void      Deinit(void);
    //--- methods of setting adjustable parameters
    void              OnTickProcess(bool value)              { m_on_tick_process=value;        }
    void              OnTradeProcess(bool value)             { m_on_trade_process=value;       }
    void              OnTimerProcess(bool value)             { m_on_timer_process=value;       }
    void              OnChartEventProcess(bool value)        { m_on_chart_event_process=value; }
    void              OnBookEventProcess(bool value)         { m_on_book_event_process=value;  }
-   int               MaxOrders()                      const { return(m_max_orders);           }
+   int               MaxOrders(void)                  const { return(m_max_orders);           }
    void              MaxOrders(int value)                   { m_max_orders=value;             }
    //--- methods of access to protected data
-   CExpertSignal*    Signal()                         const { return(m_signal);               }
+   CExpertSignal    *Signal(void)                     const { return(m_signal);               }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators=NULL);
+   virtual bool      InitIndicators(CIndicators *indicators=NULL);
    //--- event handlers
-   virtual void      OnTick();
-   virtual void      OnTrade();
-   virtual void      OnTimer();
-   virtual void      OnChartEvent(const int id,const long& lparam,const double& dparam,const string& sparam);
-   virtual void      OnBookEvent(const string& symbol);
+   virtual void      OnTick(void);
+   virtual void      OnTrade(void);
+   virtual void      OnTimer(void);
+   virtual void      OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam);
+   virtual void      OnBookEvent(const string &symbol);
 
 protected:
    //--- initialization
-   virtual bool      InitParameters()                       { return(true);                   }
+   virtual bool      InitParameters(void) { return(true); }
    //--- deinitialization
-   virtual void      DeinitTrade();
-   virtual void      DeinitSignal();
-   virtual void      DeinitTrailing();
-   virtual void      DeinitMoney();
-   virtual void      DeinitIndicators();
+   virtual void      DeinitTrade(void);
+   virtual void      DeinitSignal(void);
+   virtual void      DeinitTrailing(void);
+   virtual void      DeinitMoney(void);
+   virtual void      DeinitIndicators(void);
    //--- refreshing 
-   virtual bool      Refresh();
+   virtual bool      Refresh(void);
    //--- processing (main method)
-   virtual bool      Processing();
+   virtual bool      Processing(void);
    //--- trade open positions check
-   virtual bool      CheckOpen();
-   virtual bool      CheckOpenLong();
-   virtual bool      CheckOpenShort();
+   virtual bool      CheckOpen(void);
+   virtual bool      CheckOpenLong(void);
+   virtual bool      CheckOpenShort(void);
    //--- trade open positions processing
    virtual bool      OpenLong(double price,double sl,double tp);
    virtual bool      OpenShort(double price,double sl,double tp);
    //--- trade reverse positions check
-   virtual bool      CheckReverse();
-   virtual bool      CheckReverseLong();
-   virtual bool      CheckReverseShort();
+   virtual bool      CheckReverse(void);
+   virtual bool      CheckReverseLong(void);
+   virtual bool      CheckReverseShort(void);
    //--- trade reverse positions processing
    virtual bool      ReverseLong(double price,double sl,double tp);
    virtual bool      ReverseShort(double price,double sl,double tp);
    //--- trade close positions check
-   virtual bool      CheckClose();
-   virtual bool      CheckCloseLong();
-   virtual bool      CheckCloseShort();
+   virtual bool      CheckClose(void);
+   virtual bool      CheckCloseLong(void);
+   virtual bool      CheckCloseShort(void);
    //--- trade close positions processing
    virtual bool      CloseAll(double lot);
-   virtual bool      Close();
+   virtual bool      Close(void);
    virtual bool      CloseLong(double price);
    virtual bool      CloseShort(double price);
    //--- trailing stop check
-   virtual bool      CheckTrailingStop();
-   virtual bool      CheckTrailingStopLong();
-   virtual bool      CheckTrailingStopShort();
+   virtual bool      CheckTrailingStop(void);
+   virtual bool      CheckTrailingStopLong(void);
+   virtual bool      CheckTrailingStopShort(void);
    //--- trailing stop processing
    virtual bool      TrailingStopLong(double sl,double tp);
    virtual bool      TrailingStopShort(double sl,double tp);
    //--- trailing order check
-   virtual bool      CheckTrailingOrderLong();
-   virtual bool      CheckTrailingOrderShort();
+   virtual bool      CheckTrailingOrderLong(void);
+   virtual bool      CheckTrailingOrderShort(void);
    //--- trailing order processing
    virtual bool      TrailingOrderLong(double delta);
    virtual bool      TrailingOrderShort(double delta);
    //--- delete order check
-   virtual bool      CheckDeleteOrderLong();
-   virtual bool      CheckDeleteOrderShort();
+   virtual bool      CheckDeleteOrderLong(void);
+   virtual bool      CheckDeleteOrderShort(void);
    //--- delete order processing
-   virtual bool      DeleteOrders();
-   virtual bool      DeleteOrder();
-   virtual bool      DeleteOrderLong();
-   virtual bool      DeleteOrderShort();
+   virtual bool      DeleteOrders(void);
+   virtual bool      DeleteOrdersLong(void);
+   virtual bool      DeleteOrdersShort(void);
+   virtual bool      DeleteOrder(void);
+   virtual bool      DeleteOrderLong(void);
+   virtual bool      DeleteOrderShort(void);
    //--- lot for trade
    double            LotOpenLong(double price,double sl);
    double            LotOpenShort(double price,double sl);
    double            LotReverse(double sl);
    //--- methods of working with trade history
-   void              PrepareHistoryDate();
+   void              PrepareHistoryDate(void);
    void              HistoryPoint(bool from_check_trade=false);
-   bool              CheckTradeState();
+   bool              CheckTradeState(void);
    //--- set/reset waiting events
-   void              WaitEvent(ENUM_TRADE_EVENTS event)     { m_waiting_event|=event;         }
-   void              NoWaitEvent(ENUM_TRADE_EVENTS event)   { m_waiting_event&=~event;        }
+   void              WaitEvent(ENUM_TRADE_EVENTS event)     { m_waiting_event|=event;  }
+   void              NoWaitEvent(ENUM_TRADE_EVENTS event)   { m_waiting_event&=~event; }
    //--- trade events
-   virtual bool      TradeEventPositionStopTake()           { return(true);                   }
-   virtual bool      TradeEventOrderTriggered()             { return(true);                   }
-   virtual bool      TradeEventPositionOpened()             { return(true);                   }
-   virtual bool      TradeEventPositionVolumeChanged()      { return(true);                   }
-   virtual bool      TradeEventPositionModified()           { return(true);                   }
-   virtual bool      TradeEventPositionClosed()             { return(true);                   }
-   virtual bool      TradeEventOrderPlaced()                { return(true);                   }
-   virtual bool      TradeEventOrderModified()              { return(true);                   }
-   virtual bool      TradeEventOrderDeleted()               { return(true);                   }
-   virtual bool      TradeEventNotIdentified()              { return(true);                   }
+   virtual bool      TradeEventPositionStopTake(void)       { return(true); }
+   virtual bool      TradeEventOrderTriggered(void)         { return(true); }
+   virtual bool      TradeEventPositionOpened(void)         { return(true); }
+   virtual bool      TradeEventPositionVolumeChanged(void)  { return(true); }
+   virtual bool      TradeEventPositionModified(void)       { return(true); }
+   virtual bool      TradeEventPositionClosed(void)         { return(true); }
+   virtual bool      TradeEventOrderPlaced(void)            { return(true); }
+   virtual bool      TradeEventOrderModified(void)          { return(true); }
+   virtual bool      TradeEventOrderDeleted(void)           { return(true); }
+   virtual bool      TradeEventNotIdentified(void)          { return(true); }
    //--- timeframe functions
    void              TimeframeAdd(ENUM_TIMEFRAMES period);
-   int               TimeframesFlags(MqlDateTime& time);
+   int               TimeframesFlags(MqlDateTime &time);
   };
 //+------------------------------------------------------------------+
-//| Constructor CExpert.                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CExpert::CExpert()
+CExpert::CExpert(void) : m_period_flags(0),
+                         m_expiration(0),
+                         m_pos_tot(0),
+                         m_deal_tot(0),
+                         m_ord_tot(0),
+                         m_hist_ord_tot(0),
+                         m_beg_date(0),
+                         m_trade(NULL),
+                         m_signal(NULL),
+                         m_money(NULL),
+                         m_trailing(NULL),
+                         m_on_tick_process(true),
+                         m_on_trade_process(false),
+                         m_on_timer_process(false),
+                         m_on_chart_event_process(false),
+                         m_on_book_event_process(false),
+                         m_max_orders(1)
   {
-//--- initialization of protected data
-   m_other_symbol          =true;
-   m_other_period          =true;
-//---
-   m_adjusted_point        =10;
-   m_period                =WRONG_VALUE;
-   m_period_flags          =0;
-   m_last_tick_time.min    =-1;
-   m_expiration            =0;
-//---
-   m_pos_tot               =0;
-   m_deal_tot              =0;
-   m_ord_tot               =0;
-   m_hist_ord_tot          =0;
-   m_beg_date              =0;
-//---
-   m_trade                 =NULL;
-   m_signal                =NULL;
-   m_money                 =NULL;
-   m_trailing              =NULL;
-//--- setting default values for input parameters
-   m_on_tick_process       =true;
-   m_on_trade_process      =false;
-   m_on_timer_process      =false;
-   m_on_chart_event_process=false;
-   m_on_book_event_process =false;
-   m_max_orders            =1;
+   m_other_symbol=true;
+   m_other_period      =true;
+   m_adjusted_point    =10;
+   m_period            =WRONG_VALUE;
+   m_last_tick_time.min=-1;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CExpert::~CExpert(void)
+  {
+   Deinit();
   }
 //+------------------------------------------------------------------+
 //| Initialization and checking for input parameters                 |
-//| INPUT:  symbol     - symbol name,                                |
-//|         period     - period,                                     |
-//|         every_tick - every tick flag,                            |
-//|         magic      - magic number for trade.                     |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic)
   {
@@ -252,10 +242,12 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong ma
 //--- initialize common information
    if(m_symbol==NULL)
      {
-      if((m_symbol=new CSymbolInfo)==NULL) return(false);
+      if((m_symbol=new CSymbolInfo)==NULL)
+         return(false);
      }
-   if(!m_symbol.Name(symbol)) return(false);
-   m_period    =period;                     // period
+   if(!m_symbol.Name(symbol))
+      return(false);
+   m_period    =period;
    m_every_tick=every_tick;
    m_magic     =magic;
    if(every_tick)
@@ -263,8 +255,7 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong ma
    else
       TimeframeAdd(period);                 // add specified period
 //--- tuning for 3 or 5 digits
-   int digits_adjust=1;
-   if(m_symbol.Digits()==3 || m_symbol.Digits()==5) digits_adjust=10;
+   int digits_adjust=(m_symbol.Digits()==3 || m_symbol.Digits()==5) ? 10 : 1;
    m_adjusted_point=m_symbol.Point()*digits_adjust;
 //--- initializing objects expert
    if(!InitTrade(magic))
@@ -296,68 +287,68 @@ bool CExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong ma
    PrepareHistoryDate();
    HistoryPoint();
 //--- primary initialization is successful, pass to the phase of tuning
-   m_init_phase    =INIT_PHASE_TUNING;
+   m_init_phase=INIT_PHASE_TUNING;
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Sets magic number for object and its dependent objects           |
-//| INPUT:  value - new value of magic number.                       |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void CExpert::Magic(ulong value)
   {
-   if(m_trade!=NULL)    m_trade.SetExpertMagicNumber(value);
-   if(m_signal!=NULL)   m_signal.Magic(value);
-   if(m_money!=NULL)    m_money.Magic(value);
-   if(m_trailing!=NULL) m_trailing.Magic(value);
+   if(m_trade!=NULL)
+      m_trade.SetExpertMagicNumber(value);
+   if(m_signal!=NULL)
+      m_signal.Magic(value);
+   if(m_money!=NULL)
+      m_money.Magic(value);
+   if(m_trailing!=NULL)
+      m_trailing.Magic(value);
 //---
    CExpertBase::Magic(value);
   }
 //+------------------------------------------------------------------+
 //| Initialization trade object                                      |
-//| INPUT:  magic - magic number for trade,                          |
-//|         trade - pointer of trade object.                         |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitTrade(ulong magic,CExpertTrade* trade=NULL)
+bool CExpert::InitTrade(ulong magic,CExpertTrade *trade=NULL)
   {
 //--- удаляем существующий объект
-   if(m_trade!=NULL) delete m_trade;
+   if(m_trade!=NULL)
+      delete m_trade;
 //---
    if(trade==NULL)
      {
-      if((m_trade=new CExpertTrade)==NULL) return(false);
+      if((m_trade=new CExpertTrade)==NULL)
+         return(false);
      }
-   else m_trade=trade;
+   else
+      m_trade=trade;
 //--- tune trade object
    m_trade.SetSymbol(GetPointer(m_symbol));
    m_trade.SetExpertMagicNumber(magic);
-   //--- set default deviation for trading in adjusted points
+//--- set default deviation for trading in adjusted points
    m_trade.SetDeviationInPoints((ulong)(3*m_adjusted_point/m_symbol.Point()));
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialization signal object                                     |
-//| INPUT:  signal - pointer of signal object.                       |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitSignal(CExpertSignal* signal)
+bool CExpert::InitSignal(CExpertSignal *signal)
   {
-   if(m_signal!=NULL) delete m_signal;
+   if(m_signal!=NULL)
+      delete m_signal;
 //---
    if(signal==NULL)
      {
-      if((m_signal=new CExpertSignal)==NULL) return(false);
+      if((m_signal=new CExpertSignal)==NULL)
+         return(false);
      }
    else
       m_signal=signal;
 //--- initializing signal object
-   if(!m_signal.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
+   if(!m_signal.Init(GetPointer(m_symbol),m_period,m_adjusted_point))
+      return(false);
    m_signal.EveryTick(m_every_tick);
    m_signal.Magic(m_magic);
 //--- ok
@@ -365,22 +356,22 @@ bool CExpert::InitSignal(CExpertSignal* signal)
   }
 //+------------------------------------------------------------------+
 //| Initialization trailing object                                   |
-//| INPUT:  trailing - pointer of trailing object.                   |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitTrailing(CExpertTrailing* trailing)
+bool CExpert::InitTrailing(CExpertTrailing *trailing)
   {
-   if(m_trailing!=NULL) delete m_trailing;
+   if(m_trailing!=NULL)
+      delete m_trailing;
 //---
    if(trailing==NULL)
      {
-      if((m_trailing=new CExpertTrailing)==NULL) return(false);
+      if((m_trailing=new CExpertTrailing)==NULL)
+         return(false);
      }
    else
       m_trailing=trailing;
 //--- initializing trailing object
-   if(!m_trailing.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
+   if(!m_trailing.Init(GetPointer(m_symbol),m_period,m_adjusted_point))
+      return(false);
    m_trailing.EveryTick(m_every_tick);
    m_trailing.Magic(m_magic);
 //--- ok
@@ -388,22 +379,22 @@ bool CExpert::InitTrailing(CExpertTrailing* trailing)
   }
 //+------------------------------------------------------------------+
 //| Initialization money object                                      |
-//| INPUT:  money - pointer of money object.                         |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::InitMoney(CExpertMoney *money)
   {
-   if(m_money!=NULL) delete m_money;
+   if(m_money!=NULL)
+      delete m_money;
 //---
    if(money==NULL)
      {
-      if((m_money=new CExpertMoney)==NULL) return(false);
+      if((m_money=new CExpertMoney)==NULL)
+         return(false);
      }
    else
       m_money=money;
 //--- initializing money object
-   if(!m_money.Init(GetPointer(m_symbol),m_period,m_adjusted_point)) return(false);
+   if(!m_money.Init(GetPointer(m_symbol),m_period,m_adjusted_point))
+      return(false);
    m_money.EveryTick(m_every_tick);
    m_money.Magic(m_magic);
 //--- ok
@@ -411,13 +402,11 @@ bool CExpert::InitMoney(CExpertMoney *money)
   }
 //+------------------------------------------------------------------+
 //| Validation settings                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::ValidationSettings()
+bool CExpert::ValidationSettings(void)
   {
-   if(!CExpertBase::ValidationSettings()) return(false);
+   if(!CExpertBase::ValidationSettings())
+      return(false);
 //--- Check signal parameters
    if(!m_signal.ValidationSettings())
      {
@@ -441,20 +430,18 @@ bool CExpert::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Initialization indicators                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::InitIndicators(CIndicators* indicators)
+bool CExpert::InitIndicators(CIndicators *indicators)
   {
 //--- NULL always comes as the parameter, but here it's not significant for us
-   CIndicators* indicators_ptr=GetPointer(m_indicators);
+   CIndicators *indicators_ptr=GetPointer(m_indicators);
 //--- gather information about using of timeseries
    m_used_series|=m_signal.UsedSeries();
    m_used_series|=m_trailing.UsedSeries();
    m_used_series|=m_money.UsedSeries();
 //--- create required timeseries
-   if(!CExpertBase::InitIndicators(indicators_ptr)) return(false);
+   if(!CExpertBase::InitIndicators(indicators_ptr))
+      return(false);
    m_signal.SetPriceSeries(m_open,m_high,m_low,m_close);
    m_signal.SetOtherSeries(m_spread,m_time,m_tick_volume,m_real_volume);
    if(!m_signal.InitIndicators(indicators_ptr))
@@ -481,11 +468,8 @@ bool CExpert::InitIndicators(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Deinitialization expert                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::Deinit()
+void CExpert::Deinit(void)
   {
 //--- delete trade class
    DeinitTrade();
@@ -500,11 +484,8 @@ void CExpert::Deinit()
   }
 //+------------------------------------------------------------------+
 //| Deinitialization trade object                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::DeinitTrade()
+void CExpert::DeinitTrade(void)
   {
    if(m_trade!=NULL)
      {
@@ -514,11 +495,8 @@ void CExpert::DeinitTrade()
   }
 //+------------------------------------------------------------------+
 //| Deinitialization signal object                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::DeinitSignal()
+void CExpert::DeinitSignal(void)
   {
    if(m_signal!=NULL)
      {
@@ -528,11 +506,8 @@ void CExpert::DeinitSignal()
   }
 //+------------------------------------------------------------------+
 //| Deinitialization trailing object                                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::DeinitTrailing()
+void CExpert::DeinitTrailing(void)
   {
    if(m_trailing!=NULL)
      {
@@ -542,11 +517,8 @@ void CExpert::DeinitTrailing()
   }
 //+------------------------------------------------------------------+
 //| Deinitialization money object                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::DeinitMoney()
+void CExpert::DeinitMoney(void)
   {
    if(m_money!=NULL)
      {
@@ -556,29 +528,25 @@ void CExpert::DeinitMoney()
   }
 //+------------------------------------------------------------------+
 //| Deinitialization indicators                                      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::DeinitIndicators()
+void CExpert::DeinitIndicators(void)
   {
    m_indicators.Clear();
   }
 //+------------------------------------------------------------------+
 //| Refreshing data for processing                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::Refresh()
+bool CExpert::Refresh(void)
   {
    MqlDateTime time;
 //--- refresh rates
-   if(!m_symbol.RefreshRates()) return(false);
+   if(!m_symbol.RefreshRates())
+      return(false);
 //--- check need processing
    TimeToStruct(m_symbol.Time(),time);
    if(m_period_flags!=WRONG_VALUE && m_period_flags!=0)
-      if((m_period_flags & TimeframesFlags(time))==0) return(false);
+      if((m_period_flags  &TimeframesFlags(time))==0)
+         return(false);
    m_last_tick_time=time;
 //--- refresh indicators
    m_indicators.Refresh();
@@ -587,23 +555,22 @@ bool CExpert::Refresh()
   }
 //+------------------------------------------------------------------+
 //| Main function                                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if any trade operation processed, false otherwise.  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::Processing()
+bool CExpert::Processing(void)
   {
 //--- check if open positions
    if(m_position.Select(m_symbol.Name()))
      {
       //--- open position is available
       //--- check the possibility of reverse the position
-      if(CheckReverse()) return(true);
+      if(CheckReverse())
+         return(true);
       //--- check the possibility of closing the position/delete pending orders
       if(!CheckClose())
         {
          //--- check the possibility of modifying the position
-         if(CheckTrailingStop()) return(true);
+         if(CheckTrailingStop())
+            return(true);
          //--- return without operations
          return(false);
         }
@@ -615,110 +582,103 @@ bool CExpert::Processing()
       for(int i=total-1;i>=0;i--)
         {
          m_order.SelectByIndex(i);
-         if(m_order.Symbol()!=m_symbol.Name()) continue;
+         if(m_order.Symbol()!=m_symbol.Name())
+            continue;
          if(m_order.OrderType()==ORDER_TYPE_BUY_LIMIT || m_order.OrderType()==ORDER_TYPE_BUY_STOP)
            {
             //--- check the ability to delete a pending order to buy
-            if(CheckDeleteOrderLong()) return(true);
+            if(CheckDeleteOrderLong())
+               return(true);
             //--- check the possibility of modifying a pending order to buy
-            if(CheckTrailingOrderLong()) return(true);
+            if(CheckTrailingOrderLong())
+               return(true);
            }
          else
            {
             //--- check the ability to delete a pending order to sell
-            if(CheckDeleteOrderShort()) return(true);
+            if(CheckDeleteOrderShort())
+               return(true);
             //--- check the possibility of modifying a pending order to sell
-            if(CheckTrailingOrderShort()) return(true);
+            if(CheckTrailingOrderShort())
+               return(true);
            }
          //--- return without operations
          return(false);
         }
      }
 //--- check the possibility of opening a position/setting pending order
-   if(CheckOpen()) return(true);
+   if(CheckOpen())
+      return(true);
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| OnTick handler                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::OnTick()
+void CExpert::OnTick(void)
   {
 //--- check process flag
-   if(!m_on_tick_process) return;
+   if(!m_on_tick_process)
+      return;
 //--- updated quotes and indicators
-   if(!Refresh())         return;
+   if(!Refresh())
+      return;
 //--- expert processing
    Processing();
   }
 //+------------------------------------------------------------------+
 //| OnTrade handler                                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::OnTrade()
+void CExpert::OnTrade(void)
   {
 //--- check process flag
-   if(!m_on_trade_process) return;
+   if(!m_on_trade_process)
+      return;
    CheckTradeState();
   }
 //+------------------------------------------------------------------+
 //| OnTimer handler                                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::OnTimer()
+void CExpert::OnTimer(void)
   {
 //--- check process flag
-   if(!m_on_timer_process) return;
+   if(!m_on_timer_process)
+      return;
   }
 //+------------------------------------------------------------------+
 //| OnChartEvent handler                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::OnChartEvent(const int id,const long& lparam,const double& dparam,const string& sparam)
+void CExpert::OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
 //--- check process flag
-   if(!m_on_chart_event_process) return;
+   if(!m_on_chart_event_process)
+      return;
   }
 //+------------------------------------------------------------------+
 //| OnBookEvent handler                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::OnBookEvent(const string& symbol)
+void CExpert::OnBookEvent(const string &symbol)
   {
 //--- check process flag
-   if(!m_on_book_event_process) return;
+   if(!m_on_book_event_process)
+      return;
   }
 //+------------------------------------------------------------------+
 //| Check for position open or limit/stop order set                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckOpen()
+bool CExpert::CheckOpen(void)
   {
-   if(CheckOpenLong())  return(true);
-   if(CheckOpenShort()) return(true);
+   if(CheckOpenLong())
+      return(true);
+   if(CheckOpenShort())
+      return(true);
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| Check for long position open or limit/stop order set             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckOpenLong()
+bool CExpert::CheckOpenLong(void)
   {
    double   price=EMPTY_VALUE;
    double   sl=0.0;
@@ -728,9 +688,7 @@ bool CExpert::CheckOpenLong()
    if(m_signal.CheckOpenLong(price,sl,tp,expiration))
      {
       if(!m_trade.SetOrderExpiration(expiration))
-        {
          m_expiration=expiration;
-        }
       return(OpenLong(price,sl,tp));
      }
 //--- return without operations
@@ -738,11 +696,8 @@ bool CExpert::CheckOpenLong()
   }
 //+------------------------------------------------------------------+
 //| Check for short position open or limit/stop order set            |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckOpenShort()
+bool CExpert::CheckOpenShort(void)
   {
    double   price=EMPTY_VALUE;
    double   sl=0.0;
@@ -752,9 +707,7 @@ bool CExpert::CheckOpenShort()
    if(m_signal.CheckOpenShort(price,sl,tp,expiration))
      {
       if(!m_trade.SetOrderExpiration(expiration))
-        {
          m_expiration=expiration;
-        }
       return(OpenShort(price,sl,tp));
      }
 //--- return without operations
@@ -762,136 +715,118 @@ bool CExpert::CheckOpenShort()
   }
 //+------------------------------------------------------------------+
 //| Long position open or limit/stop order set                       |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss,                                       |
-//|         tp    - take profit.                                     |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::OpenLong(double price,double sl,double tp)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //--- get lot for open
    double lot=LotOpenLong(price,sl);
 //--- check lot for open
-   if(lot==0.0) return(false);
+   if(lot==0.0)
+      return(false);
 //---
    return(m_trade.Buy(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+
 //| Short position open or limit/stop order set                      |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss,                                       |
-//|         tp    - take profit.                                     |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::OpenShort(double price,double sl,double tp)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //--- get lot for open
    double lot=LotOpenShort(price,sl);
 //--- check lot for open
-   if(lot==0.0) return(false);
+   if(lot==0.0)
+      return(false);
 //---
    return(m_trade.Sell(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+
 //| Check for position reverse                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckReverse()
+bool CExpert::CheckReverse(void)
   {
    if(m_position.PositionType()==POSITION_TYPE_BUY)
      {
       //--- check the possibility of reverse the long position
-      if(CheckReverseLong())  return(true);
+      if(CheckReverseLong())
+         return(true);
      }
    else
+     {
       //--- check the possibility of reverse the short position
-      if(CheckReverseShort()) return(true);
+      if(CheckReverseShort())
+         return(true);
+     }
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| Check for long position reverse                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckReverseLong()
+bool CExpert::CheckReverseLong(void)
   {
    double   price=EMPTY_VALUE;
    double   sl=0.0;
    double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for long reverse operations
-   if(m_signal.CheckReverseLong(price,sl,tp,expiration)) return(ReverseLong(price,sl,tp));
+   if(m_signal.CheckReverseLong(price,sl,tp,expiration))
+      return(ReverseLong(price,sl,tp));
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| Check for short position reverse                                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckReverseShort()
+bool CExpert::CheckReverseShort(void)
   {
    double   price=EMPTY_VALUE;
    double   sl=0.0;
    double   tp=0.0;
    datetime expiration=TimeCurrent();
 //--- check signal for short reverse operations
-   if(m_signal.CheckReverseShort(price,sl,tp,expiration)) return(ReverseShort(price,sl,tp));
+   if(m_signal.CheckReverseShort(price,sl,tp,expiration))
+      return(ReverseShort(price,sl,tp));
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| Long position reverse                                            |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss,                                       |
-//|         tp    - take profit.                                     |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::ReverseLong(double price,double sl,double tp)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //--- get lot for reverse
    double lot=LotReverse(sl);
 //--- check lot
-   if(lot==0.0) return(false);
+   if(lot==0.0)
+      return(false);
 //---
    return(m_trade.Sell(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+
 //| Short position reverse                                           |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss,                                       |
-//|         tp    - take profit.                                     |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::ReverseShort(double price,double sl,double tp)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //--- get lot for reverse
    double lot=LotReverse(sl);
 //--- check lot
-   if(lot==0.0) return(false);
+   if(lot==0.0)
+      return(false);
 //---
    return(m_trade.Buy(lot,price,sl,tp));
   }
 //+------------------------------------------------------------------+
 //| Check for position close or limit/stop order delete              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckClose()
+bool CExpert::CheckClose(void)
   {
    double lot;
 //--- position must be selected before call
@@ -903,7 +838,7 @@ bool CExpert::CheckClose()
       //--- check the possibility of closing the long position / delete pending orders to buy
       if(CheckCloseLong())
         {
-         DeleteOrders();
+         DeleteOrdersLong();
          return(true);
         }
      }
@@ -912,7 +847,7 @@ bool CExpert::CheckClose()
       //--- check the possibility of closing the short position / delete pending orders to sell
       if(CheckCloseShort())
         {
-         DeleteOrders();
+         DeleteOrdersShort();
          return(true);
         }
      }
@@ -921,11 +856,8 @@ bool CExpert::CheckClose()
   }
 //+------------------------------------------------------------------+
 //| Check for long position close or limit/stop order delete         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckCloseLong()
+bool CExpert::CheckCloseLong(void)
   {
    double price=EMPTY_VALUE;
 //--- check for long close operations
@@ -936,11 +868,8 @@ bool CExpert::CheckCloseLong()
   }
 //+------------------------------------------------------------------+
 //| Check for short position close or limit/stop order delete        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckCloseShort()
+bool CExpert::CheckCloseShort(void)
   {
    double price=EMPTY_VALUE;
 //--- check for short close operations
@@ -951,91 +880,81 @@ bool CExpert::CheckCloseShort()
   }
 //+------------------------------------------------------------------+
 //| Position close and orders delete                                 |
-//| INPUT:  lot - volume for close.                                  |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::CloseAll(double lot)
   {
    bool result;
 //--- check for close operations
-   if(m_position.PositionType()==POSITION_TYPE_BUY) result=m_trade.Sell(lot,0,0,0);
-   else                                     result=m_trade.Buy(lot,0,0,0);
+   if(m_position.PositionType()==POSITION_TYPE_BUY)
+      result=m_trade.Sell(lot,0,0,0);
+   else
+      result=m_trade.Buy(lot,0,0,0);
    result|=DeleteOrders();
 //---
    return(result);
   }
 //+------------------------------------------------------------------+
 //| Position close                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::Close()
+bool CExpert::Close(void)
   {
    return(m_trade.PositionClose(m_symbol.Name()));
   }
 //+------------------------------------------------------------------+
 //| Long position close                                              |
-//| INPUT:  price - price for close.                                 |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::CloseLong(double price)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //---
    return(m_trade.Sell(m_position.Volume(),price,0,0));
   }
 //+------------------------------------------------------------------+
 //| Short position close                                             |
-//| INPUT:  price - price for close.                                 |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::CloseShort(double price)
   {
-   if(price==EMPTY_VALUE) return(false);
+   if(price==EMPTY_VALUE)
+      return(false);
 //---
    return(m_trade.Buy(m_position.Volume(),price,0,0));
   }
 //+------------------------------------------------------------------+
 //| Check for trailing stop/profit position                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTrailingStop()
+bool CExpert::CheckTrailingStop(void)
   {
 //--- position must be selected before call
    if(m_position.PositionType()==POSITION_TYPE_BUY)
      {
       //--- check the possibility of modifying the long position
-      if(CheckTrailingStopLong()) return(true);
+      if(CheckTrailingStopLong())
+         return(true);
      }
    else
      {
       //--- check the possibility of modifying the short position
-      if(CheckTrailingStopShort()) return(true);
+      if(CheckTrailingStopShort())
+         return(true);
      }
 //--- return without operations
    return(false);
   }
 //+------------------------------------------------------------------+
 //| Check for trailing stop/profit long position                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTrailingStopLong()
+bool CExpert::CheckTrailingStopLong(void)
   {
    double sl=EMPTY_VALUE;
    double tp=EMPTY_VALUE;
 //--- check for long trailing stop operations
    if(m_trailing.CheckTrailingStopLong(GetPointer(m_position),sl,tp))
      {
-      if(sl==EMPTY_VALUE) sl=m_position.StopLoss();
-      if(tp==EMPTY_VALUE) tp=m_position.TakeProfit();
+      if(sl==EMPTY_VALUE)
+         sl=m_position.StopLoss();
+      if(tp==EMPTY_VALUE)
+         tp=m_position.TakeProfit();
       //--- long trailing stop operations
       return(TrailingStopLong(sl,tp));
      }
@@ -1044,19 +963,18 @@ bool CExpert::CheckTrailingStopLong()
   }
 //+------------------------------------------------------------------+
 //| Check for trailing stop/profit short position                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTrailingStopShort()
+bool CExpert::CheckTrailingStopShort(void)
   {
    double sl=EMPTY_VALUE;
    double tp=EMPTY_VALUE;
 //--- check for short trailing stop operations
    if(m_trailing.CheckTrailingStopShort(GetPointer(m_position),sl,tp))
      {
-      if(sl==EMPTY_VALUE) sl=m_position.StopLoss();
-      if(tp==EMPTY_VALUE) tp=m_position.TakeProfit();
+      if(sl==EMPTY_VALUE)
+         sl=m_position.StopLoss();
+      if(tp==EMPTY_VALUE)
+         tp=m_position.TakeProfit();
       //--- short trailing stop operations
       return(TrailingStopShort(sl,tp));
      }
@@ -1065,10 +983,6 @@ bool CExpert::CheckTrailingStopShort()
   }
 //+------------------------------------------------------------------+
 //| Trailing stop/profit long position                               |
-//| INPUT:  sl - new stop loss,                                      |
-//|         tp - new take profit.                                    |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::TrailingStopLong(double sl,double tp)
   {
@@ -1076,10 +990,6 @@ bool CExpert::TrailingStopLong(double sl,double tp)
   }
 //+------------------------------------------------------------------+
 //| Trailing stop/profit short position                              |
-//| INPUT:  sl - new stop loss,                                      |
-//|         tp - new take profit.                                    |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::TrailingStopShort(double sl,double tp)
   {
@@ -1087,11 +997,8 @@ bool CExpert::TrailingStopShort(double sl,double tp)
   }
 //+------------------------------------------------------------------+
 //| Check for trailing long limit/stop order                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTrailingOrderLong()
+bool CExpert::CheckTrailingOrderLong(void)
   {
    double price;
 //--- check the possibility of modifying the long order
@@ -1102,11 +1009,8 @@ bool CExpert::CheckTrailingOrderLong()
   }
 //+------------------------------------------------------------------+
 //| Check for trailing short limit/stop order                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTrailingOrderShort()
+bool CExpert::CheckTrailingOrderShort(void)
   {
    double price;
 //--- check the possibility of modifying the short order
@@ -1117,9 +1021,6 @@ bool CExpert::CheckTrailingOrderShort()
   }
 //+------------------------------------------------------------------+
 //| Trailing long limit/stop order                                   |
-//| INPUT:  delta - price change.                                    |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::TrailingOrderLong(double delta)
   {
@@ -1132,9 +1033,6 @@ bool CExpert::TrailingOrderLong(double delta)
   }
 //+------------------------------------------------------------------+
 //| Trailing short limit/stop order                                  |
-//| INPUT:  delta - price change.                                    |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpert::TrailingOrderShort(double delta)
   {
@@ -1147,11 +1045,8 @@ bool CExpert::TrailingOrderShort(double delta)
   }
 //+------------------------------------------------------------------+
 //| Check for delete long limit/stop order                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckDeleteOrderLong()
+bool CExpert::CheckDeleteOrderLong(void)
   {
    double price;
 //--- check the possibility of deleting the long order
@@ -1167,11 +1062,8 @@ bool CExpert::CheckDeleteOrderLong()
   }
 //+------------------------------------------------------------------+
 //| Check for delete short limit/stop order                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation processed, false otherwise.      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckDeleteOrderShort()
+bool CExpert::CheckDeleteOrderShort(void)
   {
    double price;
 //--- check the possibility of deleting the short order
@@ -1187,62 +1079,87 @@ bool CExpert::CheckDeleteOrderShort()
   }
 //+------------------------------------------------------------------+
 //| Delete all limit/stop orders                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::DeleteOrders()
+bool CExpert::DeleteOrders(void)
   {
-   bool result=false;
+   bool result=true;
    int  total=OrdersTotal();
 //---
    for(int i=total-1;i>=0;i--)
-     {
       if(m_order.Select(OrderGetTicket(i)))
         {
-         if(m_order.Symbol()!=m_symbol.Name()) continue;
-         result|=DeleteOrder();
+         if(m_order.Symbol()!=m_symbol.Name())
+            continue;
+         result&=DeleteOrder();
         }
-     }
+//---
+   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Delete all limit/stop long orders                                |
+//+------------------------------------------------------------------+
+bool CExpert::DeleteOrdersLong(void)
+  {
+   bool result=true;
+   int  total=OrdersTotal();
+//---
+   for(int i=total-1;i>=0;i--)
+      if(m_order.Select(OrderGetTicket(i)))
+        {
+         if(m_order.Symbol()!=m_symbol.Name())
+            continue;
+         if(m_order.OrderType()!=ORDER_TYPE_BUY_STOP &&
+            m_order.OrderType()!=ORDER_TYPE_BUY_LIMIT)
+            continue;
+         result&=DeleteOrder();
+        }
+//---
+   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Delete all limit/stop orders                                     |
+//+------------------------------------------------------------------+
+bool CExpert::DeleteOrdersShort(void)
+  {
+   bool result=true;
+   int  total=OrdersTotal();
+//---
+   for(int i=total-1;i>=0;i--)
+      if(m_order.Select(OrderGetTicket(i)))
+        {
+         if(m_order.Symbol()!=m_symbol.Name())
+            continue;
+         if(m_order.OrderType()!=ORDER_TYPE_SELL_STOP &&
+            m_order.OrderType()!=ORDER_TYPE_SELL_LIMIT)
+            continue;
+         result&=DeleteOrder();
+        }
 //---
    return(result);
   }
 //+------------------------------------------------------------------+
 //| Delete limit/stop order                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::DeleteOrder()
+bool CExpert::DeleteOrder(void)
   {
    return(m_trade.OrderDelete(m_order.Ticket()));
   }
 //+------------------------------------------------------------------+
 //| Delete long limit/stop order                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::DeleteOrderLong()
+bool CExpert::DeleteOrderLong(void)
   {
    return(m_trade.OrderDelete(m_order.Ticket()));
   }
 //+------------------------------------------------------------------+
 //| Delete short limit/stop order                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if trade operation successful, false otherwise.     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::DeleteOrderShort()
+bool CExpert::DeleteOrderShort(void)
   {
    return(m_trade.OrderDelete(m_order.Ticket()));
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for open long position.                |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss.                                       |
-//| OUTPUT: lot for open.                                            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpert::LotOpenLong(double price,double sl)
   {
@@ -1250,10 +1167,6 @@ double CExpert::LotOpenLong(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for open short position.               |
-//| INPUT:  price - price,                                           |
-//|         sl    - stop loss.                                       |
-//| OUTPUT: lot for open.                                            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpert::LotOpenShort(double price,double sl)
   {
@@ -1261,9 +1174,6 @@ double CExpert::LotOpenShort(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Method of getting the lot for reverse position.                  |
-//| INPUT:  sl - stop loss.                                          |
-//| OUTPUT: lot for open.                                            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpert::LotReverse(double sl)
   {
@@ -1271,11 +1181,8 @@ double CExpert::LotReverse(double sl)
   }
 //+------------------------------------------------------------------+
 //| Method of setting the start date for the history.                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-void CExpert::PrepareHistoryDate()
+void CExpert::PrepareHistoryDate(void)
   {
    MqlDateTime dts;
 //---
@@ -1300,14 +1207,12 @@ void CExpert::PrepareHistoryDate()
   }
 //+------------------------------------------------------------------+
 //| Method of establishing the checkpoint history.                   |
-//| INPUT:  from_check_trade-flag to avoid recursive.                |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void CExpert::HistoryPoint(bool from_check_trade)
   {
 //--- check possible recursion
-   if(!from_check_trade) CheckTradeState();
+   if(!from_check_trade)
+      CheckTradeState();
 //--- select history point
    if(HistorySelect(m_beg_date,TimeCurrent()))
      {
@@ -1324,11 +1229,8 @@ void CExpert::HistoryPoint(bool from_check_trade)
   }
 //+------------------------------------------------------------------+
 //| Method of verification of trade events.                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if the event is handled, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpert::CheckTradeState()
+bool CExpert::CheckTradeState(void)
   {
    bool res=false;
 //--- select current history point
@@ -1393,7 +1295,6 @@ bool CExpert::CheckTradeState()
               }
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
-            //---
             return(res);
            }
          //--- check position is closed (including the stoploss/takeprofit)
@@ -1409,7 +1310,6 @@ bool CExpert::CheckTradeState()
                res=TradeEventPositionStopTake();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
-            //---
             return(res);
            }
         }
@@ -1428,7 +1328,6 @@ bool CExpert::CheckTradeState()
       res=TradeEventOrderDeleted();
       //--- establishment of the checkpoint history of the trade
       HistoryPoint(true);
-      //---
       return(res);
      }
 //--- check triggering of a pending order
@@ -1445,7 +1344,6 @@ bool CExpert::CheckTradeState()
             res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
-            //---
             return(res);
            }
          //--- check position open
@@ -1455,7 +1353,6 @@ bool CExpert::CheckTradeState()
             res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
-            //---
             return(res);
            }
          //--- check position is closed
@@ -1465,7 +1362,6 @@ bool CExpert::CheckTradeState()
             res=TradeEventOrderTriggered();
             //--- establishment of the checkpoint history of the trade
             HistoryPoint(true);
-            //---
             return(res);
            }
         }
@@ -1486,9 +1382,6 @@ bool CExpert::CheckTradeState()
   }
 //+------------------------------------------------------------------+
 //| Add timeframe for checked                                        |
-//| INPUT:  period - timeframe for check.                            |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 void CExpert::TimeframeAdd(ENUM_TIMEFRAMES period)
   {
@@ -1520,64 +1413,80 @@ void CExpert::TimeframeAdd(ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| Forms timeframes flags                                           |
-//| INPUT:  time - reference.                                        |
-//| OUTPUT: timeframes flags.                                        |
-//| REMARK: for simplicity, set the "new week" flag at the beginning |
-//          of every new day                                         |
 //+------------------------------------------------------------------+
 int CExpert::TimeframesFlags(MqlDateTime &time)
   {
 //--- set flags for all timeframes
-   int   result=OBJ_ALL_PERIODS;
+   int result=OBJ_ALL_PERIODS;
 //--- if first check, then setting flags all timeframes
-   if(m_last_tick_time.min==-1)       return(result);
+   if(m_last_tick_time.min==-1)
+      return(result);
 //--- check change time
-   if(time.min==m_last_tick_time.min &&
-      time.hour==m_last_tick_time.hour &&
+   if(time.min==m_last_tick_time.min && 
+      time.hour==m_last_tick_time.hour && 
       time.day==m_last_tick_time.day &&
-      time.mon==m_last_tick_time.mon) return(OBJ_NO_PERIODS);
+      time.mon==m_last_tick_time.mon)
+      return(OBJ_NO_PERIODS);
 //--- new month?
-   if(time.mon!=m_last_tick_time.mon) return(result);
+   if(time.mon!=m_last_tick_time.mon)
+      return(result);
 //--- reset the "new month" flag
    result^=OBJ_PERIOD_MN1;
 //--- new day?
-   if(time.day!=m_last_tick_time.day) return(result);
+   if(time.day!=m_last_tick_time.day)
+      return(result);
 //--- reset the "new day" and "new week" flags
    result^=OBJ_PERIOD_D1+OBJ_PERIOD_W1;
 //--- temporary variables to speed up working with structures
-   int last,curr;
+   int curr,delta;
 //--- new hour?
    curr=time.hour;
-   last=m_last_tick_time.hour;
-   if(curr!=last)
+   delta=curr-m_last_tick_time.hour;
+   if(delta!=0)
      {
-      if(curr%2!=0  && curr-last<2)      result^=OBJ_PERIOD_H2;
-      if(curr%3!=0  && curr-last<3)      result^=OBJ_PERIOD_H3;
-      if(curr%4!=0  && curr-last<4)      result^=OBJ_PERIOD_H4;
-      if(curr%6!=0  && curr-last<6)      result^=OBJ_PERIOD_H6;
-      if(curr%8!=0  && curr-last<8)      result^=OBJ_PERIOD_H8;
-      if(curr%12!=0 && curr-last<12)     result^=OBJ_PERIOD_H12;
+      if(curr%2>=delta)
+         result^=OBJ_PERIOD_H2;
+      if(curr%3>=delta)
+         result^=OBJ_PERIOD_H3;
+      if(curr%4>=delta)
+         result^=OBJ_PERIOD_H4;
+      if(curr%6>=delta)
+         result^=OBJ_PERIOD_H6;
+      if(curr%8>=delta)
+         result^=OBJ_PERIOD_H8;
+      if(curr%12>=delta)
+         result^=OBJ_PERIOD_H12;
       return(result);
      }
 //--- reset all flags for hour timeframes
    result^=OBJ_PERIOD_H1+OBJ_PERIOD_H2+OBJ_PERIOD_H3+OBJ_PERIOD_H4+OBJ_PERIOD_H6+OBJ_PERIOD_H8+OBJ_PERIOD_H12;
 //--- new minute?
    curr=time.min;
-   last=m_last_tick_time.min;
-   if(curr!=last)
+   delta=curr-m_last_tick_time.min;
+   if(delta!=0)
      {
-      if(curr%2!=0  && curr-last<2)       result^=OBJ_PERIOD_M2;
-      if(curr%3!=0  && curr-last<3)       result^=OBJ_PERIOD_M3;
-      if(curr%4!=0  && curr-last<4)       result^=OBJ_PERIOD_M4;
-      if(curr%5!=0  && curr-last<5)       result^=OBJ_PERIOD_M5;
-      if(curr%6!=0  && curr-last<6)       result^=OBJ_PERIOD_M6;
-      if(curr%10!=0 && curr-last<10)      result^=OBJ_PERIOD_M10;
-      if(curr%12!=0 && curr-last<12)      result^=OBJ_PERIOD_M12;
-      if(curr%15!=0 && curr-last<15)      result^=OBJ_PERIOD_M15;
-      if(curr%20!=0 && curr-last<20)      result^=OBJ_PERIOD_M20;
-      if(curr%30!=0 && curr-last<30)      result^=OBJ_PERIOD_M30;
+      if(curr%2>=delta)
+         result^=OBJ_PERIOD_M2;
+      if(curr%3>=delta)
+         result^=OBJ_PERIOD_M3;
+      if(curr%4>=delta)
+         result^=OBJ_PERIOD_M4;
+      if(curr%5>=delta)
+         result^=OBJ_PERIOD_M5;
+      if(curr%6>=delta)
+         result^=OBJ_PERIOD_M6;
+      if(curr%10>=delta)
+         result^=OBJ_PERIOD_M10;
+      if(curr%12>=delta)
+         result^=OBJ_PERIOD_M12;
+      if(curr%15>=delta)
+         result^=OBJ_PERIOD_M15;
+      if(curr%20>=delta)
+         result^=OBJ_PERIOD_M20;
+      if(curr%30>=delta)
+         result^=OBJ_PERIOD_M30;
      }
-//---
+//--- result
    return(result);
   }
 //+------------------------------------------------------------------+

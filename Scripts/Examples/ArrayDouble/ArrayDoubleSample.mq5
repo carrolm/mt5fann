@@ -1,11 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                            ArrayDoubleSample.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "2010, MetaQuotes Software Corp."
-#property link      "http://www.metaquotes.net"
+#property copyright "2009-2013, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
 //---
 #include <Arrays\ArrayDouble.mqh>
 #include <Files\FileBin.mqh>
@@ -16,30 +15,17 @@ string    ExtFileName="ArrayDoubleSample.bin";
 //+------------------------------------------------------------------+
 //| Example class CArrayDouble                                       |
 //+------------------------------------------------------------------+
-int OnStart()
+int OnStart(void)
   {
    int           i,pos;
    double        key;
-   CFileBin     *File;
-   CArrayDouble *ArrayDouble;
+   CFileBin      File;
+   CArrayDouble  ArrayDouble;
 //---  
    printf("Start sample %s.",__FILE__);
-//--- create an instance of class CArrayDouble
-   ArrayDouble=new CArrayDouble;
-//--- create an instance of class CFileBin
-   File=new CFileBin;
-//--- must validate creation
-   if(ArrayDouble==NULL || File==NULL)
-     {
-      if(ArrayDouble!=NULL) delete ArrayDouble;
-      if(File!=NULL) delete File;
-      //--- error creating an instance of class
-      printf("%s (%4d): creating error",__FILE__,__LINE__);
-      return(__LINE__);
-     }
 //--- fill an array of background information
 //--- open file for reading
-   if(File.Open(ExtFileName,FILE_READ)>0)
+   if(File.Open(ExtFileName,FILE_READ)!=INVALID_HANDLE)
      {
       //--- read array from file
       if(!ArrayDouble.Load(File.Handle()))
@@ -60,8 +46,6 @@ int OnStart()
          //--- displaying the log error information
          printf("%s (%4d): reserve error",__FILE__,__LINE__);
          //--- remove a previously created array
-         delete ArrayDouble;
-         delete File;
          return(__LINE__);
         }
       //--- additional fill an array of "random" values 
@@ -101,26 +85,18 @@ int OnStart()
    ArrayDouble.DeleteRange(0,ExtArraySize/2);
 //--- save the modified array of file
 //--- open file for writing
-   if(File.Open(ExtFileName,FILE_WRITE)>=0)
+   if(File.Open(ExtFileName,FILE_WRITE)!=INVALID_HANDLE)
       if(ArrayDouble.Save(File.Handle()))
         {
          //--- normal completion
-         delete ArrayDouble;
          //--- because when you call the destructor, an open file is closed automatically 
          //--- and explicitly close the file is not necessary but desirable
-         File.Close();
-         delete File;
          printf("End of sample %s. OK!",__FILE__);
          return(0);
         }
 //--- error with file
 //--- displaying the log error information
    printf("%s (%4d): error %d",__FILE__,__LINE__,GetLastError());
-//--- remove a previously created array
-   delete ArrayDouble;
-//--- do not forget close file
-   File.Close();
-   delete File;
    return(__LINE__);
   }
 //+------------------------------------------------------------------+

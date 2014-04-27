@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                  ChartObject.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -17,1066 +16,985 @@ protected:
    int               m_window;             // number of subwindow (0 - main window)
    string            m_name;               // unique name object name
    int               m_num_points;         // number of anchor points of object
+
 public:
-                     CChartObject();
-                    ~CChartObject();
+                     CChartObject(void);
+                    ~CChartObject(void);
    //--- methods of access to protected data
-   long              ChartId()                   const { return(m_chart_id);   }
-   int               Window()                    const { return(m_window);     }
-   string            Name()                      const { return(m_name);       }
+   long              ChartId(void) const { return(m_chart_id); }
+   int               Window(void) const { return(m_window); }
+   string            Name(void) const { return(m_name); }
    bool              Name(const string name);
-   int               NumPoints()                 const { return(m_num_points); }
+   int               NumPoints(void) const { return(m_num_points); }
    //--- method of identifying the object
-   virtual int       Type()                      const { return(0x8888);       }
+   virtual int       Type(void) const { return(0x8888); }
    //--- methods of filling the object
-   bool              Attach(long chart_id,string name,int window,int points);
-   bool              SetPoint(int point,datetime time,double price);
+   bool              Attach(long chart_id,const string name,const int window,const int points);
+   bool              SetPoint(const int point,const datetime time,const double price) const;
    //--- methods of deleting
-   bool              Delete();
-   void              Detach();
+   bool              Delete(void);
+   void              Detach(void);
    //--- methods of access to properties of the object
-   datetime          Time(int point)             const;
-   bool              Time(int point,datetime time);
-   double            Price(int point)            const;
-   bool              Price(int point,double price);
-   color             Color()                     const;
-   bool              Color(color new_color);
-   ENUM_LINE_STYLE   Style()                     const;
-   bool              Style(ENUM_LINE_STYLE new_style);
-   int               Width()                     const;
-   bool              Width(int new_width);
-   bool              Background()                const;
-   bool              Background(bool new_back);
-   long              Z_Order()                   const;
-   bool              Z_Order(long value);
-   bool              Selected()                  const;
-   bool              Selected(bool new_sel);
-   bool              Selectable()                const;
-   bool              Selectable(bool new_sel);
-   string            Description()               const;
-   bool              Description(const string new_text);
-   string            Tooltip()                   const;
-   bool              Tooltip(const string new_text);
-   int               Timeframes()                const;
-   virtual bool      Timeframes(int timeframes);
-   datetime          CreateTime()                const;
-   int               LevelsCount()               const;
-   bool              LevelsCount(int new_count);
+   datetime          Time(const int point) const;
+   bool              Time(const int point,const datetime time) const;
+   double            Price(const int point) const;
+   bool              Price(const int point,const double price) const;
+   color             Color(void) const;
+   bool              Color(const color new_color) const;
+   ENUM_LINE_STYLE   Style(void) const;
+   bool              Style(const ENUM_LINE_STYLE new_style) const;
+   int               Width(void) const;
+   bool              Width(const int new_width) const;
+   bool              Background(void) const;
+   bool              Background(const bool new_back) const;
+   bool              Fill(void) const;
+   bool              Fill(const bool new_fill) const;
+   long              Z_Order(void) const;
+   bool              Z_Order(const long value) const;
+   bool              Selected(void) const;
+   bool              Selected(const bool new_sel) const;
+   bool              Selectable(void) const;
+   bool              Selectable(const bool new_sel) const;
+   string            Description(void) const;
+   bool              Description(const string new_text) const;
+   string            Tooltip(void) const;
+   bool              Tooltip(const string new_text) const;
+   int               Timeframes(void) const;
+   virtual bool      Timeframes(const int timeframes) const;
+   datetime          CreateTime(void) const;
+   int               LevelsCount(void) const;
+   bool              LevelsCount(const int new_count) const;
    //--- methods to access the properties of levels of objects
-   color             LevelColor(int level)       const;
-   bool              LevelColor(int level,color new_color);
-   ENUM_LINE_STYLE   LevelStyle(int level)       const;
-   bool              LevelStyle(int level,ENUM_LINE_STYLE new_style);
-   int               LevelWidth(int level)       const;
-   bool              LevelWidth(int level,int new_width);
-   double            LevelValue(int level)       const;
-   bool              LevelValue(int level,double new_value);
-   string            LevelDescription(int level) const;
-   bool              LevelDescription(int level,const string new_text);
+   color             LevelColor(const int level) const;
+   bool              LevelColor(const int level,const color new_color) const;
+   ENUM_LINE_STYLE   LevelStyle(const int level) const;
+   bool              LevelStyle(const int level,const ENUM_LINE_STYLE new_style) const;
+   int               LevelWidth(const int level) const;
+   bool              LevelWidth(const int level,const int new_width) const;
+   double            LevelValue(const int level) const;
+   bool              LevelValue(const int level,const double new_value) const;
+   string            LevelDescription(const int level) const;
+   bool              LevelDescription(const int level,const string new_text) const;
    //--- access methods to the API functions of MQL5
-   long              GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier=-1)          const;
-   bool              GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long& value) const;
-   bool              SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long value);
-   bool              SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,long value);
-   double            GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier=-1)            const;
-   bool              GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double& value) const;
-   bool              SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double value);
-   bool              SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,double value);
-   string            GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier=-1)            const;
-   bool              GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string& value) const;
-   bool              SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string value);
-   bool              SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,string value);
+   long              GetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier=-1) const;
+   bool              GetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier,long &value) const;
+   bool              SetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier,const long value) const;
+   bool              SetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const long value) const;
+   double            GetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier=-1) const;
+   bool              GetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier,double &value) const;
+   bool              SetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier,const double value) const;
+   bool              SetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const double value) const;
+   string            GetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier=-1) const;
+   bool              GetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier,string &value) const;
+   bool              SetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier,const string value) const;
+   bool              SetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const string value) const;
    //--- methods of moving
-   bool              ShiftObject(datetime d_time,double d_price);
-   bool              ShiftPoint(int point,datetime d_time,double d_price);
+   bool              ShiftObject(const datetime d_time,const double d_price) const;
+   bool              ShiftPoint(const int point,const datetime d_time,const double d_price) const;
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Constructor CChartObject.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CChartObject::CChartObject()
+CChartObject::CChartObject(void)
   {
 //--- initialize protected data
    Detach();
   }
 //+------------------------------------------------------------------+
-//| Destructor CChartObject.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-void CChartObject::~CChartObject()
+CChartObject::~CChartObject(void)
   {
-   if(m_chart_id!=-1) ObjectDelete(m_chart_id,m_name);
+   if(m_chart_id!=-1)
+      ObjectDelete(m_chart_id,m_name);
   }
 //+------------------------------------------------------------------+
-//| Changing name of the object.                                     |
-//| INPUT:  name - new name of the object.                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Changing name of the object                                      |
 //+------------------------------------------------------------------+
 bool CChartObject::Name(const string name)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//--- changing
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- change
    if(ObjectSetString(m_chart_id,m_name,OBJPROP_NAME,name))
      {
       m_name=name;
       return(true);
      }
-//---
+//--- failure
    return(false);
   };
 //+------------------------------------------------------------------+
-//| Attach object.                                                   |
-//| INPUT:  chart_id - chart idintifier,                             |
-//|         name    - object name,                                   |
-//|         window  - chart window,                                  |
-//|         points  - number of points "anchor" object.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Attach object                                                    |
 //+------------------------------------------------------------------+
-bool CChartObject::Attach(long chart_id,string name,int window,int points)
+bool CChartObject::Attach(long chart_id,const string name,const int window,const int points)
   {
-//--- checking
-   if(ObjectFind(chart_id,name)<0) return(false);
-//--- attaching
-   if(chart_id==0) chart_id=ChartID();
+//--- check
+   if(ObjectFind(chart_id,name)<0)
+      return(false);
+//--- attach
+   if(chart_id==0)
+      chart_id=ChartID();
    m_chart_id  =chart_id;
    m_window    =window;
    m_name      =name;
    m_num_points=points;
-//---
+//--- successful
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Setting new coordinates of anchor point of an object.            |
-//| INPUT:  point - number of point of the object,                   |
-//|         time  - new time coordinate,                             |
-//|         price - new price cordinate.                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Setting new coordinates of anchor point of an object             |
 //+------------------------------------------------------------------+
-bool CChartObject::SetPoint(int point,datetime time,double price)
+bool CChartObject::SetPoint(const int point,const datetime time,const double price) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(false);
-   if(point>=m_num_points) return(false);
-//---
-   bool res=ObjectMove(m_chart_id,m_name,point,time,price);
-//---
-   return(res);
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(point>=m_num_points)
+      return(false);
+//--- result
+   return(ObjectMove(m_chart_id,m_name,point,time,price));
   }
 //+------------------------------------------------------------------+
-//| Delete an object.                                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Delete an object                                                 |
 //+------------------------------------------------------------------+
-bool CChartObject::Delete()
+bool CChartObject::Delete(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- checki
+   if(m_chart_id==-1)
+      return(false);
+//--- actions
    bool result=ObjectDelete(m_chart_id,m_name);
    Detach();
-//---
+//--- result
    return(result);
   }
 //+------------------------------------------------------------------+
-//| Detach object.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Detach object                                                    |
 //+------------------------------------------------------------------+
-void CChartObject::Detach()
+void CChartObject::Detach(void)
   {
-   m_chart_id=-1;
-   m_window=-1;
-   m_name=NULL;
+   m_chart_id  =-1;
+   m_window    =-1;
+   m_name      =NULL;
    m_num_points=0;
   }
 //+------------------------------------------------------------------+
-//| Get the time coordinate of the specified anchor point of object. |
-//| INPUT:  point - number of anchor point.                          |
-//| OUTPUT: date/time                                                |
-//| REMARK: no.                                                      |
+//| Get the time coordinate of the specified anchor point of object  |
 //+------------------------------------------------------------------+
-datetime CChartObject::Time(int point) const
+datetime CChartObject::Time(const int point) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(0);
-   if(point>=m_num_points) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+   if(point>=m_num_points)
+      return(0);
+//--- result
    return((datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point));
   }
 //+------------------------------------------------------------------+
-//| Set the time coordinate of the specified anchor point of object. |
-//| INPUT:  point -number of point,                                  |
-//|         time  -new date/time.                                    |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Set the time coordinate of the specified anchor point of object  |
 //+------------------------------------------------------------------+
-bool CChartObject::Time(int point,datetime time)
+bool CChartObject::Time(const int point,const datetime time) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(false);
-   if(point>=m_num_points) return(false);
-//---
-   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIME,time));
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(point>=m_num_points)
+      return(false);
+//--- result
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIME,point,time));
   }
 //+------------------------------------------------------------------+
 //| Get the price coordinate of the specified anchor point of object.|
-//| INPUT:  point - number of anchor point.                          |
-//| OUTPUT: price.                                                   |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CChartObject::Price(int point) const
+double CChartObject::Price(const int point) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(EMPTY_VALUE);
-   if(point>=m_num_points) return(EMPTY_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+   if(point>=m_num_points)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_PRICE,point));
   }
 //+------------------------------------------------------------------+
 //| Set the price coordinate of the specified anchor point of object.|
-//| INPUT:  point - number of anchor point,                          |
-//|         price - new price.                                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CChartObject::Price(int point,double price)
+bool CChartObject::Price(const int point,const double price) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(false);
-   if(point>=m_num_points) return(false);
-//---
-   return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_PRICE,price));
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(point>=m_num_points)
+      return(false);
+//--- result
+   return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_PRICE,point,price));
   }
 //+------------------------------------------------------------------+
-//| Get object color.                                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: color.                                                   |
-//| REMARK: no.                                                      |
+//| Get object color                                                 |
 //+------------------------------------------------------------------+
-color CChartObject::Color() const
+color CChartObject::Color(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(CLR_NONE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(CLR_NONE);
+//--- result
    return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_COLOR));
   }
 //+------------------------------------------------------------------+
-//| Set object color.                                                |
-//| INPUT:  new_color - new color.                                   |
-//| OUTPUT: true if successful, false of not.                        |
-//| REMARK: no.                                                      |
+//| Set object color                                                 |
 //+------------------------------------------------------------------+
-bool CChartObject::Color(color new_color)
+bool CChartObject::Color(const color new_color) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_COLOR,new_color));
   }
 //+------------------------------------------------------------------+
-//| Get style of line of object.                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: line style.                                              |
-//| REMARK: no.                                                      |
+//| Get style of line of object                                      |
 //+------------------------------------------------------------------+
-ENUM_LINE_STYLE CChartObject::Style() const
+ENUM_LINE_STYLE CChartObject::Style(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(WRONG_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(WRONG_VALUE);
+//--- result
    return((ENUM_LINE_STYLE)ObjectGetInteger(m_chart_id,m_name,OBJPROP_STYLE));
   }
 //+------------------------------------------------------------------+
-//| Set style of line of object.                                     |
-//| INPUT:  new_style - new style of line.                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set style of line of object                                      |
 //+------------------------------------------------------------------+
-bool CChartObject::Style(ENUM_LINE_STYLE new_style)
+bool CChartObject::Style(const ENUM_LINE_STYLE new_style) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_STYLE,new_style));
   }
 //+------------------------------------------------------------------+
-//| Get width of line of object.                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: width of line.                                           |
-//| REMARK: no.                                                      |
+//| Get width of line of object                                      |
 //+------------------------------------------------------------------+
-int CChartObject::Width() const
+int CChartObject::Width(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(-1);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(-1);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_WIDTH));
   }
 //+------------------------------------------------------------------+
-//| Set width of line of object.                                     |
-//| INPUT:  new_width - new width of line.                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set width of line of object                                      |
 //+------------------------------------------------------------------+
-bool CChartObject::Width(int new_width)
+bool CChartObject::Width(const int new_width) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_WIDTH,new_width));
   }
 //+------------------------------------------------------------------+
-//| Get the "Draw object as background" flag.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Draw object as background" flag.                    |
-//| REMARK: no.                                                      |
+//| Get the "Draw object as background" flag                         |
 //+------------------------------------------------------------------+
-bool CChartObject::Background() const
+bool CChartObject::Background(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_BACK));
   }
 //+------------------------------------------------------------------+
-//| Set the "Draw object as background" flag.                        |
-//| INPUT:  new_back - new "Draw object as background" flag.         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Draw object as background" flag                         |
 //+------------------------------------------------------------------+
-bool CChartObject::Background(bool new_back)
+bool CChartObject::Background(const bool new_back) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BACK,new_back));
   }
 //+------------------------------------------------------------------+
-//| Get the "Z-order" property.                                      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Z-order" property.                                  |
-//| REMARK: no.                                                      |
+//| Get the "Filling" flag                                           |
 //+------------------------------------------------------------------+
-long CChartObject::Z_Order() const
+bool CChartObject::Fill(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
+   return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_FILL));
+  }
+//+------------------------------------------------------------------+
+//| Set the "Filling" flag                                           |
+//+------------------------------------------------------------------+
+bool CChartObject::Fill(const bool new_fill) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_FILL,new_fill));
+  }
+//+------------------------------------------------------------------+
+//| Get the "Z-order" property                                       |
+//+------------------------------------------------------------------+
+long CChartObject::Z_Order(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_ZORDER));
   }
 //+------------------------------------------------------------------+
-//| Set the "Z-order" property.                                      |
-//| INPUT:  value - new "Z-order" property.                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Z-order" property                                       |
 //+------------------------------------------------------------------+
-bool CChartObject::Z_Order(long value)
+bool CChartObject::Z_Order(const long value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_ZORDER,value));
   }
 //+------------------------------------------------------------------+
-//| Get the "selected" flag.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "selected" flag.                                     |
-//| REMARK: no.                                                      |
+//| Get the "selected" flag                                          |
 //+------------------------------------------------------------------+
-bool CChartObject::Selected() const
+bool CChartObject::Selected(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_SELECTED));
   }
 //+------------------------------------------------------------------+
-//| Set the "selected" flag.                                         |
-//| INPUT:  new_sel - new flag "selected".                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "selected" flag                                          |
 //+------------------------------------------------------------------+
-bool CChartObject::Selected(bool new_sel)
+bool CChartObject::Selected(const bool new_sel) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_SELECTED,new_sel));
   }
 //+------------------------------------------------------------------+
-//| Get the "selectable" flag.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "selectable" flag.                                   |
-//| REMARK: no.                                                      |
+//| Get the "selectable" flag                                        |
 //+------------------------------------------------------------------+
-bool CChartObject::Selectable() const
+bool CChartObject::Selectable(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE));
   }
 //+------------------------------------------------------------------+
-//| Set flag the "selectable" flag.                                  |
-//| INPUT:  new_sel - new flag "selectable".                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set flag the "selectable" flag                                   |
 //+------------------------------------------------------------------+
-bool CChartObject::Selectable(bool new_sel)
+bool CChartObject::Selectable(const bool new_sel) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE,new_sel));
   }
 //+------------------------------------------------------------------+
-//| Get comment of object.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: comment of object.                                       |
-//| REMARK: no.                                                      |
+//| Get comment of object                                            |
 //+------------------------------------------------------------------+
-string CChartObject::Description() const
+string CChartObject::Description(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return("");
-//---
+//--- check
+   if(m_chart_id==-1)
+      return("");
+//--- result
    return(ObjectGetString(m_chart_id,m_name,OBJPROP_TEXT));
   }
 //+------------------------------------------------------------------+
-//| Set comment of object.                                           |
-//| INPUT:  new_text - new comment.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set comment of object                                            |
 //+------------------------------------------------------------------+
-bool CChartObject::Description(const string new_text)
+bool CChartObject::Description(const string new_text) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//--- tuning
-   if(new_text=="") 
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- tune
+   if(new_text=="")
       return(ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT," "));
-//---
+//--- result
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT,new_text));
   }
 //+------------------------------------------------------------------+
-//| Get tooltip of object.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: tooltip of object.                                       |
-//| REMARK: no.                                                      |
+//| Get tooltip of object                                            |
 //+------------------------------------------------------------------+
-string CChartObject::Tooltip() const
+string CChartObject::Tooltip(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return("");
-//---
+//--- check
+   if(m_chart_id==-1)
+      return("");
+//--- result
    return(ObjectGetString(m_chart_id,m_name,OBJPROP_TOOLTIP));
   }
 //+------------------------------------------------------------------+
-//| Set tooltip of object.                                           |
-//| INPUT:  new_text - new tooltip.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set tooltip of object                                            |
 //+------------------------------------------------------------------+
-bool CChartObject::Tooltip(const string new_text)
+bool CChartObject::Tooltip(const string new_text) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//--- tuning
-   if(new_text=="") 
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- tune
+   if(new_text=="")
       return(ObjectSetString(m_chart_id,m_name,OBJPROP_TOOLTIP," "));
-//---
+//--- result
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_TOOLTIP,new_text));
   }
 //+------------------------------------------------------------------+
-//| Get the "Timeframes" (visibility) flag.                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Timeframes" flag.                                   |
-//| REMARK: no.                                                      |
+//| Get the "Timeframes" (visibility) flag                           |
 //+------------------------------------------------------------------+
-int CChartObject::Timeframes() const
+int CChartObject::Timeframes(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES));
   }
 //+------------------------------------------------------------------+
-//| Set the "Timeframes" (visibility) flag.                          |
-//| INPUT:  timeframes - new flags "Timeframes".                     |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Timeframes" (visibility) flag                           |
 //+------------------------------------------------------------------+
-bool CChartObject::Timeframes(int timeframes)
+bool CChartObject::Timeframes(const int timeframes) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES,timeframes));
   }
 //+------------------------------------------------------------------+
-//| Get time of object creation.                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: creation time.                                           |
-//| REMARK: no.                                                      |
+//| Get time of object creation                                      |
 //+------------------------------------------------------------------+
-datetime CChartObject::CreateTime() const
+datetime CChartObject::CreateTime(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_CREATETIME));
   }
 //+------------------------------------------------------------------+
-//| Get number of levels of object.                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of levels of object.                              |
-//| REMARK: no.                                                      |
+//| Get number of levels of object                                   |
 //+------------------------------------------------------------------+
-int CChartObject::LevelsCount() const
+int CChartObject::LevelsCount(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELS));
   }
 //+------------------------------------------------------------------+
-//| Set number of levels of object.                                  |
-//| INPUT:  new_count - new number of levels of object.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set number of levels of object                                   |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelsCount(int new_count)
+bool CChartObject::LevelsCount(const int new_count) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELS,new_count));
   }
 //+------------------------------------------------------------------+
-//| Get color of the specified level of object.                      |
-//| INPUT:  level - number of level.                                 |
-//| OUTPUT: color of level.                                          |
-//| REMARK: no.                                                      |
+//| Get color of the specified level of object                       |
 //+------------------------------------------------------------------+
-color CChartObject::LevelColor(int level) const
+color CChartObject::LevelColor(const int level) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(CLR_NONE);
-   if(level>=LevelsCount()) return(CLR_NONE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(CLR_NONE);
+   if(level>=LevelsCount())
+      return(CLR_NONE);
+//--- result
    return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,level));
   }
 //+------------------------------------------------------------------+
-//| Set color of the specified level of object.                      |
-//| INPUT:  level - number of level,                                 |
-//|         new_color - new color of level.                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set color of the specified level of object                       |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelColor(int level,color new_color)
+bool CChartObject::LevelColor(const int level,const color new_color) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(false);
-   if(level>=LevelsCount()) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(level>=LevelsCount())
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,level,new_color));
   }
 //+------------------------------------------------------------------+
-//| Get line style of the specified level of object.                 |
-//| INPUT:  level - number of level.                                 |
-//| OUTPUT: line style of level.                                     |
-//| REMARK: no.                                                      |
+//| Get line style of the specified level of object                  |
 //+------------------------------------------------------------------+
-ENUM_LINE_STYLE CChartObject::LevelStyle(int level) const
+ENUM_LINE_STYLE CChartObject::LevelStyle(const int level) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(WRONG_VALUE);
-   if(level>=LevelsCount()) return(WRONG_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(WRONG_VALUE);
+   if(level>=LevelsCount())
+      return(WRONG_VALUE);
+//--- result
    return((ENUM_LINE_STYLE)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,level));
   }
 //+------------------------------------------------------------------+
-//| Set line style of the specified level of object.                 |
-//| INPUT:  level - number of level,                                 |
-//|         new_style - new line styleof level.                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set line style of the specified level of object                  |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelStyle(int level,ENUM_LINE_STYLE new_style)
+bool CChartObject::LevelStyle(const int level,const ENUM_LINE_STYLE new_style) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(false);
-   if(level>=LevelsCount()) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(level>=LevelsCount())
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,level,new_style));
   }
 //+------------------------------------------------------------------+
-//| Get line width of the specified level of object.                 |
-//| INPUT:  level - number of level.                                 |
-//| OUTPUT: width of line of level.                                  |
-//| REMARK: no.                                                      |
+//| Get line width of the specified level of object                  |
 //+------------------------------------------------------------------+
-int CChartObject::LevelWidth(int level) const
+int CChartObject::LevelWidth(const int level) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(-1);
-   if(level>=LevelsCount()) return(-1);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(-1);
+   if(level>=LevelsCount())
+      return(-1);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,level));
   }
 //+------------------------------------------------------------------+
-//| Set line width of the specified level of object.                 |
-//| INPUT:  level - number of level,                                 |
-//|         new_width - new width of line of level.                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set line width of the specified level of object                  |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelWidth(int level,int new_width)
+bool CChartObject::LevelWidth(const int level,const int new_width) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(false);
-   if(level>=LevelsCount()) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(level>=LevelsCount())
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,level,new_width));
   }
 //+------------------------------------------------------------------+
-//| Get value of the specified level of object.                      |
-//| INPUT:  level - number of level.                                 |
-//| OUTPUT: level value.                                             |
-//| REMARK: no.                                                      |
+//| Get value of the specified level of object                       |
 //+------------------------------------------------------------------+
-double CChartObject::LevelValue(int level) const
+double CChartObject::LevelValue(const int level) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(EMPTY_VALUE);
-   if(level>=LevelsCount()) return(EMPTY_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+   if(level>=LevelsCount())
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,level));
   }
 //+------------------------------------------------------------------+
-//| Set value of the specified level of object.                      |
-//| INPUT:  level - number level number,                             |
-//|         new_value - new value of level.                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value of the specified level of object                       |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelValue(int level,double new_value)
+bool CChartObject::LevelValue(const int level,const double new_value) const
   {
-//--- checking
-   if(m_chart_id==-1)       return(false);
-   if(level>=LevelsCount()) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(level>=LevelsCount())
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,level,new_value));
   }
 //+------------------------------------------------------------------+
-//| Get comment of of the specified level of object.                 |
-//| INPUT:  level - number of level.                                 |
-//| OUTPUT: level comment.                                           |
-//| REMARK: no.                                                      |
+//| Get comment of of the specified level of object                  |
 //+------------------------------------------------------------------+
-string CChartObject::LevelDescription(int level) const
+string CChartObject::LevelDescription(const int level) const
   {
-//--- checking
-   if(m_chart_id==-1)       return("");
-   if(level>=LevelsCount()) return("");
-//---
+//--- check
+   if(m_chart_id==-1)
+      return("");
+   if(level>=LevelsCount())
+      return("");
+//--- result
    return(ObjectGetString(m_chart_id,m_name,OBJPROP_LEVELTEXT,level));
   }
 //+------------------------------------------------------------------+
-//| Set comment to the specified level of object.                    |
-//| INPUT:  level - number of level,                                 |
-//|         new_text - new comment to the level.                     |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set comment to the specified level of object                     |
 //+------------------------------------------------------------------+
-bool CChartObject::LevelDescription(int level,const string new_text)
+bool CChartObject::LevelDescription(const int level,const string new_text) const
   {
 //--- checking
-   if(m_chart_id==-1)       return(false);
-   if(level>=LevelsCount()) return(false);
-//---
+   if(m_chart_id==-1)
+      return(false);
+   if(level>=LevelsCount())
+      return(false);
+//--- result
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_LEVELTEXT,level,new_text));
   }
 //+------------------------------------------------------------------+
-//| Access function long ObjectGetInteger(...).                      |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier.                            |
-//| OUTPUT: the property value.                                      |
-//| REMARK: no.                                                      |
+//| Access function long ObjectGetInteger(...)                       |
 //+------------------------------------------------------------------+
-long CChartObject::GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier) const
+long CChartObject::GetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
+//--- check
+   if(m_chart_id==-1)
+      return(0);
 //---
-   if(modifier==-1) return(ObjectGetInteger(m_chart_id,m_name,prop_id));
-//---
+   if(modifier==-1)
+      return(ObjectGetInteger(m_chart_id,m_name,prop_id));
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,prop_id,modifier));
   }
 //+------------------------------------------------------------------+
-//| Access function bool ObjectGetInteger(...).                      |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - variable for the property value.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function bool ObjectGetInteger(...)                       |
 //+------------------------------------------------------------------+
-bool CChartObject::GetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long& value) const
+bool CChartObject::GetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier,long &value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetInteger(.,modifier,.).                  |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - new value for the property.                   |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetInteger(.,modifier,.)                   |
 //+------------------------------------------------------------------+
-bool CChartObject::SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,int modifier,long value)
+bool CChartObject::SetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const int modifier,const long value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetInteger(...).                           |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         value    - new value for the property.                   |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetInteger(...)                            |
 //+------------------------------------------------------------------+
-bool CChartObject::SetInteger(ENUM_OBJECT_PROPERTY_INTEGER prop_id,long value)
+bool CChartObject::SetInteger(const ENUM_OBJECT_PROPERTY_INTEGER prop_id,const long value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,prop_id,value));
   }
 //+------------------------------------------------------------------+
-//| Access function double ObjectGetDouble(...).                     |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier.                            |
-//| OUTPUT: the property value.                                      |
-//| REMARK: no.                                                      |
+//| Access function double ObjectGetDouble(...)                      |
 //+------------------------------------------------------------------+
-double CChartObject::GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier) const
+double CChartObject::GetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier) const
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
 //---
-   if(modifier==-1) return(ObjectGetDouble(m_chart_id,m_name,prop_id));
-//---
+   if(modifier==-1)
+      return(ObjectGetDouble(m_chart_id,m_name,prop_id));
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,prop_id,modifier));
   }
 //+------------------------------------------------------------------+
-//| Access function bool ObjectGetDouble(...).                       |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - variable for the property value.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function bool ObjectGetDouble(...)                        |
 //+------------------------------------------------------------------+
-bool CChartObject::GetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double& value) const
+bool CChartObject::GetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier,double &value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetDouble(.,modifier,.).                   |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - new value for the property.                   |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetDouble(.,modifier,.)                    |
 //+------------------------------------------------------------------+
-bool CChartObject::SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,int modifier,double value)
+bool CChartObject::SetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const int modifier,const double value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetDouble(...).                            |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         value    - new the property value.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetDouble(...)                             |
 //+------------------------------------------------------------------+
-bool CChartObject::SetDouble(ENUM_OBJECT_PROPERTY_DOUBLE prop_id,double value)
+bool CChartObject::SetDouble(const ENUM_OBJECT_PROPERTY_DOUBLE prop_id,const double value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,prop_id,value));
   }
 //+------------------------------------------------------------------+
-//| Access function string ObjectGetString (...).                    |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier.                            |
-//| OUTPUT: the property value.                                      |
-//| REMARK: no.                                                      |
+//| Access function string ObjectGetString (...)                     |
 //+------------------------------------------------------------------+
-string CChartObject::GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier) const
+string CChartObject::GetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier) const
   {
-//--- checking
-   if(m_chart_id==-1) return("");
+//--- check
+   if(m_chart_id==-1)
+      return("");
 //---
-   if(modifier==-1) return(ObjectGetString(m_chart_id,m_name,prop_id));
-//---
+   if(modifier==-1)
+      return(ObjectGetString(m_chart_id,m_name,prop_id));
+//--- result
    return(ObjectGetString(m_chart_id,m_name,prop_id,modifier));
   }
 //+------------------------------------------------------------------+
-//| Access function bool ObjectGetString(...).                       |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - variable for the property value.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function bool ObjectGetString(...)                        |
 //+------------------------------------------------------------------+
-bool CChartObject::GetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string& value) const
+bool CChartObject::GetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier,string &value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetString(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetString(.,modifier,.).                   |
-//| INPUT:  prop_id  - property identifier,                          |
-//|         modifier - property modifier,                            |
-//|         value    - new value for the property.                   |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetString(.,modifier,.)                    |
 //+------------------------------------------------------------------+
-bool CChartObject::SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,int modifier,string value)
+bool CChartObject::SetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const int modifier,const string value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetString(m_chart_id,m_name,prop_id,modifier,value));
   }
 //+------------------------------------------------------------------+
-//| Access function ObjectSetString(...).                            |
-//| INPUT:  prop_id - property identifier,                           |
-//|         value   - new value for the property.                    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access function ObjectSetString(...)                             |
 //+------------------------------------------------------------------+
-bool CChartObject::SetString(ENUM_OBJECT_PROPERTY_STRING prop_id,string value)
+bool CChartObject::SetString(const ENUM_OBJECT_PROPERTY_STRING prop_id,const string value) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetString(m_chart_id,m_name,prop_id,value));
   }
 //+------------------------------------------------------------------+
-//| Relative movement of object.                                     |
-//| INPUT:  d_time  - increment of time coordinate,                  |
-//|         d_price - increment of price coordinate.                 |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Relative movement of object                                      |
 //+------------------------------------------------------------------+
-bool CChartObject::ShiftObject(datetime d_time,double d_price)
+bool CChartObject::ShiftObject(const datetime d_time,const double d_price) const
   {
-   bool resutl=true;
+   bool result=true;
    int  i;
-//--- checking
-   if(m_chart_id==-1) return(false);
-//--- moving
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- move
    for(i=0;i<m_num_points;i++)
-      resutl&=ShiftPoint(i,d_time,d_price);
-//---
-   return(resutl);
+      result&=ShiftPoint(i,d_time,d_price);
+//--- result
+   return(result);
   }
 //+------------------------------------------------------------------+
-//| Relative movement of the specified achor point of object.        |
-//| INPUT:  point   - number of point,                               |
-//|         d_time  - increment of time coordinate,                  |
-//|         d_price - increment of price coordinat.                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Relative movement of the specified achor point of object         |
 //+------------------------------------------------------------------+
-bool CChartObject::ShiftPoint(int point,datetime d_time,double d_price)
+bool CChartObject::ShiftPoint(const int point,const datetime d_time,const double d_price) const
   {
-//--- checking
-   if(m_chart_id==-1)      return(false);
-   if(point>=m_num_points) return(false);
-//--- moving
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+   if(point>=m_num_points)
+      return(false);
+//--- move
    datetime time=(datetime)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,point);
    double   price=ObjectGetDouble(m_chart_id,m_name,OBJPROP_PRICE,point);
-//---
+//--- result
    return(ObjectMove(m_chart_id,m_name,point,time+d_time,price+d_price));
   }
 //+------------------------------------------------------------------+
-//| Writing object parameters to file.                               |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Writing object parameters to file                                |
 //+------------------------------------------------------------------+
-bool CChartObject::Save(int file_handle)
+bool CChartObject::Save(const int file_handle)
   {
    int    i,len;
    int    levels;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-//--- writing start marker - 0xFFFFFFFFFFFFFFFF
-   if(FileWriteLong(file_handle,-1)!=sizeof(long)) return(false);
-//--- writing object type
-   if(FileWriteInteger(file_handle,Type(),INT_VALUE)!=INT_VALUE) return(false);
-//--- writing object name
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write start marker - 0xFFFFFFFFFFFFFFFF
+   if(FileWriteLong(file_handle,-1)!=sizeof(long))
+      return(false);
+//--- write object type
+   if(FileWriteInteger(file_handle,Type(),INT_VALUE)!=INT_VALUE)
+      return(false);
+//--- write object name
    str=ObjectGetString(m_chart_id,m_name,OBJPROP_NAME);
    len=StringLen(str);
-   if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE) return(false);
-   if(len!=0) if(FileWriteString(file_handle,str,len)!=len) return(false);
-//--- writing object color
-   if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_COLOR))!=sizeof(long)) return(false);
-//--- writing object line style
-   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_STYLE))!=sizeof(int)) return(false);
-//--- writing object line width
-   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_WIDTH))!=sizeof(int)) return(false);
-//--- writing the property value "Background"
-   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BACK),CHAR_VALUE)!=sizeof(char)) return(false);
-//--- writing the property value "Selectable"
-   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE),CHAR_VALUE)!=sizeof(char)) return(false);
-//--- writing the property value "Timeframes"
-   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES),INT_VALUE)!=sizeof(int)) return(false);
-//--- writing comment
+   if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE)
+      return(false);
+   if(len!=0) if(FileWriteString(file_handle,str,len)!=len)
+      return(false);
+//--- write object color
+   if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_COLOR))!=sizeof(long))
+      return(false);
+//--- write object line style
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_STYLE))!=sizeof(int))
+      return(false);
+//--- write object line width
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_WIDTH))!=sizeof(int))
+      return(false);
+//--- write the property value "Background"
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BACK),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- write the property value "Selectable"
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- write the property value "Timeframes"
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write comment
    str=ObjectGetString(m_chart_id,m_name,OBJPROP_TEXT);
    len=StringLen(str);
-   if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE) return(false);
-   if(len!=0) if(FileWriteString(file_handle,str,len)!=len) return(false);
-//--- writing number of points
-   if(FileWriteInteger(file_handle,m_num_points,INT_VALUE)!=INT_VALUE) return(false);
-//--- writing points
+   if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE)
+      return(false);
+   if(len!=0) if(FileWriteString(file_handle,str,len)!=len)
+      return(false);
+//--- write number of points
+   if(FileWriteInteger(file_handle,m_num_points,INT_VALUE)!=INT_VALUE)
+      return(false);
+//--- write points
    for(i=0;i<m_num_points;i++)
      {
-      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,i))!=sizeof(long)) return(false);
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_PRICE,i))!=sizeof(double)) return(false);
+      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_TIME,i))!=sizeof(long))
+         return(false);
+      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_PRICE,i))!=sizeof(double))
+         return(false);
      }
-//--- writing number of levels
+//--- write number of levels
    levels=(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELS);
-   if(FileWriteInteger(file_handle,levels,INT_VALUE)!=INT_VALUE) return(false);
-//--- writing levels
+   if(FileWriteInteger(file_handle,levels,INT_VALUE)!=INT_VALUE)
+      return(false);
+//--- write levels
    for(i=0;i<levels;i++)
      {
       //--- level color
-      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,i))!=sizeof(long)) return(false);
+      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,i))!=sizeof(long))
+         return(false);
       //--- level line style
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,i))!=sizeof(int)) return(false);
+      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,i))!=sizeof(int))
+         return(false);
       //--- level line width
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,i))!=sizeof(int)) return(false);
+      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,i))!=sizeof(int))
+         return(false);
       //--- level value
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,i))!=sizeof(double)) return(false);
+      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,i))!=sizeof(double))
+         return(false);
       //--- level name
       str=ObjectGetString(m_chart_id,m_name,OBJPROP_LEVELTEXT,i);
       len=StringLen(str);
-      if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE) return(false);
-      if(len!=0) if(FileWriteString(file_handle,str,len)!=len) return(false);
+      if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE)
+         return(false);
+      if(len!=0) if(FileWriteString(file_handle,str,len)!=len)
+         return(false);
      }
-//---
+//--- successful
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading object parameters from file.                             |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading object parameters from file                              |
 //+------------------------------------------------------------------+
-bool CChartObject::Load(int file_handle)
+bool CChartObject::Load(const int file_handle)
   {
    int    i,len,num;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-//--- reading and check start marker - 0xFFFFFFFFFFFFFFFF
-   if(FileReadLong(file_handle)!=-1) return(false);
-//--- reading and check object type
-   if(FileReadInteger(file_handle,INT_VALUE)!=Type()) return(false);
-//--- reading object name
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read and check start marker - 0xFFFFFFFFFFFFFFFF
+   if(FileReadLong(file_handle)!=-1)
+      return(false);
+//--- read and check object type
+   if(FileReadInteger(file_handle,INT_VALUE)!=Type())
+      return(false);
+//--- read object name
    len=FileReadInteger(file_handle,INT_VALUE);
-   if(len!=0) str=FileReadString(file_handle,len);
-   else       str="";
-   if(!ObjectSetString(m_chart_id,m_name,OBJPROP_NAME,str)) return(false);
-//--- reading object color
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_COLOR,FileReadLong(file_handle))) return(false);
-//--- reading object line style
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_STYLE,FileReadInteger(file_handle))) return(false);
-//--- reading object line style
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_WIDTH,FileReadInteger(file_handle))) return(false);
-//--- reading the property value "Background"
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BACK,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-//--- reading the property value "Selectable"
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-//--- reading the property value "Timeframes"
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES,FileReadInteger(file_handle,INT_VALUE))) return(false);
-//--- reading comment
+   str=(len!=0) ? FileReadString(file_handle,len) : "";
+   if(!ObjectSetString(m_chart_id,m_name,OBJPROP_NAME,str))
+      return(false);
+//--- read object color
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_COLOR,FileReadLong(file_handle)))
+      return(false);
+//--- read object line style
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_STYLE,FileReadInteger(file_handle)))
+      return(false);
+//--- read object line style
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_WIDTH,FileReadInteger(file_handle)))
+      return(false);
+//--- read the property value "Background"
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BACK,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- read the property value "Selectable"
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_SELECTABLE,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- read the property value "Timeframes"
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIMEFRAMES,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read comment
    len=FileReadInteger(file_handle,INT_VALUE);
-   if(len!=0) str=FileReadString(file_handle,len);
-   else       str="";
-   if(!ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT,str)) return(false);
-//--- reading number of point
+   str=(len!=0) ? FileReadString(file_handle,len) : "";
+   if(!ObjectSetString(m_chart_id,m_name,OBJPROP_TEXT,str))
+      return(false);
+//--- read number of point
    num=FileReadInteger(file_handle,INT_VALUE);
-//--- reading points
+//--- read points
    if(num!=0)
      {
       for(i=0;i<num;i++)
         {
-         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIME,i,FileReadLong(file_handle))) return(false);
-         if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_PRICE,i,FileReadDouble(file_handle))) return(false);
+         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_TIME,i,FileReadLong(file_handle)))
+            return(false);
+         if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_PRICE,i,FileReadDouble(file_handle)))
+            return(false);
         }
      }
-//--- reading number of levels
+//--- read number of levels
    num=FileReadInteger(file_handle,INT_VALUE);
-   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELS,0,FileReadLong(file_handle))) return(false);
-//--- reading levels
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELS,0,FileReadLong(file_handle)))
+      return(false);
+//--- read levels
    if(num!=0)
      {
       for(i=0;i<num;i++)
         {
          //--- level color
-         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,i,FileReadLong(file_handle))) return(false);
+         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELCOLOR,i,FileReadLong(file_handle)))
+            return(false);
          //--- levelline style
-         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,i,FileReadInteger(file_handle))) return(false);
+         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELSTYLE,i,FileReadInteger(file_handle)))
+            return(false);
          //--- level line width
-         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,i,FileReadInteger(file_handle))) return(false);
+         if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_LEVELWIDTH,i,FileReadInteger(file_handle)))
+            return(false);
          //--- level value
-         if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,i,FileReadDouble(file_handle))) return(false);
+         if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_LEVELVALUE,i,FileReadDouble(file_handle)))
+            return(false);
          //--- level name
          len=FileReadInteger(file_handle,INT_VALUE);
-         if(len!=0) str=FileReadString(file_handle,len);
-         else       str="";
-         if(!ObjectSetString(m_chart_id,m_name,OBJPROP_LEVELTEXT,i,str)) return(false);
+         str=(len!=0) ? FileReadString(file_handle,len) : "";
+         if(!ObjectSetString(m_chart_id,m_name,OBJPROP_LEVELTEXT,i,str))
+            return(false);
         }
      }
-//---
+//--- successful
    return(true);
   }
 //+------------------------------------------------------------------+

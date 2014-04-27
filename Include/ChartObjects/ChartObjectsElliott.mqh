@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                          ChartObjectsElliott.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All Elliott tools.                                               |
 //+------------------------------------------------------------------+
@@ -15,180 +14,188 @@
 class CChartObjectElliottWave3 : public CChartObject
   {
 public:
+                     CChartObjectElliottWave3(void);
+                    ~CChartObjectElliottWave3(void);
    //--- methods of access to properties of the object
-   ENUM_ELLIOT_WAVE_DEGREE Degree() const;
-   bool              Degree(ENUM_ELLIOT_WAVE_DEGREE degree);
-   bool              Lines() const;
-   bool              Lines(bool lines);
+   ENUM_ELLIOT_WAVE_DEGREE Degree(void) const;
+   bool              Degree(const ENUM_ELLIOT_WAVE_DEGREE degree) const;
+   bool              Lines(void) const;
+   bool              Lines(const bool lines) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_ELLIOTWAVE3); }
+   virtual int       Type(void) const { return(OBJ_ELLIOTWAVE3); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "ElliottCorrectiveWave".                           |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate,                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3)
+CChartObjectElliottWave3::CChartObjectElliottWave3(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_ELLIOTWAVE3,window,time1,price1,time2,price2,time3,price3);
-//---
-   if(result) result&=Attach(chart_id,name,window,3);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the "Degree" property.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "Degree" property.                          |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-ENUM_ELLIOT_WAVE_DEGREE CChartObjectElliottWave3::Degree() const
+CChartObjectElliottWave3::~CChartObjectElliottWave3(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(WRONG_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "ElliottCorrectiveWave"                            |
+//+------------------------------------------------------------------+
+bool CChartObjectElliottWave3::Create(long chart_id,const string name,const int window,
+                                      const datetime time1,const double price1,
+                                      const datetime time2,const double price2,
+                                      const datetime time3,const double price3)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_ELLIOTWAVE3,window,time1,price1,time2,price2,time3,price3))
+      return(false);
+   if(!Attach(chart_id,name,window,3))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the "Degree" property                               |
+//+------------------------------------------------------------------+
+ENUM_ELLIOT_WAVE_DEGREE CChartObjectElliottWave3::Degree(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(WRONG_VALUE);
+//--- result
    return((ENUM_ELLIOT_WAVE_DEGREE)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DEGREE));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "Degree" property.                             |
-//| INPUT:  degree - new value for the "Degree" proeprty.            |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "Degree" property                              |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Degree(ENUM_ELLIOT_WAVE_DEGREE degree)
+bool CChartObjectElliottWave3::Degree(const ENUM_ELLIOT_WAVE_DEGREE degree) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_DEGREE,degree));
   }
 //+------------------------------------------------------------------+
-//| Get value of the "Lines" property.                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of "Lines" property.                               |
-//| REMARK: no.                                                      |
+//| Get value of the "Lines" property                                |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Lines() const
+bool CChartObjectElliottWave3::Lines(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "Lines" property.                              |
-//| INPUT:  lines - new value for the "Lines" property.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "Lines" property                               |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Lines(bool lines)
+bool CChartObjectElliottWave3::Lines(const bool lines) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES,lines));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Save(int file_handle)
+bool CChartObjectElliottWave3::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObject::Save(file_handle);
-   if(resutl)
+   bool result;
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   result=CChartObject::Save(file_handle);
+   if(result)
      {
-      //--- writing value of the "Degree" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DEGREE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Lines" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES),INT_VALUE)!=sizeof(int)) return(false);
+      //--- write value of the "Degree" property
+      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DEGREE),INT_VALUE)!=sizeof(int))
+         return(false);
+      //--- write value of the "Lines" property
+      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES),INT_VALUE)!=sizeof(int))
+         return(false);
      }
-//---
-   return(resutl);
+//--- result
+   return(result);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave3::Load(int file_handle)
+bool CChartObjectElliottWave3::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObject::Load(file_handle);
-   if(resutl)
+   bool result;
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   result=CChartObject::Load(file_handle);
+   if(result)
      {
-      //--- reading value of the "Degree" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DEGREE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Lines" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES,FileReadInteger(file_handle,INT_VALUE))) return(false);
+      //--- read value of the "Degree" property
+      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DEGREE,FileReadInteger(file_handle,INT_VALUE)))
+         return(false);
+      //--- read value of the "Lines" property
+      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_DRAWLINES,FileReadInteger(file_handle,INT_VALUE)))
+         return(false);
      }
-//---
-   return(resutl);
+//--- result
+   return(result);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectElliottWave5.                                  |
 //| Purpose: Class of the "ElliottMotiveWave" object of chart.       |
-//|          Derives from class CChartObjectElliottWave3    .        |
+//|          Derives from class CChartObjectElliottWave3.            |
 //+------------------------------------------------------------------+
 class CChartObjectElliottWave5 : public CChartObjectElliottWave3
   {
 public:
+                     CChartObjectElliottWave5(void);
+                    ~CChartObjectElliottWave5(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3,datetime time4,double price4,datetime time5,double price5);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3,
+                            const datetime time4,const double price4,
+                            const datetime time5,const double price5);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_ELLIOTWAVE5); }
+   virtual int       Type(void) const { return(OBJ_ELLIOTWAVE5); }
   };
 //+------------------------------------------------------------------+
-//| Create object "ElliottMotiveWave".                               |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate,                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate,                       |
-//|         time4    - fourth time coordinate,                       |
-//|         price4   - fourth pricecoordinate,                       |
-//|         time5    - fifth time coordinate,                        |
-//|         price5   - fifth price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectElliottWave5::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3,datetime time4,double price4,datetime time5,double price5)
+CChartObjectElliottWave5::CChartObjectElliottWave5(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_ELLIOTWAVE5,window,time1,price1,time2,price2,time3,price3,time4,price4,time5,price5);
-//---
-   if(result) result&=Attach(chart_id,name,window,5);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectElliottWave5::~CChartObjectElliottWave5(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "ElliottMotiveWave"                                |
+//+------------------------------------------------------------------+
+bool CChartObjectElliottWave5::Create(long chart_id,const string name,const int window,
+                                      const datetime time1,const double price1,
+                                      const datetime time2,const double price2,
+                                      const datetime time3,const double price3,
+                                      const datetime time4,const double price4,
+                                      const datetime time5,const double price5)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_ELLIOTWAVE5,window,time1,price1,time2,price2,time3,price3,time4,price4,time5,price5))
+      return(false);
+   if(!Attach(chart_id,name,window,5))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

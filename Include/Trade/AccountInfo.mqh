@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                  AccountInfo.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                       http://www.metaquotes.net/ |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Object.mqh>
 //+------------------------------------------------------------------+
@@ -13,337 +12,268 @@
 class CAccountInfo : public CObject
   {
 public:
+                     CAccountInfo(void);
+                    ~CAccountInfo(void);
    //--- fast access methods to the integer account propertyes
-   long              Login()                 const;
-   ENUM_ACCOUNT_TRADE_MODE TradeMode()       const;
-   string            TradeModeDescription()  const;
-   long              Leverage()              const;
-   ENUM_ACCOUNT_STOPOUT_MODE MarginMode()    const;
-   string            MarginModeDescription() const;
-   bool              TradeAllowed()          const;
-   bool              TradeExpert()           const;
-   int               LimitOrders()           const;
+   long              Login(void) const;
+   ENUM_ACCOUNT_TRADE_MODE TradeMode(void) const;
+   string            TradeModeDescription(void) const;
+   long              Leverage(void) const;
+   ENUM_ACCOUNT_STOPOUT_MODE MarginMode(void) const;
+   string            MarginModeDescription(void) const;
+   bool              TradeAllowed(void) const;
+   bool              TradeExpert(void) const;
+   int               LimitOrders(void) const;
    //--- fast access methods to the double account propertyes
-   double            Balance()               const;
-   double            Credit()                const;
-   double            Profit()                const;
-   double            Equity()                const;
-   double            Margin()                const;
-   double            FreeMargin()            const;
-   double            MarginLevel()           const;
-   double            MarginCall()            const;
-   double            MarginStopOut()         const;
+   double            Balance(void) const;
+   double            Credit(void) const;
+   double            Profit(void) const;
+   double            Equity(void) const;
+   double            Margin(void) const;
+   double            FreeMargin(void) const;
+   double            MarginLevel(void) const;
+   double            MarginCall(void) const;
+   double            MarginStopOut(void) const;
    //--- fast access methods to the string account propertyes
-   string            Name()                  const;
-   string            Server()                const;
-   string            Currency()              const;
-   string            Company()               const;
+   string            Name(void) const;
+   string            Server(void) const;
+   string            Currency(void) const;
+   string            Company(void) const;
    //--- access methods to the API MQL5 functions
-   long              InfoInteger(ENUM_ACCOUNT_INFO_INTEGER prop_id) const;
-   double            InfoDouble(ENUM_ACCOUNT_INFO_DOUBLE prop_id)   const;
-   string            InfoString(ENUM_ACCOUNT_INFO_STRING prop_id)   const;
-   //---
-   double            OrderProfitCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price_open,double price_close) const;
-   double            MarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price)      const;
-   double            FreeMarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price)  const;
-   double            MaxLotCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double price,double percent=100) const;
+   long              InfoInteger(const ENUM_ACCOUNT_INFO_INTEGER prop_id) const;
+   double            InfoDouble(const ENUM_ACCOUNT_INFO_DOUBLE prop_id) const;
+   string            InfoString(const ENUM_ACCOUNT_INFO_STRING prop_id) const;
+   //--- checks
+   double            OrderProfitCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                      const double volume,const double price_open,const double price_close) const;
+   double            MarginCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                 const double volume,const double price) const;
+   double            FreeMarginCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                     const double volume,const double price) const;
+   double            MaxLotCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                 const double price,const double percent=100) const;
   };
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_LOGIN".                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_LOGIN".                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-long CAccountInfo::Login() const
+CAccountInfo::CAccountInfo(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CAccountInfo::~CAccountInfo(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Get the property value "ACCOUNT_LOGIN"                           |
+//+------------------------------------------------------------------+
+long CAccountInfo::Login(void) const
   {
    return(AccountInfoInteger(ACCOUNT_LOGIN));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_TRADE_MODE".                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_TRADE_MODE".                 |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_TRADE_MODE"                      |
 //+------------------------------------------------------------------+
-ENUM_ACCOUNT_TRADE_MODE CAccountInfo::TradeMode() const
+ENUM_ACCOUNT_TRADE_MODE CAccountInfo::TradeMode(void) const
   {
    return((ENUM_ACCOUNT_TRADE_MODE)AccountInfoInteger(ACCOUNT_TRADE_MODE));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_TRADE_MODE" as string.           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_TRADE_MODE" as string.       |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_TRADE_MODE" as string            |
 //+------------------------------------------------------------------+
-string CAccountInfo::TradeModeDescription() const
+string CAccountInfo::TradeModeDescription(void) const
   {
    string str;
 //---
    switch(TradeMode())
      {
-      case ACCOUNT_TRADE_MODE_DEMO:
-         str="Demo trading account";
-         break;
-      case ACCOUNT_TRADE_MODE_CONTEST:
-         str="Contest trading account";
-         break;
-      case ACCOUNT_TRADE_MODE_REAL:
-         str="Real trading account";
-         break;
-      default:
-         str="Unknown trade account";
+      case ACCOUNT_TRADE_MODE_DEMO   : str="Demo trading account";    break;
+      case ACCOUNT_TRADE_MODE_CONTEST: str="Contest trading account"; break;
+      case ACCOUNT_TRADE_MODE_REAL   : str="Real trading account";    break;
+      default                        : str="Unknown trade account";
      }
 //---
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_LEVERAGE".                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_LEVERAGE".                   |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_LEVERAGE"                        |
 //+------------------------------------------------------------------+
-long CAccountInfo::Leverage() const
+long CAccountInfo::Leverage(void) const
   {
    return(AccountInfoInteger(ACCOUNT_LEVERAGE));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN_SO_MODE".                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN_SO_MODE".             |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN_SO_MODE"                  |
 //+------------------------------------------------------------------+
-ENUM_ACCOUNT_STOPOUT_MODE CAccountInfo::MarginMode() const
+ENUM_ACCOUNT_STOPOUT_MODE CAccountInfo::MarginMode(void) const
   {
    return((ENUM_ACCOUNT_STOPOUT_MODE)AccountInfoInteger(ACCOUNT_MARGIN_SO_MODE));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN_SO_MODE" as string.       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN_SO_MODE" as string.   |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN_SO_MODE" as string        |
 //+------------------------------------------------------------------+
-string CAccountInfo::MarginModeDescription() const
+string CAccountInfo::MarginModeDescription(void) const
   {
    string str;
 //---
    switch(MarginMode())
      {
-      case ACCOUNT_STOPOUT_MODE_PERCENT:
-         str="Level is specified in percentage";
-         break;
-      case ACCOUNT_STOPOUT_MODE_MONEY:
-         str="Level is specified in money";
-         break;
-      default:
-         str="Unknown margin mode";
+      case ACCOUNT_STOPOUT_MODE_PERCENT: str="Level is specified in percentage"; break;
+      case ACCOUNT_STOPOUT_MODE_MONEY  : str="Level is specified in money";      break;
+      default                          : str="Unknown margin mode";
      }
 //---
    return(str);
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_TRADE_ALLOWED".                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_TRADE_ALLOWED".              |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_TRADE_ALLOWED"                   |
 //+------------------------------------------------------------------+
-bool CAccountInfo::TradeAllowed() const
+bool CAccountInfo::TradeAllowed(void) const
   {
    return((bool)AccountInfoInteger(ACCOUNT_TRADE_ALLOWED));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_TRADE_EXPERT".                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_TRADE_EXPERT".               |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_TRADE_EXPERT"                    |
 //+------------------------------------------------------------------+
-bool CAccountInfo::TradeExpert() const
+bool CAccountInfo::TradeExpert(void) const
   {
    return((bool)AccountInfoInteger(ACCOUNT_TRADE_EXPERT));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_LIMIT_ORDERS".                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_LIMIT_ORDERS".               |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_LIMIT_ORDERS"                    |
 //+------------------------------------------------------------------+
-int CAccountInfo::LimitOrders() const
+int CAccountInfo::LimitOrders(void) const
   {
    return((int)AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_BALANCE".                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_BALANCE".                    |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_BALANCE"                         |
 //+------------------------------------------------------------------+
-double CAccountInfo::Balance() const
+double CAccountInfo::Balance(void) const
   {
    return(AccountInfoDouble(ACCOUNT_BALANCE));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_CREDIT".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_CREDIT".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_CREDIT"                          |
 //+------------------------------------------------------------------+
-double CAccountInfo::Credit() const
+double CAccountInfo::Credit(void) const
   {
    return(AccountInfoDouble(ACCOUNT_CREDIT));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_PROFIT".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_PROFIT".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_PROFIT"                          |
 //+------------------------------------------------------------------+
-double CAccountInfo::Profit() const
+double CAccountInfo::Profit(void) const
   {
    return(AccountInfoDouble(ACCOUNT_PROFIT));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_EQUITY".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_EQUITY".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_EQUITY"                          |
 //+------------------------------------------------------------------+
-double CAccountInfo::Equity() const
+double CAccountInfo::Equity(void) const
   {
    return(AccountInfoDouble(ACCOUNT_EQUITY));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN"                          |
 //+------------------------------------------------------------------+
-double CAccountInfo::Margin() const
+double CAccountInfo::Margin(void) const
   {
    return(AccountInfoDouble(ACCOUNT_MARGIN));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_FREEMARGIN".                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_FREEMARGIN".                 |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_FREEMARGIN"                      |
 //+------------------------------------------------------------------+
-double CAccountInfo::FreeMargin() const
+double CAccountInfo::FreeMargin(void) const
   {
    return(AccountInfoDouble(ACCOUNT_FREEMARGIN));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN_LEVEL".                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN_LEVEL".               |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN_LEVEL"                    |
 //+------------------------------------------------------------------+
-double CAccountInfo::MarginLevel() const
+double CAccountInfo::MarginLevel(void) const
   {
    return(AccountInfoDouble(ACCOUNT_MARGIN_LEVEL));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN_SO_CALL".                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN_SO_CALL".             |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN_SO_CALL"                  |
 //+------------------------------------------------------------------+
-double CAccountInfo::MarginCall() const
+double CAccountInfo::MarginCall(void) const
   {
    return(AccountInfoDouble(ACCOUNT_MARGIN_SO_CALL));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_MARGIN_SO_SO".                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_MARGIN_SO_SO".               |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_MARGIN_SO_SO"                    |
 //+------------------------------------------------------------------+
-double CAccountInfo::MarginStopOut() const
+double CAccountInfo::MarginStopOut(void) const
   {
    return(AccountInfoDouble(ACCOUNT_MARGIN_SO_SO));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_NAME".                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_NAME".                       |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_NAME"                            |
 //+------------------------------------------------------------------+
-string CAccountInfo::Name() const
+string CAccountInfo::Name(void) const
   {
    return(AccountInfoString(ACCOUNT_NAME));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_SERVER".                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_SERVER".                     |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_SERVER"                          |
 //+------------------------------------------------------------------+
-string CAccountInfo::Server() const
+string CAccountInfo::Server(void) const
   {
    return(AccountInfoString(ACCOUNT_SERVER));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_CURRENCY".                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_CURRENCY".                   |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_CURRENCY"                        |
 //+------------------------------------------------------------------+
-string CAccountInfo::Currency() const
+string CAccountInfo::Currency(void) const
   {
    return(AccountInfoString(ACCOUNT_CURRENCY));
   }
 //+------------------------------------------------------------------+
-//| Get the property value "ACCOUNT_COMPANY".                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the property value "ACCOUNT_COMPANY".                    |
-//| REMARK: no.                                                      |
+//| Get the property value "ACCOUNT_COMPANY"                         |
 //+------------------------------------------------------------------+
-string CAccountInfo::Company() const
+string CAccountInfo::Company(void) const
   {
    return(AccountInfoString(ACCOUNT_COMPANY));
   }
 //+------------------------------------------------------------------+
-//| Access functions AccountInfoInteger(...).                        |
-//| INPUT:  prop_id  -identifier integer properties.                 |
-//| OUTPUT: the integer property value.                              |
-//| REMARK: no.                                                      |
+//| Access functions AccountInfoInteger(...)                         |
 //+------------------------------------------------------------------+
-long CAccountInfo::InfoInteger(ENUM_ACCOUNT_INFO_INTEGER prop_id) const
+long CAccountInfo::InfoInteger(const ENUM_ACCOUNT_INFO_INTEGER prop_id) const
   {
    return(AccountInfoInteger(prop_id));
   }
 //+------------------------------------------------------------------+
-//| Access functions AccountInfoDouble(...).                         |
-//| INPUT:  prop_id  -identifier double properties.                  |
-//| OUTPUT: the double property value.                               |
-//| REMARK: no.                                                      |
+//| Access functions AccountInfoDouble(...)                          |
 //+------------------------------------------------------------------+
-double CAccountInfo::InfoDouble(ENUM_ACCOUNT_INFO_DOUBLE prop_id) const
+double CAccountInfo::InfoDouble(const ENUM_ACCOUNT_INFO_DOUBLE prop_id) const
   {
    return(AccountInfoDouble(prop_id));
   }
 //+------------------------------------------------------------------+
-//| Access functions AccountInfoString(...).                         |
-//| INPUT:  prop_id  -identifier string properties.                  |
-//| OUTPUT: the string property value.                               |
-//| REMARK: no.                                                      |
+//| Access functions AccountInfoString(...)                          |
 //+------------------------------------------------------------------+
-string CAccountInfo::InfoString(ENUM_ACCOUNT_INFO_STRING prop_id) const
+string CAccountInfo::InfoString(const ENUM_ACCOUNT_INFO_STRING prop_id) const
   {
    return(AccountInfoString(prop_id));
   }
 //+------------------------------------------------------------------+
-//| Access functions OrderCalcProfit(...).                           |
+//| Access functions OrderCalcProfit(...).                            |
 //| INPUT:  name            - symbol name,                           |
 //|         trade_operation - trade operation,                       |
 //|         volume          - volume of the opening position,        |
-//|         price_open      - price of the opening position.         |
+//|         price_open      - price of the opening position,         |
 //|         price_close     - price of the closing position.         |
-//| OUTPUT: the free margin value.                                   |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CAccountInfo::OrderProfitCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price_open,double price_close) const
+double CAccountInfo::OrderProfitCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                      const double volume,const double price_open,const double price_close) const
   {
    double profit=EMPTY_VALUE;
 //---
-   if(!OrderCalcProfit(trade_operation,symbol,volume,price_open,price_close,profit)) return(EMPTY_VALUE);
+   if(!OrderCalcProfit(trade_operation,symbol,volume,price_open,price_close,profit))
+      return(EMPTY_VALUE);
 //---
    return(profit);
   }
@@ -353,14 +283,14 @@ double CAccountInfo::OrderProfitCheck(const string symbol,ENUM_ORDER_TYPE trade_
 //|         trade_operation - trade operation,                       |
 //|         volume          - volume of the opening position,        |
 //|         price           - price of the opening position.         |
-//| OUTPUT: the free margin value.                                   |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CAccountInfo::MarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price) const
+double CAccountInfo::MarginCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                 const double volume,const double price) const
   {
    double margin=EMPTY_VALUE;
 //---
-   if(!OrderCalcMargin(trade_operation,symbol,volume,price,margin)) return(EMPTY_VALUE);
+   if(!OrderCalcMargin(trade_operation,symbol,volume,price,margin))
+      return(EMPTY_VALUE);
 //---
    return(margin);
   }
@@ -370,10 +300,9 @@ double CAccountInfo::MarginCheck(const string symbol,ENUM_ORDER_TYPE trade_opera
 //|         trade_operation - trade operation,                       |
 //|         volume          - volume of the opening position,        |
 //|         price           - price of the opening position.         |
-//| OUTPUT: the free margin value.                                   |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CAccountInfo::FreeMarginCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double volume,double price) const
+double CAccountInfo::FreeMarginCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                     const double volume,const double price) const
   {
    return(FreeMargin()-MarginCheck(symbol,trade_operation,volume,price));
   }
@@ -381,12 +310,11 @@ double CAccountInfo::FreeMarginCheck(const string symbol,ENUM_ORDER_TYPE trade_o
 //| Access functions OrderCalcMargin(...).                           |
 //| INPUT:  name            - symbol name,                           |
 //|         trade_operation - trade operation,                       |
-//|         price           - price of the opening position.         |
-//|         percent         - percent of available margin [1-100%]   |
-//| OUTPUT: the free margin value.                                   |
-//| REMARK: no.                                                      |
+//|         price           - price of the opening position,         |
+//|         percent         - percent of available margin [1-100%].   |
 //+------------------------------------------------------------------+
-double CAccountInfo::MaxLotCheck(const string symbol,ENUM_ORDER_TYPE trade_operation,double price,double percent) const
+double CAccountInfo::MaxLotCheck(const string symbol,const ENUM_ORDER_TYPE trade_operation,
+                                 const double price,const double percent) const
   {
    double margin=0.0;
 //--- checks
@@ -402,19 +330,22 @@ double CAccountInfo::MaxLotCheck(const string symbol,ENUM_ORDER_TYPE trade_opera
       return(0.0);
      }
 //---
-   if(margin==0.0)   // for pending orders
+   if(margin==0.0) // for pending orders
       return(SymbolInfoDouble(symbol,SYMBOL_VOLUME_MAX));
 //--- calculate maximum volume
    double volume=NormalizeDouble(FreeMargin()*percent/100.0/margin,2);
 //--- normalize and check limits
    double stepvol=SymbolInfoDouble(symbol,SYMBOL_VOLUME_STEP);
-   if(stepvol>0.0)   volume=stepvol*MathFloor(volume/stepvol);
+   if(stepvol>0.0)
+      volume=stepvol*MathFloor(volume/stepvol);
 //---
    double minvol=SymbolInfoDouble(symbol,SYMBOL_VOLUME_MIN);
-   if(volume<minvol) volume=0.0;
+   if(volume<minvol)
+      volume=0.0;
 //---
    double maxvol=SymbolInfoDouble(symbol,SYMBOL_VOLUME_MAX);
-   if(volume>maxvol) volume=maxvol;
+   if(volume>maxvol)
+      volume=maxvol;
 //--- return volume
    return(volume);
   }

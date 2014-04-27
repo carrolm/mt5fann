@@ -1,61 +1,64 @@
 //+------------------------------------------------------------------+
 //|                                                      FileTxt.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "File.mqh"
 //+------------------------------------------------------------------+
-//| Class CFileTxt.                                                  |
+//| Class CFileTxt                                                   |
 //| Purpose: Class of operations with text files.                    |
 //|          Derives from class CFile.                               |
 //+------------------------------------------------------------------+
 class CFileTxt : public CFile
   {
 public:
+                     CFileTxt(void);
+                    ~CFileTxt(void);
    //--- methods for working with files
-   int               Open(const string file_name,int open_flags);
+   int               Open(const string file_name,const int open_flags);
    //--- methods to access data
    uint              WriteString(const string value);
-   string            ReadString();
+   string            ReadString(void);
   };
 //+------------------------------------------------------------------+
-//| Open the text file.                                              |
-//| INPUT:  file_name  - name of file,                               |
-//|         open_flags - flags ofopening.                            |
-//| OUTPUT: handle of opened file, or -1.                            |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-int CFileTxt::Open(const string file_name,int open_flags)
+CFileTxt::CFileTxt(void)
   {
-   int result=CFile::Open(file_name,open_flags|FILE_TXT);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Writing string to file.                                          |
-//| INPUT:  value - string to write.                                 |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CFileTxt::~CFileTxt(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Open the text file                                               |
+//+------------------------------------------------------------------+
+int CFileTxt::Open(const string file_name,const int open_flags)
+  {
+   return(CFile::Open(file_name,open_flags|FILE_TXT));
+  }
+//+------------------------------------------------------------------+
+//| Writing string to file                                           |
 //+------------------------------------------------------------------+
 uint CFileTxt::WriteString(const string value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteString(m_handle,value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteString(m_handle,value));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Reading string from file.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: string that is read.                                     |
-//| REMARK: no.                                                      |
+//| Reading string from file                                         |
 //+------------------------------------------------------------------+
-string CFileTxt::ReadString()
+string CFileTxt::ReadString(void)
   {
-//--- checking
-   if(m_handle<0) return("");
-//---
-   return(FileReadString(m_handle));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadString(m_handle));
+//--- failure
+   return("");
   }
 //+------------------------------------------------------------------+

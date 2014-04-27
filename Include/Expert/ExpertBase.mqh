@@ -1,11 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   ExpertBase.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Include files.                                                   |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Trade\SymbolInfo.mqh>
 #include <Trade\AccountInfo.mqh>
@@ -91,123 +87,117 @@ protected:
    CiRealVolume     *m_real_volume;    // pointer to the object for access to real volumes of bars
 
 public:
-                     CExpertBase();
-                    ~CExpertBase();
+                     CExpertBase(void);
+                    ~CExpertBase(void);
    //--- methods of access to protected data
-   ENUM_INIT_PHASE   InitPhase()         const        { return(m_init_phase);       }
-   void              TrendType(ENUM_TYPE_TREND value) { m_trend_type=value;         }
-   int               UsedSeries()        const;
-   void              EveryTick(bool value)            { m_every_tick=value;         }
+   ENUM_INIT_PHASE   InitPhase(void)            const { return(m_init_phase); }
+   void              TrendType(ENUM_TYPE_TREND value) { m_trend_type=value;   }
+   int               UsedSeries(void) const;
+   void              EveryTick(bool value)            { m_every_tick=value;   }
    //--- methods of access to protected data
-   double            Open(int ind)       const;
-   double            High(int ind)       const;
-   double            Low(int ind)        const;
-   double            Close(int ind)      const;
-   int               Spread(int ind)     const;
-   datetime          Time(int ind)       const;
+   double            Open(int ind) const;
+   double            High(int ind) const;
+   double            Low(int ind) const;
+   double            Close(int ind) const;
+   int               Spread(int ind) const;
+   datetime          Time(int ind) const;
    long              TickVolume(int ind) const;
    long              RealVolume(int ind) const;
    //--- methods of initialization of the object
-   virtual bool      Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double point);
+   virtual bool      Init(CSymbolInfo *symbol,ENUM_TIMEFRAMES period,double point);
    bool              Symbol(string name);
    bool              Period(ENUM_TIMEFRAMES value);
-   void              Magic(ulong value)               { m_magic=value;              }
+   void              Magic(ulong value) { m_magic=value; }
    //--- method of verification of settings
    virtual bool      ValidationSettings();
    //--- methods of creating the indicator and timeseries
-   virtual bool      SetPriceSeries(CiOpen* open,CiHigh* high,CiLow* low,CiClose* close);
-   virtual bool      SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tick_volume,CiRealVolume* real_volume);
-   virtual bool      InitIndicators(CIndicators* indicators=NULL);
+   virtual bool      SetPriceSeries(CiOpen *open,CiHigh *high,CiLow *low,CiClose *close);
+   virtual bool      SetOtherSeries(CiSpread *spread,CiTime *time,CiTickVolume *tick_volume,CiRealVolume *real_volume);
+   virtual bool      InitIndicators(CIndicators *indicators=NULL);
 
 protected:
    //--- methods initialization of timeseries
-   bool              InitOpen(CIndicators* indicators);
-   bool              InitHigh(CIndicators* indicators);
-   bool              InitLow(CIndicators* indicators);
-   bool              InitClose(CIndicators* indicators);
-   bool              InitSpread(CIndicators* indicators);
-   bool              InitTime(CIndicators* indicators);
-   bool              InitTickVolume(CIndicators* indicators);
-   bool              InitRealVolume(CIndicators* indicators);
+   bool              InitOpen(CIndicators *indicators);
+   bool              InitHigh(CIndicators *indicators);
+   bool              InitLow(CIndicators *indicators);
+   bool              InitClose(CIndicators *indicators);
+   bool              InitSpread(CIndicators *indicators);
+   bool              InitTime(CIndicators *indicators);
+   bool              InitTickVolume(CIndicators *indicators);
+   bool              InitRealVolume(CIndicators *indicators);
    //--- method of getting the measure units of price levels
-   virtual double    PriceLevelUnit()                 { return(m_adjusted_point);   }
+   virtual double    PriceLevelUnit(void)      { return(m_adjusted_point); }
    //--- method of getting index of bar the analysis starts with
-   virtual int       StartIndex()                     { return((m_every_tick?0:1)); }
-   virtual bool      CompareMagic(ulong magic)        { return(m_magic==magic);     }
+   virtual int       StartIndex(void) { return((m_every_tick?0:1)); }
+   virtual bool      CompareMagic(ulong magic) { return(m_magic==magic);   }
   };
 //+------------------------------------------------------------------+
-//| Constructor CExpertBase.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CExpertBase::CExpertBase()
+void CExpertBase::CExpertBase(void) : m_magic(0),
+                                      m_init_phase(INIT_PHASE_FIRST),
+                                      m_other_symbol(false),
+                                      m_symbol(NULL),
+                                      m_other_period(false),
+                                      m_period(PERIOD_CURRENT),
+                                      m_adjusted_point(1.0),
+                                      m_trend_type(TYPE_TREND_FLAT),
+                                      m_every_tick(false),
+                                      m_used_series(0),
+                                      m_open(NULL),
+                                      m_high(NULL),
+                                      m_low(NULL),
+                                      m_close(NULL),
+                                      m_spread(NULL),
+                                      m_time(NULL),
+                                      m_tick_volume(NULL),
+                                      m_real_volume(NULL)
+
   {
-//--- initialization of protected data
-   m_magic         =0;
-   m_init_phase    =INIT_PHASE_FIRST;
-   m_other_symbol  =false;
-   m_symbol        =NULL;
-   m_other_period  =false;
-   m_period        =PERIOD_CURRENT;
-   m_adjusted_point=1.0;
-   m_trend_type    =TYPE_TREND_FLAT;
-   m_every_tick    =false;
-   m_used_series   =0;
-   m_open          =NULL;
-   m_high          =NULL;
-   m_low           =NULL;
-   m_close         =NULL;
-   m_spread        =NULL;
-   m_time          =NULL;
-   m_tick_volume   =NULL;
-   m_real_volume   =NULL;
   }
 //+------------------------------------------------------------------+
-//| Destructor CExpertBase.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-void CExpertBase::~CExpertBase()
+void CExpertBase::~CExpertBase(void)
   {
 //--- if the symbol is "custom", delete it
-   if(m_other_symbol && m_symbol!=NULL) delete m_symbol;
+   if(m_other_symbol && m_symbol!=NULL)
+      delete m_symbol;
 //--- release of "custom" timeseries
    if(m_other_symbol || m_other_period)
      {
-      if(IS_OPEN_SERIES_USAGE        && m_open!=NULL)        delete m_open;
-      if(IS_HIGH_SERIES_USAGE        && m_high!=NULL)        delete m_high;
-      if(IS_LOW_SERIES_USAGE         && m_low!=NULL)         delete m_low;
-      if(IS_CLOSE_SERIES_USAGE       && m_close!=NULL)       delete m_close;
-      if(IS_SPREAD_SERIES_USAGE      && m_spread!=NULL)      delete m_spread;
-      if(IS_TIME_SERIES_USAGE        && m_time!=NULL)        delete m_time;
-      if(IS_TICK_VOLUME_SERIES_USAGE && m_tick_volume!=NULL) delete m_tick_volume;
-      if(IS_REAL_VOLUME_SERIES_USAGE && m_real_volume!=NULL) delete m_real_volume;
+      if(IS_OPEN_SERIES_USAGE && CheckPointer(m_open)==POINTER_DYNAMIC)
+         delete m_open;
+      if(IS_HIGH_SERIES_USAGE && CheckPointer(m_high)==POINTER_DYNAMIC)
+         delete m_high;
+      if(IS_LOW_SERIES_USAGE && CheckPointer(m_low)==POINTER_DYNAMIC)
+         delete m_low;
+      if(IS_CLOSE_SERIES_USAGE && CheckPointer(m_close)==POINTER_DYNAMIC)
+         delete m_close;
+      if(IS_SPREAD_SERIES_USAGE && CheckPointer(m_spread)==POINTER_DYNAMIC)
+         delete m_spread;
+      if(IS_TIME_SERIES_USAGE && CheckPointer(m_time)==POINTER_DYNAMIC)
+         delete m_time;
+      if(IS_TICK_VOLUME_SERIES_USAGE && CheckPointer(m_tick_volume)==POINTER_DYNAMIC)
+         delete m_tick_volume;
+      if(IS_REAL_VOLUME_SERIES_USAGE && CheckPointer(m_real_volume)==POINTER_DYNAMIC)
+         delete m_real_volume;
      }
   }
 //+------------------------------------------------------------------+
 //| Get flags of used timeseries                                     |
-//| INPUT:  no.                                                      |
-//| OUTPUT: flags of using of timeseries if another                  |
-//|         symbol or timeframe is not set, otherwise - 0.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CExpertBase::UsedSeries() const
+int CExpertBase::UsedSeries(void) const
   {
-   if(m_other_symbol || m_other_period) return(0);
+   if(m_other_symbol || m_other_period)
+      return(0);
 //---
    return(m_used_series);
   }
 //+------------------------------------------------------------------+
 //| Initialization of object.                                        |
-//| INPUT:  symbol - pointer to the CSymbolInfo object,              |
-//|         period - work timeframe,                                 |
-//|         point  - "weight" 2/4 of a point.                        |
-//| OUTPUT: true - if successful, false - if not.                    |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double point)
+bool CExpertBase::Init(CSymbolInfo *symbol,ENUM_TIMEFRAMES period,double point)
   {
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_FIRST)
@@ -228,15 +218,12 @@ bool CExpertBase::Init(CSymbolInfo* symbol,ENUM_TIMEFRAMES period,double point)
    m_other_symbol  =false;
    m_other_period  =false;
 //--- primary initialization is successful, pass to the phase of tuning
-   m_init_phase    =INIT_PHASE_TUNING;
+   m_init_phase=INIT_PHASE_TUNING;
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Changing work symbol.                                            |
-//| INPUT:  name - new work symbol.                                  |
-//| OUTPUT: true - if successful, false - if not.                    |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpertBase::Symbol(string name)
   {
@@ -249,7 +236,8 @@ bool CExpertBase::Symbol(string name)
    if(m_symbol!=NULL)
      {
       //--- symbol has been already set
-      if(m_symbol.Name()==name) return(true);
+      if(m_symbol.Name()==name)
+         return(true);
       //--- symbol is not the one required, but is already "custom"
       if(m_other_symbol)
         {
@@ -281,9 +269,6 @@ bool CExpertBase::Symbol(string name)
   }
 //+------------------------------------------------------------------+
 //| Changing work timeframe.                                         |
-//| INPUT:  value - new work timeframe.                              |
-//| OUTPUT: true - if successful, false - if not.                    |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpertBase::Period(ENUM_TIMEFRAMES value)
   {
@@ -293,7 +278,8 @@ bool CExpertBase::Period(ENUM_TIMEFRAMES value)
       printf(__FUNCTION__+": changing of timeframe is forbidden");
       return(false);
      }
-   if(m_period==value) return(true);
+   if(m_period==value)
+      return(true);
 //--- change work timeframe
    m_period=value;
    m_other_period=true;
@@ -302,14 +288,12 @@ bool CExpertBase::Period(ENUM_TIMEFRAMES value)
   }
 //+------------------------------------------------------------------+
 //| Checking adjustable parameters                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if the settings are valid, false - if not.          |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CExpertBase::ValidationSettings()
   {
 //--- rechecking parameters
-   if(m_init_phase==INIT_PHASE_VALIDATION) return(true);
+   if(m_init_phase==INIT_PHASE_VALIDATION)
+      return(true);
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_TUNING)
      {
@@ -323,15 +307,8 @@ bool CExpertBase::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Setting pointers of price timeseries.                            |
-//| INPUT:  open  - pointer to object-timeseries,                    |
-//|         high  - pointer to object-timeseries,                    |
-//|         low   - pointer to object-timeseries,                    |
-//|         close - pointer to object-timeseries.                    |
-//| OUTPUT: true - in case of successful, otherwise - false.         |
-//| REMARK: Using external objects-timeseries                        |
-//|         allows saving the memory and time.                       |
 //+------------------------------------------------------------------+
-bool CExpertBase::SetPriceSeries(CiOpen* open,CiHigh* high,CiLow* low,CiClose* close)
+bool CExpertBase::SetPriceSeries(CiOpen *open,CiHigh *high,CiLow *low,CiClose *close)
   {
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_VALIDATION)
@@ -342,7 +319,7 @@ bool CExpertBase::SetPriceSeries(CiOpen* open,CiHigh* high,CiLow* low,CiClose* c
 //--- check pointers
    if((IS_OPEN_SERIES_USAGE  && open==NULL) ||
       (IS_HIGH_SERIES_USAGE  && high==NULL) ||
-      (IS_LOW_SERIES_USAGE   && low==NULL)  ||
+      (IS_LOW_SERIES_USAGE   && low==NULL)  || 
       (IS_CLOSE_SERIES_USAGE && close==NULL))
      {
       printf(__FUNCTION__+": NULL pointer");
@@ -357,15 +334,8 @@ bool CExpertBase::SetPriceSeries(CiOpen* open,CiHigh* high,CiLow* low,CiClose* c
   }
 //+------------------------------------------------------------------+
 //| Setting pointers of other timeseries.                            |
-//| INPUT:  spread      - pointer to the object-timeseries,          |
-//|         time        - pointer to the object-timeseries,          |
-//|         tick_volume - pointer to the object-timeseries,          |
-//|         real_volume - pointer to the object-timeseries.          |
-//| OUTPUT: true - in case of successful, otherwise - false.         |
-//| REMARK: Using external objects-timeseries                        |
-//|         allows saving the memory and time.                       |
 //+------------------------------------------------------------------+
-bool CExpertBase::SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tick_volume,CiRealVolume* real_volume)
+bool CExpertBase::SetOtherSeries(CiSpread *spread,CiTime *time,CiTickVolume *tick_volume,CiRealVolume *real_volume)
   {
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_VALIDATION)
@@ -374,8 +344,8 @@ bool CExpertBase::SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tic
       return(false);
      }
 //--- check pointers
-   if((IS_SPREAD_SERIES_USAGE      && spread==NULL)      ||
-      (IS_TIME_SERIES_USAGE        && time==NULL)        ||
+   if((IS_SPREAD_SERIES_USAGE && spread==NULL) || 
+      (IS_TIME_SERIES_USAGE && time==NULL) || 
       (IS_TICK_VOLUME_SERIES_USAGE && tick_volume==NULL) ||
       (IS_REAL_VOLUME_SERIES_USAGE && real_volume==NULL))
      {
@@ -391,34 +361,42 @@ bool CExpertBase::SetOtherSeries(CiSpread* spread,CiTime* time,CiTickVolume* tic
   }
 //+------------------------------------------------------------------+
 //| Initialization of indicators and timeseries.                     |
-//| INPUT:  indicators - pointer to an object-collection             |
-//|                      of indicators and timeseries.               |
-//| OUTPUT: true - in case of successful, otherwise - false.         |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitIndicators(CIndicators* indicators)
+bool CExpertBase::InitIndicators(CIndicators *indicators)
   {
 //--- this call is for compatibility with the previous version
-   if(!ValidationSettings())                                      return(false);
+   if(!ValidationSettings())
+      return(false);
 //--- check the initialization phase
    if(m_init_phase!=INIT_PHASE_VALIDATION)
      {
       printf(__FUNCTION__+": parameters of setting are not checked");
       return(false);
      }
-   if(!m_other_symbol && !m_other_period)                         return(true);
+   if(!m_other_symbol && !m_other_period)
+      return(true);
 //--- check pointers
-   if(m_symbol==NULL)                                             return(false);
-   if(indicators==NULL)                                           return(false);
+   if(m_symbol==NULL)
+      return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of required timeseries
-   if(IS_OPEN_SERIES_USAGE        && !InitOpen(indicators))       return(false);
-   if(IS_HIGH_SERIES_USAGE        && !InitHigh(indicators))       return(false);
-   if(IS_LOW_SERIES_USAGE         && !InitLow(indicators))        return(false);
-   if(IS_CLOSE_SERIES_USAGE       && !InitClose(indicators))      return(false);
-   if(IS_SPREAD_SERIES_USAGE      && !InitSpread(indicators))     return(false);
-   if(IS_TIME_SERIES_USAGE        && !InitTime(indicators))       return(false);
-   if(IS_TICK_VOLUME_SERIES_USAGE && !InitTickVolume(indicators)) return(false);
-   if(IS_REAL_VOLUME_SERIES_USAGE && !InitRealVolume(indicators)) return(false);
+   if(IS_OPEN_SERIES_USAGE && !InitOpen(indicators))
+      return(false);
+   if(IS_HIGH_SERIES_USAGE && !InitHigh(indicators))
+      return(false);
+   if(IS_LOW_SERIES_USAGE && !InitLow(indicators))
+      return(false);
+   if(IS_CLOSE_SERIES_USAGE && !InitClose(indicators))
+      return(false);
+   if(IS_SPREAD_SERIES_USAGE && !InitSpread(indicators))
+      return(false);
+   if(IS_TIME_SERIES_USAGE && !InitTime(indicators))
+      return(false);
+   if(IS_TICK_VOLUME_SERIES_USAGE && !InitTickVolume(indicators))
+      return(false);
+   if(IS_REAL_VOLUME_SERIES_USAGE && !InitRealVolume(indicators))
+      return(false);
 //--- initialization of object (from the point of view of the base class) has been performed successfully
 //--- now it's impossible to change anything in the settings
    m_init_phase=INIT_PHASE_COMPLETE;
@@ -427,123 +405,96 @@ bool CExpertBase::InitIndicators(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Access to data of the Open timeseries.                           |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertBase::Open(int ind) const
   {
 //--- check pointer
-   if(m_open==NULL) return(EMPTY_VALUE);
+   if(m_open==NULL)
+      return(EMPTY_VALUE);
 //--- return the result
    return(m_open.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the High timeseries.                           |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertBase::High(int ind) const
   {
 //--- check pointer
-   if(m_high==NULL) return(EMPTY_VALUE);
+   if(m_high==NULL)
+      return(EMPTY_VALUE);
 //--- return the result
    return(m_high.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the Low timeseries.                            |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertBase::Low(int ind) const
   {
 //--- check pointer
-   if(m_low==NULL) return(EMPTY_VALUE);
+   if(m_low==NULL)
+      return(EMPTY_VALUE);
 //--- return the result
    return(m_low.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the Close timeseries.                          |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CExpertBase::Close(int ind) const
   {
 //--- check pointer
-   if(m_close==NULL) return(EMPTY_VALUE);
+   if(m_close==NULL)
+      return(EMPTY_VALUE);
 //--- return the result
    return(m_close.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the Spread timeseries.                         |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 int CExpertBase::Spread(int ind) const
   {
 //--- check pointer
-   if(m_spread==NULL) return(INT_MAX);
+   if(m_spread==NULL)
+      return(INT_MAX);
 //--- return the result
    return(m_spread.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the Time timeseries.                           |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 datetime CExpertBase::Time(int ind) const
   {
 //--- check pointer
-   if(m_time==NULL) return(0);
+   if(m_time==NULL)
+      return(0);
 //--- return the result
    return(m_time.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the TickVolume timeseries.                     |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 long CExpertBase::TickVolume(int ind) const
   {
 //--- check pointer
-   if(m_tick_volume==NULL) return(0);
+   if(m_tick_volume==NULL)
+      return(0);
 //--- return the result
    return(m_tick_volume.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Access to data of the RealVolume timeseries.                     |
-//| INPUT:  ind - index of an element of the timeseries.             |
-//| OUTPUT: value of the element in case of successful execution,    |     
-//|         otherwise - EMPTY_VALUE.                                 |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 long CExpertBase::RealVolume(int ind) const
   {
 //--- check pointer
-   if(m_real_volume==NULL) return(0);
+   if(m_real_volume==NULL)
+      return(0);
 //--- return the result
    return(m_real_volume.GetData(ind));
   }
 //+------------------------------------------------------------------+
 //| Initialization of the Open timeseries.                           |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitOpen(CIndicators* indicators)
+bool CExpertBase::InitOpen(CIndicators *indicators)
   {
 //--- create object
    if((m_open=new CiOpen)==NULL)
@@ -569,11 +520,8 @@ bool CExpertBase::InitOpen(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the High timeseries.                           |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitHigh(CIndicators* indicators)
+bool CExpertBase::InitHigh(CIndicators *indicators)
   {
 //--- create object
    if((m_high=new CiHigh)==NULL)
@@ -599,11 +547,8 @@ bool CExpertBase::InitHigh(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the Low timeseries.                            |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitLow(CIndicators* indicators)
+bool CExpertBase::InitLow(CIndicators *indicators)
   {
 //--- create object
    if((m_low=new CiLow)==NULL)
@@ -629,17 +574,13 @@ bool CExpertBase::InitLow(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the Close timeseries.                          |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitClose(CIndicators* indicators)
+bool CExpertBase::InitClose(CIndicators *indicators)
   {
 //--- create object
    if((m_close=new CiClose)==NULL)
      {
       printf(__FUNCTION__+": error creating object");
-      delete m_open;
       return(false);
      }
 //--- add object to collection
@@ -660,11 +601,8 @@ bool CExpertBase::InitClose(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the Spread timeseries.                         |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitSpread(CIndicators* indicators)
+bool CExpertBase::InitSpread(CIndicators *indicators)
   {
 //--- create object
    if((m_spread=new CiSpread)==NULL)
@@ -690,11 +628,8 @@ bool CExpertBase::InitSpread(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the Time timeseries.                           |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitTime(CIndicators* indicators)
+bool CExpertBase::InitTime(CIndicators *indicators)
   {
 //--- create object
    if((m_time=new CiTime)==NULL)
@@ -720,11 +655,8 @@ bool CExpertBase::InitTime(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the TickVolume timeseries.                     |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitTickVolume(CIndicators* indicators)
+bool CExpertBase::InitTickVolume(CIndicators *indicators)
   {
 //--- create object
    if((m_tick_volume=new CiTickVolume)==NULL)
@@ -750,11 +682,8 @@ bool CExpertBase::InitTickVolume(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Initialization of the RealVolume timeseries.                     |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CExpertBase::InitRealVolume(CIndicators* indicators)
+bool CExpertBase::InitRealVolume(CIndicators *indicators)
   {
 //--- create object
    if((m_real_volume=new CiRealVolume)==NULL)
@@ -777,144 +706,5 @@ bool CExpertBase::InitRealVolume(CIndicators* indicators)
      }
 //--- ok
    return(true);
-  }
-//+------------------------------------------------------------------+
-//| Function of formatting of debug information.                     |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Formatting debug information (array of doubles).                 |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         arr    - reference to array of initial information,      |
-//|         digits - number of digits after the decimal point.       |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatDblArr(string& str,double& arr[],int digits)
-  {
-   int total=ArraySize(arr);
-   if(total>16) total=16;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<total;i++)
-     {
-      str+=DoubleToString(arr[i],digits);
-      if(i!=total-1) str+=",";
-     }
-//---
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Formatting of debug information (array of int values).           |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         arr    - reference to array of initial information.      |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatIntArr(string& str,int& arr[])
-  {
-   int total=ArraySize(arr);
-   if(total>16) total=16;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<total;i++)
-     {
-      str+=IntegerToString(arr[i]);
-      if(i!=total-1) str+=",";
-     }
-//---
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Formatting debug information (array of long values).             |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         arr    - reference to array of initial information.      |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatLongArr(string& str,long& arr[])
-  {
-   int total=ArraySize(arr);
-   if(total>16) total=16;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<total;i++)
-     {
-      str+=IntegerToString(arr[i]);
-      if(i!=total-1) str+=",";
-     }
-//---
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Formatting debug information (bit map of 16 bits).               |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         map    - bit map.                                        |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatBit16(string& str,const short map)
-  {
-   ushort mask=1;
-   mask<<=15;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<16;i++)
-     {
-      str+=((map&mask)!=0)?"1":"0";
-      if(i%4==3) str+=" ";
-      mask>>=1;
-     }
-//---
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Formatting debug information (bit map of 32 bits).               |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         map    - bit map.                                        |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatBit32(string& str,const int map)
-  {
-   uint mask=1;
-   mask<<=31;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<32;i++)
-     {
-      str+=((map&mask)!=0)?"1":"0";
-      if(i%4==3) str+=" ";
-      mask>>=1;
-     }
-//---
-   return(str);
-  }
-//+------------------------------------------------------------------+
-//| Formatting debug information (bit map of 64 bits).               |
-//| INPUT:  str    - reference to a string of debug information,     |
-//|         map    - bit map.                                        |
-//| OUTPUT: string with debug information.                           |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-string FormatBit64(string& str,const long map)
-  {
-   ulong mask=1;
-   mask<<=63;
-//--- clear
-   str="";
-//---
-   for(int i=0;i<64;i++)
-     {
-      str+=((map&mask)!=0)?"1":"0";
-      if(i%4==3) str+=" ";
-      mask>>=1;
-     }
-//---
-   return(str);
   }
 //+------------------------------------------------------------------+

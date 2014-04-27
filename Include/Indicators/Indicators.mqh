@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   Indicators.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Trend.mqh"
 #include "Oscilators.mqh"
@@ -21,236 +20,234 @@ protected:
    MqlDateTime       m_prev_time;
 
 public:
-                     CIndicators();
+                     CIndicators(void);
+                    ~CIndicators(void);
    //--- method for creation
-   CIndicator*       Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int count,MqlParam& params[]);
-   bool              BufferResize(int size);
+   CIndicator       *Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const ENUM_INDICATOR type,const int count,const MqlParam &params[]);
+   bool              BufferResize(const int size);
    //--- method of refreshing of the data of all indicators in the collection
-   int               Refresh();
+   int               Refresh(void);
 protected:
    //--- method of formation of flags timeframes
-   int               TimeframesFlags(MqlDateTime& time);
+   int               TimeframesFlags(const MqlDateTime &time);
   };
 //+------------------------------------------------------------------+
-//| Constructor CIndicators.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CIndicators::CIndicators()
+CIndicators::CIndicators(void)
   {
-//--- initialize protected data
    m_prev_time.min=-1;
   }
 //+------------------------------------------------------------------+
-//| Indicator creation.                                              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         type      - indicator type,                              |
-//|         count     - number of parameters,                        |
-//|         params    - structure of parameters.                     |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-CIndicator *CIndicators::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICATOR type,int count,MqlParam& params[])
+CIndicators::~CIndicators(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Indicator creation                                               |
+//+------------------------------------------------------------------+
+CIndicator *CIndicators::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                                const ENUM_INDICATOR type,const int count,const MqlParam &params[])
   {
    CIndicator *result=NULL;
 //---
    switch(type)
      {
-      //--- Identifier of "Accelerator Oscillator"
       case IND_AC:
-         if(count!=0) break;
-         result=new CiAC;
+         //--- Identifier of "Accelerator Oscillator"
+         if(count==0)
+            result=new CiAC;
          break;
-      //--- Identifier of "Accumulation/Distribution"
       case IND_AD:
-         if(count!=1) break;
-         result=new CiAD;
+         //--- Identifier of "Accumulation/Distribution"
+         if(count==1)
+            result=new CiAD;
          break;
-      //--- Identifier of "Alligator"
       case IND_ALLIGATOR:
-         if(count!=8) break;
-         result=new CiAlligator;
+         //--- Identifier of "Alligator"
+         if(count==8)
+            result=new CiAlligator;
          break;
-      //--- Identifier of "Average Directional Index"
       case IND_ADX:
-         if(count!=1) break;
-         result=new CiADX;
+         //--- Identifier of "Average Directional Index"
+         if(count==1)
+            result=new CiADX;
          break;
-      //--- Identifier of "Average Directional Index by Welles Wilder"
       case IND_ADXW:
-         if(count!=1) break;
-         result=new CiADXWilder;
+         //--- Identifier of "Average Directional Index by Welles Wilder"
+         if(count==1)
+            result=new CiADXWilder;
          break;
-      //--- Identifier of "Average True Range"
       case IND_ATR:
-         if(count!=1) break;
-         result=new CiATR;
+         //--- Identifier of "Average True Range"
+         if(count==1)
+            result=new CiATR;
          break;
-      //--- Identifier of "Awesome Oscillator"
       case IND_AO:
-         if(count!=0) break;
-         result=new CiAO;
+         //--- Identifier of "Awesome Oscillator"
+         if(count==0)
+            result=new CiAO;
          break;
-      //--- Identifier of "Bears Power"
       case IND_BEARS:
-         if(count!=1) break;
-         result=new CiBearsPower;
+         //--- Identifier of "Bears Power"
+         if(count==1)
+            result=new CiBearsPower;
          break;
-      //--- Identifier of "Bollinger Bands"
       case IND_BANDS:
-         if(count!=4) break;
-         result=new CiBands;
+         //--- Identifier of "Bollinger Bands"
+         if(count==4)
+            result=new CiBands;
          break;
-      //--- Identifier of "Bulls Power"
       case IND_BULLS:
-         if(count!=1) break;
-         result=new CiBullsPower;
+         //--- Identifier of "Bulls Power"
+         if(count==1)
+            result=new CiBullsPower;
          break;
-      //--- Identifier of "Commodity Channel Index"
       case IND_CCI:
-         if(count!=2) break;
-         result=new CiCCI;
+         //--- Identifier of "Commodity Channel Index"
+         if(count==2)
+            result=new CiCCI;
          break;
-      //--- Identifier of "Chaikin Oscillator"
       case IND_CHAIKIN:
-         if(count!=4) break;
-         result=new CiChaikin;
+         //--- Identifier of "Chaikin Oscillator"
+         if(count==4)
+            result=new CiChaikin;
          break;
-      //--- Identifier of "DeMarker"
       case IND_DEMARKER:
-         if(count!=1) break;
-         result=new CiDeMarker;
+         //--- Identifier of "DeMarker"
+         if(count==1)
+            result=new CiDeMarker;
          break;
-      //--- Identifier of "Envelopes"
       case IND_ENVELOPES:
-         if(count!=5) break;
-         result=new CiEnvelopes;
+         //--- Identifier of "Envelopes"
+         if(count==5)
+            result=new CiEnvelopes;
          break;
-      //--- Identifier of "Force Index"
       case IND_FORCE:
-         if(count!=3) break;
-         result=new CiForce;
+         //--- Identifier of "Force Index"
+         if(count==3)
+            result=new CiForce;
          break;
-      //--- Identifier of "Fractals"
       case IND_FRACTALS:
-         if(count!=0) break;
-         result=new CiFractals;
+         //--- Identifier of "Fractals"
+         if(count==0)
+            result=new CiFractals;
          break;
-      //--- Identifier of "Gator oscillator"
       case IND_GATOR:
-         if(count!=8) break;
-         result=new CiGator;
+         //--- Identifier of "Gator oscillator"
+         if(count==8)
+            result=new CiGator;
          break;
-      //--- Identifier of "Ichimoku Kinko Hyo"
       case IND_ICHIMOKU:
-         if(count!=3) break;
-         result=new CiIchimoku;
+         //--- Identifier of "Ichimoku Kinko Hyo"
+         if(count==3)
+            result=new CiIchimoku;
          break;
-      //--- Identifier of "Moving Averages Convergence-Divergence"
       case IND_MACD:
-         if(count!=4) break;
-         result=new CiMACD;
+         //--- Identifier of "Moving Averages Convergence-Divergence"
+         if(count==4)
+            result=new CiMACD;
          break;
-      //--- Identifier of "Market Facilitation Index by Bill Williams"
       case IND_BWMFI:
-         if(count!=1) break;
-         result=new CiBWMFI;
+         //--- Identifier of "Market Facilitation Index by Bill Williams"
+         if(count==1)
+            result=new CiBWMFI;
          break;
-      //--- Identifier of "Momentum"
       case IND_MOMENTUM:
-         if(count!=2) break;
-         result=new CiMomentum;
+         //--- Identifier of "Momentum"
+         if(count==2)
+            result=new CiMomentum;
          break;
-      //--- Identifier of "Money Flow Index"
       case IND_MFI:
-         if(count!=2) break;
-         result=new CiMFI;
+         //--- Identifier of "Money Flow Index"
+         if(count==2)
+            result=new CiMFI;
          break;
-      //--- Identifier of "Moving Average"
       case IND_MA:
-         if(count!=4) break;
-         result=new CiMA;
+         //--- Identifier of "Moving Average"
+         if(count==4)
+            result=new CiMA;
          break;
-      //--- Identifier of "Moving Average of Oscillator (MACD histogram)"
       case IND_OSMA:
-         if(count!=4) break;
-         result=new CiOsMA;
+         //--- Identifier of "Moving Average of Oscillator (MACD histogram)"
+         if(count==4)
+            result=new CiOsMA;
          break;
-      //--- Identifier of "On Balance Volume"
       case IND_OBV:
-         if(count!=1) break;
-         result=new CiOBV;
+         //--- Identifier of "On Balance Volume"
+         if(count==1)
+            result=new CiOBV;
          break;
-      //--- Identifier of "Parabolic Stop And Reverse System"
       case IND_SAR:
-         if(count!=2) break;
-         result=new CiSAR;
+         //--- Identifier of "Parabolic Stop And Reverse System"
+         if(count==2)
+            result=new CiSAR;
          break;
-      //--- Identifier of "Relative Strength Index"
       case IND_RSI:
-         if(count!=2) break;
-         result=new CiRSI;
+         //--- Identifier of "Relative Strength Index"
+         if(count==2)
+            result=new CiRSI;
          break;
-      //--- Identifier of "Relative Vigor Index"
       case IND_RVI:
-         if(count!=1) break;
-         result=new CiRVI;
+         //--- Identifier of "Relative Vigor Index"
+         if(count==1)
+            result=new CiRVI;
          break;
-      //--- Identifier of "Standard Deviation"
       case IND_STDDEV:
-         if(count!=4) break;
-         result=new CiStdDev;
+         //--- Identifier of "Standard Deviation"
+         if(count==4)
+            result=new CiStdDev;
          break;
-      //--- Identifier of "Stochastic Oscillator"
       case IND_STOCHASTIC:
-         if(count!=5) break;
-         result=new CiStochastic;
+         //--- Identifier of "Stochastic Oscillator"
+         if(count==5)
+            result=new CiStochastic;
          break;
-      //--- Identifier of "Williams' Percent Range"
       case IND_WPR:
-         if(count!=1) break;
-         result=new CiWPR;
+         //--- Identifier of "Williams' Percent Range"
+         if(count==1)
+            result=new CiWPR;
          break;
-      //--- Identifier of "Double Exponential Moving Average"
       case IND_DEMA:
-         if(count!=3) break;
-         result=new CiDEMA;
+         //--- Identifier of "Double Exponential Moving Average"
+         if(count==3)
+            result=new CiDEMA;
          break;
-      //--- Identifier of "Triple Exponential Moving Average"
       case IND_TEMA:
-         if(count!=3) break;
-         result=new CiTEMA;
+         //--- Identifier of "Triple Exponential Moving Average"
+         if(count==3)
+            result=new CiTEMA;
          break;
-      //--- Identifier of "Triple Exponential Moving Averages Oscillator"
       case IND_TRIX:
-         if(count!=2) break;
-         result=new CiTriX;
+         //--- Identifier of "Triple Exponential Moving Averages Oscillator"
+         if(count==2)
+            result=new CiTriX;
          break;
-      //--- Identifier of "Fractal Adaptive Moving Average"
       case IND_FRAMA:
-         if(count!=3) break;
-         result=new CiFrAMA;
+         //--- Identifier of "Fractal Adaptive Moving Average"
+         if(count==3)
+            result=new CiFrAMA;
          break;
-      //--- Identifier of "Adaptive Moving Average"
       case IND_AMA:
-         if(count!=5) break;
-         result=new CiAMA;
+         //--- Identifier of "Adaptive Moving Average"
+         if(count==5)
+            result=new CiAMA;
          break;
-      //--- Identifier of "Variable Index DYnamic Average"
       case IND_VIDYA:
-         if(count!=4) break;
-         result=new CiVIDyA;
+         //--- Identifier of "Variable Index DYnamic Average"
+         if(count==4)
+            result=new CiVIDyA;
          break;
-      //--- Identifier of "Volumes"
       case IND_VOLUMES:
-         if(count!=1) break;
-         result=new CiVolumes;
+         //--- Identifier of "Volumes"
+         if(count==1)
+            result=new CiVolumes;
          break;
-      //--- Identifier of "Custom"
+         //--- Identifier of "Custom"
       case IND_CUSTOM:
-         if(count<=0) break;
+         if(count>0)
          result=new CiCustom;
          break;
      }
@@ -268,43 +265,39 @@ CIndicator *CIndicators::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_INDICA
    return(result);
   }
 //+------------------------------------------------------------------+
-//| Set size of buffers of all indicators in the collection.         |
-//| INPUT:  size - size of buffers.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size of buffers of all indicators in the collection          |
 //+------------------------------------------------------------------+
-bool CIndicators::BufferResize(int size)
+bool CIndicators::BufferResize(const int size)
   {
    int total=Total();
    for(int i=0;i<total;i++)
      {
       CSeries *series=At(i);
       //--- check pointer
-      if(series==NULL)               return(false);
-      if(!series.BufferResize(size)) return(false);
+      if(series==NULL)
+         return(false);
+      if(!series.BufferResize(size))
+         return(false);
      }
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data of all indicators in the collection.      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: flags of updating timeframes.                            |
-//| REMARK: flags are similar to "flags of visibility of objects".   |
+//| Refreshing of the data of all indicators in the collection       |
 //+------------------------------------------------------------------+
-int CIndicators::Refresh()
+int CIndicators::Refresh(void)
   {
    MqlDateTime time;
    TimeCurrent(time);
 //---
-//   int flags=TimeframesFlags();
    int flags=TimeframesFlags(time);
    int total=Total();
 //---
    for(int i=0;i<total;i++)
      {
       CSeries *indicator=At(i);
-      if(indicator!=NULL) indicator.Refresh(flags);
+      if(indicator!=NULL)
+         indicator.Refresh(flags);
      }
 //---
    m_prev_time=time;
@@ -312,84 +305,79 @@ int CIndicators::Refresh()
    return(flags);
   }
 //+------------------------------------------------------------------+
-//| Formation of timeframe flags.                                    |
-//| INPUT:  time - reference.                                        |
-//| OUTPUT: flags.                                                   |
-//| REMARK: formation of flags is similar to "flags of visibility    |
-//|         of objects".                                             |
-//|         OBJ_PERIOD_M1  =0x00000001                               |
-//|         OBJ_PERIOD_M2  =0x00000002                               |
-//|         OBJ_PERIOD_M3  =0x00000004                               |
-//|         OBJ_PERIOD_M4  =0x00000008                               |
-//|         OBJ_PERIOD_M5  =0x00000010                               |
-//|         OBJ_PERIOD_M6  =0x00000020                               |
-//|         OBJ_PERIOD_M10 =0x00000040                               |
-//|         OBJ_PERIOD_M12 =0x00000080                               |
-//|         OBJ_PERIOD_M15 =0x00000100                               |
-//|         OBJ_PERIOD_M20 =0x00000200                               |
-//|         OBJ_PERIOD_M30 =0x00000400                               |
-//|         OBJ_PERIOD_H1  =0x00000800                               |
-//|         OBJ_PERIOD_H2  =0x00001000                               |
-//|         OBJ_PERIOD_H3  =0x00002000                               |
-//|         OBJ_PERIOD_H4  =0x00004000                               |
-//|         OBJ_PERIOD_H6  =0x00008000                               |
-//|         OBJ_PERIOD_H8  =0x00010000                               |
-//|         OBJ_PERIOD_H12 =0x00020000                               |
-//|         OBJ_PERIOD_D1  =0x00040000                               |
-//|         OBJ_PERIOD_W1  =0x00080000                               |
-//|         OBJ_PERIOD_MN1 =0x00100000                               |
+//| Formation of timeframe flags                                     |
 //+------------------------------------------------------------------+
-int CIndicators::TimeframesFlags(MqlDateTime& time)
+int CIndicators::TimeframesFlags(const MqlDateTime &time)
   {
 //--- set flags for all timeframes
    int   result=OBJ_ALL_PERIODS;
 //--- if first check, then setting flags all timeframes
-   if(m_prev_time.min==-1)       return(result);
+   if(m_prev_time.min==-1)
+      return(result);
 //--- check change time
-   if(time.min==m_prev_time.min &&
-      time.hour==m_prev_time.hour &&
+   if(time.min==m_prev_time.min && 
+      time.hour==m_prev_time.hour && 
       time.day==m_prev_time.day &&
-      time.mon==m_prev_time.mon) return(OBJ_NO_PERIODS);
+      time.mon==m_prev_time.mon)
+      return(OBJ_NO_PERIODS);
 //--- new month?
-   if(time.mon!=m_prev_time.mon) return(result);
+   if(time.mon!=m_prev_time.mon)
+      return(result);
 //--- reset the "new month" flag
    result^=OBJ_PERIOD_MN1;
 //--- new day?
-   if(time.day!=m_prev_time.day) return(result);
+   if(time.day!=m_prev_time.day)
+      return(result);
 //--- reset the "new day" and "new week" flags
    result^=OBJ_PERIOD_D1+OBJ_PERIOD_W1;
 //--- temporary variables to speed up working with structures
-   int last,curr;
+   int curr,delta;
 //--- new hour?
    curr=time.hour;
-   last=m_prev_time.hour;
-   if(curr!=last)
+   delta=curr-m_prev_time.hour;
+   if(delta!=0)
      {
-      if(curr%2!=0  && curr-last<2)      result^=OBJ_PERIOD_H2;
-      if(curr%3!=0  && curr-last<3)      result^=OBJ_PERIOD_H3;
-      if(curr%4!=0  && curr-last<4)      result^=OBJ_PERIOD_H4;
-      if(curr%6!=0  && curr-last<6)      result^=OBJ_PERIOD_H6;
-      if(curr%8!=0  && curr-last<8)      result^=OBJ_PERIOD_H8;
-      if(curr%12!=0 && curr-last<12)     result^=OBJ_PERIOD_H12;
+      if(curr%2>=delta)
+         result^=OBJ_PERIOD_H2;
+      if(curr%3>=delta)
+         result^=OBJ_PERIOD_H3;
+      if(curr%4>=delta)
+         result^=OBJ_PERIOD_H4;
+      if(curr%6>=delta)
+         result^=OBJ_PERIOD_H6;
+      if(curr%8>=delta)
+         result^=OBJ_PERIOD_H8;
+      if(curr%12>=delta)
+         result^=OBJ_PERIOD_H12;
       return(result);
      }
 //--- reset all flags for hour timeframes
    result^=OBJ_PERIOD_H1+OBJ_PERIOD_H2+OBJ_PERIOD_H3+OBJ_PERIOD_H4+OBJ_PERIOD_H6+OBJ_PERIOD_H8+OBJ_PERIOD_H12;
 //--- new minute?
    curr=time.min;
-   last=m_prev_time.min;
-   if(curr!=last)
+   delta=curr-m_prev_time.min;
+   if(delta!=0)
      {
-      if(curr%2!=0  && curr-last<2)       result^=OBJ_PERIOD_M2;
-      if(curr%3!=0  && curr-last<3)       result^=OBJ_PERIOD_M3;
-      if(curr%4!=0  && curr-last<4)       result^=OBJ_PERIOD_M4;
-      if(curr%5!=0  && curr-last<5)       result^=OBJ_PERIOD_M5;
-      if(curr%6!=0  && curr-last<6)       result^=OBJ_PERIOD_M6;
-      if(curr%10!=0 && curr-last<10)      result^=OBJ_PERIOD_M10;
-      if(curr%12!=0 && curr-last<12)      result^=OBJ_PERIOD_M12;
-      if(curr%15!=0 && curr-last<15)      result^=OBJ_PERIOD_M15;
-      if(curr%20!=0 && curr-last<20)      result^=OBJ_PERIOD_M20;
-      if(curr%30!=0 && curr-last<30)      result^=OBJ_PERIOD_M30;
+      if(curr%2>=delta)
+         result^=OBJ_PERIOD_M2;
+      if(curr%3>=delta)
+         result^=OBJ_PERIOD_M3;
+      if(curr%4>=delta)
+         result^=OBJ_PERIOD_M4;
+      if(curr%5>=delta)
+         result^=OBJ_PERIOD_M5;
+      if(curr%6>=delta)
+         result^=OBJ_PERIOD_M6;
+      if(curr%10>=delta)
+         result^=OBJ_PERIOD_M10;
+      if(curr%12>=delta)
+         result^=OBJ_PERIOD_M12;
+      if(curr%15>=delta)
+         result^=OBJ_PERIOD_M15;
+      if(curr%20>=delta)
+         result^=OBJ_PERIOD_M20;
+      if(curr%30>=delta)
+         result^=OBJ_PERIOD_M30;
      }
 //---
    return(result);

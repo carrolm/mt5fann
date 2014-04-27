@@ -21,7 +21,7 @@
 #property indicator_label1  "Tenkan-sen"
 #property indicator_label2  "Kijun-sen"
 #property indicator_label3  "Senkou Span A;Senkou Span B"
-#property indicator_label4  "Chinkou Span"
+#property indicator_label4  "Chikou Span"
 //--- input parameters
 input int InpTenkan=9;     // Tenkan-sen
 input int InpKijun=26;     // Kijun-sen
@@ -31,7 +31,7 @@ double    ExtTenkanBuffer[];
 double    ExtKijunBuffer[];
 double    ExtSpanABuffer[];
 double    ExtSpanBBuffer[];
-double    ExtChinkouBuffer[];
+double    ExtChikouBuffer[];
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
@@ -42,7 +42,7 @@ void OnInit()
    SetIndexBuffer(1,ExtKijunBuffer,INDICATOR_DATA);
    SetIndexBuffer(2,ExtSpanABuffer,INDICATOR_DATA);
    SetIndexBuffer(3,ExtSpanBBuffer,INDICATOR_DATA);
-   SetIndexBuffer(4,ExtChinkouBuffer,INDICATOR_DATA);
+   SetIndexBuffer(4,ExtChikouBuffer,INDICATOR_DATA);
 //---
    IndicatorSetInteger(INDICATOR_DIGITS,_Digits+1);
 //--- sets first bar from what index will be drawn
@@ -91,15 +91,16 @@ double Lowest(const double&array[],int range,int fromIndex)
 //+------------------------------------------------------------------+
 //| Ichimoku Kinko Hyo                                               |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int limit;
 //---
@@ -108,21 +109,21 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //---
    for(int i=limit;i<rates_total && !IsStopped();i++)
      {
-      ExtChinkouBuffer[i]=Close[i];
+      ExtChikouBuffer[i]=close[i];
       //--- tenkan sen
-      double high=Highest(High,InpTenkan,i);
-      double low=Lowest(Low,InpTenkan,i);
-      ExtTenkanBuffer[i]=(high+low)/2.0;
+      double _high=Highest(high,InpTenkan,i);
+      double _low=Lowest(low,InpTenkan,i);
+      ExtTenkanBuffer[i]=(_high+_low)/2.0;
       //--- kijun sen
-      high=Highest(High,InpKijun,i);
-      low=Lowest(Low,InpKijun,i);
-      ExtKijunBuffer[i]=(high+low)/2.0;
+      _high=Highest(high,InpKijun,i);
+      _low=Lowest(low,InpKijun,i);
+      ExtKijunBuffer[i]=(_high+_low)/2.0;
       //--- senkou span a
       ExtSpanABuffer[i]=(ExtTenkanBuffer[i]+ExtKijunBuffer[i])/2.0;
       //--- senkou span b
-      high=Highest(High,InpSenkou,i);
-      low=Lowest(Low,InpSenkou,i);
-      ExtSpanBBuffer[i]=(high+low)/2.0;
+      _high=Highest(high,InpSenkou,i);
+      _low=Lowest(low,InpSenkou,i);
+      ExtSpanBBuffer[i]=(_high+_low)/2.0;
      }
 //--- done
    return(rates_total);
