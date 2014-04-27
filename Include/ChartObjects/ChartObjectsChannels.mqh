@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                         ChartObjectsChannels.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All channels.                                                    |
 //+------------------------------------------------------------------+
@@ -15,31 +14,42 @@
 class CChartObjectChannel : public CChartObjectTrend
   {
 public:
+                     CChartObjectChannel(void);
+                    ~CChartObjectChannel(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_CHANNEL); }
+   virtual int       Type(void) const { return(OBJ_CHANNEL); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Equidistant channel".                             |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate,                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectChannel::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3)
+CChartObjectChannel::CChartObjectChannel(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_CHANNEL,window,time1,price1,time2,price2,time3,price3);
-   if(result) result&=Attach(chart_id,name,window,3);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectChannel::~CChartObjectChannel(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Equidistant channel"                              |
+//+------------------------------------------------------------------+
+bool CChartObjectChannel::Create(long chart_id,const string name,const int window,
+                                 const datetime time1,const double price1,
+                                 const datetime time2,const double price2,
+                                 const datetime time3,const double price3)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_CHANNEL,window,time1,price1,time2,price2,time3,price3))
+      return(false);
+   if(!Attach(chart_id,name,window,3))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectStdDevChannel.                                 |
@@ -50,110 +60,102 @@ bool CChartObjectChannel::Create(long chart_id,string name,int window,datetime t
 class CChartObjectStdDevChannel : public CChartObjectTrend
   {
 public:
+                     CChartObjectStdDevChannel(void);
+                    ~CChartObjectStdDevChannel(void);
    //--- methods of access to properties of the object
-   double            Deviations() const;
-   bool              Deviations(double deviation);
+   double            Deviations(void) const;
+   bool              Deviations(const double deviation) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,datetime time2,double deviation);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const datetime time2,const double deviation);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_STDDEVCHANNEL); }
+   virtual int       Type(void) const { return(OBJ_STDDEVCHANNEL); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Standard deviation channel".                      |
-//| INPUT:  chart_id  - chart identifier,                            |
-//|         name      - object name,                                 |
-//|         window    - subwindow number,                            |
-//|         time1     - first time coordinate,                       |
-//|         time2     - second time coordinate,                      |
-//|         deviation - deviation.                                   |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectStdDevChannel::Create(long chart_id,string name,int window,datetime time1,datetime time2,double deviation)
+CChartObjectStdDevChannel::CChartObjectStdDevChannel(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_STDDEVCHANNEL,window,time1,0.0,time2,0.0);
-   if(result)
-     {
-      result&=Attach(chart_id,name,window,2);
-      result&=Deviations(deviation);
-     }
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the "Deviations" property.                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "Deviations" property.                      |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectStdDevChannel::Deviations() const
+CChartObjectStdDevChannel::~CChartObjectStdDevChannel(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Standard deviation channel"                       |
+//+------------------------------------------------------------------+
+bool CChartObjectStdDevChannel::Create(long chart_id,const string name,const int window,
+                                       const datetime time1,const datetime time2,const double deviation)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_STDDEVCHANNEL,window,time1,0.0,time2,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+   if(!Deviations(deviation))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the "Deviations" property                           |
+//+------------------------------------------------------------------+
+double CChartObjectStdDevChannel::Deviations(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_DEVIATION));
   }
 //+------------------------------------------------------------------+
-//| Set value for the "Deviations" property.                         |
-//| INPUT:  deviations - new value for the "Deviations" property.    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value for the "Deviations" property                          |
 //+------------------------------------------------------------------+
-bool CChartObjectStdDevChannel::Deviations(double deviation)
+bool CChartObjectStdDevChannel::Deviations(const double deviation) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_DEVIATION,deviation));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing file.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectStdDevChannel::Save(int file_handle)
+bool CChartObjectStdDevChannel::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectTrend::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "Deviations" property
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_DEVIATION))!=sizeof(double)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectTrend::Save(file_handle))
+      return(false);
+//--- write value of the "Deviations" property
+   if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_DEVIATION))!=sizeof(double))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of previously opened                |
-//|         for reading file.                                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectStdDevChannel::Load(int file_handle)
+bool CChartObjectStdDevChannel::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectTrend::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "Deviations" property
-      if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_DEVIATION,FileReadDouble(file_handle))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectTrend::Load(file_handle))
+      return(false);
+//--- read value of the "Deviations" property
+   if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_DEVIATION,FileReadDouble(file_handle)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectRegression.                                    |
@@ -163,27 +165,38 @@ bool CChartObjectStdDevChannel::Load(int file_handle)
 class CChartObjectRegression : public CChartObjectTrend
   {
 public:
+                     CChartObjectRegression(void);
+                    ~CChartObjectRegression(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,datetime time2);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const datetime time2);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_REGRESSION); }
+   virtual int       Type(void) const { return(OBJ_REGRESSION); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Regression channel".                              |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         time2    - second time coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectRegression::Create(long chart_id,string name,int window,datetime time1,datetime time2)
+CChartObjectRegression::CChartObjectRegression(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_REGRESSION,window,time1,0.0,time2,0.0);
-   if(result) result&=Attach(chart_id,name,window,2);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectRegression::~CChartObjectRegression(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Regression channel"                               |
+//+------------------------------------------------------------------+
+bool CChartObjectRegression::Create(long chart_id,const string name,const int window,
+                                    const datetime time1,const datetime time2)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_REGRESSION,window,time1,0.0,time2,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectPitchfork.                                     |
@@ -193,30 +206,41 @@ bool CChartObjectRegression::Create(long chart_id,string name,int window,datetim
 class CChartObjectPitchfork : public CChartObjectTrend
   {
 public:
+                     CChartObjectPitchfork(void);
+                    ~CChartObjectPitchfork(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_CHANNEL); }
+   virtual int       Type(void) const { return(OBJ_CHANNEL); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Andrews pitchfork".                               |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate,                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectPitchfork::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3)
+CChartObjectPitchfork::CChartObjectPitchfork(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_PITCHFORK,window,time1,price1,time2,price2,time3,price3);
-   if(result) result&=Attach(chart_id,name,window,3);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectPitchfork::~CChartObjectPitchfork(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Andrews pitchfork"                                |
+//+------------------------------------------------------------------+
+bool CChartObjectPitchfork::Create(long chart_id,const string name,const int window,
+                                   const datetime time1,const double price1,
+                                   const datetime time2,const double price2,
+                                   const datetime time3,const double price3)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_PITCHFORK,window,time1,price1,time2,price2,time3,price3))
+      return(false);
+   if(!Attach(chart_id,name,window,3))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

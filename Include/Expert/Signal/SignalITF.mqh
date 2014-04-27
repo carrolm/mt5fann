@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                    SignalITF.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -37,7 +36,8 @@ protected:
    int               m_bad_days_of_week;
 
 public:
-                     CSignalITF();
+                     CSignalITF(void);
+                    ~CSignalITF(void);
    //--- methods initialize protected data
    void              GoodMinuteOfHour(int value)  { m_good_minute_of_hour=value; }
    void              BadMinutesOfHour(long value) { m_bad_minutes_of_hour=value; }
@@ -46,46 +46,44 @@ public:
    void              GoodDayOfWeek(int value)     { m_good_day_of_week=value;    }
    void              BadDaysOfWeek(int value)     { m_bad_days_of_week=value;    }
    //--- methods of checking conditions of entering the market
-   virtual double    Direction();
+   virtual double    Direction(void);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalITF.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalITF::CSignalITF()
+CSignalITF::CSignalITF(void) : m_good_minute_of_hour(-1),
+                               m_bad_minutes_of_hour(0),
+                               m_good_hour_of_day(-1),
+                               m_bad_hours_of_day(0),
+                               m_good_day_of_week(-1),
+                               m_bad_days_of_week(0)
   {
-//--- set default inputs
-   m_good_minute_of_hour=-1;
-   m_bad_minutes_of_hour=0;
-   m_good_hour_of_day   =-1;
-   m_bad_hours_of_day   =0;
-   m_good_day_of_week   =-1;
-   m_bad_days_of_week   =0;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalITF::~CSignalITF(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Check conditions for time filter.                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: 0.0-if condition performed, EMPTY_VALUE otherwise.       |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CSignalITF::Direction()
+double CSignalITF::Direction(void)
   {
    MqlDateTime s_time;
 //---
    TimeCurrent(s_time);
 //--- check days conditions
-   if(!((m_good_day_of_week==-1 || m_good_day_of_week==s_time.day_of_week) &&
-       !(m_bad_days_of_week&(1<<s_time.day_of_week))))
+   if(!((m_good_day_of_week==-1 || m_good_day_of_week==s_time.day_of_week) && 
+      !(m_bad_days_of_week&(1<<s_time.day_of_week))))
       return(EMPTY_VALUE);
 //--- check hours conditions
-   if(!((m_good_hour_of_day==-1 || m_good_hour_of_day==s_time.hour) &&
-       !(m_bad_hours_of_day&(1<<s_time.hour))))
+   if(!((m_good_hour_of_day==-1 || m_good_hour_of_day==s_time.hour) && 
+      !(m_bad_hours_of_day&(1<<s_time.hour))))
       return(EMPTY_VALUE);
 //--- check minutes conditions
-   if(!((m_good_minute_of_hour==-1 || m_good_minute_of_hour==s_time.min) &&
-       !(m_bad_minutes_of_hour&(1<<s_time.min))))
+   if(!((m_good_minute_of_hour==-1 || m_good_minute_of_hour==s_time.min) && 
+      !(m_bad_minutes_of_hour&(1<<s_time.min))))
       return(EMPTY_VALUE);
 //--- condition OK
    return(0.0);

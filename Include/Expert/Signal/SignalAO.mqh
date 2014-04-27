@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                     SignalAO.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -38,21 +37,22 @@ protected:
    uint              m_extr_map;       // resulting bit-map of ratio of extremums of the oscillator and the price
 
 public:
-                     CSignalAO();
+                     CSignalAO(void);
+                    ~CSignalAO(void);
    //--- methods of adjusting "weights" of market models
    void              Pattern_0(int value)        { m_pattern_0=value;         }
    void              Pattern_1(int value)        { m_pattern_1=value;         }
    void              Pattern_2(int value)        { m_pattern_2=value;         }
    void              Pattern_3(int value)        { m_pattern_3=value;         }
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
-   virtual int       ShortCondition();
+   virtual int       LongCondition(void);
+   virtual int       ShortCondition(void);
 
 protected:
    //--- method of initialization of the indicator
-   bool              InitAO(CIndicators* indicators);
+   bool              InitAO(CIndicators *indicators);
    //--- methods of getting data
    double            AO(int ind)                 { return(m_ao.Main(ind));    }
    double            DiffAO(int ind)             { return(AO(ind)-AO(ind+1)); }
@@ -60,48 +60,47 @@ protected:
    bool              ExtStateAO(int ind);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalAO.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalAO::CSignalAO()
+CSignalAO::CSignalAO(void) : m_pattern_0(30),
+                             m_pattern_1(20),
+                             m_pattern_2(70),
+                             m_pattern_3(90)
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_HIGH+USE_SERIES_LOW;
-//--- setting default "weights" of the market models
-   m_pattern_0=30;           // model 0 "first analyzed bar has required color"
-   m_pattern_1=20;           // model 1 "the 'saucer' signal"
-   m_pattern_2=70;           // model 2 "the 'crossing of the zero line' signal"
-   m_pattern_3=90;           // model 2 "the 'divergence' signal"
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalAO::~CSignalAO(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalAO::InitIndicators(CIndicators* indicators)
+bool CSignalAO::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize AO indicator
-   if(!InitAO(indicators))                        return(false);
+   if(!InitAO(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialize AO indicators.                                        |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalAO::InitAO(CIndicators* indicators)
+bool CSignalAO::InitAO(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add object to collection
    if(!indicators.Add(GetPointer(m_ao)))
      {
@@ -119,12 +118,6 @@ bool CSignalAO::InitAO(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| Check of the indicator state.                                    |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: absolute value - number of time intervals                |
-//|                  passed from the moment of turn of the indicator,|
-//|         sign: <0 - the oscillator has turned downwards,          |
-//|               >0 - the oscillator has turned upwards.            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 int CSignalAO::StateAO(int ind)
   {
@@ -133,35 +126,35 @@ int CSignalAO::StateAO(int ind)
 //---
    for(int i=ind;;i++)
      {
-      if(AO(i+1)==EMPTY_VALUE) break;
+      if(AO(i+1)==EMPTY_VALUE)
+         break;
       var=DiffAO(i);
       if(res>0)
         {
-         if(var<0) break;
+         if(var<0)
+            break;
          res++;
          continue;
         }
       if(res<0)
         {
-         if(var>0) break;
+         if(var>0)
+            break;
          res--;
          continue;
         }
-      if(var>0) res++;
-      if(var<0) res--;
+      if(var>0)
+         res++;
+      if(var<0)
+         res--;
      }
 //---
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Extended check of the indicator state.                           |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: true if the model corresponds to a pattern,              |
-//|         otherwise - false.                                       |
-//| REMARK: Extended check of the indicator state                    |
-//|         consists in forming a bit-map                            |
-//|         according to certain rules, which                        |
-//|         shows ratios of extremums of the indicator and the price.|
+//| Extended check of the oscillator state consists                  |
+//| in forming a bit-map according to certain rules,                 |
+//| which shows ratios of extremums of the oscillator and price.     |
 //+------------------------------------------------------------------+
 bool CSignalAO::ExtStateAO(int ind)
   {
@@ -204,8 +197,10 @@ bool CSignalAO::ExtStateAO(int ind)
             m_extr_pr[i]=m_low.MinValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]<m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]<m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]<m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]<m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -223,8 +218,10 @@ bool CSignalAO::ExtStateAO(int ind)
             m_extr_pr[i]=m_high.MaxValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]>m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]>m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]>m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]>m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -237,16 +234,14 @@ bool CSignalAO::ExtStateAO(int ind)
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalAO::LongCondition()
+int CSignalAO::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
 //--- if the first analyzed bar is "red", don't "vote" for buying
-   if(DiffAO(idx)<0.0)   return(result);
+   if(DiffAO(idx)<0.0)
+      return(result);
 //--- first analyzed bar is "green" (the indicator has no objections to buying)
    if(IS_PATTERN_USAGE(0))
       result=m_pattern_0;
@@ -291,16 +286,14 @@ int CSignalAO::LongCondition()
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will fall.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalAO::ShortCondition()
+int CSignalAO::ShortCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
 //--- if the first analyzed bar is "green", don't "vote" for selling
-   if(DiffAO(idx)>0.0)   return(result);
+   if(DiffAO(idx)>0.0)
+      return(result);
 //--- first analyzed bar is "red" (the indicator has no objections to selling)
    if(IS_PATTERN_USAGE(0))
       result=m_pattern_0;

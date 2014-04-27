@@ -73,14 +73,14 @@ void OnInit()
 //+------------------------------------------------------------------+
 int OnCalculate(const int rates_total,
                 const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- variables of indicator
    int    i,pos,posCHV;
@@ -93,7 +93,7 @@ int OnCalculate(const int rates_total,
       pos=0;
    else pos=prev_calculated-1;
 //--- fill H-L(i) buffer 
-   for(i=pos;i<rates_total && !IsStopped();i++) ExtHLBuffer[i]=High[i]-Low[i];
+   for(i=pos;i<rates_total && !IsStopped();i++) ExtHLBuffer[i]=high[i]-low[i];
 //--- calculate smoothed H-L(i) buffer
    if(pos<ExtSmoothPeriod-1)
      {

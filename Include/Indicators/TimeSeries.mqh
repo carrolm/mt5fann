@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   TimeSeries.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Series.mqh"
 #include <Arrays\ArrayInt.mqh>
@@ -15,64 +14,69 @@
 class CPriceSeries : public CSeries
   {
 public:
+                     CPriceSeries(void);
+                    ~CPriceSeries(void);
    //--- method of creation
-   virtual bool      BufferResize(int size);
+   virtual bool      BufferResize(const int size);
    //--- methods for searching extremum
-   virtual int       MinIndex(int start,int count)            const;
-   virtual double    MinValue(int start,int count,int& index) const;
-   virtual int       MaxIndex(int start,int count)            const;
-   virtual double    MaxValue(int start,int count,int& index) const;
+   virtual int       MinIndex(const int start,const int count) const;
+   virtual double    MinValue(const int start,const int count,int &index) const;
+   virtual int       MaxIndex(const int start,const int count) const;
+   virtual double    MaxValue(const int start,const int count,int &index) const;
    //--- methods of access to data
-   double            GetData(int index)                       const;
+   double            GetData(const int index) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
-//| Set size of buffer.                                              |
-//| INPUT:  size - size buffer.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CPriceSeries::BufferResize(int size)
+CPriceSeries::CPriceSeries(void)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CPriceSeries::~CPriceSeries(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Set size of buffer                                               |
+//+------------------------------------------------------------------+
+bool CPriceSeries::BufferResize(const int size)
+  {
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    CDoubleBuffer *buff=At(0);
 //--- check pointer
-   if(buff==NULL) return(false);
+   if(buff==NULL)
+      return(false);
 //--
    buff.Size(size);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Find minimum of specified buffer.                                |
-//| INPUT:  start - start element,                                   |
-//|         count - number of elements of search range.              |
-//| OUTPUT: position of element, or -1.                              |
-//| REMARK: no.                                                      |
+//| Find minimum of specified buffer                                 |
 //+------------------------------------------------------------------+
-int CPriceSeries::MinIndex(int start,int count) const
+int CPriceSeries::MinIndex(const int start,const int count) const
   {
    CDoubleBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return(-1);
+//--- check
+   if(buff==NULL)
+      return(-1);
 //---
    return(buff.Minimum(start,count));
   }
 //+------------------------------------------------------------------+
-//| Find minimum of specified buffer.                                |
-//| INPUT:  start - first element,                                   |
-//|         count - number of elements for search range,             |
-//|         index - reference to variable for index value.           |
-//| OUTPUT: value of element, or EMPTY_VALUE.                        |
-//| REMARK: no.                                                      |
+//| Find minimum of specified buffer                                 |
 //+------------------------------------------------------------------+
-double CPriceSeries::MinValue(int start,int count,int& index) const
+double CPriceSeries::MinValue(const int start,const int count,int &index) const
   {
    int    idx=MinIndex(start,count);
    double res=EMPTY_VALUE;
-//--- checking
+//--- check
    if(idx!=-1)
      {
       CDoubleBuffer *buff=At(0);
@@ -83,33 +87,25 @@ double CPriceSeries::MinValue(int start,int count,int& index) const
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Find maximum of specified buffer.                                |
-//| INPUT:  start - start element,                                   |
-//|         count - number of elements for search range.             |
-//| OUTPUT: position of element, or -1.                              |
-//| REMARK: no.                                                      |
+//| Find maximum of specified buffer                                 |
 //+------------------------------------------------------------------+
-int CPriceSeries::MaxIndex(int start,int count) const
+int CPriceSeries::MaxIndex(const int start,const int count) const
   {
    CDoubleBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return(-1);
+//--- check
+   if(buff==NULL)
+      return(-1);
 //---
    return(buff.Maximum(start,count));
   }
 //+------------------------------------------------------------------+
-//| Find maximum of specified buffer.                                |
-//| INPUT:  start - start element,                                   |
-//|         count - number of elements for search range,             |
-//|         index - reference to variable for index value.           |
-//| OUTPUT: value element, or EMPTY_VALUE.                           |
-//| REMARK: no.                                                      |
+//| Find maximum of specified buffer                                 |
 //+------------------------------------------------------------------+
-double CPriceSeries::MaxValue(int start,int count,int& index) const
+double CPriceSeries::MaxValue(const int start,const int count,int &index) const
   {
    int    idx=MaxIndex(start,count);
    double res=EMPTY_VALUE;
-//--- checking
+//--- check
    if(idx!=-1)
      {
       CDoubleBuffer *buff=At(0);
@@ -120,40 +116,37 @@ double CPriceSeries::MaxValue(int start,int count,int& index) const
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Method to access data.                                           |
-//| INPUT:  index - position element in the buffer.                  |
-//| OUTPUT: value if successful, EMPTY_VALUE if not.                 |
-//| REMARK: no.                                                      |
+//| Method to access data                                            |
 //+------------------------------------------------------------------+
-double CPriceSeries::GetData(int index) const
+double CPriceSeries::GetData(const int index) const
   {
    CDoubleBuffer *buff=At(0);
-//--- checking
+//--- check
    if(buff==NULL)
      {
-      Print("CPriceSeries::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(EMPTY_VALUE);
      }
 //---
    return(buff.At(index));
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data.                                          |
-//| INPUT:  flags - flags of updating timeframes.                    |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing of the data                                           |
 //+------------------------------------------------------------------+
-void CPriceSeries::Refresh(int flags)
+void CPriceSeries::Refresh(const int flags)
   {
    CDoubleBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
-//--- refreshing of buffers
+//--- check
+   if(buff==NULL)
+      return;
+//--- refresh of buffers
    if(!(flags&m_timeframe_flags))
      {
-      if(m_refresh_current) buff.RefreshCurrent();
+      if(m_refresh_current)
+         buff.RefreshCurrent();
      }
-   else                     buff.Refresh();
+   else
+      buff.Refresh();
   }
 //+------------------------------------------------------------------+
 //| Class COpenBuffer.                                               |
@@ -163,29 +156,37 @@ void CPriceSeries::Refresh(int flags)
 class COpenBuffer : public CDoubleBuffer
   {
 public:
+                     COpenBuffer(void);
+                    ~COpenBuffer(void);
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
   };
 //+------------------------------------------------------------------+
-//| Refreshing of the data buffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool COpenBuffer::Refresh()
+COpenBuffer::COpenBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+COpenBuffer::~COpenBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of the data buffer                                    |
+//+------------------------------------------------------------------+
+bool COpenBuffer::Refresh(void)
   {
    m_data_total=CopyOpen(m_symbol,m_period,0,m_size,m_data);
 //---
    return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data buffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of the data buffer                                    |
 //+------------------------------------------------------------------+
-bool COpenBuffer::RefreshCurrent()
+bool COpenBuffer::RefreshCurrent(void)
   {
    double array[1];
 //---
@@ -205,27 +206,40 @@ bool COpenBuffer::RefreshCurrent()
 class CiOpen : public CPriceSeries
   {
 public:
+                     CiOpen(void);
+                    ~CiOpen(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data
-   int               GetData(int start_pos,int count,double& buffer[])                const;
-   int               GetData(datetime start_time,int count,double& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,double& buffer[]) const;
+   int               GetData(const int start_pos,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const;
   };
 //+------------------------------------------------------------------+
-//| Creation of open series.                                         |
-//| INPUT:  symbol  - series symbol,                                 |
-//|         period  - series period.                                 |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiOpen::Create(string symbol,ENUM_TIMEFRAMES period)
+CiOpen::CiOpen(void)
+  {
+   m_name="Open";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiOpen::~CiOpen(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of open series                                          |
+//+------------------------------------------------------------------+
+bool CiOpen::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CDoubleBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new COpenBuffer)==NULL)    return(false);
+   if((buff=new COpenBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -239,43 +253,25 @@ bool CiOpen::Create(string symbol,ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the open buffer by specifying         |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiOpen::GetData(int start_pos,int count,double& buffer[]) const
+int CiOpen::GetData(const int start_pos,const int count,double &buffer[]) const
   {
    return(CopyOpen(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the open buffer by specifying         |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiOpen::GetData(datetime start_time,int count,double& buffer[]) const
+int CiOpen::GetData(const datetime start_time,const int count,double &buffer[]) const
   {
    return(CopyOpen(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the open buffer by specifying         |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element of the buffer,        |
-//|         stop_time  - time of end element of the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiOpen::GetData(datetime start_time,datetime stop_time,double& buffer[]) const
+int CiOpen::GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const
   {
    return(CopyOpen(m_symbol,m_period,start_time,stop_time,buffer));
   }
@@ -287,29 +283,37 @@ int CiOpen::GetData(datetime start_time,datetime stop_time,double& buffer[]) con
 class CHighBuffer : public CDoubleBuffer
   {
 public:
+                     CHighBuffer(void);
+                    ~CHighBuffer(void);
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
   };
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CHighBuffer::Refresh()
+CHighBuffer::CHighBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CHighBuffer::~CHighBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CHighBuffer::Refresh(void)
   {
    m_data_total=CopyHigh(m_symbol,m_period,0,m_size,m_data);
 //---
    return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CHighBuffer::RefreshCurrent()
+bool CHighBuffer::RefreshCurrent(void)
   {
    double array[1];
 //---
@@ -329,27 +333,40 @@ bool CHighBuffer::RefreshCurrent()
 class CiHigh : public CPriceSeries
   {
 public:
+                     CiHigh(void);
+                    ~CiHigh(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data
-   int               GetData(int start_pos,int count,double& buffer[])                const;
-   int               GetData(datetime start_time,int count,double& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,double& buffer[]) const;
+   int               GetData(const int start_pos,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const;
   };
 //+------------------------------------------------------------------+
-//| Creation of high series.                                         |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiHigh::Create(string symbol,ENUM_TIMEFRAMES period)
+CiHigh::CiHigh(void)
+  {
+   m_name="High";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiHigh::~CiHigh(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of high series                                          |
+//+------------------------------------------------------------------+
+bool CiHigh::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CDoubleBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CHighBuffer)==NULL)    return(false);
+   if((buff=new CHighBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -363,43 +380,25 @@ bool CiHigh::Create(string symbol,ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the high buffer by specifying         |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     value.                                       |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiHigh::GetData(int start_pos,int count,double& buffer[]) const
+int CiHigh::GetData(const int start_pos,const int count,double &buffer[]) const
   {
    return(CopyHigh(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the high buffer for the initial       |
-//| time and the number of elements".                                |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| time and the number of elements"                                 |
 //+------------------------------------------------------------------+
-int CiHigh::GetData(datetime start_time,int count,double& buffer[]) const
+int CiHigh::GetData(const datetime start_time,const int count,double &buffer[]) const
   {
    return(CopyHigh(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the high buffer by specifying         |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiHigh::GetData(datetime start_time,datetime stop_time,double& buffer[]) const
+int CiHigh::GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const
   {
    return(CopyHigh(m_symbol,m_period,start_time,stop_time,buffer));
   }
@@ -411,29 +410,37 @@ int CiHigh::GetData(datetime start_time,datetime stop_time,double& buffer[]) con
 class CLowBuffer : public CDoubleBuffer
   {
 public:
+                     CLowBuffer(void);
+                    ~CLowBuffer(void);
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
   };
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CLowBuffer::Refresh()
+CLowBuffer::CLowBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CLowBuffer::~CLowBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CLowBuffer::Refresh(void)
   {
    m_data_total=CopyLow(m_symbol,m_period,0,m_size,m_data);
 //---
    return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CLowBuffer::RefreshCurrent()
+bool CLowBuffer::RefreshCurrent(void)
   {
    double array[1];
 //---
@@ -453,27 +460,40 @@ bool CLowBuffer::RefreshCurrent()
 class CiLow : public CPriceSeries
   {
 public:
+                     CiLow(void);
+                    ~CiLow(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data
-   int               GetData(int start_pos,int count,double& buffer[])                const;
-   int               GetData(datetime start_time,int count,double& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,double& buffer[]) const;
+   int               GetData(const int start_pos,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const;
   };
 //+------------------------------------------------------------------+
-//| Creation of low series.                                          |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiLow::Create(string symbol,ENUM_TIMEFRAMES period)
+CiLow::CiLow(void)
+  {
+   m_name="Low";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiLow::~CiLow(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of low series                                           |
+//+------------------------------------------------------------------+
+bool CiLow::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CDoubleBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CLowBuffer)==NULL)     return(false);
+   if((buff=new CLowBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -487,43 +507,25 @@ bool CiLow::Create(string symbol,ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the low buffer by specifying          |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiLow::GetData(int start_pos,int count,double& buffer[]) const
+int CiLow::GetData(const int start_pos,const int count,double &buffer[]) const
   {
    return(CopyLow(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the low buffer for the initial        |
-//| time and the number of elements".                                |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| time and the number of elements"                                 |
 //+------------------------------------------------------------------+
-int CiLow::GetData(datetime start_time,int count,double& buffer[]) const
+int CiLow::GetData(const datetime start_time,const int count,double &buffer[]) const
   {
    return(CopyLow(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the low buffer for the initial        |
-//| and final time".                                                 |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| and final time"                                                  |
 //+------------------------------------------------------------------+
-int CiLow::GetData(datetime start_time,datetime stop_time,double& buffer[]) const
+int CiLow::GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const
   {
    return(CopyLow(m_symbol,m_period,start_time,stop_time,buffer));
   }
@@ -535,29 +537,37 @@ int CiLow::GetData(datetime start_time,datetime stop_time,double& buffer[]) cons
 class CCloseBuffer : public CDoubleBuffer
   {
 public:
+                     CCloseBuffer(void);
+                    ~CCloseBuffer(void);
    //--- method of refreshing of data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
   };
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CCloseBuffer::Refresh()
+CCloseBuffer::CCloseBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CCloseBuffer::~CCloseBuffer(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CCloseBuffer::Refresh(void)
   {
    m_data_total=CopyClose(m_symbol,m_period,0,m_size,m_data);
 //---
    return(m_data_total>0);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data buffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of the data buffer                                    |
 //+------------------------------------------------------------------+
-bool CCloseBuffer::RefreshCurrent()
+bool CCloseBuffer::RefreshCurrent(void)
   {
    double array[1];
 //---
@@ -577,27 +587,40 @@ bool CCloseBuffer::RefreshCurrent()
 class CiClose : public CPriceSeries
   {
 public:
+                     CiClose(void);
+                    ~CiClose(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data
-   int               GetData(int start_pos,int count,double& buffer[])                const;
-   int               GetData(datetime start_time,int count,double& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,double& buffer[]) const;
+   int               GetData(const int start_pos,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,double &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const;
   };
 //+------------------------------------------------------------------+
-//| Creation of the close series.                                    |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiClose::Create(string symbol,ENUM_TIMEFRAMES period)
+CiClose::CiClose(void)
+  {
+   m_name="Close";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiClose::~CiClose(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of the close series                                     |
+//+------------------------------------------------------------------+
+bool CiClose::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CDoubleBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CCloseBuffer)==NULL)   return(false);
+   if((buff=new CCloseBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -611,43 +634,25 @@ bool CiClose::Create(string symbol,ENUM_TIMEFRAMES period)
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the close buffer by specifying        |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiClose::GetData(int start_pos,int count,double& buffer[]) const
+int CiClose::GetData(const int start_pos,const int count,double &buffer[]) const
   {
    return(CopyClose(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the close buffer by specifying        |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiClose::GetData(datetime start_time,int count,double& buffer[]) const
+int CiClose::GetData(const datetime start_time,const int count,double &buffer[]) const
   {
    return(CopyClose(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the close buffer by specifying        |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiClose::GetData(datetime start_time,datetime stop_time,double& buffer[]) const
+int CiClose::GetData(const datetime start_time,const datetime stop_time,double &buffer[]) const
   {
    return(CopyClose(m_symbol,m_period,start_time,stop_time,buffer));
   }
@@ -665,51 +670,49 @@ protected:
    int               m_size;             // size of used history
 
 public:
-                     CSpreadBuffer();
+                     CSpreadBuffer(void);
+                    ~CSpreadBuffer(void);
    //--- methods of access to protected data
-   void              Size(int size) { m_size=size; }
+   void              Size(const int size) { m_size=size; }
    //--- methods of access to data
-   int               At(int index) const;
+   int               At(const int index) const;
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
    //--- methods of tuning
-   void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
+   void              SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSpreadBuffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CSpreadBuffer::CSpreadBuffer()
+CSpreadBuffer::CSpreadBuffer(void) : m_symbol(""),
+                                     m_period(WRONG_VALUE),
+                                     m_freshed_data(0),
+                                     m_size(DEFAULT_BUFFER_SIZE)
   {
-//--- initialize protected data
-   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
-//| Access to data on the position.                                  |
-//| INPUT:  index - position of element.                             |
-//| OUTPUT: element in the position, or 0.                           |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-int CSpreadBuffer::At(int index) const
+CSpreadBuffer::~CSpreadBuffer(void)
   {
-//--- checking
-   if(index>=m_data_total) return(0);
-//---
-   int d=CArrayInt::At(index);
+  }
+//+------------------------------------------------------------------+
+//| Access to data on the position                                   |
+//+------------------------------------------------------------------+
+int CSpreadBuffer::At(const int index) const
+  {
+//--- check
+   if(index>=m_data_total)
+      return(0);
 //---
    return(CArrayInt::At(index));
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CSpreadBuffer::Refresh()
+bool CSpreadBuffer::Refresh(void)
   {
    m_freshed_data=CopySpread(m_symbol,m_period,0,m_size,m_data);
 //---
@@ -722,38 +725,27 @@ bool CSpreadBuffer::Refresh()
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of the data buffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of the data buffer                                    |
 //+------------------------------------------------------------------+
-bool CSpreadBuffer::RefreshCurrent()
+bool CSpreadBuffer::RefreshCurrent(void)
   {
    int array[1];
 //---
-   m_freshed_data=CopySpread(m_symbol,m_period,0,1,m_data);
-//---
-   if(m_freshed_data==1 && m_data_total>0)
+   if(CopySpread(m_symbol,m_period,0,1,array)==1 && m_data_total>0)
      {
-      ArrayResize(m_data,m_data_total);
+      m_data[0]=array[0];
       return(true);
      }
 //--- error
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Set symbol and period.                                           |
-//| INPUT:  symbol - symbol,                                         |
-//|         period - period.                                         |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Set symbol and period                                            |
 //+------------------------------------------------------------------+
-void CSpreadBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
+void CSpreadBuffer::SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period)
   {
-   if(symbol==NULL) m_symbol=ChartSymbol();
-   else             m_symbol=symbol;
-   if(period==0)    m_period=ChartPeriod();
-   else             m_period=period;
+   m_symbol=(symbol==NULL) ? ChartSymbol() : symbol;
+   m_period=(period==0)    ? ChartPeriod() : period;
   }
 //+------------------------------------------------------------------+
 //| Class CiSpread.                                                  |
@@ -763,31 +755,44 @@ void CSpreadBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
 class CiSpread : public CSeries
   {
 public:
+                     CiSpread(void);
+                    ~CiSpread(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual bool      BufferResize(int size);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
+   virtual bool      BufferResize(const int size);
    //--- methods of access to data
-   int               GetData(int index)                                            const;
-   int               GetData(int start_pos,int count,int& buffer[])                const;
-   int               GetData(datetime start_time,int count,int& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,int& buffer[]) const;
+   int               GetData(const int index) const;
+   int               GetData(const int start_pos,const int count,int &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,int &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,int &buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
-//| Creating of the spread series.                                   |
-//| INPUT:  symbol  - series symbol,                                 |
-//|         period  - series period.                                 |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiSpread::Create(string symbol,ENUM_TIMEFRAMES period)
+CiSpread::CiSpread(void)
+  {
+   m_name="Spread";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiSpread::~CiSpread(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creating of the spread series                                    |
+//+------------------------------------------------------------------+
+bool CiSpread::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CSpreadBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CSpreadBuffer)==NULL)  return(false);
+   if((buff=new CSpreadBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -800,18 +805,15 @@ bool CiSpread::Create(string symbol,ENUM_TIMEFRAMES period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Method to access data.                                           |
-//| INPUT:  index - position of element in the buffer.               |
-//| OUTPUT: value of element if successful, 0 if not.                |
-//| REMARK: no.                                                      |
+//| Method to access data                                            |
 //+------------------------------------------------------------------+
-int CiSpread::GetData(int index) const
+int CiSpread::GetData(const int index) const
   {
    CSpreadBuffer *buff=At(0);
-//--- checking
+//--- check
    if(buff==NULL)
      {
-      Print("CiSpread::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(0);
      }
 //---
@@ -819,81 +821,62 @@ int CiSpread::GetData(int index) const
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the spread buffer by specifying       |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiSpread::GetData(int start_pos,int count,int& buffer[]) const
+int CiSpread::GetData(const int start_pos,const int count,int &buffer[]) const
   {
    return(CopySpread(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the spread buffer by specifying       |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      value.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiSpread::GetData(datetime start_time,int count,int& buffer[]) const
+int CiSpread::GetData(const datetime start_time,const int count,int &buffer[]) const
   {
    return(CopySpread(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the spread buffer by specifying       |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiSpread::GetData(datetime start_time,datetime stop_time,int& buffer[]) const
+int CiSpread::GetData(const datetime start_time,const datetime stop_time,int &buffer[]) const
   {
    return(CopySpread(m_symbol,m_period,start_time,stop_time,buffer));
   }
 //+------------------------------------------------------------------+
-//| Set size buffer.                                                 |
-//| INPUT:  size - size buffer.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size buffer                                                  |
 //+------------------------------------------------------------------+
-bool CiSpread::BufferResize(int size)
+bool CiSpread::BufferResize(const int size)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    CSpreadBuffer *buff=At(0);
 //--- check pointer
-   if(buff==NULL) return(false);
+   if(buff==NULL)
+      return(false);
 //---
    buff.Size(size);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data.                                              |
-//| INPUT:  flags - flags of updating timeframes.                    |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing of data                                               |
 //+------------------------------------------------------------------+
-void CiSpread::Refresh(int flags)
+void CiSpread::Refresh(const int flags)
   {
    CSpreadBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
-//--- refreshing buffer
+//--- check
+   if(buff==NULL)
+      return;
+//--- refresh buffer
    if(!(flags&m_timeframe_flags))
      {
-      if(m_refresh_current) buff.RefreshCurrent();
+      if(m_refresh_current)
+         buff.RefreshCurrent();
      }
-   else                     buff.Refresh();
+   else
+      buff.Refresh();
   }
 //+------------------------------------------------------------------+
 //| Class CTimeBuffer.                                               |
@@ -909,51 +892,49 @@ protected:
    int               m_size;             // size of used history
 
 public:
-                     CTimeBuffer();
+                     CTimeBuffer(void);
+                    ~CTimeBuffer(void);
    //--- methods of access to protected data
-   void              Size(int size) { m_size=size; }
+   void              Size(const int size) { m_size=size; }
    //--- methods of access to data
-   long              At(int index) const;
+   long              At(const int index) const;
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
    //--- methods of tuning
-   void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
+   void              SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CTimeBuffer.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CTimeBuffer::CTimeBuffer()
+CTimeBuffer::CTimeBuffer(void) : m_symbol(""),
+                                 m_period(WRONG_VALUE),
+                                 m_freshed_data(0),
+                                 m_size(DEFAULT_BUFFER_SIZE)
   {
-//--- initialize protected data
-   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
-//| Access to data in a position.                                    |
-//| INPUT:  index - position of element.                             |
-//| OUTPUT: element in the position, or 0.                           |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-long CTimeBuffer::At(int index) const
+CTimeBuffer::~CTimeBuffer(void)
   {
-//--- checking
-   if(index>=m_data_total) return(0);
-//---
-   datetime d=(datetime)CArrayLong::At(index);
-//---
-   return(d);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to data in a position                                     |
 //+------------------------------------------------------------------+
-bool CTimeBuffer::Refresh()
+long CTimeBuffer::At(const int index) const
+  {
+//--- check
+   if(index>=m_data_total)
+      return(0);
+//---
+   return((datetime)CArrayLong::At(index));
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CTimeBuffer::Refresh(void)
   {
    m_freshed_data=CopyTime(m_symbol,m_period,0,m_size,m_data);
 //---
@@ -966,38 +947,27 @@ bool CTimeBuffer::Refresh()
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CTimeBuffer::RefreshCurrent()
+bool CTimeBuffer::RefreshCurrent(void)
   {
    long array[1];
 //---
-   m_freshed_data=CopyTime(m_symbol,m_period,0,1,m_data);
-//---
-   if(m_freshed_data==1 && m_data_total>0)
+   if(CopyTime(m_symbol,m_period,0,1,array)==1 && m_data_total>0)
      {
-      ArrayResize(m_data,m_data_total);
+      m_data[0]=array[0];
       return(true);
      }
 //--- error
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Set symbol and period.                                           |
-//| INPUT:  symbol - symbol,                                         |
-//|         period - period.                                         |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Set symbol and period                                            |
 //+------------------------------------------------------------------+
-void CTimeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
+void CTimeBuffer::SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period)
   {
-   if(symbol==NULL) m_symbol=ChartSymbol();
-   else             m_symbol=symbol;
-   if(period==0)    m_period=ChartPeriod();
-   else             m_period=period;
+   m_symbol=(symbol==NULL) ? ChartSymbol() : symbol;
+   m_period=(period==0)    ? ChartPeriod() : period;
   }
 //+------------------------------------------------------------------+
 //| Class CiTime.                                                    |
@@ -1007,31 +977,44 @@ void CTimeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
 class CiTime : public CSeries
   {
 public:
+                     CiTime(void);
+                    ~CiTime(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual bool      BufferResize(int size);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
+   virtual bool      BufferResize(const int size);
    //--- methods of access to data
-   datetime          GetData(int index)                                                 const;
-   int               GetData(int start_pos,int count,datetime& buffer[])                const;
-   int               GetData(datetime start_time,int count,datetime& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,datetime& buffer[]) const;
+   datetime          GetData(const int index) const;
+   int               GetData(const int start_pos,const int count,datetime &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,datetime &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,datetime &buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
-//| Creating of the time series.                                     |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiTime::Create(string symbol,ENUM_TIMEFRAMES period)
+CiTime::CiTime(void)
+  {
+   m_name="Time";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiTime::~CiTime(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creating of the time series                                      |
+//+------------------------------------------------------------------+
+bool CiTime::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CTimeBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CTimeBuffer)==NULL)    return(false);
+   if((buff=new CTimeBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -1044,18 +1027,15 @@ bool CiTime::Create(string symbol,ENUM_TIMEFRAMES period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Method to access data.                                           |
-//| INPUT:  index - position of element in the buffer.               |
-//| OUTPUT: value - if successful, 0 otherwise.                      |
-//| REMARK: no.                                                      |
+//| Method to access data                                            |
 //+------------------------------------------------------------------+
-datetime CiTime::GetData(int index) const
+datetime CiTime::GetData(const int index) const
   {
    CTimeBuffer *buff=At(0);
-//--- checking
+//--- check
    if(buff==NULL)
      {
-      Print("CiSpread::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(0);
      }
 //---
@@ -1063,81 +1043,62 @@ datetime CiTime::GetData(int index) const
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the time buffer by specifying         |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiTime::GetData(int start_pos,int count,datetime& buffer[]) const
+int CiTime::GetData(const int start_pos,const int count,datetime &buffer[]) const
   {
    return(CopyTime(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the time buffer by specifying         |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiTime::GetData(datetime start_time,int count,datetime& buffer[]) const
+int CiTime::GetData(const datetime start_time,const int count,datetime &buffer[]) const
   {
    return(CopyTime(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the time buffer by specifying         |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      variables.                                  |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiTime::GetData(datetime start_time,datetime stop_time,datetime& buffer[]) const
+int CiTime::GetData(const datetime start_time,const datetime stop_time,datetime &buffer[]) const
   {
    return(CopyTime(m_symbol,m_period,start_time,stop_time,buffer));
   }
 //+------------------------------------------------------------------+
-//| Set size buffer.                                                 |
-//| INPUT:  size - size buffer.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size buffer                                                  |
 //+------------------------------------------------------------------+
-bool CiTime::BufferResize(int size)
+bool CiTime::BufferResize(const int size)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    CTimeBuffer *buff=At(0);
 //--- check pointer
-   if(buff==NULL) return(false);
+   if(buff==NULL)
+      return(false);
 //---
    buff.Size(size);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data.                                              |
-//| INPUT:  flags - flags of updating timeframes.                    |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing of data                                               |
 //+------------------------------------------------------------------+
-void CiTime::Refresh(int flags)
+void CiTime::Refresh(const int flags)
   {
    CTimeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
-//--- refreshing buffers
+//--- check
+   if(buff==NULL)
+      return;
+//--- refresh buffers
    if(!(flags&m_timeframe_flags))
      {
-      if(m_refresh_current) buff.RefreshCurrent();
+      if(m_refresh_current)
+         buff.RefreshCurrent();
      }
-   else                     buff.Refresh();
+   else
+      buff.Refresh();
   }
 //+------------------------------------------------------------------+
 //| Class CTickVolumeBuffer.                                         |
@@ -1153,51 +1114,49 @@ protected:
    int               m_size;             // size of used history
 
 public:
-                     CTickVolumeBuffer();
+                     CTickVolumeBuffer(void);
+                    ~CTickVolumeBuffer(void);
    //--- methods of access to protected data
-   void              Size(int size) { m_size=size; }
+   void              Size(const int size) { m_size=size; }
    //--- methods of access to data
-   long              At(int index) const;
+   long              At(const int index) const;
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
    //--- methods of tuning
-   void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
+   void              SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CTickVolumeBuffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CTickVolumeBuffer::CTickVolumeBuffer()
+CTickVolumeBuffer::CTickVolumeBuffer(void) : m_symbol(""),
+                                             m_period(WRONG_VALUE),
+                                             m_freshed_data(0),
+                                             m_size(DEFAULT_BUFFER_SIZE)
   {
-//--- initialize protected data
-   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
-//| Access to data in a position.                                    |
-//| INPUT:  index - position of element.                             |
-//| OUTPUT: value of element in the position, or 0.                  |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-long CTickVolumeBuffer::At(int index) const
+CTickVolumeBuffer::~CTickVolumeBuffer(void)
   {
-//--- checking
-   if(index>=m_data_total) return(0);
-//---
-   datetime d=(datetime)CArrayLong::At(index);
-//---
-   return(d);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to data in a position                                     |
 //+------------------------------------------------------------------+
-bool CTickVolumeBuffer::Refresh()
+long CTickVolumeBuffer::At(const int index) const
+  {
+//--- check
+   if(index>=m_data_total)
+      return(0);
+//---
+   return((datetime)CArrayLong::At(index));
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CTickVolumeBuffer::Refresh(void)
   {
    m_freshed_data=CopyTickVolume(m_symbol,m_period,0,m_size,m_data);
 //---
@@ -1210,38 +1169,27 @@ bool CTickVolumeBuffer::Refresh()
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CTickVolumeBuffer::RefreshCurrent()
+bool CTickVolumeBuffer::RefreshCurrent(void)
   {
    long array[1];
 //---
-   m_freshed_data=CopyTickVolume(m_symbol,m_period,0,1,m_data);
-//---
-   if(m_freshed_data==1 && m_data_total>0)
+   if(CopyTickVolume(m_symbol,m_period,0,1,array)==1 && m_data_total>0)
      {
-      ArrayResize(m_data,m_data_total);
+      m_data[0]=array[0];
       return(true);
      }
 //--- error
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Set symbol and period.                                           |
-//| INPUT:  symbol - symbol,                                         |
-//|         period - period.                                         |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Set symbol and period                                            |
 //+------------------------------------------------------------------+
-void CTickVolumeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
+void CTickVolumeBuffer::SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period)
   {
-   if(symbol==NULL) m_symbol=ChartSymbol();
-   else             m_symbol=symbol;
-   if(period==0)    m_period=ChartPeriod();
-   else             m_period=period;
+   m_symbol=(symbol==NULL) ? ChartSymbol() : symbol;
+   m_period=(period==0)    ? ChartPeriod() : period;
   }
 //+------------------------------------------------------------------+
 //| Class CiTickVolume.                                              |
@@ -1251,31 +1199,44 @@ void CTickVolumeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
 class CiTickVolume : public CSeries
   {
 public:
+                     CiTickVolume(void);
+                    ~CiTickVolume(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual bool      BufferResize(int size);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
+   virtual bool      BufferResize(const int size);
    //--- methods of access to data
-   long              GetData(int index)                                             const;
-   int               GetData(int start_pos,int count,long& buffer[])                const;
-   int               GetData(datetime start_time,int count,long& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,long& buffer[]) const;
+   long              GetData(const int index) const;
+   int               GetData(const int start_pos,const int count,long &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,long &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,long &buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
-//| Creation of the tick volume series.                              |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiTickVolume::Create(string symbol,ENUM_TIMEFRAMES period)
+CiTickVolume::CiTickVolume(void)
+  {
+   m_name="Volume";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiTickVolume::~CiTickVolume(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of the tick volume series                               |
+//+------------------------------------------------------------------+
+bool CiTickVolume::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CTickVolumeBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period))    return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CTickVolumeBuffer)==NULL) return(false);
+   if((buff=new CTickVolumeBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -1288,18 +1249,15 @@ bool CiTickVolume::Create(string symbol,ENUM_TIMEFRAMES period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Method to access data.                                           |
-//| INPUT:  index - position of element in the buffer.               |
-//| OUTPUT: value of element if successful, 0 if not.                |
-//| REMARK: no.                                                      |
+//| Method to access data                                            |
 //+------------------------------------------------------------------+
-long CiTickVolume::GetData(int index) const
+long CiTickVolume::GetData(const int index) const
   {
    CTickVolumeBuffer *buff=At(0);
-//--- checking
+//--- check
    if(buff==NULL)
      {
-      Print("CiSpread::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(0);
      }
 //---
@@ -1307,81 +1265,62 @@ long CiTickVolume::GetData(int index) const
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the tick volume buffer by specifying  |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiTickVolume::GetData(int start_pos,int count,long& buffer[]) const
+int CiTickVolume::GetData(const int start_pos,const int count,long &buffer[]) const
   {
    return(CopyTickVolume(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the tick volume buffer by specifying  |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiTickVolume::GetData(datetime start_time,int count,long& buffer[]) const
+int CiTickVolume::GetData(const datetime start_time,const int count,long &buffer[]) const
   {
    return(CopyTickVolume(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the tick volume buffer by specifying  |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiTickVolume::GetData(datetime start_time,datetime stop_time,long& buffer[]) const
+int CiTickVolume::GetData(const datetime start_time,const datetime stop_time,long &buffer[]) const
   {
    return(CopyTickVolume(m_symbol,m_period,start_time,stop_time,buffer));
   }
 //+------------------------------------------------------------------+
-//| Set size buffer.                                                 |
-//| INPUT:  size - size buffer.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size buffer                                                  |
 //+------------------------------------------------------------------+
-bool CiTickVolume::BufferResize(int size)
+bool CiTickVolume::BufferResize(const int size)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    CTickVolumeBuffer *buff=At(0);
 //--- check pointer
-   if(buff==NULL) return(false);
+   if(buff==NULL)
+      return(false);
 //--
    buff.Size(size);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data.                                              |
-//| INPUT:  flags - flags of updating timeframes.                    |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing of data                                               |
 //+------------------------------------------------------------------+
-void CiTickVolume::Refresh(int flags)
+void CiTickVolume::Refresh(const int flags)
   {
    CTickVolumeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
-//--- refreshing buffers
+//--- check
+   if(buff==NULL)
+      return;
+//--- refresh buffers
    if(!(flags&m_timeframe_flags))
      {
-      if(m_refresh_current) buff.RefreshCurrent();
+      if(m_refresh_current)
+         buff.RefreshCurrent();
      }
-   else                     buff.Refresh();
+   else
+      buff.Refresh();
   }
 //+------------------------------------------------------------------+
 //| Class CRealVolumeBuffer.                                         |
@@ -1397,51 +1336,49 @@ protected:
    int               m_size;             // size of used history
 
 public:
-                     CRealVolumeBuffer();
+                     CRealVolumeBuffer(void);
+                    ~CRealVolumeBuffer(void);
    //--- methods of access to protected data
-   void              Size(int size) { m_size=size; }
+   void              Size(const int size) { m_size=size; }
    //--- methods of access to data
-   long              At(int index) const;
+   long              At(const int index) const;
    //--- method of refreshing of the data buffer
-   virtual bool      Refresh();
-   virtual bool      RefreshCurrent();
+   virtual bool      Refresh(void);
+   virtual bool      RefreshCurrent(void);
    //--- methods of tuning
-   void              SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period);
+   void              SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CRealVolumeBuffer.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CRealVolumeBuffer::CRealVolumeBuffer()
+CRealVolumeBuffer::CRealVolumeBuffer(void) : m_symbol(""),
+                                             m_period(WRONG_VALUE),
+                                             m_freshed_data(0),
+                                             m_size(DEFAULT_BUFFER_SIZE)
   {
-//--- initialize protected data
-   m_size=DEFAULT_BUFFER_SIZE;
    ArraySetAsSeries(m_data,true);
   }
 //+------------------------------------------------------------------+
-//| Access to data in a position.                                    |
-//| INPUT:  index - position of element.                             |
-//| OUTPUT: element in the position, or 0.                           |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-long CRealVolumeBuffer::At(int index) const
+CRealVolumeBuffer::~CRealVolumeBuffer(void)
   {
-//--- checking
-   if(index>=m_data_total) return(0);
-//---
-   datetime d=(datetime)CArrayLong::At(index);
-//---
-   return(d);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to data in a position                                     |
 //+------------------------------------------------------------------+
-bool CRealVolumeBuffer::Refresh()
+long CRealVolumeBuffer::At(const int index) const
+  {
+//--- check
+   if(index>=m_data_total)
+      return(0);
+//---
+   return((datetime)CArrayLong::At(index));
+  }
+//+------------------------------------------------------------------+
+//| Refreshing of data buffer                                        |
+//+------------------------------------------------------------------+
+bool CRealVolumeBuffer::Refresh(void)
   {
    m_freshed_data=CopyRealVolume(m_symbol,m_period,0,m_size,m_data);
 //---
@@ -1454,38 +1391,27 @@ bool CRealVolumeBuffer::Refresh()
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data buffer.                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Refreshing of data buffer                                        |
 //+------------------------------------------------------------------+
-bool CRealVolumeBuffer::RefreshCurrent()
+bool CRealVolumeBuffer::RefreshCurrent(void)
   {
    long array[1];
 //---
-   m_freshed_data=CopyRealVolume(m_symbol,m_period,0,1,m_data);
-//---
-   if(m_freshed_data==1 && m_data_total>0)
+   if(CopyRealVolume(m_symbol,m_period,0,1,array)==1 && m_data_total>0)
      {
-      ArrayResize(m_data,m_data_total);
+      m_data[0]=array[0];
       return(true);
      }
 //--- error
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Set symbol and period.                                           |
-//| INPUT:  symbol - symbol,                                         |
-//|         period - period.                                         |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Set symbol and period                                            |
 //+------------------------------------------------------------------+
-void CRealVolumeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
+void CRealVolumeBuffer::SetSymbolPeriod(const string symbol,const ENUM_TIMEFRAMES period)
   {
-   if(symbol==NULL) m_symbol=ChartSymbol();
-   else             m_symbol=symbol;
-   if(period==0)    m_period=ChartPeriod();
-   else             m_period=period;
+   m_symbol=(symbol==NULL) ? ChartSymbol() : symbol;
+   m_period=(period==0)    ? ChartPeriod() : period;
   }
 //+------------------------------------------------------------------+
 //| Class CiRealVolume.                                              |
@@ -1495,31 +1421,44 @@ void CRealVolumeBuffer::SetSymbolPeriod(string symbol,ENUM_TIMEFRAMES period)
 class CiRealVolume : public CSeries
   {
 public:
+                     CiRealVolume(void);
+                    ~CiRealVolume(void);
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
-   virtual bool      BufferResize(int size);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
+   virtual bool      BufferResize(const int size);
    //--- methods of access to data
-   long              GetData(int index)                                             const;
-   int               GetData(int start_pos,int count,long& buffer[])                const;
-   int               GetData(datetime start_time,int count,long& buffer[])          const;
-   int               GetData(datetime start_time,datetime stop_time,long& buffer[]) const;
+   long              GetData(const int index) const;
+   int               GetData(const int start_pos,const int count,long &buffer[]) const;
+   int               GetData(const datetime start_time,const int count,long &buffer[]) const;
+   int               GetData(const datetime start_time,const datetime stop_time,long &buffer[]) const;
    //--- method of refreshing of the data
-   virtual void      Refresh(int flags=OBJ_ALL_PERIODS);
+   virtual void      Refresh(const int flags=OBJ_ALL_PERIODS);
   };
 //+------------------------------------------------------------------+
-//| Creation of the real volume series.                              |
-//| INPUT:  symbol - series symbol,                                  |
-//|         period - series period.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiRealVolume::Create(string symbol,ENUM_TIMEFRAMES period)
+CiRealVolume::CiRealVolume(void)
+  {
+   m_name="RealVolume";
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiRealVolume::~CiRealVolume(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Creation of the real volume series                               |
+//+------------------------------------------------------------------+
+bool CiRealVolume::Create(const string symbol,const ENUM_TIMEFRAMES period)
   {
    CRealVolumeBuffer *buff;
 //--- check history
-   if(!SetSymbolPeriod(symbol,period))    return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
-   if((buff=new CRealVolumeBuffer)==NULL) return(false);
+   if((buff=new CRealVolumeBuffer)==NULL)
+      return(false);
 //--- add
    if(!Add(buff))
      {
@@ -1532,18 +1471,15 @@ bool CiRealVolume::Create(string symbol,ENUM_TIMEFRAMES period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Method to access data.                                           |
-//| INPUT:  index - position element of the buffer.                  |
-//| OUTPUT: value -if successful, 0 otherwise.                       |
-//| REMARK: no.                                                      |
+//| Method to access data                                            |
 //+------------------------------------------------------------------+
-long CiRealVolume::GetData(int index) const
+long CiRealVolume::GetData(const int index) const
   {
    CRealVolumeBuffer *buff=At(0);
-//--- checking
+//--- check
    if(buff==NULL)
      {
-      Print("CiSpread::GetData: invalid buffer");
+      Print(__FUNCTION__,": invalid buffer");
       return(0);
      }
 //---
@@ -1551,80 +1487,61 @@ long CiRealVolume::GetData(int index) const
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the real volume buffer by specifying  |
-//| start position and number of elements".                          |
-//| INPUT:  start_pos - position of start element in the buffer,     |
-//|         count     - number of elements to copy,                  |
-//|         buffer    - reference to a dynamic array of double       |
-//|                     values.                                      |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start position and number of elements"                           |
 //+------------------------------------------------------------------+
-int CiRealVolume::GetData(int start_pos,int count,long& buffer[]) const
+int CiRealVolume::GetData(const int start_pos,const int count,long &buffer[]) const
   {
    return(CopyRealVolume(m_symbol,m_period,start_pos,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the real volume buffer by specifying  |
-//| start time and number of elements".                              |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         count      - number of elements to copy,                 |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CiRealVolume::GetData(datetime start_time,int count,long& buffer[]) const
+int CiRealVolume::GetData(const datetime start_time,const int count,long &buffer[]) const
   {
    return(CopyRealVolume(m_symbol,m_period,start_time,count,buffer));
   }
 //+------------------------------------------------------------------+
 //| API access method "Copying the real volume buffer by specifying  |
-//| start and end time".                                             |
-//| INPUT:  start_time - time of start element in the buffer,        |
-//|         stop_time  - time of end element in the buffer,          |
-//|         buffer     - reference to a dynamic array of double      |
-//|                      values.                                     |
-//| OUTPUT: >=0 if successful, -1 if not.                            |
-//| REMARK: no.                                                      |
+//| start and end time"                                              |
 //+------------------------------------------------------------------+
-int CiRealVolume::GetData(datetime start_time,datetime stop_time,long& buffer[]) const
+int CiRealVolume::GetData(const datetime start_time,const datetime stop_time,long &buffer[]) const
   {
    return(CopyRealVolume(m_symbol,m_period,start_time,stop_time,buffer));
   }
 //+------------------------------------------------------------------+
-//| Set size buffer.                                                 |
-//| INPUT:  size - size buffer.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set size buffer                                                  |
 //+------------------------------------------------------------------+
-bool CiRealVolume::BufferResize(int size)
+bool CiRealVolume::BufferResize(const int size)
   {
-   if(size>m_buffer_size && !CSeries::BufferResize(size)) return(false);
+   if(size>m_buffer_size && !CSeries::BufferResize(size))
+      return(false);
 //-- history is avalible
    CRealVolumeBuffer *buff=At(0);
 //--- check pointer
-   if(buff==NULL) return(false);
+   if(buff==NULL)
+      return(false);
 //--
    buff.Size(size);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Refreshing of data.                                              |
-//| INPUT:  flags - flags of updating timeframes.                    |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Refreshing of data                                               |
 //+------------------------------------------------------------------+
-void CiRealVolume::Refresh(int flags)
+void CiRealVolume::Refresh(const int flags)
   {
    CRealVolumeBuffer *buff=At(0);
-//--- checking
-   if(buff==NULL) return;
-//--- refreshing buffers
+//--- check
+   if(buff==NULL)
+      return;
+//--- refresh buffers
    if(!(flags&m_timeframe_flags))
      {
-      if(m_refresh_current) buff.RefreshCurrent();
+      if(m_refresh_current)
+         buff.RefreshCurrent();
      }
-   else                     buff.Refresh();
+   else
+      buff.Refresh();
   }
 //+------------------------------------------------------------------+

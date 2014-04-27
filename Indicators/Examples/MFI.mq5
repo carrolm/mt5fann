@@ -51,15 +51,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Money Flow Index                                                 |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- variables of indicator
    int    CalcPosition;
@@ -73,9 +74,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       CalcPosition=prev_calculated-1;
 //--- calculate MFI by volume
    if(InpVolumeType==VOLUME_TICK)
-      CalculateMFI(CalcPosition,rates_total,High,Low,Close,TickVolume);
+      CalculateMFI(CalcPosition,rates_total,high,low,close,tick_volume);
    else
-      CalculateMFI(CalcPosition,rates_total,High,Low,Close,Volume);
+      CalculateMFI(CalcPosition,rates_total,high,low,close,volume);
 //--- OnCalculate done. Return new prev_calculated
    return(rates_total);
   }

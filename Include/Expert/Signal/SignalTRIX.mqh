@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   SignalTRIX.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -43,7 +42,8 @@ protected:
    uint              m_extr_map;       // resulting bit-map of ratio of extremums of the oscillator and the price
 
 public:
-                     CSignalTriX();
+                     CSignalTriX(void);
+                    ~CSignalTriX(void);
    //--- methods of setting adjustable parameters
    void              PeriodTriX(int value)             { m_period_trix=value;           }
    void              Applied(ENUM_APPLIED_PRICE value) { m_applied=value;               }
@@ -53,16 +53,16 @@ public:
    void              Pattern_2(int value)              { m_pattern_2=value;             }
    void              Pattern_3(int value)              { m_pattern_3=value;             }
    //--- method of verification of settings
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
-   virtual int       ShortCondition();
+   virtual int       LongCondition(void);
+   virtual int       ShortCondition(void);
 
 protected:
    //--- method of initialization of the oscillator
-   bool              InitTriX(CIndicators* indicators);
+   bool              InitTriX(CIndicators *indicators);
    //--- methods of getting data
    double            TriX(int ind)                     { return(m_trix.Main(ind));      }
    double            DiffTriX(int ind)                 { return(TriX(ind)-TriX(ind+1)); }
@@ -71,32 +71,31 @@ protected:
    bool              CompareMaps(int map,int count,bool minimax=false,int start=0);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalTriX.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalTriX::CSignalTriX()
+CSignalTriX::CSignalTriX(void) : m_period_trix(12),
+                                 m_applied(PRICE_CLOSE),
+                                 m_pattern_0(20),
+                                 m_pattern_1(80),
+                                 m_pattern_2(100),
+                                 m_pattern_3(70)
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_HIGH+USE_SERIES_LOW;
-//--- setting default values for the oscillator parameters
-   m_period_trix=12;
-//--- setting default "weights" of the market models
-   m_pattern_0  =20;         // model 0 "the oscillator has required direction"
-   m_pattern_1  =80;         // model 1 "reverse of the oscillator to required direction"
-   m_pattern_2  =100;        // model 2 "crossing of main line an the zero level"
-   m_pattern_3  =70;         // model 3 "divergence of the oscillator and price"
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalTriX::~CSignalTriX(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalTriX::ValidationSettings()
+bool CSignalTriX::ValidationSettings(void)
   {
-   if(!CExpertSignal::ValidationSettings()) return(false);
+   if(!CExpertSignal::ValidationSettings())
+      return(false);
 //---
    if(m_period_trix<=0)
      {
@@ -108,31 +107,29 @@ bool CSignalTriX::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators -pointer of indicator collection.             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalTriX::InitIndicators(CIndicators* indicators)
+bool CSignalTriX::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize TriX oscilator
-   if(!InitTriX(indicators))                      return(false);
+   if(!InitTriX(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialize TriX oscillators.                                     |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CSignalTriX::InitTriX(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add object to collection
    if(!indicators.Add(GetPointer(m_trix)))
      {
@@ -150,12 +147,6 @@ bool CSignalTriX::InitTriX(CIndicators *indicators)
   }
 //+------------------------------------------------------------------+
 //| Check of the oscillator state.                                   |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: absolute value - number of time intervals                |
-//|         passed from the moment of reverse of the oscillator,     |
-//|         sign: <0 - the oscillator has turned downwards,          |
-//|               >0 - the oscillator has turned upwards.            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 int CSignalTriX::State(int ind)
   {
@@ -164,35 +155,35 @@ int CSignalTriX::State(int ind)
 //---
    for(int i=ind;;i++)
      {
-      if(TriX(i+1)==EMPTY_VALUE) break;
+      if(TriX(i+1)==EMPTY_VALUE)
+         break;
       var=DiffTriX(i);
       if(res>0)
         {
-         if(var<0) break;
+         if(var<0)
+            break;
          res++;
          continue;
         }
       if(res<0)
         {
-         if(var>0) break;
+         if(var>0)
+            break;
          res--;
          continue;
         }
-      if(var>0) res++;
-      if(var<0) res--;
+      if(var>0)
+         res++;
+      if(var<0)
+         res--;
      }
 //---
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Extended check of the oscillator state.                          |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: true if the model corresponds to a pattern,              |
-//|         otherwise - false.                                       |
-//| REMARK: Extended check of the oscillator state                   |
-//|         consists in forming a bit-map                            |
-//|         according to certain rules, which                        |
-//|         shows ratios of extremums of the oscillator and price.   |
+//| Extended check of the oscillator state consists                  |
+//| in forming a bit-map according to certain rules,                 |
+//| which shows ratios of extremums of the oscillator and price.     |
 //+------------------------------------------------------------------+
 bool CSignalTriX::ExtState(int ind)
   {
@@ -235,8 +226,10 @@ bool CSignalTriX::ExtState(int ind)
             m_extr_pr[i]=m_low.MinValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]<m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]<m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]<m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]<m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -254,8 +247,10 @@ bool CSignalTriX::ExtState(int ind)
             m_extr_pr[i]=m_high.MaxValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]>m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]>m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]>m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]>m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -268,20 +263,14 @@ bool CSignalTriX::ExtState(int ind)
   }
 //+------------------------------------------------------------------+
 //| Comparing the bit-map of extremums with pattern.                 |
-//| INPUT:  map     - pattern of bit-map,                            |
-//|         count   - number of analyzed extremums,                  |
-//|         minimax - 'all' flag,                                    |
-//|         start   - starting extremum.                             |
-//| OUTPUT: true if the analyzed map corresponds to the pattern,     |
-//|         otherwise - false.                                       |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CSignalTriX::CompareMaps(int map,int count,bool minimax,int start)
   {
    int step =(minimax)?4:8;
    int total=step*(start+count);
 //--- check input parameters for a possible going out of range of the bit-map
-   if(total>32) return(false);
+   if(total>32)
+      return(false);
 //--- bit-map of the patter is an "array" of 4-bit fields
 //--- each "element of the array" definitely describes the desired ratio
 //--- of current extremums of the oscillator and the price with previous ones
@@ -311,30 +300,30 @@ bool CSignalTriX::CompareMaps(int map,int count,bool minimax,int start)
         {
          //--- "take" two bits of the corresponding extremum of the price (higher-order bit is always 0)
          check_map=(m_extr_map>>i)&3;
-         if(inp_map!=check_map) return(false);
+         if(inp_map!=check_map)
+            return(false);
         }
       //--- "take" two bits - pattern of the corresponding oscillator extremum
       inp_map=(map>>(j+2))&3;
       //--- if the higher-order bit=1, then any ratio is suitable for us
-      if(inp_map>=2) continue;
+      if(inp_map>=2)
+         continue;
       //--- "take" two bits of the corresponding oscillator extremum (higher-order bit is always 0)
       check_map=(m_extr_map>>(i+2))&3;
-      if(inp_map!=check_map) return(false);
+      if(inp_map!=check_map)
+         return(false);
      }
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalTriX::LongCondition()
+int CSignalTriX::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
-   //--- check direction of the oscillator
+//--- check direction of the oscillator
    if(DiffTriX(idx)>0.0)
      {
       //--- the oscillator is directed upwards confirming the possibility of price growth
@@ -352,7 +341,7 @@ int CSignalTriX::LongCondition()
          //--- perform the extended analysis of the oscillator state
          ExtState(idx);
          //--- search for the "divergence" signal
-         if(CompareMaps(1,1))      // 0000 0001b
+         if(CompareMaps(1,1)) // 0000 0001b
            {
             if(m_extr_osc[0]<0.0 && m_extr_osc[1]<0.0 && m_extr_osc[2]<0.0)
               {
@@ -367,15 +356,12 @@ int CSignalTriX::LongCondition()
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will fall.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalTriX::ShortCondition()
+int CSignalTriX::ShortCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
-   //--- check direction of the main line
+//--- check direction of the main line
    if(DiffTriX(idx)<0.0)
      {
       //--- main line is directed downwards, confirming a possibility of falling of price
@@ -393,7 +379,7 @@ int CSignalTriX::ShortCondition()
          //--- perform the extended analysis of the oscillator state
          ExtState(idx);
          //--- search for the "divergence" signal
-         if(CompareMaps(1,1))      // 0000 0001b
+         if(CompareMaps(1,1)) // 0000 0001b
            {
             if(m_extr_osc[0]>0.0 && m_extr_osc[1]>0.0 && m_extr_osc[2]>0.0)
               {

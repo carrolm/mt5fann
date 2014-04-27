@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             SignalBearsPower.mqh |
-//|                      Copyright © 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -39,23 +38,24 @@ protected:
    uint              m_extr_map;       // resulting bit-map of ratio of extremums of the oscillator and the price
 
 public:
-                     CSignalBearsPower();
+                     CSignalBearsPower(void);
+                    ~CSignalBearsPower(void);
    //--- methods of setting adjustable parameters
-   void              PeriodBears(int value)      { m_period_bears=value;             }
+   void              PeriodBears(int value) { m_period_bears=value;             }
    //--- methods of adjusting "weights" of market models
    void              Pattern_0(int value)        { m_pattern_0=value;                }
    void              Pattern_1(int value)        { m_pattern_1=value;                }
    //--- method of verification of settings
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
+   virtual int       LongCondition(void);
    //--- the oscillator doesn't identify conditions for selling
 
 protected:
    //--- method of initialization of the oscillator
-   bool              InitBears(CIndicators* indicators);
+   bool              InitBears(CIndicators *indicators);
    //--- methods of getting data
    double            Bears(int ind)               { return(m_bears.Main(ind));       }
    double            DiffBears(int ind)           { return(Bears(ind)-Bears(ind+1)); }
@@ -63,31 +63,29 @@ protected:
    bool              ExtStateBears(int ind);
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalBearsPower.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalBearsPower::CSignalBearsPower()
+CSignalBearsPower::CSignalBearsPower(void) : m_period_bears(13),
+                                             m_pattern_0(20),
+                                             m_pattern_1(80)
   {
 //--- initialization of protected data
-   m_used_series =USE_SERIES_HIGH+USE_SERIES_LOW;
-//--- setting default values for the oscillator parameters
-   m_period_bears=13;
-//--- setting default "weights" of the market models
-   m_pattern_0   =20;        // model 0 "reverse of the oscillator to required direction"
-   m_pattern_1   =80;        // model 1 "divergence of the oscillator and price"
+   m_used_series=USE_SERIES_HIGH+USE_SERIES_LOW;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalBearsPower::~CSignalBearsPower(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalBearsPower::ValidationSettings()
+bool CSignalBearsPower::ValidationSettings(void)
   {
 //--- validation settings of additional filters
-   if(!CExpertSignal::ValidationSettings()) return(false);
+   if(!CExpertSignal::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_period_bears<=0)
      {
@@ -99,31 +97,29 @@ bool CSignalBearsPower::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalBearsPower::InitIndicators(CIndicators* indicators)
+bool CSignalBearsPower::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize BearsPower oscillator
-   if(!InitBears(indicators))                     return(false);
+   if(!InitBears(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialize BearsPower oscillators.                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 bool CSignalBearsPower::InitBears(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add object to collection
    if(!indicators.Add(GetPointer(m_bears)))
      {
@@ -141,12 +137,6 @@ bool CSignalBearsPower::InitBears(CIndicators *indicators)
   }
 //+------------------------------------------------------------------+
 //| Check of the oscillator state.                                   |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: absolute value - number of time intervals                |
-//|         passed from the moment of reverse of the oscillator,     |
-//|         sign: <0 - the oscillator has turned downwards,          |
-//|               >0 - the oscillator has turned upwards.            |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 int CSignalBearsPower::StateBears(int ind)
   {
@@ -155,35 +145,35 @@ int CSignalBearsPower::StateBears(int ind)
 //---
    for(int i=ind;;i++)
      {
-      if(Bears(i+1)==EMPTY_VALUE) break;
+      if(Bears(i+1)==EMPTY_VALUE)
+         break;
       var=DiffBears(i);
       if(res>0)
         {
-         if(var<0) break;
+         if(var<0)
+            break;
          res++;
          continue;
         }
       if(res<0)
         {
-         if(var>0) break;
+         if(var>0)
+            break;
          res--;
          continue;
         }
-      if(var>0) res++;
-      if(var<0) res--;
+      if(var>0)
+         res++;
+      if(var<0)
+         res--;
      }
 //--- return the result
    return(res);
   }
 //+------------------------------------------------------------------+
-//| Extended check of the oscillator state.                          |
-//| INPUT:  ind - index of a bar to start the check from.            |
-//| OUTPUT: true if the model corresponds to a pattern,              |
-//|         otherwise - false.                                       |
-//| REMARK: Extended check of the oscillator state                   |
-//|         consists in forming a bit-map                            |
-//|         according to certain rules, which                        |
-//|         shows ratios of extremums of the oscillator and price.   |
+//| Extended check of the oscillator state consists                  |
+//| in forming a bit-map according to certain rules,                 |
+//| which shows ratios of extremums of the oscillator and price.     |
 //+------------------------------------------------------------------+
 bool CSignalBearsPower::ExtStateBears(int ind)
   {
@@ -226,8 +216,10 @@ bool CSignalBearsPower::ExtStateBears(int ind)
             m_extr_pr[i]=m_low.MinValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]<m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]<m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]<m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]<m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -245,8 +237,10 @@ bool CSignalBearsPower::ExtStateBears(int ind)
             m_extr_pr[i]=m_high.MaxValue(pos-2,5,index);
             //--- form the intermediate bit-map
             map=0;
-            if(m_extr_pr[i-2]>m_extr_pr[i])   map+=1;  // set bit 0
-            if(m_extr_osc[i-2]>m_extr_osc[i]) map+=4;  // set bit 2
+            if(m_extr_pr[i-2]>m_extr_pr[i])
+               map+=1;  // set bit 0
+            if(m_extr_osc[i-2]>m_extr_osc[i])
+               map+=4;  // set bit 2
             //--- add the result
             m_extr_map+=map<<(4*(i-2));
            }
@@ -259,22 +253,21 @@ bool CSignalBearsPower::ExtStateBears(int ind)
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalBearsPower::LongCondition()
+int CSignalBearsPower::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
 //--- if the oscillator is above zero, don't "vote" for buying
-   if(Bears(idx)>0.0)   return(result);
+   if(Bears(idx)>0.0)
+      return(result);
 //--- the oscillator is below zero
    if(StateBears(idx)>0)
      {
       //--- the oscillator has turned upwards at a previous bar
       //--- there is a condition for buying
-      if(IS_PATTERN_USAGE(0)) result=m_pattern_0;
+      if(IS_PATTERN_USAGE(0))
+         result=m_pattern_0;
       //--- if the model 1 is used, search for the "divergence" signal
       if(IS_PATTERN_USAGE(1))
         {

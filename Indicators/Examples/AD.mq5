@@ -35,15 +35,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Accumulation/Distribution                                        |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- check for bars count
    if(rates_total<2)
@@ -53,9 +54,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(pos<0) pos=0;
 //--- calculate with appropriate volumes
    if(InpVolumeType==VOLUME_TICK)
-      Calculate(rates_total,pos,High,Low,Close,TickVolume);
+      Calculate(rates_total,pos,high,low,close,tick_volume);
    else
-      Calculate(rates_total,pos,High,Low,Close,Volume);
+      Calculate(rates_total,pos,high,low,close,volume);
 //----
    return(rates_total);
   }
@@ -63,23 +64,23 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //| Calculating with selected volume                                 |
 //+------------------------------------------------------------------+
 void Calculate(const int rates_total,const int pos,
-               const double &High[],
-               const double &Low[],
-               const double &Close[],
-               const long &Volume[])
+               const double &high[],
+               const double &low[],
+               const double &close[],
+               const long &volume[])
   {
    double hi,lo,cl;
 //--- main cycle
    for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get some data from arrays
-      hi=High[i];
-      lo=Low[i];
-      cl=Close[i];
+      hi=high[i];
+      lo=low[i];
+      cl=close[i];
       //--- calculate new AD
       double sum=(cl-lo)-(hi-cl);
       if(hi==lo) sum=0.0;
-      else       sum=(sum/(hi-lo))*Volume[i];
+      else       sum=(sum/(hi-lo))*volume[i];
       if(i>0) sum+=ExtADbuffer[i-1];
       ExtADbuffer[i]=sum;
      }

@@ -70,15 +70,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Ultimate Oscillator                                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int    i,limit;
    double TL,RawUO;
@@ -141,8 +142,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       for(i=1;i<=InpSlowPeriod;i++)
         {
          ExtUOBuffer[i]=0.0;
-         TL=MathMin(Low[i],Close[i-1]);
-         ExtBPBuffer[i]=Close[i]-TL;
+         TL=MathMin(low[i],close[i-1]);
+         ExtBPBuffer[i]=close[i]-TL;
         }
       //--- now we are going to calculate from limit index in main loop
       limit=InpSlowPeriod+1;
@@ -152,9 +153,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(i=limit;i<rates_total && !IsStopped();i++)
      {
       //--- TL is True Low
-      TL=MathMin(Low[i],Close[i-1]);
+      TL=MathMin(low[i],close[i-1]);
       //--- buying pressure
-      ExtBPBuffer[i]=Close[i]-TL;
+      ExtBPBuffer[i]=close[i]-TL;
       //--- first we calculate "raw" value
       if(ExtFastATRBuffer[i]!=0.0 && 
          ExtMiddleATRBuffer[i]!=0.0 && 

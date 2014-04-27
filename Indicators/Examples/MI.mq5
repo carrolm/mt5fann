@@ -73,15 +73,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Mass Index                                                       |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- check for bars count
    int posMI=ExtSumPeriod+ExtPeriodEMA+ExtSecondPeriodEMA-3;
@@ -92,14 +93,14 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- correct position
    if(pos<1)
      {
-      ExtHLBuffer[0]=High[0]-Low[0];
+      ExtHLBuffer[0]=high[0]-low[0];
       pos=1;
      }
 //--- main cycle
    for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- fill main data buffer
-      ExtHLBuffer[i]=High[i]-Low[i];
+      ExtHLBuffer[i]=high[i]-low[i];
       //--- calculate EMA values
       ExtEHLBuffer[i]=ExponentialMA(i,ExtPeriodEMA,ExtEHLBuffer[i-1],ExtHLBuffer);
       //--- calculate EMA on EMA values

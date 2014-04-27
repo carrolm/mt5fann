@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                 BillWilliams.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -13,39 +12,67 @@
 class CiAC : public CIndicator
   {
 public:
+                     CiAC(void);
+                    ~CiAC(void);
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data of indicator
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_AC); }
+   virtual int       Type(void) const { return(IND_AC); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiAC::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiAC::CiAC(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiAC::~CiAC(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Accelerator Oscillator" indicator                    |
+//+------------------------------------------------------------------+
+bool CiAC::Create(const string symbol,const ENUM_TIMEFRAMES period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iAC(symbol,period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiAC::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiAC::Initialize(string symbol,ENUM_TIMEFRAMES period)
+bool CiAC::Initialize(const string symbol,const ENUM_TIMEFRAMES period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -61,48 +88,20 @@ bool CiAC::Initialize(string symbol,ENUM_TIMEFRAMES period)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Accelerator Oscillator" indicator.                   |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to the buffer of "Accelerator Oscillator"                 |
 //+------------------------------------------------------------------+
-bool CiAC::Create(string symbol,ENUM_TIMEFRAMES period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iAC(symbol,period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- idicator successfully created
-   if(!Initialize(symbol,period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to the buffer of "Accelerator Oscillator".                |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiAC::Main(int index) const
+double CiAC::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
 //| Class CiAlligator.                                               |
-//| Purpose: Class of the "Alligator" indicator .                    |
+//| Purpose: Class of the "Alligator" indicator.                     |
 //|          Derives from class CIndicator.                          |
 //+------------------------------------------------------------------+
 class CiAlligator : public CIndicator
@@ -118,90 +117,114 @@ protected:
    int               m_applied;
 
 public:
-                     CiAlligator();
+                     CiAlligator(void);
+                    ~CiAlligator(void);
    //--- methods of access to protected data
-   int               JawPeriod()      const { return(m_jaw_period);   }
-   int               JawShift()       const { return(m_jaw_shift);    }
-   int               TeethPeriod()    const { return(m_teeth_period); }
-   int               TeethShift()     const { return(m_teeth_shift);  }
-   int               LipsPeriod()     const { return(m_lips_period);  }
-   int               LipsShift()      const { return(m_lips_shift);   }
-   ENUM_MA_METHOD    MaMethod()       const { return(m_ma_method);    }
-   int               Applied()        const { return(m_applied);      }
+   int               JawPeriod(void)        const { return(m_jaw_period);   }
+   int               JawShift(void)         const { return(m_jaw_shift);    }
+   int               TeethPeriod(void)      const { return(m_teeth_period); }
+   int               TeethShift(void)       const { return(m_teeth_shift);  }
+   int               LipsPeriod(void)       const { return(m_lips_period);  }
+   int               LipsShift(void)        const { return(m_lips_shift);   }
+   ENUM_MA_METHOD    MaMethod(void)         const { return(m_ma_method);    }
+   int               Applied(void)          const { return(m_applied);      }
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int jaw_period,const int jaw_shift,
+                            const int teeth_period,const int teeth_shift,
+                            const int lips_period,const int lips_shift,
+                            const ENUM_MA_METHOD ma_method,const int applied);
    //--- methods of access to data of indicator
-   double            Jaw(int index)   const;
-   double            Teeth(int index) const;
-   double            Lips(int index)  const;
+   double            Jaw(const int index) const;
+   double            Teeth(const int index) const;
+   double            Lips(const int index) const;
    //--- method of identifying
-   virtual int       Type()           const { return(IND_ALLIGATOR);  }
+   virtual int       Type(void) const { return(IND_ALLIGATOR); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int jaw_period,const int jaw_shift,
+                                const int teeth_period,const int teeth_shift,
+                                const int lips_period,const int lips_shift,
+                                const ENUM_MA_METHOD ma_method,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiAlligator.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiAlligator::CiAlligator()
+CiAlligator::CiAlligator(void) : m_jaw_period(-1),
+                                 m_jaw_shift(-1),
+                                 m_teeth_period(-1),
+                                 m_teeth_shift(-1),
+                                 m_lips_period(-1),
+                                 m_lips_shift(-1),
+                                 m_ma_method(WRONG_VALUE),
+                                 m_applied(-1)
   {
-//--- initialize protected data
-   m_jaw_period  =-1;
-   m_jaw_shift   =-1;
-   m_teeth_period=-1;
-   m_teeth_shift =-1;
-   m_lips_period =-1;
-   m_lips_shift  =-1;
-   m_ma_method   =WRONG_VALUE;
-   m_applied     =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiAlligator::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiAlligator::~CiAlligator(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Alligator" indicator                                 |
+//+------------------------------------------------------------------+
+bool CiAlligator::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                         const int jaw_period,const int jaw_shift,
+                         const int teeth_period,const int teeth_shift,
+                         const int lips_period,const int lips_shift,
+                         const ENUM_MA_METHOD ma_method,const int applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iAlligator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiAlligator::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                                   (int)params[2].integer_value,(int)params[3].integer_value,
-                                   (int)params[4].integer_value,(int)params[5].integer_value,
-                        (ENUM_MA_METHOD)params[6].integer_value,(int)params[7].integer_value));
+          (int)params[2].integer_value,(int)params[3].integer_value,
+          (int)params[4].integer_value,(int)params[5].integer_value,
+          (ENUM_MA_METHOD)params[6].integer_value,(int)params[7].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol       - indicator symbol,                         |
-//|         period       - indicator period,                         |
-//|         jaw_period   - period for the calculation of jaws,       |
-//|         jaw_shift    - shift of jaws,                            |
-//|         teeth_period - period for the calculation of teeth,      |
-//|         teeth_shift  - shift of teeth,                           |
-//|         lips_period  - period for the calculation of lips,       |
-//|         lips_shift   - shift of lips,                            |
-//|         ma_method    - averaging method for MA,                  |
-//|         applied      - what to apply the indicator to.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiAlligator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
+bool CiAlligator::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                             const int jaw_period,const int jaw_shift,
+                             const int teeth_period,const int teeth_shift,
+                             const int lips_period,const int lips_shift,
+                             const ENUM_MA_METHOD ma_method,const int applied)
   {
    if(CreateBuffers(symbol,period,3))
      {
       //--- string of status of drawing
       m_name  ="Alligator";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(jaw_period)+","+IntegerToString(jaw_shift)+","+
-                IntegerToString(teeth_period)+","+IntegerToString(teeth_shift)+","+
-                IntegerToString(lips_period)+","+IntegerToString(lips_shift)+","+
-                MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
+               IntegerToString(jaw_period)+","+IntegerToString(jaw_shift)+","+
+               IntegerToString(teeth_period)+","+IntegerToString(teeth_shift)+","+
+               IntegerToString(lips_period)+","+IntegerToString(lips_shift)+","+
+               MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
       //--- save settings
       m_jaw_period  =jaw_period;
       m_jaw_shift   =jaw_shift;
@@ -225,78 +248,38 @@ bool CiAlligator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Alligator" indicator.                                |
-//| INPUT:  symbol       - indicator symbol,                         |
-//|         period       - indicator period,                         |
-//|         jaw_period   - period for the calculation of jaws,       |
-//|         jaw_shift    - shift of jaws,                            |
-//|         teeth_period - period for the calculation of teeth,      |
-//|         teeth_shift  - shift of teeth,                           |
-//|         lips_period  - period for the calculation of lips,       |
-//|         lips_shift   - shift of lips,                            |
-//|         ma_method    - averaging method for MA,                  |
-//|         applied      - what to apply the indicator to.           |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Access to Jaw buffer of "Alligator"                              |
 //+------------------------------------------------------------------+
-bool CiAlligator::Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iAlligator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- idicator successfully created
-   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to Jaw buffer of "Alligator".                             |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiAlligator::Jaw(int index) const
+double CiAlligator::Jaw(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Teeth buffer of "Alligator".                           |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Teeth buffer of "Alligator"                            |
 //+------------------------------------------------------------------+
-double CiAlligator::Teeth(int index) const
+double CiAlligator::Teeth(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Lips buffer of "Alligator".                            |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Lips buffer of "Alligator"                             |
 //+------------------------------------------------------------------+
-double CiAlligator::Lips(int index) const
+double CiAlligator::Lips(const int index) const
   {
    CIndicatorBuffer *buffer=At(2);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -308,39 +291,67 @@ double CiAlligator::Lips(int index) const
 class CiAO : public CIndicator
   {
 public:
+                     CiAO(void);
+                    ~CiAO(void);
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to data of indicator
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_AO); }
+   virtual int       Type(void) const { return(IND_AO); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiAO::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiAO::CiAO(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiAO::~CiAO(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Awesome Oscillator" indicator                        |
+//+------------------------------------------------------------------+
+bool CiAO::Create(const string symbol,const ENUM_TIMEFRAMES period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iAO(symbol,period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfullly created
+   if(!Initialize(symbol,period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiAO::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period));
   }
 //+------------------------------------------------------------------+
-//| Create the "Awesome Oscillator" indicator.                       |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Awesome Oscillator" indicator                        |
 //+------------------------------------------------------------------+
-bool CiAO::Initialize(string symbol,ENUM_TIMEFRAMES period)
+bool CiAO::Initialize(const string symbol,const ENUM_TIMEFRAMES period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -355,42 +366,14 @@ bool CiAO::Initialize(string symbol,ENUM_TIMEFRAMES period)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Awesome Oscillator" indicator.                       |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Awesome Oscillator"                         |
 //+------------------------------------------------------------------+
-bool CiAO::Create(string symbol,ENUM_TIMEFRAMES period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iAO(symbol,period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfullly created
-   if(!Initialize(symbol,period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Awesome Oscillator".                        |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiAO::Main(int index) const
+double CiAO::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -402,40 +385,68 @@ double CiAO::Main(int index) const
 class CiFractals : public CIndicator
   {
 public:
+                     CiFractals(void);
+                    ~CiFractals(void);
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period);
    //--- methods of access to indicator data
-   double            Upper(int index) const;
-   double            Lower(int index) const;
+   double            Upper(const int index) const;
+   double            Lower(const int index) const;
    //--- method of identifying
-   virtual int       Type()           const { return(IND_FRACTALS); }
+   virtual int       Type(void) const { return(IND_FRACTALS); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period);
   };
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CiFractals::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiFractals::CiFractals(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiFractals::~CiFractals(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Fractals" indicator                                  |
+//+------------------------------------------------------------------+
+bool CiFractals::Create(const string symbol,const ENUM_TIMEFRAMES period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iFractals(symbol,period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiFractals::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiFractals::Initialize(string symbol,ENUM_TIMEFRAMES period)
+bool CiFractals::Initialize(const string symbol,const ENUM_TIMEFRAMES period)
   {
    if(CreateBuffers(symbol,period,2))
      {
@@ -452,56 +463,26 @@ bool CiFractals::Initialize(string symbol,ENUM_TIMEFRAMES period)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Fractals" indicator.                                 |
-//| INPUT:  symbol - indicator symbol,                               |
-//|         period - indicator period.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to Upper buffer of "Fractals"                             |
 //+------------------------------------------------------------------+
-bool CiFractals::Create(string symbol,ENUM_TIMEFRAMES period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iFractals(symbol,period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- idicator successfully created
-   if(!Initialize(symbol,period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to Upper buffer of "Fractals".                            |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiFractals::Upper(int index) const
+double CiFractals::Upper(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Lower buffer of "Fractals".                            |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Lower buffer of "Fractals"                             |
 //+------------------------------------------------------------------+
-double CiFractals::Lower(int index) const
+double CiFractals::Lower(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -523,89 +504,113 @@ protected:
    int               m_applied;
 
 public:
-                     CiGator();
+                     CiGator(void);
+                    ~CiGator(void);
    //--- methods of access to protected data
-   int               JawPeriod()      const { return(m_jaw_period);   }
-   int               JawShift()       const { return(m_jaw_shift);    }
-   int               TeethPeriod()    const { return(m_teeth_period); }
-   int               TeethShift()     const { return(m_teeth_shift);  }
-   int               LipsPeriod()     const { return(m_lips_period);  }
-   int               LipsShift()      const { return(m_lips_shift);   }
-   ENUM_MA_METHOD    MaMethod()       const { return(m_ma_method);    }
-   int               Applied()        const { return(m_applied);      }
+   int               JawPeriod(void)        const { return(m_jaw_period);   }
+   int               JawShift(void)         const { return(m_jaw_shift);    }
+   int               TeethPeriod(void)      const { return(m_teeth_period); }
+   int               TeethShift(void)       const { return(m_teeth_shift);  }
+   int               LipsPeriod(void)       const { return(m_lips_period);  }
+   int               LipsShift(void)        const { return(m_lips_shift);   }
+   ENUM_MA_METHOD    MaMethod(void)         const { return(m_ma_method);    }
+   int               Applied(void)          const { return(m_applied);      }
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int jaw_period,const int jaw_shift,
+                            const int teeth_period,const int teeth_shift,
+                            const int lips_period,const int lips_shift,
+                            const ENUM_MA_METHOD ma_method,const int applied);
    //--- methods of access to data of indicator
-   double            Upper(int index) const;
-   double            Lower(int index) const;
+   double            Upper(const int index) const;
+   double            Lower(const int index) const;
    //--- method of identifying
-   virtual int       Type()           const { return(IND_GATOR);      }
+   virtual int       Type(void) const { return(IND_GATOR); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int jaw_period,const int jaw_shift,
+                                const int teeth_period,const int teeth_shift,
+                                const int lips_period,const int lips_shift,
+                                const ENUM_MA_METHOD ma_method,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiGator.                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiGator::CiGator()
+CiGator::CiGator(void) : m_jaw_period(-1),
+                         m_jaw_shift(-1),
+                         m_teeth_period(-1),
+                         m_teeth_shift(-1),
+                         m_lips_period(-1),
+                         m_lips_shift(-1),
+                         m_ma_method(WRONG_VALUE),
+                         m_applied(-1)
   {
-//--- initialize protected data
-   m_jaw_period  =-1;
-   m_jaw_shift   =-1;
-   m_teeth_period=-1;
-   m_teeth_shift =-1;
-   m_lips_period =-1;
-   m_lips_shift  =-1;
-   m_ma_method   =WRONG_VALUE;
-   m_applied     =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiGator::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiGator::~CiGator(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "Gator oscillator"                              |
+//+------------------------------------------------------------------+
+bool CiGator::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                     const int jaw_period,const int jaw_shift,
+                     const int teeth_period,const int teeth_shift,
+                     const int lips_period,const int lips_shift,
+                     const ENUM_MA_METHOD ma_method,const int applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iGator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiGator::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                                   (int)params[2].integer_value,(int)params[3].integer_value,
-                                   (int)params[4].integer_value,(int)params[5].integer_value,
-                        (ENUM_MA_METHOD)params[6].integer_value,(int)params[7].integer_value));
+          (int)params[2].integer_value,(int)params[3].integer_value,
+          (int)params[4].integer_value,(int)params[5].integer_value,
+          (ENUM_MA_METHOD)params[6].integer_value,(int)params[7].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol       - indicator symbol,                         |
-//|         period       - indicator period,                         |
-//|         jaw_period   - period for the calculation of jaws,       |
-//|         jaw_shift    - shift of jaws,                            |
-//|         teeth_period - period for the calculation of teeth,      |
-//|         teeth_shift  - shift of teeth,                           |
-//|         lips_period  - period for the calculation of lips,       |
-//|         lips_shift   - shift of lips,                            |
-//|         ma_method    - averaging method for MA,                  |
-//|         applied      - what to apply the indicator to.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiGator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
+bool CiGator::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                         const int jaw_period,const int jaw_shift,
+                         const int teeth_period,const int teeth_shift,
+                         const int lips_period,const int lips_shift,
+                         const ENUM_MA_METHOD ma_method,const int applied)
   {
    if(CreateBuffers(symbol,period,2))
      {
       //--- string of status drawing
       m_name  ="Gator";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(jaw_period)+","+IntegerToString(jaw_shift)+","+
-                IntegerToString(teeth_period)+","+IntegerToString(teeth_shift)+","+
-                IntegerToString(lips_period)+","+IntegerToString(lips_shift)+","+
-                MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
+               IntegerToString(jaw_period)+","+IntegerToString(jaw_shift)+","+
+               IntegerToString(teeth_period)+","+IntegerToString(teeth_shift)+","+
+               IntegerToString(lips_period)+","+IntegerToString(lips_shift)+","+
+               MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
       //--- save settings
       m_jaw_period  =jaw_period;
       m_jaw_shift   =jaw_shift;
@@ -627,64 +632,26 @@ bool CiGator::Initialize(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "Gator oscillator".                             |
-//| INPUT:  symbol       - indicator symbol,                         |
-//|         period       - indicator period,                         |
-//|         jaw_period   - period for the calculation of jaws,       |
-//|         jaw_shift    - shift of jaws,                            |
-//|         teeth_period - period for the calculation of teeth,      |
-//|         teeth_shift  - shift of teeth,                           |
-//|         lips_period  - period for the calculation of lips,       |
-//|         lips_shift   - shift of lips,                            |
-//|         ma_method    - averaging method for MA,                  |
-//|         applied      - what to apply the indicator to.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to Upper buffer of "Gator oscillator"                     |
 //+------------------------------------------------------------------+
-bool CiGator::Create(string symbol,ENUM_TIMEFRAMES period,int jaw_period,int jaw_shift,int teeth_period,int teeth_shift,int lips_period,int lips_shift,ENUM_MA_METHOD ma_method,int applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iGator(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- idicator successfully created
-   if(!Initialize(symbol,period,jaw_period,jaw_shift,teeth_period,teeth_shift,lips_period,lips_shift,ma_method,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to Upper buffer of "Gator oscillator".                    |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiGator::Upper(int index) const
+double CiGator::Upper(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Lower buffer of "Gator oscillator".                    |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Lower buffer of "Gator oscillator"                     |
 //+------------------------------------------------------------------+
-double CiGator::Lower(int index) const
+double CiGator::Lower(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -700,54 +667,69 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiBWMFI();
+                     CiBWMFI(void);
+                    ~CiBWMFI(void);
    //--- methods of access to protected data
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied); }
+   ENUM_APPLIED_VOLUME Applied(void) const { return(m_applied); }
    //--- method of creating
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to data of indicator
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_BWMFI); }
+   virtual int       Type(void) const { return(IND_BWMFI); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiBWMFI.                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiBWMFI::CiBWMFI()
+CiBWMFI::CiBWMFI(void) : m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_applied=WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiBWMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiBWMFI::~CiBWMFI(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create "Market Facilitation Index by Bill Williams" indicator    |
+//+------------------------------------------------------------------+
+bool CiBWMFI::Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iBWMFI(symbol,period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- idicator successfully created
+   if(!Initialize(symbol,period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiBWMFI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(ENUM_APPLIED_VOLUME)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize indicator with the special parameters.                |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize indicator with the special parameters                 |
 //+------------------------------------------------------------------+
-bool CiBWMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
+bool CiBWMFI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -765,43 +747,14 @@ bool CiBWMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUM
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create "Market Facilitation Index by Bill Williams" indicator.   |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiBWMFI::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iBWMFI(symbol,period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- idicator successfully created
-   if(!Initialize(symbol,period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
 //| Access to buffer of "Market Facilitation Index by Bill Williams".|
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-double CiBWMFI::Main(int index) const
+double CiBWMFI::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }

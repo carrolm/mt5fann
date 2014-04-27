@@ -54,15 +54,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Stochastic Oscillator                                            |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,k,start;
 //--- check for bars count
@@ -86,8 +87,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       double dmax=-1000000.0;
       for(k=i-InpKPeriod+1;k<=i;k++)
         {
-         if(dmin>Low[k])  dmin=Low[k];
-         if(dmax<High[k]) dmax=High[k];
+         if(dmin>low[k])  dmin=low[k];
+         if(dmax<high[k]) dmax=high[k];
         }
       ExtLowesBuffer[i]=dmin;
       ExtHighesBuffer[i]=dmax;
@@ -106,7 +107,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       double sumhigh=0.0;
       for(k=(i-InpSlowing+1);k<=i;k++)
         {
-         sumlow +=(Close[k]-ExtLowesBuffer[k]);
+         sumlow +=(close[k]-ExtLowesBuffer[k]);
          sumhigh+=(ExtHighesBuffer[k]-ExtLowesBuffer[k]);
         }
       if(sumhigh==0.0) ExtMainBuffer[i]=100.0;

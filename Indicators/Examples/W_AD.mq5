@@ -32,15 +32,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //---
    if(rates_total<2)
@@ -57,10 +58,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(int i=pos;i<rates_total && !IsStopped();i++)
      {
       //--- get data
-      double hi=High[i];
-      double lo=Low[i];
-      double cl=Close[i];
-      double prev_cl=Close[i-1];
+      double hi=high[i];
+      double lo=low[i];
+      double cl=close[i];
+      double prev_cl=close[i-1];
       //--- calculate TRH and TRL
       double trh=MathMax(hi,prev_cl);
       double trl=MathMin(lo,prev_cl);

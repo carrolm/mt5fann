@@ -41,25 +41,26 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Heiken Ashi                                                      |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //--- preliminary calculations
    if(prev_calculated==0)
      {
       //--- set first candle
-      ExtLBuffer[0]=Low[0];
-      ExtHBuffer[0]=High[0];
-      ExtOBuffer[0]=Open[0];
-      ExtCBuffer[0]=Close[0];
+      ExtLBuffer[0]=low[0];
+      ExtHBuffer[0]=high[0];
+      ExtOBuffer[0]=open[0];
+      ExtCBuffer[0]=close[0];
       limit=1;
      }
    else limit=prev_calculated-1;
@@ -68,9 +69,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(i=limit;i<rates_total && !IsStopped();i++)
      {
       double haOpen=(ExtOBuffer[i-1]+ExtCBuffer[i-1])/2;
-      double haClose=(Open[i]+High[i]+Low[i]+Close[i])/4;
-      double haHigh=MathMax(High[i],MathMax(haOpen,haClose));
-      double haLow=MathMin(Low[i],MathMin(haOpen,haClose));
+      double haClose=(open[i]+high[i]+low[i]+close[i])/4;
+      double haHigh=MathMax(high[i],MathMax(haOpen,haClose));
+      double haLow=MathMin(low[i],MathMin(haOpen,haClose));
 
       ExtLBuffer[i]=haLow;
       ExtHBuffer[i]=haHigh;

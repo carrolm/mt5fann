@@ -1,9 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                                  MACD Sample.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright   "Copyright 2010, MetaQuotes Software Corp."
+#property copyright   "Copyright 2009-2013, MetaQuotes Software Corp."
 #property link        "http://www.mql5.com"
 #property version     "5.20"
 #property description "It is important to make sure that the expert works with a normal"
@@ -56,60 +56,63 @@ protected:
    double            m_take_profit;
 
 public:
-                     CSampleExpert();
-   bool              Init();
-   void              Deinit();
-   bool              Processing();
+                     CSampleExpert(void);
+                    ~CSampleExpert(void);
+   bool              Init(void);
+   void              Deinit(void);
+   bool              Processing(void);
 
 protected:
-   bool              InitCheckParameters(int digits_adjust);
-   bool              InitIndicators();
-   bool              LongClosed();
-   bool              ShortClosed();
-   bool              LongModified();
-   bool              ShortModified();
-   bool              LongOpened();
-   bool              ShortOpened();
+   bool              InitCheckParameters(const int digits_adjust);
+   bool              InitIndicators(void);
+   bool              LongClosed(void);
+   bool              ShortClosed(void);
+   bool              LongModified(void);
+   bool              ShortModified(void);
+   bool              LongOpened(void);
+   bool              ShortOpened(void);
   };
-//---
+//--- global expert
 CSampleExpert ExtExpert;
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CSampleExpert::CSampleExpert()
+CSampleExpert::CSampleExpert(void) : m_adjusted_point(0),
+                                     m_handle_macd(INVALID_HANDLE),
+                                     m_handle_ema(INVALID_HANDLE),
+                                     m_macd_current(0),
+                                     m_macd_previous(0),
+                                     m_signal_current(0),
+                                     m_signal_previous(0),
+                                     m_ema_current(0),
+                                     m_ema_previous(0),
+                                     m_macd_open_level(0),
+                                     m_macd_close_level(0),
+                                     m_traling_stop(0),
+                                     m_take_profit(0)
   {
-//---
-   m_adjusted_point=0;
-   m_handle_macd=INVALID_HANDLE;
-   m_handle_ema =INVALID_HANDLE;
-//---
    ArraySetAsSeries(m_buff_MACD_main,true);
    ArraySetAsSeries(m_buff_MACD_signal,true);
    ArraySetAsSeries(m_buff_EMA,true);
-//---
-   m_macd_current    =0;
-   m_macd_previous   =0;
-   m_signal_current  =0;
-   m_signal_previous =0;
-   m_ema_current     =0;
-   m_ema_previous    =0;
-//---
-   m_macd_open_level =0;
-   m_macd_close_level=0;
-   m_traling_stop    =0;
-   m_take_profit     =0;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSampleExpert::~CSampleExpert(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Initialization and checking for input parameters                 |
 //+------------------------------------------------------------------+
-bool CSampleExpert::Init()
+bool CSampleExpert::Init(void)
   {
 //--- initialize common information
    m_symbol.Name(Symbol());              // symbol
    m_trade.SetExpertMagicNumber(12345);  // magic
 //--- tuning for 3 or 5 digits
    int digits_adjust=1;
-   if(m_symbol.Digits()==3 || m_symbol.Digits()==5) digits_adjust=10;
+   if(m_symbol.Digits()==3 || m_symbol.Digits()==5)
+      digits_adjust=10;
    m_adjusted_point=m_symbol.Point()*digits_adjust;
 //--- set default deviation for trading in adjusted points
    m_macd_open_level =InpMACDOpenLevel*m_adjusted_point;
@@ -119,15 +122,17 @@ bool CSampleExpert::Init()
 //--- set default deviation for trading in adjusted points
    m_trade.SetDeviationInPoints(3*digits_adjust);
 //---
-   if(!InitCheckParameters(digits_adjust)) return(false);
-   if(!InitIndicators())                   return(false);
-//--- ok
+   if(!InitCheckParameters(digits_adjust))
+      return(false);
+   if(!InitIndicators())
+      return(false);
+//--- succeed
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Checking for input parameters                                    |
 //+------------------------------------------------------------------+
-bool CSampleExpert::InitCheckParameters(int digits_adjust)
+bool CSampleExpert::InitCheckParameters(const int digits_adjust)
   {
 //--- initial data checks
    if(InpTakeProfit*digits_adjust<m_symbol.StopsLevel())
@@ -154,13 +159,13 @@ bool CSampleExpert::InitCheckParameters(int digits_adjust)
 //--- warning
    if(InpTakeProfit<=InpTrailingStop)
       printf("Warning: Trailing Stop must be less than Take Profit");
-//--- ok
+//--- succeed
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialization of the indicators                                 |
 //+------------------------------------------------------------------+
-bool CSampleExpert::InitIndicators()
+bool CSampleExpert::InitIndicators(void)
   {
 //--- create MACD indicator
    if(m_handle_macd==INVALID_HANDLE)
@@ -176,13 +181,13 @@ bool CSampleExpert::InitIndicators()
          printf("Error creating EMA indicator");
          return(false);
         }
-//--- ok
+//--- succeed
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Check for long position closing                                  |
 //+------------------------------------------------------------------+
-bool CSampleExpert::LongClosed()
+bool CSampleExpert::LongClosed(void)
   {
    bool res=false;
 //--- should it be closed?
@@ -198,13 +203,13 @@ bool CSampleExpert::LongClosed()
             //--- processed and cannot be modified
             res=true;
            }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| Check for short position closing                                 |
 //+------------------------------------------------------------------+
-bool CSampleExpert::ShortClosed()
+bool CSampleExpert::ShortClosed(void)
   {
    bool res=false;
 //--- should it be closed?
@@ -220,13 +225,13 @@ bool CSampleExpert::ShortClosed()
             //--- processed and cannot be modified
             res=true;
            }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| Check for long position modifying                                |
 //+------------------------------------------------------------------+
-bool CSampleExpert::LongModified()
+bool CSampleExpert::LongModified(void)
   {
    bool res=false;
 //--- check for trailing stop
@@ -251,13 +256,13 @@ bool CSampleExpert::LongModified()
            }
         }
      }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| Check for short position modifying                               |
 //+------------------------------------------------------------------+
-bool CSampleExpert::ShortModified()
+bool CSampleExpert::ShortModified(void)
   {
    bool   res=false;
 //--- check for trailing stop
@@ -282,13 +287,13 @@ bool CSampleExpert::ShortModified()
            }
         }
      }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| Check for long position opening                                  |
 //+------------------------------------------------------------------+
-bool CSampleExpert::LongOpened()
+bool CSampleExpert::LongOpened(void)
   {
    bool res=false;
 //--- check for long position (BUY) possibility
@@ -315,13 +320,13 @@ bool CSampleExpert::LongOpened()
             //--- in any case we must exit from expert
             res=true;
            }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| Check for short position opening                                 |
 //+------------------------------------------------------------------+
-bool CSampleExpert::ShortOpened()
+bool CSampleExpert::ShortOpened(void)
   {
    bool res=false;
 //--- check for short position (SELL) possibility
@@ -348,21 +353,24 @@ bool CSampleExpert::ShortOpened()
             //--- in any case we must exit from expert
             res=true;
            }
-//---
+//--- result
    return(res);
   }
 //+------------------------------------------------------------------+
 //| main function returns true if any position processed             |
 //+------------------------------------------------------------------+
-bool CSampleExpert::Processing()
+bool CSampleExpert::Processing(void)
   {
 //--- refresh rates
-   if(!m_symbol.RefreshRates())                                          return(false);
+   if(!m_symbol.RefreshRates())
+      return(false);
 //--- refresh indicators
-   if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2) return(false);
+   if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2)
+      return(false);
    if(CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main)  !=2 ||
       CopyBuffer(m_handle_macd,1,0,2,m_buff_MACD_signal)!=2 ||
-      CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA)         !=2)             return(false);
+      CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA)         !=2)
+      return(false);
 //   m_indicators.Refresh();
 //--- to simplify the coding and speed up access
 //--- data are put into internal variables
@@ -380,23 +388,29 @@ bool CSampleExpert::Processing()
       if(m_position.PositionType()==POSITION_TYPE_BUY)
         {
          //--- try to close or modify long position
-         if(LongClosed())    return(true);
-         if(LongModified())  return(true);
+         if(LongClosed())
+            return(true);
+         if(LongModified())
+            return(true);
         }
       else
         {
          //--- try to close or modify short position
-         if(ShortClosed())   return(true);
-         if(ShortModified()) return(true);
+         if(ShortClosed())
+            return(true);
+         if(ShortModified())
+            return(true);
         }
      }
 //--- no opened position identified
    else
      {
       //--- check for long position (BUY) possibility
-      if(LongOpened())  return(true);
+      if(LongOpened())
+         return(true);
       //--- check for short position (SELL) possibility
-      if(ShortOpened()) return(true);
+      if(ShortOpened())
+         return(true);
      }
 //--- exit without position processing
    return(false);
@@ -404,17 +418,18 @@ bool CSampleExpert::Processing()
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-int OnInit()
+int OnInit(void)
   {
 //--- create all necessary objects
-   if(!ExtExpert.Init()) return(-1);
-//--- ok
-   return(0);
+   if(!ExtExpert.Init())
+      return(INIT_FAILED);
+//--- secceed
+   return(INIT_SUCCEEDED);
   }
 //+------------------------------------------------------------------+
 //| Expert new tick handling function                                |
 //+------------------------------------------------------------------+
-void OnTick()
+void OnTick(void)
   {
    static datetime limit_time=0; // last trade processing time + timeout
 //--- don't process if timeout
@@ -424,9 +439,9 @@ void OnTick()
       if(Bars(Symbol(),Period())>2*InpMATrendPeriod)
         {
          //--- change limit time by timeout in seconds if processed
-         if(ExtExpert.Processing()) limit_time=TimeCurrent()+ExtTimeOut;
+         if(ExtExpert.Processing())
+            limit_time=TimeCurrent()+ExtTimeOut;
         }
      }
-//---
   }
 //+------------------------------------------------------------------+

@@ -63,15 +63,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //--- check for minimum rates count
    if(rates_total<3)
@@ -85,12 +86,12 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       pos=1;
       ExtAFBuffer[0]=ExtSarStep;
       ExtAFBuffer[1]=ExtSarStep;
-      ExtSARBuffer[0]=High[0];
+      ExtSARBuffer[0]=high[0];
       ExtLastRevPos=0;
       ExtDirectionLong=false;
-      ExtSARBuffer[1]=GetHigh(pos,ExtLastRevPos,High);
-      ExtEPBuffer[0]=Low[pos];
-      ExtEPBuffer[1]=Low[pos];
+      ExtSARBuffer[1]=GetHigh(pos,ExtLastRevPos,high);
+      ExtEPBuffer[0]=low[pos];
+      ExtEPBuffer[1]=low[pos];
      }
 //---main cycle
    for(int i=pos;i<rates_total-1 && !IsStopped();i++)
@@ -98,24 +99,24 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       //--- check for reverse
       if(ExtDirectionLong)
         {
-         if(ExtSARBuffer[i]>Low[i])
+         if(ExtSARBuffer[i]>low[i])
            {
             //--- switch to SHORT
             ExtDirectionLong=false;
-            ExtSARBuffer[i]=GetHigh(i,ExtLastRevPos,High);
-            ExtEPBuffer[i]=Low[i];
+            ExtSARBuffer[i]=GetHigh(i,ExtLastRevPos,high);
+            ExtEPBuffer[i]=low[i];
             ExtLastRevPos=i;
             ExtAFBuffer[i]=ExtSarStep;
            }
         }
       else
         {
-         if(ExtSARBuffer[i]<High[i])
+         if(ExtSARBuffer[i]<high[i])
            {
             //--- switch to LONG
             ExtDirectionLong=true;
-            ExtSARBuffer[i]=GetLow(i,ExtLastRevPos,Low);
-            ExtEPBuffer[i]=High[i];
+            ExtSARBuffer[i]=GetLow(i,ExtLastRevPos,low);
+            ExtEPBuffer[i]=high[i];
             ExtLastRevPos=i;
             ExtAFBuffer[i]=ExtSarStep;
            }
@@ -124,9 +125,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(ExtDirectionLong)
         {
          //--- check for new High
-         if(High[i]>ExtEPBuffer[i-1] && i!=ExtLastRevPos)
+         if(high[i]>ExtEPBuffer[i-1] && i!=ExtLastRevPos)
            {
-            ExtEPBuffer[i]=High[i];
+            ExtEPBuffer[i]=high[i];
             ExtAFBuffer[i]=ExtAFBuffer[i-1]+ExtSarStep;
             if(ExtAFBuffer[i]>ExtSarMaximum)
                ExtAFBuffer[i]=ExtSarMaximum;
@@ -143,15 +144,15 @@ int OnCalculate(const int rates_total,const int prev_calculated,
          //--- calculate SAR for tomorrow
          ExtSARBuffer[i+1]=ExtSARBuffer[i]+ExtAFBuffer[i]*(ExtEPBuffer[i]-ExtSARBuffer[i]);
          //--- check for SAR
-         if(ExtSARBuffer[i+1]>Low[i] || ExtSARBuffer[i+1]>Low[i-1])
-            ExtSARBuffer[i+1]=MathMin(Low[i],Low[i-1]);
+         if(ExtSARBuffer[i+1]>low[i] || ExtSARBuffer[i+1]>low[i-1])
+            ExtSARBuffer[i+1]=MathMin(low[i],low[i-1]);
         }
       else
         {
          //--- check for new Low
-         if(Low[i]<ExtEPBuffer[i-1] && i!=ExtLastRevPos)
+         if(low[i]<ExtEPBuffer[i-1] && i!=ExtLastRevPos)
            {
-            ExtEPBuffer[i]=Low[i];
+            ExtEPBuffer[i]=low[i];
             ExtAFBuffer[i]=ExtAFBuffer[i-1]+ExtSarStep;
             if(ExtAFBuffer[i]>ExtSarMaximum)
                ExtAFBuffer[i]=ExtSarMaximum;
@@ -168,8 +169,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
          //--- calculate SAR for tomorrow
          ExtSARBuffer[i+1]=ExtSARBuffer[i]+ExtAFBuffer[i]*(ExtEPBuffer[i]-ExtSARBuffer[i]);
          //--- check for SAR
-         if(ExtSARBuffer[i+1]<High[i] || ExtSARBuffer[i+1]<High[i-1])
-            ExtSARBuffer[i+1]=MathMax(High[i],High[i-1]);
+         if(ExtSARBuffer[i+1]<high[i] || ExtSARBuffer[i+1]<high[i-1])
+            ExtSARBuffer[i+1]=MathMax(high[i],high[i-1]);
         }
      }
 //---- OnCalculate done. Return new prev_calculated.

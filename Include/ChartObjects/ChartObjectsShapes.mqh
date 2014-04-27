@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                           ChartObjectsShapes.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All shapes.                                                      |
 //+------------------------------------------------------------------+
@@ -15,30 +14,40 @@
 class CChartObjectRectangle : public CChartObject
   {
 public:
+                     CChartObjectRectangle(void);
+                    ~CChartObjectRectangle(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_RECTANGLE); }
+   virtual int       Type(void) const { return(OBJ_RECTANGLE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Rectangle".                                       |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate                         |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectRectangle::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2)
+CChartObjectRectangle::CChartObjectRectangle(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_RECTANGLE,window,time1,price1,time2,price2);
-//---
-   if(result) result&=Attach(chart_id,name,window,2);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectRectangle::~CChartObjectRectangle(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Rectangle"                                        |
+//+------------------------------------------------------------------+
+bool CChartObjectRectangle::Create(long chart_id,const string name,const int window,
+                                   const datetime time1,const double price1,
+                                   const datetime time2,const double price2)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_RECTANGLE,window,time1,price1,time2,price2))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectTriangle.                                      |
@@ -48,32 +57,42 @@ bool CChartObjectRectangle::Create(long chart_id,string name,int window,datetime
 class CChartObjectTriangle : public CChartObject
   {
 public:
+                     CChartObjectTriangle(void);
+                    ~CChartObjectTriangle(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_TRIANGLE); }
+   virtual int       Type(void) const { return(OBJ_TRIANGLE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Triangle".                                        |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectTriangle::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3)
+CChartObjectTriangle::CChartObjectTriangle(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_TRIANGLE,window,time1,price1,time2,price2,time3,price3);
-//---
-   if(result) result&=Attach(chart_id,name,window,3);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectTriangle::~CChartObjectTriangle(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Triangle"                                         |
+//+------------------------------------------------------------------+
+bool CChartObjectTriangle::Create(long chart_id,const string name,const int window,
+                                  const datetime time1,const double price1,
+                                  const datetime time2,const double price2,
+                                  const datetime time3,const double price3)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_TRIANGLE,window,time1,price1,time2,price2,time3,price3))
+      return(false);
+   if(!Attach(chart_id,name,window,3))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectEllipse.                                       |
@@ -83,31 +102,41 @@ bool CChartObjectTriangle::Create(long chart_id,string name,int window,datetime 
 class CChartObjectEllipse : public CChartObject
   {
 public:
+                     CChartObjectEllipse(void);
+                    ~CChartObjectEllipse(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2,
+                            const datetime time3,const double price3);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_ELLIPSE); }
+   virtual int       Type(void) const { return(OBJ_ELLIPSE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Ellipse".                                         |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//|         time3    - third time coordinate,                        |
-//|         price3   - third price coordinate.                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectEllipse::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2,datetime time3,double price3)
+CChartObjectEllipse::CChartObjectEllipse(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_ELLIPSE,window,time1,price1,time2,price2,time3,price3);
-//---
-   if(result) result&=Attach(chart_id,name,window,3);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectEllipse::~CChartObjectEllipse(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Ellipse"                                          |
+//+------------------------------------------------------------------+
+bool CChartObjectEllipse::Create(long chart_id,const string name,const int window,
+                                 const datetime time1,const double price1,
+                                 const datetime time2,const double price2,
+                                 const datetime time3,const double price3)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_ELLIPSE,window,time1,price1,time2,price2,time3,price3))
+      return(false);
+   if(!Attach(chart_id,name,window,3))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

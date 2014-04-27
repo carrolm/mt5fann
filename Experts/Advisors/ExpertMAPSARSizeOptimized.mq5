@@ -1,9 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                    ExpertMAPSARSizeOptimized.mq5 |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2010, MetaQuotes Software Corp."
+#property copyright   "2009-2013, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 //+------------------------------------------------------------------+
@@ -38,7 +38,7 @@ CExpert ExtExpert;
 //+------------------------------------------------------------------+
 //| Initialization function of the expert                            |
 //+------------------------------------------------------------------+
-int OnInit()
+int OnInit(void)
   {
 //--- Initializing expert
    if(!ExtExpert.Init(Symbol(),Period(),Expert_EveryTick,Expert_MagicNumber))
@@ -142,8 +142,8 @@ int OnInit()
       ExtExpert.Deinit();
       return(-11);
      }
-//--- ok
-   return(0);
+//--- succeed
+   return(INIT_SUCCEEDED);
   }
 //+------------------------------------------------------------------+
 //| Deinitialization function of the expert                          |
@@ -155,21 +155,21 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 //| Function-event handler "tick"                                    |
 //+------------------------------------------------------------------+
-void OnTick()
+void OnTick(void)
   {
    ExtExpert.OnTick();
   }
 //+------------------------------------------------------------------+
 //| Function-event handler "trade"                                   |
 //+------------------------------------------------------------------+
-void OnTrade()
+void OnTrade(void)
   {
    ExtExpert.OnTrade();
   }
 //+------------------------------------------------------------------+
 //| Function-event handler "timer"                                   |
 //+------------------------------------------------------------------+
-void OnTimer()
+void OnTimer(void)
   {
    ExtExpert.OnTimer();
   }

@@ -74,15 +74,16 @@ double Lowest(const double&array[],int range,int fromIndex)
 //+------------------------------------------------------------------+
 //| Detrended Price Oscillator                                       |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit=0;
 //--- check for rates count
@@ -149,14 +150,14 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(shift=limit;shift<rates_total && !IsStopped();shift++)
      {
 
-      val=Lowest(Low,ExtDepth,shift);
+      val=Lowest(low,ExtDepth,shift);
       //---
       if(val==lastlow) val=0.0;
       else
         {
          lastlow=val;
          //---
-         if((Low[shift]-val)>(ExtDeviation*_Point)) val=0.0;
+         if((low[shift]-val)>(ExtDeviation*_Point)) val=0.0;
          else
            {
             //---
@@ -169,18 +170,18 @@ int OnCalculate(const int rates_total,const int prev_calculated,
            }
         }
       //---
-      if(Low[shift]==val) LowMapBuffer[shift]=val;
+      if(low[shift]==val) LowMapBuffer[shift]=val;
       else
          LowMapBuffer[shift]=0.0;
       //--- high
-      val=Highest(High,ExtDepth,shift);
+      val=Highest(high,ExtDepth,shift);
       //---
       if(val==lasthigh) val=0.0;
       else
         {
          lasthigh=val;
          //---
-         if((val-High[shift])>(ExtDeviation*_Point)) val=0.0;
+         if((val-high[shift])>(ExtDeviation*_Point)) val=0.0;
          else
            {
             //---
@@ -193,7 +194,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
            }
         }
       //---
-      if(High[shift]==val) HighMapBuffer[shift]=val;
+      if(high[shift]==val) HighMapBuffer[shift]=val;
       else  HighMapBuffer[shift]=0.0;
      }
 // final cutting 
@@ -218,7 +219,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
            {
             if(HighMapBuffer[shift]!=0)
               {
-               lasthigh=High[shift];
+               lasthigh=high[shift];
                lasthighpos=shift;
                whatlookfor=-1;
                ZigzagPeakBuffer[shift]=lasthigh;
@@ -227,7 +228,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
               }
             if(LowMapBuffer[shift]!=0)
               {
-               lastlow=Low[shift];
+               lastlow=low[shift];
                lastlowpos=shift;
                whatlookfor=1;
                ZigzagLawnBuffer[shift]=lastlow;

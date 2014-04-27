@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              SignalEnvelopes.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertSignal.mqh>
 // wizard description start
@@ -44,7 +43,8 @@ protected:
    int               m_pattern_1;      // model 1 "price crossed a border of the envelope"
 
 public:
-                     CSignalEnvelopes();
+                     CSignalEnvelopes(void);
+                    ~CSignalEnvelopes(void);
    //--- methods of setting adjustable parameters
    void              PeriodMA(int value)                 { m_ma_period=value;        }
    void              Shift(int value)                    { m_ma_shift=value;         }
@@ -57,53 +57,50 @@ public:
    void              Pattern_0(int value)                { m_pattern_0=value;        }
    void              Pattern_1(int value)                { m_pattern_1=value;        }
    //--- method of verification of settings
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //--- method of creating the indicator and timeseries
-   virtual bool      InitIndicators(CIndicators* indicators);
+   virtual bool      InitIndicators(CIndicators *indicators);
    //--- methods of checking if the market models are formed
-   virtual int       LongCondition();
-   virtual int       ShortCondition();
+   virtual int       LongCondition(void);
+   virtual int       ShortCondition(void);
 
 protected:
    //--- method of initialization of the indicator
-   bool              InitMA(CIndicators* indicators);
+   bool              InitMA(CIndicators *indicators);
    //--- methods of getting data
    double            Upper(int ind)                      { return(m_env.Upper(ind)); }
    double            Lower(int ind)                      { return(m_env.Lower(ind)); }
   };
 //+------------------------------------------------------------------+
-//| Constructor CSignalEnvelopes.                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CSignalEnvelopes::CSignalEnvelopes()
+CSignalEnvelopes::CSignalEnvelopes(void) : m_ma_period(45),
+                                           m_ma_shift(0),
+                                           m_ma_method(MODE_SMA),
+                                           m_ma_applied(PRICE_CLOSE),
+                                           m_deviation(0.15),
+                                           m_limit_in(0.2),
+                                           m_limit_out(0.2),
+                                           m_pattern_0(90),
+                                           m_pattern_1(70)
   {
 //--- initialization of protected data
    m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
-//--- setting default values for the indicator parameters
-   m_ma_period =45;
-   m_ma_shift  =0;
-   m_ma_method =MODE_SMA;
-   m_ma_applied=PRICE_CLOSE;
-   m_deviation =0.15;
-//---
-   m_limit_in  =0.2;
-   m_limit_out =0.2;
-//--- setting default "weights" of the market models
-   m_pattern_0 =90;          // model 0 "price is near the necessary border of the envelope"
-   m_pattern_1 =70;          // model 1 "price crossed a border of the envelope"
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CSignalEnvelopes::~CSignalEnvelopes(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalEnvelopes::ValidationSettings()
+bool CSignalEnvelopes::ValidationSettings(void)
   {
 //--- validation settings of additional filters
-   if(!CExpertSignal::ValidationSettings()) return(false);
+   if(!CExpertSignal::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_ma_period<=0)
      {
@@ -115,31 +112,29 @@ bool CSignalEnvelopes::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalEnvelopes::InitIndicators(CIndicators* indicators)
+bool CSignalEnvelopes::InitIndicators(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL)                           return(false);
+   if(indicators==NULL)
+      return(false);
 //--- initialization of indicators and timeseries of additional filters
-   if(!CExpertSignal::InitIndicators(indicators)) return(false);
+   if(!CExpertSignal::InitIndicators(indicators))
+      return(false);
 //--- create and initialize MA indicator
-   if(!InitMA(indicators))                        return(false);
+   if(!InitMA(indicators))
+      return(false);
 //--- ok
    return(true);
   }
 //+------------------------------------------------------------------+
 //| Initialize MA indicators.                                        |
-//| INPUT:  indicators - pointer of indicator collection.            |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CSignalEnvelopes::InitMA(CIndicators* indicators)
+bool CSignalEnvelopes::InitMA(CIndicators *indicators)
   {
 //--- check pointer
-   if(indicators==NULL) return(false);
+   if(indicators==NULL)
+      return(false);
 //--- add object to collection
    if(!indicators.Add(GetPointer(m_env)))
      {
@@ -157,11 +152,8 @@ bool CSignalEnvelopes::InitMA(CIndicators* indicators)
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will grow.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalEnvelopes::LongCondition()
+int CSignalEnvelopes::LongCondition(void)
   {
    int result=0;
    int idx   =StartIndex();
@@ -180,11 +172,8 @@ int CSignalEnvelopes::LongCondition()
   }
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: number of "votes" that price will fall.                  |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-int CSignalEnvelopes::ShortCondition()
+int CSignalEnvelopes::ShortCondition(void)
   {
    int result  =0;
    int idx     =StartIndex();

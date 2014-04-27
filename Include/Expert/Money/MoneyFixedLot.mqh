@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                MoneyFixedLot.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertMoney.mqh>
 // wizard description start
@@ -29,34 +28,34 @@ protected:
    double            m_lots;
 
 public:
-                     CMoneyFixedLot();
+                     CMoneyFixedLot(void);
+                    ~CMoneyFixedLot(void);
    //---
-   void              Lots(double lots) { m_lots=lots; }
-   virtual bool      ValidationSettings();
+   void              Lots(double lots)                      { m_lots=lots; }
+   virtual bool      ValidationSettings(void);
    //---
-   virtual double    CheckOpenLong(double price,double sl);
-   virtual double    CheckOpenShort(double price,double sl);
+   virtual double    CheckOpenLong(double price,double sl)  { return(m_lots); }
+   virtual double    CheckOpenShort(double price,double sl) { return(m_lots); }
   };
 //+------------------------------------------------------------------+
-//| Constructor CMoneyFixedLot.                                      |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CMoneyFixedLot::CMoneyFixedLot()
+void CMoneyFixedLot::CMoneyFixedLot(void) : m_lots(0.1)
   {
-//--- set default inputs
-   m_lots=0.1;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CMoneyFixedLot::~CMoneyFixedLot(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CMoneyFixedLot::ValidationSettings()
+bool CMoneyFixedLot::ValidationSettings(void)
   {
-   if(!CExpertMoney::ValidationSettings()) return(false);
+   if(!CExpertMoney::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_lots<m_symbol.LotsMin() || m_lots>m_symbol.LotsMax())
      {
@@ -70,25 +69,5 @@ bool CMoneyFixedLot::ValidationSettings()
      }
 //--- ok
    return(true);
-  }
-//+------------------------------------------------------------------+
-//| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CMoneyFixedLot::CheckOpenLong(double price,double sl)
-  {
-   return(m_lots);
-  }
-//+------------------------------------------------------------------+
-//| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CMoneyFixedLot::CheckOpenShort(double price,double sl)
-  {
-   return(m_lots);
   }
 //+------------------------------------------------------------------+

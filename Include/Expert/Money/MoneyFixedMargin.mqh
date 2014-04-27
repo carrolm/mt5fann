@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             MoneyFixedMargin.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertMoney.mqh>
 // wizard description start
@@ -24,19 +23,31 @@
 class CMoneyFixedMargin : public CExpertMoney
   {
 public:
+                     CMoneyFixedMargin(void);
+                    ~CMoneyFixedMargin(void);
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
   };
 //+------------------------------------------------------------------+
+//| Constructor                                                      |
+//+------------------------------------------------------------------+
+void CMoneyFixedMargin::CMoneyFixedMargin(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CMoneyFixedMargin::~CMoneyFixedMargin(void)
+  {
+  }
+//+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyFixedMargin::CheckOpenLong(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    if(price==0.0)
@@ -48,13 +59,11 @@ double CMoneyFixedMargin::CheckOpenLong(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneyFixedMargin::CheckOpenShort(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    if(price==0.0)

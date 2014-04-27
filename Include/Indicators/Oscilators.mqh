@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   Oscilators.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -16,54 +15,69 @@ protected:
    int               m_ma_period;
 
 public:
-                     CiATR();
+                     CiATR(void);
+                    ~CiATR(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
+   int               MaPeriod(void) const { return(m_ma_period); }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_ATR);     }
+   virtual int       Type(void) const { return(IND_ATR); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiATR.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiATR::CiATR()
+CiATR::CiATR(void) : m_ma_period(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiATR::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiATR::~CiATR(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Average True Range" indicator                        |
+//+------------------------------------------------------------------+
+bool CiATR::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iATR(symbol,period,ma_period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiATR::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiATR::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
+bool CiATR::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -81,43 +95,14 @@ bool CiATR::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Average True Range" indicator.                       |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Average True Range"                         |
 //+------------------------------------------------------------------+
-bool CiATR::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iATR(symbol,period,ma_period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,ma_period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Average True Range".                        |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiATR::Main(int index) const
+double CiATR::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -132,54 +117,69 @@ protected:
    int               m_ma_period;
 
 public:
-                     CiBearsPower();
+                     CiBearsPower(void);
+                    ~CiBearsPower(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
+   int               MaPeriod(void) const { return(m_ma_period); }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_BEARS);   }
+   virtual int       Type(void) const { return(IND_BEARS); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiBearsPower.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiBearsPower::CiBearsPower()
+CiBearsPower::CiBearsPower(void) : m_ma_period(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiBearsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiBearsPower::~CiBearsPower(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Bears Power" indicator                               |
+//+------------------------------------------------------------------+
+bool CiBearsPower::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iBearsPower(symbol,period,ma_period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiBearsPower::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiBearsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
+bool CiBearsPower::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -197,43 +197,14 @@ bool CiBearsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Bears Power" indicator.                              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Bears Power"                                |
 //+------------------------------------------------------------------+
-bool CiBearsPower::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iBearsPower(symbol,period,ma_period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,ma_period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Bears Power".                               |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiBearsPower::Main(int index) const
+double CiBearsPower::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -248,54 +219,69 @@ protected:
    int               m_ma_period;
 
 public:
-                     CiBullsPower();
+                     CiBullsPower(void);
+                    ~CiBullsPower(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
+   int               MaPeriod(void) const { return(m_ma_period); }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_BULLS);   }
+   virtual int       Type(void) const { return(IND_BULLS); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiBullsPower.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiBullsPower::CiBullsPower()
+CiBullsPower::CiBullsPower(void) : m_ma_period(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiBullsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiBullsPower::~CiBullsPower(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "Bulls Power"                                   |
+//+------------------------------------------------------------------+
+bool CiBullsPower::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iBullsPower(symbol,period,ma_period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiBullsPower::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiBullsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
+bool CiBullsPower::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -313,43 +299,14 @@ bool CiBullsPower::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "Bulls Power".                                  |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Bulls Power"                                |
 //+------------------------------------------------------------------+
-bool CiBullsPower::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iBullsPower(symbol,period,ma_period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,ma_period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Bulls Power".                               |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiBullsPower::Main(int index) const
+double CiBullsPower::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -365,92 +322,49 @@ protected:
    int               m_applied;
 
 public:
-                     CiCCI();
+                     CiCCI(void);
+                    ~CiCCI(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
-   int               Applied()       const { return(m_applied);   }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   int               Applied(void)         const { return(m_applied);   }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_CCI);     }
+   virtual int       Type(void) const { return(IND_CCI); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiCCI.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiCCI::CiCCI()
+CiCCI::CiCCI(void) : m_ma_period(-1),
+                     m_applied(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_applied  =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiCCI::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiCCI::~CiCCI(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Create the "Commodity Channel Index" indicator.                  |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Commodity Channel Index" indicator                   |
 //+------------------------------------------------------------------+
-bool CiCCI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name  ="CCI";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      m_applied  =applied;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Commodity Channel Index" indicator.                  |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiCCI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
+bool CiCCI::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iCCI(symbol,period,ma_period,applied);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period,applied))
      {
@@ -463,16 +377,43 @@ bool CiCCI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applie
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Commodity Channel Index".                   |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiCCI::Main(int index) const
+bool CiCCI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Create the "Commodity Channel Index" indicator                   |
+//+------------------------------------------------------------------+
+bool CiCCI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name  ="CCI";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      m_applied  =applied;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Commodity Channel Index"                    |
+//+------------------------------------------------------------------+
+double CiCCI::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -490,72 +431,92 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiChaikin();
+                     CiChaikin(void);
+                    ~CiChaikin(void);
    //--- methods of access to protected data
-   int               FastMaPeriod()  const { return(m_fast_ma_period); }
-   int               SlowMaPeriod()  const { return(m_slow_ma_period); }
-   ENUM_MA_METHOD    MaMethod()      const { return(m_ma_method);      }
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied);        }
+   int               FastMaPeriod(void)    const { return(m_fast_ma_period); }
+   int               SlowMaPeriod(void)    const { return(m_slow_ma_period); }
+   ENUM_MA_METHOD    MaMethod(void)        const { return(m_ma_method);      }
+   ENUM_APPLIED_VOLUME Applied(void)       const { return(m_applied);        }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int fast_ma_period,int slow_ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int fast_ma_period,const int slow_ma_period,
+                            const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_CHAIKIN);      }
+   virtual int       Type(void) const { return(IND_CHAIKIN); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ma_period,int slow_ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int fast_ma_period,const int slow_ma_period,
+                                const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiChaikin.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiChaikin::CiChaikin()
+CiChaikin::CiChaikin(void) : m_fast_ma_period(-1),
+                             m_slow_ma_period(-1),
+                             m_ma_method(WRONG_VALUE),
+                             m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_fast_ma_period=-1;
-   m_slow_ma_period=-1;
-   m_ma_method     =WRONG_VALUE;
-   m_applied       =WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiChaikin::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiChaikin::~CiChaikin(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "Chaikin Oscillator"                            |
+//+------------------------------------------------------------------+
+bool CiChaikin::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                       const int fast_ma_period,const int slow_ma_period,
+                       const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iChaikin(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiChaikin::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                        (ENUM_MA_METHOD)params[2].integer_value,(ENUM_APPLIED_VOLUME)params[3].integer_value));
+          (ENUM_MA_METHOD)params[2].integer_value,(ENUM_APPLIED_VOLUME)params[3].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol         - indicator symbol,                       |
-//|         period         - indicator period,                       |
-//|         fast_ma_period - period of fast MA,                      |
-//|         slow_ma_period - period of slow MA,                      |
-//|         ma_method      - averaging method for MA,                |
-//|         applied        - what to apply the indicator to.         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiChaikin::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ma_period,int slow_ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
+bool CiChaikin::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                           const int fast_ma_period,const int slow_ma_period,
+                           const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
       //--- string of status of drawing
       m_name  ="Chaikin";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(fast_ma_period)+","+IntegerToString(slow_ma_period)+","+
-                MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
+               IntegerToString(fast_ma_period)+","+IntegerToString(slow_ma_period)+","+
+               MethodDescription(ma_method)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
       //--- save settings
       m_fast_ma_period=fast_ma_period;
       m_slow_ma_period=slow_ma_period;
@@ -570,46 +531,14 @@ bool CiChaikin::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ma_peri
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "Chaikin Oscillator".                           |
-//| INPUT:  symbol         - indicator symbol,                       |
-//|         period         - indicator period,                       |
-//|         fast_ma_period - period of fast MA,                      |
-//|         slow_ma_period - period of slow MA,                      |
-//|         ma_method      - averaging method for MA,                |
-//|         applied        - what to apply the indicator to.         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Chaikin Oscillator"                         |
 //+------------------------------------------------------------------+
-bool CiChaikin::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ma_period,int slow_ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iChaikin(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,fast_ma_period,slow_ma_period,ma_method,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Chaikin Oscillator".                        |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiChaikin::Main(int index) const
+double CiChaikin::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -624,54 +553,69 @@ protected:
    int               m_ma_period;
 
 public:
-                     CiDeMarker();
+                     CiDeMarker(void);
+                    ~CiDeMarker(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period);  }
+   int               MaPeriod(void) const { return(m_ma_period); }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_DEMARKER); }
+   virtual int       Type(void) const { return(IND_DEMARKER); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiDeMarker.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiDeMarker::CiDeMarker()
+CiDeMarker::CiDeMarker(void) : m_ma_period(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiDeMarker::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiDeMarker::~CiDeMarker(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "DeMarker"                                      |
+//+------------------------------------------------------------------+
+bool CiDeMarker::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iDeMarker(symbol,period,ma_period);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiDeMarker::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiDeMarker::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
+bool CiDeMarker::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -689,43 +633,14 @@ bool CiDeMarker::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "DeMarker".                                     |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "DeMarker"                                   |
 //+------------------------------------------------------------------+
-bool CiDeMarker::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iDeMarker(symbol,period,ma_period);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,ma_period))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "DeMarker".                                  |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiDeMarker::Main(int index) const
+double CiDeMarker::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -742,69 +657,86 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiForce();
+                     CiForce(void);
+                    ~CiForce(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
-   ENUM_MA_METHOD    MaMethod()      const { return(m_ma_method); }
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied);   }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   ENUM_MA_METHOD    MaMethod(void)        const { return(m_ma_method); }
+   ENUM_APPLIED_VOLUME Applied(void)       const { return(m_applied);   }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int ma_period,const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_FORCE);   }
+   virtual int       Type(void) const { return(IND_FORCE); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int ma_period,const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiForce.                                             |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiForce::CiForce()
+CiForce::CiForce(void) : m_ma_period(-1),
+                         m_ma_method(WRONG_VALUE),
+                         m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_ma_method=WRONG_VALUE;
-   m_applied  =WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiForce::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiForce::~CiForce(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "Force Index"                                   |
+//+------------------------------------------------------------------+
+bool CiForce::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                     const int ma_period,const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iForce(symbol,period,ma_period,ma_method,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,ma_period,ma_method,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiForce::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(ENUM_MA_METHOD)params[1].integer_value,
-                   (ENUM_APPLIED_VOLUME)params[2].integer_value));
+          (ENUM_APPLIED_VOLUME)params[2].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         ma_method - averaging method for MA,                     |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiForce::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
+bool CiForce::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                         const int ma_period,const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
       //--- string of status of drawing
       m_name  ="Force";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+MethodDescription(ma_method)+","+
-                VolumeDescription(applied)+","+") H="+IntegerToString(m_handle);
+               IntegerToString(ma_period)+","+MethodDescription(ma_method)+","+
+               VolumeDescription(applied)+","+") H="+IntegerToString(m_handle);
       //--- save settings
       m_ma_period=ma_period;
       m_ma_method=ma_method;
@@ -818,45 +750,14 @@ bool CiForce::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "Force Index".                                  |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         ma_method - averaging method for MA,                     |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Force Index"                                |
 //+------------------------------------------------------------------+
-bool CiForce::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_MA_METHOD ma_method,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iForce(symbol,period,ma_period,ma_method,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,ma_period,ma_method,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Force Index".                               |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiForce::Main(int index) const
+double CiForce::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -875,73 +776,93 @@ protected:
    int               m_applied;
 
 public:
-                     CiMACD();
+                     CiMACD(void);
+                    ~CiMACD(void);
    //--- methods of access to protected data
-   int               FastEmaPeriod()   const { return(m_fast_ema_period); }
-   int               SlowEmaPeriod()   const { return(m_slow_ema_period); }
-   int               SignalPeriod()    const { return(m_signal_period);   }
-   int               Applied()         const { return(m_applied);         }
+   int               FastEmaPeriod(void)     const { return(m_fast_ema_period); }
+   int               SlowEmaPeriod(void)     const { return(m_slow_ema_period); }
+   int               SignalPeriod(void)      const { return(m_signal_period);   }
+   int               Applied(void)           const { return(m_applied);         }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int fast_ema_period,const int slow_ema_period,
+                            const int signal_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index)   const;
-   double            Signal(int index) const;
+   double            Main(const int index) const;
+   double            Signal(const int index) const;
    //--- method of identifying
-   virtual int       Type()            const { return(IND_MACD);          }
+   virtual int       Type(void) const { return(IND_MACD); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int fast_ema_period,const int slow_ema_period,
+                                const int signal_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiMACD.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiMACD::CiMACD()
+CiMACD::CiMACD(void) : m_fast_ema_period(-1),
+                       m_slow_ema_period(-1),
+                       m_signal_period(-1),
+                       m_applied(-1)
   {
-//--- initialize protected data
-   m_fast_ema_period=-1;
-   m_slow_ema_period=-1;
-   m_signal_period  =-1;
-   m_applied        =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiMACD::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiMACD::~CiMACD(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Moving Averages Convergence-Divergence" indicator    |
+//+------------------------------------------------------------------+
+bool CiMACD::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                    const int fast_ema_period,const int slow_ema_period,
+                    const int signal_period,const int applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iMACD(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiMACD::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                                   (int)params[2].integer_value,(int)params[3].integer_value));
+          (int)params[2].integer_value,(int)params[3].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol          - indicator symbol,                      |
-//|         period          - indicator period,                      |
-//|         fast_ema_period - period of fast EMA,                    |
-//|         slow_ema_period - period of slow EMA,                    |
-//|         signal_period   - period of signal MA,                   |
-//|         applied         - what to apply the indicator to.        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiMACD::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
+bool CiMACD::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                        const int fast_ema_period,const int slow_ema_period,
+                        const int signal_period,const int applied)
   {
    if(CreateBuffers(symbol,period,2))
      {
       //--- string of status of drawing
       m_name  ="MACD";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(fast_ema_period)+","+IntegerToString(slow_ema_period)+","+
-                IntegerToString(signal_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
+               IntegerToString(fast_ema_period)+","+IntegerToString(slow_ema_period)+","+
+               IntegerToString(signal_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
       //--- save settings
       m_fast_ema_period=fast_ema_period;
       m_slow_ema_period=slow_ema_period;
@@ -957,62 +878,28 @@ bool CiMACD::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Moving Averages Convergence-Divergence" indicator.   |
-//| INPUT:  symbol          - indicator symbol,                      |
-//|         period          - indicator period,                      |
-//|         fast_ema_period - period of fast EMA,                    |
-//|         slow_ema_period - period of slow EMA,                    |
-//|         signal_period   - period of signal MA,                   |
-//|         applied         - what to apply the indicator to.        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiMACD::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
-  {   
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iMACD(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
 //| Access to Main buffer of "Moving Averages                        |
-//|                           Convergence-Divergence".               |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//|                           Convergence-Divergence"                |
 //+------------------------------------------------------------------+
-double CiMACD::Main(int index) const
+double CiMACD::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
 //| Access to Signal buffer of "Moving Averages                      |
-//|                             Convergence-Divergence".             |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//|                             Convergence-Divergence"              |
 //+------------------------------------------------------------------+
-double CiMACD::Signal(int index) const
+double CiMACD::Signal(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1028,92 +915,49 @@ protected:
    int               m_applied;
 
 public:
-                     CiMomentum();
+                     CiMomentum(void);
+                    ~CiMomentum(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period);  }
-   int               Applied()       const { return(m_applied);    }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   int               Applied(void)         const { return(m_applied);   }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_MOMENTUM); }
+   virtual int       Type(void) const { return(IND_MOMENTUM); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiMomentum.                                          |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiMomentum::CiMomentum()
+CiMomentum::CiMomentum(void) : m_ma_period(-1),
+                               m_applied(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_applied  =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiMomentum::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiMomentum::~CiMomentum(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Momentum" indicator                                  |
 //+------------------------------------------------------------------+
-bool CiMomentum::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name="Momentum";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      m_applied  =applied;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Momentum" indicator.                                 |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiMomentum::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
+bool CiMomentum::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iMomentum(symbol,period,ma_period,applied);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period,applied))
      {
@@ -1126,16 +970,43 @@ bool CiMomentum::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int a
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Momentum".                                  |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiMomentum::Main(int index) const
+bool CiMomentum::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with special parameters                 |
+//+------------------------------------------------------------------+
+bool CiMomentum::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name="Momentum";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      m_applied  =applied;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Momentum"                                   |
+//+------------------------------------------------------------------+
+double CiMomentum::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1154,72 +1025,93 @@ protected:
    int               m_applied;
 
 public:
-                     CiOsMA();
+                     CiOsMA(void);
+                    ~CiOsMA(void);
    //--- methods of access to protected data
-   int               FastEmaPeriod() const { return(m_fast_ema_period); }
-   int               SlowEmaPeriod() const { return(m_slow_ema_period); }
-   int               SignalPeriod()  const { return(m_signal_period);   }
-   int               Applied()       const { return(m_applied);         }
+   int               FastEmaPeriod(void)   const { return(m_fast_ema_period); }
+   int               SlowEmaPeriod(void)   const { return(m_slow_ema_period); }
+   int               SignalPeriod(void)    const { return(m_signal_period);   }
+   int               Applied(void)         const { return(m_applied);         }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int fast_ema_period,const int slow_ema_period,
+                            const int signal_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_OSMA);          }
+   virtual int       Type(void) const { return(IND_OSMA); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int fast_ema_period,const int slow_ema_period,
+                                const int signal_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiOsMA.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiOsMA::CiOsMA()
+CiOsMA::CiOsMA(void) : m_fast_ema_period(-1),
+                       m_slow_ema_period(-1),
+                       m_signal_period(-1),
+                       m_applied(-1)
   {
-//--- initialize protected data
-   m_fast_ema_period=-1;
-   m_slow_ema_period=-1;
-   m_signal_period  =-1;
-   m_applied        =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiOsMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiOsMA::~CiOsMA(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create indicator "Moving Average of Oscillator                   |
+//| (MACD histogram)"                                                |
+//+------------------------------------------------------------------+
+bool CiOsMA::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                    const int fast_ema_period,const int slow_ema_period,
+                    const int signal_period,const int applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iOsMA(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiOsMA::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                                   (int)params[2].integer_value,(int)params[3].integer_value));
+          (int)params[2].integer_value,(int)params[3].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol          - indicator symbol,                      |
-//|         period          - indicator period,                      |
-//|         fast_ema_period - period of fast EMA,                    |
-//|         slow_ema_period - period of slow EMA,                    |
-//|         signal_period   - period of signal MA,                   |
-//|         applied         - what to apply the indicator to.        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiOsMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
+bool CiOsMA::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                        const int fast_ema_period,const int slow_ema_period,
+                        const int signal_period,const int applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
       //--- string of status of drawing
       m_name  ="OsMA";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(fast_ema_period)+","+IntegerToString(slow_ema_period)+","+
-                IntegerToString(signal_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
+               IntegerToString(fast_ema_period)+","+IntegerToString(slow_ema_period)+","+
+               IntegerToString(signal_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
       //--- save settings
       m_fast_ema_period=fast_ema_period;
       m_slow_ema_period=slow_ema_period;
@@ -1234,48 +1126,15 @@ bool CiOsMA::Initialize(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create indicator "Moving Average of Oscillator                   |
-//| (MACD histogram)".                                               |
-//| INPUT:  symbol          - indicator symbol,                      |
-//|         period          - indicator period,                      |
-//|         fast_ema_period - period of fast EMA,                    |
-//|         slow_ema_period - period of slow EMA,                    |
-//|         signal_period   - period of signal MA,                   |
-//|         applied         - what to apply the indicator to.        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiOsMA::Create(string symbol,ENUM_TIMEFRAMES period,int fast_ema_period,int slow_ema_period,int signal_period,int applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iOsMA(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,fast_ema_period,slow_ema_period,signal_period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
 //| Access to buffer of "Moving Average of Oscillator                |
-//|                     (MACD histogram)".                           |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//|                     (MACD histogram)"                            |
 //+------------------------------------------------------------------+
-double CiOsMA::Main(int index) const
+double CiOsMA::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1291,92 +1150,49 @@ protected:
    int               m_applied;
 
 public:
-                     CiRSI();
+                     CiRSI(void);
+                    ~CiRSI(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
-   int               Applied()       const { return(m_applied);   }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   int               Applied(void)         const { return(m_applied);   }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_RSI);     }
+   virtual int       Type(void) const { return(IND_RSI); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiRSI.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiRSI::CiRSI()
+CiRSI::CiRSI(void) : m_ma_period(-1),
+                     m_applied(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_applied  =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiRSI::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiRSI::~CiRSI(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create indicator "Relative Strength Index"                       |
 //+------------------------------------------------------------------+
-bool CiRSI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name  ="RSI";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      m_applied  =applied;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create indicator "Relative Strength Index".                      |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiRSI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
+bool CiRSI::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iRSI(symbol,period,ma_period,applied);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period,applied))
      {
@@ -1389,16 +1205,43 @@ bool CiRSI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applie
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Relative Strength Index".                   |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiRSI::Main(int index) const
+bool CiRSI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with special parameters                 |
+//+------------------------------------------------------------------+
+bool CiRSI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name  ="RSI";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+","+PriceDescription(applied)+","+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      m_applied  =applied;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Relative Strength Index"                    |
+//+------------------------------------------------------------------+
+double CiRSI::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1413,89 +1256,48 @@ protected:
    int               m_ma_period;
 
 public:
-                     CiRVI();
+                     CiRVI(void);
+                    ~CiRVI(void);
    //--- methods of access to protected data
-   int               MaPeriod()        const { return(m_ma_period); }
+   int               MaPeriod(void) const { return(m_ma_period); }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
    //--- methods of access to indicator data
-   double            Main(int index)   const;
-   double            Signal(int index) const;
+   double            Main(const int index) const;
+   double            Signal(const int index) const;
    //--- method of identifying
-   virtual int       Type()            const { return(IND_RVI);     }
+   virtual int       Type(void) const { return(IND_RVI); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiRVI.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiRVI::CiRVI()
+CiRVI::CiRVI(void) : m_ma_period(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiRVI::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiRVI::~CiRVI(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Relative Vigor Index" indicator                      |
 //+------------------------------------------------------------------+
-bool CiRVI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period)
-  {
-   if(CreateBuffers(symbol,period,2))
-     {
-      //--- string of status of drawing
-      m_name  ="RVI";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      ((CIndicatorBuffer*)At(1)).Name("SIGNAL_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Relative Vigor Index" indicator.                     |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiRVI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
+bool CiRVI::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iRVI(symbol,period,ma_period);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period))
      {
@@ -1508,30 +1310,55 @@ bool CiRVI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to Main buffer of "Relative Vigor Index".                 |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiRVI::Main(int index) const
+bool CiRVI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with special parameters                 |
+//+------------------------------------------------------------------+
+bool CiRVI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period)
+  {
+   if(CreateBuffers(symbol,period,2))
+     {
+      //--- string of status of drawing
+      m_name  ="RVI";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      ((CIndicatorBuffer*)At(1)).Name("SIGNAL_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to Main buffer of "Relative Vigor Index"                  |
+//+------------------------------------------------------------------+
+double CiRVI::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Signal buffer of "Relative Vigor Index".               |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Signal buffer of "Relative Vigor Index"                |
 //+------------------------------------------------------------------+
-double CiRVI::Signal(int index) const
+double CiRVI::Signal(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1550,77 +1377,96 @@ protected:
    ENUM_STO_PRICE    m_price_field;
 
 public:
-                     CiStochastic();
+                     CiStochastic(void);
+                    ~CiStochastic(void);
    //--- methods of access to protected data
-   int               Kperiod()         const { return(m_Kperiod);      }
-   int               Dperiod()         const { return(m_Dperiod);      }
-   int               Slowing()         const { return(m_slowing);      }
-   ENUM_MA_METHOD    MaMethod()        const { return(m_ma_method);    }
-   ENUM_STO_PRICE    PriceField()      const { return(m_price_field);  }
+   int               Kperiod(void)           const { return(m_Kperiod);     }
+   int               Dperiod(void)           const { return(m_Dperiod);     }
+   int               Slowing(void)           const { return(m_slowing);     }
+   ENUM_MA_METHOD    MaMethod(void)          const { return(m_ma_method);   }
+   ENUM_STO_PRICE    PriceField(void)        const { return(m_price_field); }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int Kperiod,int Dperiod,int slowing,ENUM_MA_METHOD ma_method,ENUM_STO_PRICE price_field);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int Kperiod,const int Dperiod,const int slowing,
+                            const ENUM_MA_METHOD ma_method,const ENUM_STO_PRICE price_field);
    //--- methods of access to indicator data
-   double            Main(int index)   const;
-   double            Signal(int index) const;
+   double            Main(const int index) const;
+   double            Signal(const int index) const;
    //--- method of identifying
-   virtual int       Type()            const { return(IND_STOCHASTIC); }
+   virtual int       Type(void) const { return(IND_STOCHASTIC); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int Kperiod,int Dperiod,int slowing,ENUM_MA_METHOD ma_method,ENUM_STO_PRICE price_field);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int Kperiod,const int Dperiod,const int slowing,
+                                const ENUM_MA_METHOD ma_method,const ENUM_STO_PRICE price_field);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiStochastic.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiStochastic::CiStochastic()
+CiStochastic::CiStochastic(void) : m_Kperiod(-1),
+                                   m_Dperiod(-1),
+                                   m_slowing(-1),
+                                   m_ma_method(WRONG_VALUE),
+                                   m_price_field(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_Kperiod    =-1;
-   m_Dperiod    =-1;
-   m_slowing    =-1;
-   m_ma_method  =WRONG_VALUE;
-   m_price_field=WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiStochastic::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiStochastic::~CiStochastic(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Stochastic Oscillator" indicator                     |
+//+------------------------------------------------------------------+
+bool CiStochastic::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                          const int Kperiod,const int Dperiod,const int slowing,
+                          const ENUM_MA_METHOD ma_method,const ENUM_STO_PRICE price_field)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iStochastic(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiStochastic::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value,
-                                   (int)params[2].integer_value,(ENUM_MA_METHOD)params[3].integer_value,
-                        (ENUM_STO_PRICE)params[4].integer_value));
+          (int)params[2].integer_value,(ENUM_MA_METHOD)params[3].integer_value,
+          (ENUM_STO_PRICE)params[4].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         Kperiod   - %K period,                                   |
-//|         Dperiod   - %D period,                                   |
-//|         slowing   - period of slowing,                           |
-//|         ma_method - averaging method,                            |
-//|         price_field - price to apply the indicator to.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiStochastic::Initialize(string symbol,ENUM_TIMEFRAMES period,int Kperiod,int Dperiod,int slowing,ENUM_MA_METHOD ma_method,ENUM_STO_PRICE price_field)
+bool CiStochastic::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                              const int Kperiod,const int Dperiod,const int slowing,
+                              const ENUM_MA_METHOD ma_method,const ENUM_STO_PRICE price_field)
   {
    if(CreateBuffers(symbol,period,2))
      {
       //--- string of status of drawing
       m_name  ="Stochastic";
       m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(Kperiod)+","+IntegerToString(Dperiod)+","+IntegerToString(slowing)+","+
-                MethodDescription(ma_method)+","+IntegerToString(price_field)+") H="+IntegerToString(m_handle);
+               IntegerToString(Kperiod)+","+IntegerToString(Dperiod)+","+IntegerToString(slowing)+","+
+               MethodDescription(ma_method)+","+IntegerToString(price_field)+") H="+IntegerToString(m_handle);
       //--- save settings
       m_Kperiod    =Kperiod;
       m_Dperiod    =Dperiod;
@@ -1637,61 +1483,26 @@ bool CiStochastic::Initialize(string symbol,ENUM_TIMEFRAMES period,int Kperiod,i
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Stochastic Oscillator" indicator.                    |
-//| INPUT:  symbol      - indicator symbol,                          |
-//|         period      - indicator period,                          |
-//|         Kperiod     - %K period,                                 |
-//|         Dperiod     - %D period,                                 |
-//|         slowing     - period of slowing,                         |
-//|         ma_method   - averaging method,                          |
-//|         price_field - price to apply the indicator to.           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to Main buffer of "Stochastic Oscillator"                 |
 //+------------------------------------------------------------------+
-bool CiStochastic::Create(string symbol,ENUM_TIMEFRAMES period,int Kperiod,int Dperiod,int slowing,ENUM_MA_METHOD ma_method,ENUM_STO_PRICE price_field)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iStochastic(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,Kperiod,Dperiod,slowing,ma_method,price_field))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to Main buffer of "Stochastic Oscillator".                |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiStochastic::Main(int index) const
+double CiStochastic::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
 //+------------------------------------------------------------------+
-//| Access to Signal buffer of "Stochastic Oscillator".              |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Access to Signal buffer of "Stochastic Oscillator"               |
 //+------------------------------------------------------------------+
-double CiStochastic::Signal(int index) const
+double CiStochastic::Signal(const int index) const
   {
    CIndicatorBuffer *buffer=At(1);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1706,87 +1517,47 @@ protected:
    int               m_calc_period;
 
 public:
-                     CiWPR();
+                     CiWPR(void);
+                    ~CiWPR(void);
    //--- methods of access to protected data
-   int               CalcPeriod()    const { return(m_calc_period); }
+   int               CalcPeriod(void) const { return(m_calc_period); }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int calc_period);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int calc_period);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const  { return(IND_WPR);       }
+   virtual int       Type(void) const  { return(IND_WPR); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int calc_period);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int calc_period);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiWPR.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiWPR::CiWPR()
+CiWPR::CiWPR(void) : m_calc_period(-1)
   {
-//--- initialize protected data
-   m_calc_period=-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiWPR::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiWPR::~CiWPR(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize indicator with the cpecial parameters.                |
-//| INPUT:  symbol      - indicator symbol,                          |
-//|         period      - indicator period,                          |
-//|         calc_period - period.                                    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Williams' Percent Range" indicator                   |
 //+------------------------------------------------------------------+
-bool CiWPR::Initialize(string symbol,ENUM_TIMEFRAMES period,int calc_period)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name  ="WPR";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(calc_period)+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_calc_period=calc_period;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Williams' Percent Range" indicator.                  |
-//| INPUT:  symbol      - indicator symbol,                          |
-//|         period      - indicator period,                          |
-//|         calc_period - period.                                    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiWPR::Create(string symbol,ENUM_TIMEFRAMES period,int calc_period)
+bool CiWPR::Create(const string symbol,const ENUM_TIMEFRAMES period,const int calc_period)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iWPR(symbol,period,calc_period);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,calc_period))
      {
@@ -1799,16 +1570,42 @@ bool CiWPR::Create(string symbol,ENUM_TIMEFRAMES period,int calc_period)
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Williams' Percent Range".                   |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiWPR::Main(int index) const
+bool CiWPR::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Initialize indicator with the cpecial parameters                 |
+//+------------------------------------------------------------------+
+bool CiWPR::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int calc_period)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name  ="WPR";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(calc_period)+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_calc_period=calc_period;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Williams' Percent Range"                    |
+//+------------------------------------------------------------------+
+double CiWPR::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -1825,94 +1622,49 @@ protected:
    int               m_applied;
 
 public:
-                     CiTriX();
+                     CiTriX(void);
+                    ~CiTriX(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
-   int               Applied()       const { return(m_applied);   }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   int               Applied(void)         const { return(m_applied);   }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_TRIX);    }
+   virtual int       Type(void) const { return(IND_TRIX); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiTriX.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiTriX::CiTriX()
+CiTriX::CiTriX(void) : m_ma_period(-1),
+                       m_applied(-1)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_applied  =-1;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiTriX::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiTriX::~CiTriX(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
   }
 //+------------------------------------------------------------------+
 //| Create the "Triple Exponential Moving Averages                   |
-//| Oscillator" indicator.                                           |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Oscillator" indicator                                            |
 //+------------------------------------------------------------------+
-bool CiTriX::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name  ="TriX";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      m_applied  =applied;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Triple Exponential Moving Averages                   |
-//| Oscillator" indicator.                                           |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiTriX::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int applied)
+bool CiTriX::Create(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
   {
 //--- check history
    if(!SetSymbolPeriod(symbol,period)) return(false);
 //--- create
    m_handle=iTriX(symbol,period,ma_period,applied);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period,applied))
      {
@@ -1925,17 +1677,45 @@ bool CiTriX::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,int appli
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Triple Exponential Moving Averages          |
-//|                      Oscillator".                                |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiTriX::Main(int index) const
+bool CiTriX::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value,(int)params[1].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Create the "Triple Exponential Moving Averages                   |
+//| Oscillator" indicator                                            |
+//+------------------------------------------------------------------+
+bool CiTriX::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int ma_period,const int applied)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name  ="TriX";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+","+PriceDescription(applied)+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      m_applied  =applied;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Triple Exponential Moving Averages          |
+//|                      Oscillator"                                 |
+//+------------------------------------------------------------------+
+double CiTriX::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }

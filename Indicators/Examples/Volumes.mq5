@@ -36,15 +36,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //|  Volumes                                                         |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
 //---check for rates total
    if(rates_total<2)
@@ -55,9 +56,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(start<1) start=1;
 //--- main cycle
    if(InpVolumeType==VOLUME_TICK)
-      CalculateVolume(start,rates_total,TickVolume);
+      CalculateVolume(start,rates_total,tick_volume);
    else
-      CalculateVolume(start,rates_total,Volume);
+      CalculateVolume(start,rates_total,volume);
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);
   }

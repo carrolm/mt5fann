@@ -1,520 +1,500 @@
 //+------------------------------------------------------------------+
 //|                                                      FileBin.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "File.mqh"
 //+------------------------------------------------------------------+
-//| Class CFileBin.                                                  |
-//| Purpose: Class of operations with binary files.                  |
-//|          Derives from class CFile.                               |
+//| Class CFileBin                                                   |
+//| Purpose: Class of operations with binary files                   |
+//|          Derives from class CFile                                |
 //+------------------------------------------------------------------+
 class CFileBin : public CFile
   {
 public:
+                     CFileBin(void);
+                    ~CFileBin(void);
    //--- methods for working with files
-   int               Open(string file_name,int open_flags);
+   int               Open(const string file_name,const int open_flags);
    //--- methods for writing data
-   uint              WriteChar(char value);
-   uint              WriteShort(short value);
-   uint              WriteInteger(int value);
-   uint              WriteLong(long value);
-   uint              WriteFloat(float value);
-   uint              WriteDouble(double value);
+   uint              WriteChar(const char value);
+   uint              WriteShort(const short value);
+   uint              WriteInteger(const int value);
+   uint              WriteLong(const long value);
+   uint              WriteFloat(const float value);
+   uint              WriteDouble(const double value);
    uint              WriteString(const string value);
-   uint              WriteString(const string value,int size);
-   uint              WriteCharArray(char& array[],int start_item=0,int items_count=-1);
-   uint              WriteShortArray(short& array[],int start_item=0,int items_count=-1);
-   uint              WriteIntegerArray(int& array[],int start_item=0,int items_count=-1);
-   uint              WriteLongArray(long& array[],int start_item=0,int items_count=-1);
-   uint              WriteFloatArray(float& array[],int start_item=0,int items_count=-1);
-   uint              WriteDoubleArray(double& array[],int start_item=0,int items_count=-1);
+   uint              WriteString(const string value,const int size);
+   uint              WriteCharArray(const char &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              WriteShortArray(const short& array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              WriteIntegerArray(const int& array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              WriteLongArray(const long &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              WriteFloatArray(const float &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              WriteDoubleArray(const double &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   template<typename T>
+   uint              WriteArray(T &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   template<typename T>
+   uint              WriteStruct(T &data);
    bool              WriteObject(CObject *object);
    //--- methods for reading data
-   bool              ReadChar(char& value);
-   bool              ReadShort(short& value);
-   bool              ReadInteger(int& value);
-   bool              ReadLong(long& value);
-   bool              ReadFloat(float& value);
-   bool              ReadDouble(double& value);
-   bool              ReadString(string& value);
-   bool              ReadString(string& value,int size);
-   bool              ReadCharArray(char& array[],int start_item=0,int items_count=-1);
-   bool              ReadShortArray(short& array[],int start_item=0,int items_count=-1);
-   bool              ReadIntegerArray(int& array[],int start_item=0,int items_count=-1);
-   bool              ReadLongArray(long& array[],int start_item=0,int items_count=-1);
-   bool              ReadFloatArray(float& array[],int start_item=0,int items_count=-1);
-   bool              ReadDoubleArray(double& array[],int start_item=0,int items_count=-1);
+   bool              ReadChar(char &value);
+   bool              ReadShort(short &value);
+   bool              ReadInteger(int &value);
+   bool              ReadLong(long &value);
+   bool              ReadFloat(float &value);
+   bool              ReadDouble(double &value);
+   bool              ReadString(string &value);
+   bool              ReadString(string &value,const int size);
+   uint              ReadCharArray(char &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              ReadShortArray(short& array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              ReadIntegerArray(int& array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              ReadLongArray(long &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              ReadFloatArray(float &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   uint              ReadDoubleArray(double &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   template<typename T>
+   uint              ReadArray(T &array[],const int start_item=0,const int items_count=WHOLE_ARRAY);
+   template<typename T>
+   uint              ReadStruct(T &data);
    bool              ReadObject(CObject *object);
   };
 //+------------------------------------------------------------------+
-//| Opening a binary file.                                           |
-//| INPUT:  file_name - name of file,                                |
-//|         open_flags - flags of opening.                           |
-//| OUTPUT: handle of opened file, or -1.                            |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-int CFileBin::Open(string file_name, int open_flags)
+CFileBin::CFileBin(void)
   {
-   int result=CFile::Open(file_name,open_flags|FILE_BIN);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Write a variable of char or uchar type.                          |
-//| INPUT: value - variable to write.                                |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteChar(char value)
+CFileBin::~CFileBin(void)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteInteger(m_handle,value,sizeof(char)));
   }
 //+------------------------------------------------------------------+
-//| Write a variable of short or ushort type.                        |
-//| INPUT:  value - variable to write.                               |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Opening a binary file                                            |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteShort(short value)
+int CFileBin::Open(const string file_name,const int open_flags)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteInteger(m_handle,value,sizeof(short)));
+   return(CFile::Open(file_name,open_flags|FILE_BIN));
   }
 //+------------------------------------------------------------------+
-//| Write a variable of int or uint type.                            |
-//| INPUT:  value - variable to write.                               |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a variable of char or uchar type                           |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteInteger(int value)
+uint CFileBin::WriteChar(const char value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteInteger(m_handle,value,sizeof(int)));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteInteger(m_handle,value,sizeof(char)));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write a variable of long or ulong type.                          |
-//| INPUT:  value - variable to write.                               |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a variable of short or ushort type                         |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteLong(long value)
+uint CFileBin::WriteShort(const short value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteLong(m_handle,value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteInteger(m_handle,value,sizeof(short)));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write a variable of float type.                                  |
-//| INPUT:  value - variable to write.                               |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a variable of int or uint type                             |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteFloat(float value)
+uint CFileBin::WriteInteger(const int value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteFloat(m_handle,value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteInteger(m_handle,value,sizeof(int)));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write a variable of double type.                                 |
-//| INPUT:  value - variable to write.                               |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a variable of long or ulong type                           |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteDouble(double value)
+uint CFileBin::WriteLong(const long value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteDouble(m_handle,value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteLong(m_handle,value));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write a variable of string type.                                 |
-//| INPUT:  value - string to write.                                 |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a variable of float type                                   |
+//+------------------------------------------------------------------+
+uint CFileBin::WriteFloat(const float value)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteFloat(m_handle,value));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Write a variable of double type                                  |
+//+------------------------------------------------------------------+
+uint CFileBin::WriteDouble(const double value)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteDouble(m_handle,value));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Write a variable of string type                                  |
 //+------------------------------------------------------------------+
 uint CFileBin::WriteString(const string value)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   int size=StringLen(value);
-   FileWriteInteger(m_handle,size);
-//---
-   return(FileWriteString(m_handle,value,size));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      //--- size of string
+      int size=StringLen(value);
+      //--- write
+      if(FileWriteInteger(m_handle,size)==sizeof(int))
+         return(FileWriteString(m_handle,value,size));
+     }
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write a part of string.                                          |
-//| INPUT:  value - string to write,                                 |
-//|         size   - number of characters in the string to write.    |
-//| OUTPUT: number of bytes written.                                 |
-//| REMARK: no.                                                      |
+//| Write a part of string                                           |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteString(const string value,int size)
+uint CFileBin::WriteString(const string value,const int size)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteString(m_handle,value,size));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteString(m_handle,value,size));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write array variables of type char or uchar.                     |
-//| INPUT:  array      -array to write,                              |
-//|         start_item -starting element for write,                  |
-//|         items_count-number of elements to write.                 |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write array variables of type char or uchar                      |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteCharArray(char& array[],int start_item,int items_count)
+uint CFileBin::WriteCharArray(const char &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write an array of variables of short or ushort type.             |
-//| INPUT:  array       - array to write,                            |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to write.               |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write an array of variables of short or ushort type              |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteShortArray(short& array[],int start_item,int items_count)
+uint CFileBin::WriteShortArray(const short &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write an array of variables of int or uint type.                 |
-//| INPUT:  array       - array to write,                            |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to write.               |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write an array of variables of int or uint type                  |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteIntegerArray(int& array[],int start_item,int items_count)
+uint CFileBin::WriteIntegerArray(const int &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write an array of variables of long or ulong type.               |
-//| INPUT:  array       - array to write,                            |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to write.               |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write an array of variables of long or ulong type                |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteLongArray(long& array[],int start_item,int items_count)
+uint CFileBin::WriteLongArray(const long &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write an array of variables of float type.                       |
-//| INPUT:  array       - array to write,                            |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to write.               |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write an array of variables of float type                        |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteFloatArray(float& array[],int start_item,int items_count)
+uint CFileBin::WriteFloatArray(const float &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write an array of variables of double type.                      |
-//| INPUT:  array       - array to write,                            |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to write.               |
-//| OUTPUT: number of elements written.                              |
-//| REMARK: no.                                                      |
+//| Write an array of variables of double type                       |
 //+------------------------------------------------------------------+
-uint CFileBin::WriteDoubleArray(double& array[],int start_item,int items_count)
+uint CFileBin::WriteDoubleArray(const double &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(0);
-//---
-   return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Write data of an instance of the CObject class.                  |
-//| INPUT:  object - pointer to an instance of the CObject class.    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Write an array of variables of any type                          |
+//+------------------------------------------------------------------+
+template<typename T>
+uint CFileBin::WriteArray(T &array[],const int start_item=0,const int items_count=WHOLE_ARRAY)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Write an structure                                               |
+//+------------------------------------------------------------------+
+template<typename T>
+uint CFileBin::WriteStruct(T &data)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileWriteStruct(m_handle,data));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Write data of an instance of the CObject class                   |
 //+------------------------------------------------------------------+
 bool CFileBin::WriteObject(CObject *object)
   {
-//--- checking
-   if(m_handle<0)            return(false);
-   if(!CheckPointer(object)) return(false);
-//---
-   return(object.Save(m_handle));
+//--- check handle & object
+   if(m_handle!=INVALID_HANDLE)
+      if(CheckPointer(object))
+         return(object.Save(m_handle));
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of char or uchar type.                           |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Read a variable of char or uchar type                            |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadChar(char& value)
+bool CFileBin::ReadChar(char &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=(char)FileReadInteger(m_handle,sizeof(char));
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=(char)FileReadInteger(m_handle,sizeof(char));
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of short or ushort type.                         |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of short or ushort type                          |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadShort(short& value)
+bool CFileBin::ReadShort(short &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=(short)FileReadInteger(m_handle,sizeof(short));
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=(short)FileReadInteger(m_handle,sizeof(short));
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of int or uint type.                             |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of int or uint type                              |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadInteger(int& value)
+bool CFileBin::ReadInteger(int &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=FileReadInteger(m_handle,sizeof(int));
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=FileReadInteger(m_handle,sizeof(int));
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of long or ulong type.                           |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of long or ulong type                            |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadLong(long& value)
+bool CFileBin::ReadLong(long &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=FileReadLong(m_handle);
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=FileReadLong(m_handle);
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of float type.                                   |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of float type                                    |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadFloat(float& value)
+bool CFileBin::ReadFloat(float &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=FileReadFloat(m_handle);
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=FileReadFloat(m_handle);
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a variable of double type.                                  |
-//| INPUT:  value - variable to read.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of double type                                   |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadDouble(double& value)
+bool CFileBin::ReadDouble(double &value)
   {
-   bool result=true;
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   ResetLastError();
-   value=FileReadDouble(m_handle);
-   if(GetLastError()!=0) result=false;
-//---
-   return(result);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      value=FileReadDouble(m_handle);
+      return(GetLastError()==0);
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of string type.                       |
-//| INPUT:  value - string to read.                                  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a variable of string type                                   |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadString(string& value)
+bool CFileBin::ReadString(string &value)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   int size=FileReadInteger(m_handle);
-   value=FileReadString(m_handle,size);
-//---
-   return(size==StringLen(value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      ResetLastError();
+      int size=FileReadInteger(m_handle);
+      if(GetLastError()==0)
+        {
+         value=FileReadString(m_handle,size);
+         return(size==StringLen(value));
+        }
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read a part of string.                                           |
-//| INPUT:  value - string to read,                                  |
-//|         size  - number of characters to read.                    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read a part of string                                            |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadString(string& value,int size)
+bool CFileBin::ReadString(string &value,const int size)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   value=FileReadString(m_handle,size);
-//---
-   return(size==StringLen(value));
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+     {
+      value=FileReadString(m_handle,size);
+      return(size==StringLen(value));
+     }
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of char or uchar type.                |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of char or uchar type                 |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadCharArray(char& array[],int start_item,int items_count)
+uint CFileBin::ReadCharArray(char &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of short or ushort type.              |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of short or ushort type               |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadShortArray(short& array[],int start_item,int items_count)
+uint CFileBin::ReadShortArray(short &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of int or uint type.                  |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of int or uint type                   |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadIntegerArray(int& array[],int start_item,int items_count)
+uint CFileBin::ReadIntegerArray(int &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of long or ulong type.                |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of long or ulong type                 |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadLongArray(long& array[],int start_item,int items_count)
+uint CFileBin::ReadLongArray(long &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of float type.                        |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of float type                         |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadFloatArray(float& array[],int start_item,int items_count)
+uint CFileBin::ReadFloatArray(float &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read an array of variables of double type.                       |
-//| INPUT:  array       - array to read,                             |
-//|         start_item  - starting element,                          |
-//|         items_count - number of elements to read.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of double type                        |
 //+------------------------------------------------------------------+
-bool CFileBin::ReadDoubleArray(double& array[],int start_item,int items_count)
+uint CFileBin::ReadDoubleArray(double &array[],const int start_item,const int items_count)
   {
-//--- checking
-   if(m_handle<0) return(false);
-//---
-   return(FileReadArray(m_handle,array,start_item,items_count)!=0);
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
   }
 //+------------------------------------------------------------------+
-//| Read data of an instance of the CObject class.                   |
-//| INPUT:  object - pointer to an instance of the CObject class.    |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Read an array of variables of any type                           |
+//+------------------------------------------------------------------+
+template<typename T>
+uint CFileBin::ReadArray(T &array[],const int start_item=0,const int items_count=WHOLE_ARRAY)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadArray(m_handle,array,start_item,items_count));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Read an structure                                                |
+//+------------------------------------------------------------------+
+template<typename T>
+uint CFileBin::ReadStruct(T &data)
+  {
+//--- check handle
+   if(m_handle!=INVALID_HANDLE)
+      return(FileReadStruct(m_handle,data));
+//--- failure
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Read data of an instance of the CObject class                    |
 //+------------------------------------------------------------------+
 bool CFileBin::ReadObject(CObject *object)
   {
-//--- checking
-   if(m_handle<0)            return(false);
-   if(!CheckPointer(object)) return(false);
-//---
-   return(object.Load(m_handle));
+//--- check handle & object
+   if(m_handle!=INVALID_HANDLE)
+      if(CheckPointer(object))
+         return(object.Load(m_handle));
+//--- failure
+   return(false);
   }
 //+------------------------------------------------------------------+

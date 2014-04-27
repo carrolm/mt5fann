@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                      ChartObjectsTxtControls.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.03.30 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All text objects.                                                |
 //+------------------------------------------------------------------+
@@ -15,211 +14,200 @@
 class CChartObjectText : public CChartObject
   {
 public:
+                     CChartObjectText(void);
+                    ~CChartObjectText(void);
    //--- methods of access to properties of the object
-   double            Angle() const;
-   bool              Angle(double angle);
-   string            Font() const;
-   bool              Font(string font);
-   int               FontSize() const;
-   bool              FontSize(int size);
-   ENUM_ANCHOR_POINT Anchor() const;
-   bool              Anchor(ENUM_ANCHOR_POINT anchor);
+   double            Angle(void) const;
+   bool              Angle(const double angle) const;
+   string            Font(void) const;
+   bool              Font(const string font) const;
+   int               FontSize(void) const;
+   bool              FontSize(const int size) const;
+   ENUM_ANCHOR_POINT Anchor(void) const;
+   bool              Anchor(const ENUM_ANCHOR_POINT anchor) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time,double price);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time,const double price);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_TEXT); }
+   virtual int       Type(void) const { return(OBJ_TEXT); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Text".                                            |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time     - time coordinate,                              |
-//|         price    - price coordinate.                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Create(long chart_id,string name,int window,datetime time,double price)
+CChartObjectText::CChartObjectText(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_TEXT,window,time,price);
-   if(result) result&=Attach(chart_id,name,window,1);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get value of the "Angle" property.                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of the "Angle" property.                           |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectText::Angle() const
+CChartObjectText::~CChartObjectText(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Text"                                             |
+//+------------------------------------------------------------------+
+bool CChartObjectText::Create(long chart_id,const string name,const int window,
+                              const datetime time,const double price)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_TEXT,window,time,price))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get value of the "Angle" property                                |
+//+------------------------------------------------------------------+
+double CChartObjectText::Angle(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
+//--- result
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_ANGLE));
   }
 //+------------------------------------------------------------------+
-//| Set value of the "Angle" property.                               |
-//| INPUT:  angle - new value of the "Angle" property.               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set value of the "Angle" property                                |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Angle(double angle)
+bool CChartObjectText::Angle(const double angle) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_ANGLE,angle));
   }
 //+------------------------------------------------------------------+
-//| Get font name.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: font name.                                               |
-//| REMARK: no.                                                      |
+//| Get font name                                                    |
 //+------------------------------------------------------------------+
-string CChartObjectText::Font() const
+string CChartObjectText::Font(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return("");
-//---
+//--- check
+   if(m_chart_id==-1)
+      return("");
+//--- result
    return(ObjectGetString(m_chart_id,m_name,OBJPROP_FONT));
   }
 //+------------------------------------------------------------------+
-//| Set font name.                                                   |
-//| INPUT:  font - new name of font.                                 |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set font name                                                    |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Font(string font)
+bool CChartObjectText::Font(const string font) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetString(m_chart_id,m_name,OBJPROP_FONT,font));
   }
 //+------------------------------------------------------------------+
-//| Get font size.                                                   |
-//| INPUT:  no.                                                      |
-//| OUTPUT: font size.                                               |
-//| REMARK: no.                                                      |
+//| Get font size                                                    |
 //+------------------------------------------------------------------+
-int CChartObjectText::FontSize() const
+int CChartObjectText::FontSize(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE));
   }
 //+------------------------------------------------------------------+
-//| Set font size.                                                   |
-//| INPUT:  size - new size of font.                                 |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set font size                                                    |
 //+------------------------------------------------------------------+
-bool CChartObjectText::FontSize(int size)
+bool CChartObjectText::FontSize(const int size) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE,size));
   }
 //+------------------------------------------------------------------+
-//| Get anchor point.                                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: anchor point.                                            |
-//| REMARK: no.                                                      |
+//| Get anchor point                                                 |
 //+------------------------------------------------------------------+
-ENUM_ANCHOR_POINT CChartObjectText::Anchor() const
+ENUM_ANCHOR_POINT CChartObjectText::Anchor(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(WRONG_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(WRONG_VALUE);
+//--- result
    return((ENUM_ANCHOR_POINT)ObjectGetInteger(m_chart_id,m_name,OBJPROP_ANCHOR));
   }
 //+------------------------------------------------------------------+
-//| Set anchor point.                                                |
-//| INPUT:  anchor - new anchor point.                               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set anchor point                                                 |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Anchor(ENUM_ANCHOR_POINT anchor)
+bool CChartObjectText::Anchor(const ENUM_ANCHOR_POINT anchor) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_ANCHOR,anchor));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Save(int file_handle)
+bool CChartObjectText::Save(const int file_handle)
   {
-   bool   resutl;
    int    len;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObject::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "Angle" property
-      if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_ANGLE))!=sizeof(double)) return(false);
-      //--- writing value of the "Font Name" property
-      str=ObjectGetString(m_chart_id,m_name,OBJPROP_FONT);
-      len=StringLen(str);
-      if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE) return(false);
-      if(len!=0) if(FileWriteString(file_handle,str,len)!=len) return(false);
-      //--- writing value of the "Font Size" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Anchor Point" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_ANCHOR),INT_VALUE)!=sizeof(int)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObject::Save(file_handle))
+      return(false);
+//--- write value of the "Angle" property
+   if(FileWriteDouble(file_handle,ObjectGetDouble(m_chart_id,m_name,OBJPROP_ANGLE))!=sizeof(double))
+      return(false);
+//--- write value of the "Font Name" property
+   str=ObjectGetString(m_chart_id,m_name,OBJPROP_FONT);
+   len=StringLen(str);
+   if(FileWriteInteger(file_handle,len,INT_VALUE)!=INT_VALUE)
+      return(false);
+   if(len!=0 && FileWriteString(file_handle,str,len)!=len)
+      return(false);
+//--- write value of the "Font Size" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write value of the "Anchor Point" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_ANCHOR),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectText::Load(int file_handle)
+bool CChartObjectText::Load(const int file_handle)
   {
-   bool   resutl;
    int    len;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObject::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "Angle" property
-      if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_ANGLE,0,FileReadDouble(file_handle))) return(false);
-      //--- reading value of the "Font Name" property
-      len=FileReadInteger(file_handle,INT_VALUE);
-      if(len!=0) str=FileReadString(file_handle,len);
-      else       str="";
-      if(!ObjectSetString(m_chart_id,m_name,OBJPROP_FONT,str)) return(false);
-      //--- reading value of the "Font Size" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Anchor Point" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_ANCHOR,FileReadInteger(file_handle,INT_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObject::Load(file_handle))
+      return(false);
+//--- reading value of the "Angle" property
+   if(!ObjectSetDouble(m_chart_id,m_name,OBJPROP_ANGLE,0,FileReadDouble(file_handle)))
+      return(false);
+//--- read value of the "Font Name" property
+   len=FileReadInteger(file_handle,INT_VALUE);
+   str=(len!=0) ? FileReadString(file_handle,len) : "";
+   if(!ObjectSetString(m_chart_id,m_name,OBJPROP_FONT,str))
+      return(false);
+//--- read value of the "Font Size" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_FONTSIZE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read value of the "Anchor Point" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_ANCHOR,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectLabel.                                         |
@@ -229,206 +217,191 @@ bool CChartObjectText::Load(int file_handle)
 class CChartObjectLabel : public CChartObjectText
   {
 public:
+                     CChartObjectLabel(void);
+                    ~CChartObjectLabel(void);
    //--- methods of access to properties of the object
-   int               X_Distance() const;
-   bool              X_Distance(int X);
-   int               Y_Distance() const;
-   bool              Y_Distance(int Y);
-   int               X_Size() const;
-   int               Y_Size() const;
-   ENUM_BASE_CORNER  Corner() const;
-   bool              Corner(ENUM_BASE_CORNER corner);
+   int               X_Distance(void) const;
+   bool              X_Distance(const int X) const;
+   int               Y_Distance(void) const;
+   bool              Y_Distance(const int Y) const;
+   int               X_Size(void) const;
+   int               Y_Size(void) const;
+   ENUM_BASE_CORNER  Corner(void) const;
+   bool              Corner(const ENUM_BASE_CORNER corner) const;
    //--- change of time/price coordinates is blocked
-   bool              Time(datetime time) { return(false);     }
-   bool              Price(double price) { return(false);     }
+   bool              Time(const datetime time) const { return(false); }
+   bool              Price(const double price) const { return(false); }
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,int X,int Y);
+   bool              Create(long chart_id,const string name,const int window,const int X,const int Y);
    //--- method of identifying the object
-   virtual int       Type() const        { return(OBJ_LABEL); }
+   virtual int       Type(void) const { return(OBJ_LABEL); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Label".                                           |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         X        - X-distance from anchor point to base corner,  |
-//|         Y        - Y-distance from anchor point to base corner.  |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::Create(long chart_id,string name,int window,int X,int Y)
+CChartObjectLabel::CChartObjectLabel(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_LABEL,window,0,0.0);
-//---
-   if(result) result&=Attach(chart_id,name,window,1);
-   result&=Description(name);
-   result&=X_Distance(X);
-   result&=Y_Distance(Y);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get the X-distance.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: X-distance.                                              |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-int CChartObjectLabel::X_Distance() const
+CChartObjectLabel::~CChartObjectLabel(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Label"                                            |
+//+------------------------------------------------------------------+
+bool CChartObjectLabel::Create(long chart_id,const string name,const int window,const int X,const int Y)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_LABEL,window,0,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+   if(!Description(name))
+      return(false);
+   if(!X_Distance(X) || !Y_Distance(Y))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get the X-distance                                               |
+//+------------------------------------------------------------------+
+int CChartObjectLabel::X_Distance(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE));
   }
 //+------------------------------------------------------------------+
-//| Set the X-distance.                                              |
-//| INPUT:  X - new X-distance.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the X-distance                                               |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::X_Distance(int X)
+bool CChartObjectLabel::X_Distance(const int X) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE,X));
   }
 //+------------------------------------------------------------------+
-//| Get the Y-distance.                                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: Y-distance.                                              |
-//| REMARK: no.                                                      |
+//| Get the Y-distance                                               |
 //+------------------------------------------------------------------+
-int CChartObjectLabel::Y_Distance() const
+int CChartObjectLabel::Y_Distance(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE));
   }
 //+------------------------------------------------------------------+
-//| Set the Y-distance.                                              |
-//| INPUT:  Y - new Y-distance.                                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the Y-distance                                               |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::Y_Distance(int Y)
+bool CChartObjectLabel::Y_Distance(const int Y) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE,Y));
   }
 //+------------------------------------------------------------------+
-//| Get the X-size.                                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: X-size.                                                  |
-//| REMARK: no.                                                      |
+//| Get the X-size                                                   |
 //+------------------------------------------------------------------+
-int CChartObjectLabel::X_Size() const
+int CChartObjectLabel::X_Size(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE));
   }
 //+------------------------------------------------------------------+
-//| Get the Y-size.                                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: Y-size.                                                  |
-//| REMARK: no.                                                      |
+//| Get the Y-size                                                   |
 //+------------------------------------------------------------------+
-int CChartObjectLabel::Y_Size() const
+int CChartObjectLabel::Y_Size(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(0);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(0);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YSIZE));
   }
 //+------------------------------------------------------------------+
-//| Get base corner.                                                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: base corner.                                             |
-//| REMARK: no.                                                      |
+//| Get base corner                                                  |
 //+------------------------------------------------------------------+
-ENUM_BASE_CORNER CChartObjectLabel::Corner() const
+ENUM_BASE_CORNER CChartObjectLabel::Corner(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(WRONG_VALUE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(WRONG_VALUE);
+//--- result
    return((ENUM_BASE_CORNER)ObjectGetInteger(m_chart_id,m_name,OBJPROP_CORNER));
   }
 //+------------------------------------------------------------------+
-//| Set base corner.                                                 |
-//| INPUT:  corner - new base corner.                                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set base corner                                                  |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::Corner(ENUM_BASE_CORNER corner)
+bool CChartObjectLabel::Corner(const ENUM_BASE_CORNER corner) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_CORNER,corner));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::Save(int file_handle)
+bool CChartObjectLabel::Save(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectText::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "X-distance" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Y-distance" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Corner" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_CORNER),INT_VALUE)!=sizeof(int)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectText::Save(file_handle))
+      return(false);
+//--- write value of the "X-distance" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write value of the "Y-distance" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write value of the "Corner" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_CORNER),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading file.                                        |
-//| OUTPUT: true-if successful, false otherwise.                     |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectLabel::Load(int file_handle)
+bool CChartObjectLabel::Load(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectText::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "X-distance" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Y-distance" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Corner" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_CORNER,FileReadInteger(file_handle,INT_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectText::Load(file_handle))
+      return(false);
+//--- reading value of the "X-distance" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XDISTANCE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read value of the "Y-distance" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YDISTANCE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read value of the "Corner" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_CORNER,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectEdit.                                          |
@@ -438,208 +411,214 @@ bool CChartObjectLabel::Load(int file_handle)
 class CChartObjectEdit : public CChartObjectLabel
   {
 public:
+                     CChartObjectEdit(void);
+                    ~CChartObjectEdit(void);
    //--- methods of access to properties of the object
-   bool              X_Size(int X);
-   bool              Y_Size(int Y);
-   color             BackColor() const;
-   bool              BackColor(color new_color);
-   color             BorderColor() const;
-   bool              BorderColor(color new_color);
-   bool              ReadOnly() const;
-   bool              ReadOnly(bool flag);
+   bool              X_Size(const int X) const;
+   bool              Y_Size(const int Y) const;
+   color             BackColor(void) const;
+   bool              BackColor(const color new_color) const;
+   color             BorderColor(void) const;
+   bool              BorderColor(const color new_color) const;
+   bool              ReadOnly(void) const;
+   bool              ReadOnly(const bool flag) const;
+   ENUM_ALIGN_MODE   TextAlign(void) const;
+   bool              TextAlign(const ENUM_ALIGN_MODE align) const;
    //--- change of angle is blocked
-   bool              Angle(double angle) { return(false);    }
+   bool              Angle(const double angle) const { return(false); }
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,int X,int Y,int sizeX,int sizeY);
+   bool              Create(long chart_id,const string name,const int window,const int X,const int Y,const int sizeX,const int sizeY);
    //--- method of identifying the object
-   virtual int       Type() const        { return(OBJ_EDIT); }
+   virtual int       Type(void) const { return(OBJ_EDIT); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Edit".                                            |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         X        - X-distance from anchor point to base corner,  |
-//|         Y        - Y-distance from anchor point to base corner,  |
-//|         sizeX    - X-size,                                       |
-//|         sizeY    - Y-size.                                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::Create(long chart_id,string name,int window,int X,int Y,int sizeX,int sizeY)
+CChartObjectEdit::CChartObjectEdit(void)
   {
-   bool result=ObjectCreate(chart_id,name,(ENUM_OBJECT)Type(),window,0,0,0);
-//---
-   if(result) result&=Attach(chart_id,name,window,1);
-   result&=X_Distance(X);
-   result&=Y_Distance(Y);
-   result&=X_Size(sizeX);
-   result&=Y_Size(sizeY);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Set X-size.                                                      |
-//| INPUT:  X - new X-size.                                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::X_Size(int X)
+CChartObjectEdit::~CChartObjectEdit(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Edit"                                             |
+//+------------------------------------------------------------------+
+bool CChartObjectEdit::Create(long chart_id,const string name,const int window,const int X,const int Y,const int sizeX,const int sizeY)
+  {
+   if(!ObjectCreate(chart_id,name,(ENUM_OBJECT)Type(),window,0,0,0))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+   if(!X_Distance(X) || !Y_Distance(Y))
+      return(false);
+   if(!X_Size(sizeX) || !Y_Size(sizeY))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Set X-size                                                       |
+//+------------------------------------------------------------------+
+bool CChartObjectEdit::X_Size(const int X) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,X));
   }
 //+------------------------------------------------------------------+
-//| Set Y-size.                                                      |
-//| INPUT:  Y - new Y-size.                                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set Y-size                                                       |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::Y_Size(int Y)
+bool CChartObjectEdit::Y_Size(const int Y) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,Y));
   }
 //+------------------------------------------------------------------+
-//| Get background color.                                            |
-//| INPUT:  no.                                                      |
-//| OUTPUT: background color.                                        |
-//| REMARK: no.                                                      |
+//| Get background color                                             |
 //+------------------------------------------------------------------+
-color CChartObjectEdit::BackColor() const
+color CChartObjectEdit::BackColor(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(CLR_NONE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(CLR_NONE);
+//--- result
    return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR));
   }
 //+------------------------------------------------------------------+
-//| Set background color.                                            |
-//| INPUT:  new_color - new background color.                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set background color                                             |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::BackColor(color new_color)
+bool CChartObjectEdit::BackColor(const color new_color) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,new_color));
   }
 //+------------------------------------------------------------------+
-//| Get border color.                                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: border color.                                            |
-//| REMARK: no.                                                      |
+//| Get border color                                                 |
 //+------------------------------------------------------------------+
-color CChartObjectEdit::BorderColor() const
+color CChartObjectEdit::BorderColor(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(CLR_NONE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(CLR_NONE);
+//--- result
    return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BORDER_COLOR));
   }
 //+------------------------------------------------------------------+
-//| Set border color.                                                |
-//| INPUT:  new_color - new border color.                            |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set border color                                                 |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::BorderColor(color new_color)
+bool CChartObjectEdit::BorderColor(const color new_color) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BORDER_COLOR,new_color));
   }
 //+------------------------------------------------------------------+
-//| Get the "Read only" property.                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of "Read only" property.                           |
-//| REMARK: no.                                                      |
+//| Get the "Read only" property                                     |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::ReadOnly() const
+bool CChartObjectEdit::ReadOnly(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return((int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_READONLY));
   }
 //+------------------------------------------------------------------+
-//| Set the "Read only" property.                                    |
-//| INPUT:  flag - new value of the "Read only" property.            |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Read only" property                                     |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::ReadOnly(bool flag)
+bool CChartObjectEdit::ReadOnly(const bool flag) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_READONLY,flag));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Get the "Align" property                                         |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::Save(int file_handle)
+ENUM_ALIGN_MODE CChartObjectEdit::TextAlign(void) const
   {
-   bool   resutl;
-   string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectLabel::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "X-size" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Y-size" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YSIZE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing background color
-      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR))!=sizeof(long)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
+   return((ENUM_ALIGN_MODE)ObjectGetInteger(m_chart_id,m_name,OBJPROP_ALIGN));
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Align" property                                         |
 //+------------------------------------------------------------------+
-bool CChartObjectEdit::Load(int file_handle)
+bool CChartObjectEdit::TextAlign(const ENUM_ALIGN_MODE align) const
   {
-   bool   resutl;
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
+   return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_ALIGN,align));
+  }
+//+------------------------------------------------------------------+
+//| Writing parameters of object to file                             |
+//+------------------------------------------------------------------+
+bool CChartObjectEdit::Save(const int file_handle)
+  {
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectLabel::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "X-size" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Y-size" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading background color
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,FileReadLong(file_handle))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectLabel::Save(file_handle))
+      return(false);
+//--- write value of the "X-size" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write value of the "Y-size" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YSIZE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write background color
+   if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR))!=sizeof(long))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Reading parameters of object from file                           |
+//+------------------------------------------------------------------+
+bool CChartObjectEdit::Load(const int file_handle)
+  {
+   string str;
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectLabel::Load(file_handle))
+      return(false);
+//--- read value of the "X-size" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read value of the "Y-size" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read background color
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,FileReadLong(file_handle)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectButton.                                        |
@@ -649,88 +628,86 @@ bool CChartObjectEdit::Load(int file_handle)
 class CChartObjectButton : public CChartObjectEdit
   {
 public:
+                     CChartObjectButton(void);
+                    ~CChartObjectButton(void);
    //--- methods of access to properties of the object
-   bool              State() const;
-   bool              State(bool state);
+   bool              State(void) const;
+   bool              State(const bool state) const;
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_BUTTON); }
+   virtual int       Type(void) const { return(OBJ_BUTTON); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Get state.                                                       |
-//| INPUT:  no.                                                      |
-//| OUTPUT: state.                                                   |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectButton::State() const
+CChartObjectButton::CChartObjectButton(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectButton::~CChartObjectButton(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Get state                                                        |
+//+------------------------------------------------------------------+
+bool CChartObjectButton::State(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_STATE));
   }
 //+------------------------------------------------------------------+
-//| Set state.                                                       |
-//| INPUT:  state - state.                                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set state                                                        |
 //+------------------------------------------------------------------+
-bool CChartObjectButton::State(bool state)
+bool CChartObjectButton::State(const bool state) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_STATE,state));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectButton::Save(int file_handle)
+bool CChartObjectButton::Save(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectEdit::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing state
-      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_STATE))!=sizeof(long)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectEdit::Save(file_handle))
+      return(false);
+//--- write state
+   if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_STATE))!=sizeof(long))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectButton::Load(int file_handle)
+bool CChartObjectButton::Load(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectEdit::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading state
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_STATE,FileReadLong(file_handle))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectEdit::Load(file_handle))
+      return(false);
+//--- read state
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_STATE,FileReadLong(file_handle)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectRectLabel.                                     |
@@ -740,183 +717,171 @@ bool CChartObjectButton::Load(int file_handle)
 class CChartObjectRectLabel : public CChartObjectLabel
   {
 public:
+                     CChartObjectRectLabel(void);
+                    ~CChartObjectRectLabel(void);
    //--- methods of access to properties of the object
-   bool              X_Size(int X);
-   bool              Y_Size(int Y);
-   color             BackColor() const;
-   bool              BackColor(color new_color);
-   ENUM_BORDER_TYPE  BorderType() const;
-   bool              BorderType(ENUM_BORDER_TYPE flag);
+   bool              X_Size(const int X) const;
+   bool              Y_Size(const int Y) const;
+   color             BackColor(void) const;
+   bool              BackColor(const color new_color) const;
+   ENUM_BORDER_TYPE  BorderType(void) const;
+   bool              BorderType(const ENUM_BORDER_TYPE flag) const;
    //--- change of angle is blocked
-   bool              Angle(double angle) { return(false);               }
+   bool              Angle(const double angle) const { return(false); }
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,int X,int Y,int sizeX,int sizeY);
+   bool              Create(long chart_id,const string name,const int window,const int X,const int Y,const int sizeX,const int sizeY);
    //--- method of identifying the object
-   virtual int       Type() const        { return(OBJ_RECTANGLE_LABEL); }
+   virtual int       Type(void) const { return(OBJ_RECTANGLE_LABEL); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Ractangle Label".                                 |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         X        - X-distance from anchor point to base corner,  |
-//|         Y        - Y-distance from anchor point to base corner,  |
-//|         sizeX    - X-size,                                       |
-//|         sizeY    - Y-size.                                       |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::Create(long chart_id,string name,int window,int X,int Y,int sizeX,int sizeY)
+CChartObjectRectLabel::CChartObjectRectLabel(void)
   {
-   bool result=ObjectCreate(chart_id,name,(ENUM_OBJECT)Type(),window,0,0,0);
-//---
-   if(result) result&=Attach(chart_id,name,window,1);
-   result&=X_Distance(X);
-   result&=Y_Distance(Y);
-   result&=X_Size(sizeX);
-   result&=Y_Size(sizeY);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Set X-size.                                                      |
-//| INPUT:  X - new X-size.                                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::X_Size(int X)
+CChartObjectRectLabel::~CChartObjectRectLabel(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Ractangle Label"                                  |
+//+------------------------------------------------------------------+
+bool CChartObjectRectLabel::Create(long chart_id,const string name,const int window,const int X,const int Y,const int sizeX,const int sizeY)
+  {
+   if(!ObjectCreate(chart_id,name,(ENUM_OBJECT)Type(),window,0,0,0))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+   if(!X_Distance(X) || !Y_Distance(Y))
+      return(false);
+   if(!X_Size(sizeX) || !Y_Size(sizeY))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Set X-size                                                       |
+//+------------------------------------------------------------------+
+bool CChartObjectRectLabel::X_Size(const int X) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,X));
   }
 //+------------------------------------------------------------------+
-//| Set Y-size.                                                      |
-//| INPUT:  Y - new Y-size.                                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set Y-size                                                       |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::Y_Size(int Y)
+bool CChartObjectRectLabel::Y_Size(const int Y) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,Y));
   }
 //+------------------------------------------------------------------+
-//| Get background color.                                            |
-//| INPUT:  no.                                                      |
-//| OUTPUT: background color.                                        |
-//| REMARK: no.                                                      |
+//| Get background color                                             |
 //+------------------------------------------------------------------+
-color CChartObjectRectLabel::BackColor() const
+color CChartObjectRectLabel::BackColor(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(CLR_NONE);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(CLR_NONE);
+//--- result
    return((color)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR));
   }
 //+------------------------------------------------------------------+
-//| Set background color.                                            |
-//| INPUT:  new_color - new background color.                        |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set background color                                             |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::BackColor(color new_color)
+bool CChartObjectRectLabel::BackColor(const color new_color) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,new_color));
   }
 //+------------------------------------------------------------------+
-//| Get the "Border type" property.                                  |
-//| INPUT:  no.                                                      |
-//| OUTPUT: value of "Read only" property.                           |
-//| REMARK: no.                                                      |
+//| Get the "Border type" property                                   |
 //+------------------------------------------------------------------+
-ENUM_BORDER_TYPE CChartObjectRectLabel::BorderType() const
+ENUM_BORDER_TYPE CChartObjectRectLabel::BorderType(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return((ENUM_BORDER_TYPE)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE));
   }
 //+------------------------------------------------------------------+
-//| Set the "Border type" property.                                  |
-//| INPUT:  flag - new value of the "Read only" property.            |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Border type" property                                   |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::BorderType(ENUM_BORDER_TYPE type)
+bool CChartObjectRectLabel::BorderType(const ENUM_BORDER_TYPE type) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE,type));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of object to file.                            |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of object to file                             |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::Save(int file_handle)
+bool CChartObjectRectLabel::Save(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObjectLabel::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "X-size" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing value of the "Y-size" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YSIZE),INT_VALUE)!=sizeof(int)) return(false);
-      //--- writing background color
-      if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR))!=sizeof(long)) return(false);
-      //--- writing value of the "Border type" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE),INT_VALUE)!=sizeof(int)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObjectLabel::Save(file_handle))
+      return(false);
+//--- write value of the "X-size" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_XSIZE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write value of the "Y-size" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_YSIZE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- write background color
+   if(FileWriteLong(file_handle,ObjectGetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR))!=sizeof(long))
+      return(false);
+//--- write value of the "Border type" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE),INT_VALUE)!=sizeof(int))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectRectLabel::Load(int file_handle)
+bool CChartObjectRectLabel::Load(const int file_handle)
   {
-   bool   resutl;
    string str;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObjectLabel::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "X-size" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading value of the "Y-size" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-      //--- reading background color
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,FileReadLong(file_handle))) return(false);
-      //--- reading value of the "Border type" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE,FileReadInteger(file_handle,INT_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObjectLabel::Load(file_handle))
+      return(false);
+//--- read value of the "X-size" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_XSIZE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read value of the "Y-size" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_YSIZE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- read background color
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BGCOLOR,FileReadLong(file_handle)))
+      return(false);
+//--- read value of the "Border type" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_BORDER_TYPE,FileReadInteger(file_handle,INT_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

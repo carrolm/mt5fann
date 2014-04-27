@@ -43,15 +43,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //|  Accelerator/Decelerator Oscillator                              |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int i,limit;
 //---
@@ -70,13 +71,13 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    for(i=limit;i<rates_total-3 && !IsStopped();i++)
      {
       //---- Upper Fractal
-      if(High[i]>High[i+1] && High[i]>High[i+2] && High[i]>=High[i-1] && High[i]>=High[i-2])
-         ExtUpperBuffer[i]=High[i];
+      if(high[i]>high[i+1] && high[i]>high[i+2] && high[i]>=high[i-1] && high[i]>=high[i-2])
+         ExtUpperBuffer[i]=high[i];
       else ExtUpperBuffer[i]=EMPTY_VALUE;
 
       //---- Lower Fractal
-      if(Low[i]<Low[i+1] && Low[i]<Low[i+2] && Low[i]<=Low[i-1] && Low[i]<=Low[i-2])
-         ExtLowerBuffer[i]=Low[i];
+      if(low[i]<low[i+1] && low[i]<low[i+2] && low[i]<=low[i-1] && low[i]<=low[i-2])
+         ExtLowerBuffer[i]=low[i];
       else ExtLowerBuffer[i]=EMPTY_VALUE;
      }
 //--- OnCalculate done. Return new prev_calculated.

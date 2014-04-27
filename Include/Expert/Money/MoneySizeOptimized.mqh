@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                           MoneySizeOptimized.mqh |
-//|                      Copyright © 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.10.08 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include <Expert\ExpertMoney.mqh>
 #include <Trade\DealInfo.mqh>
@@ -29,10 +28,11 @@ protected:
    double            m_decrease_factor;
 
 public:
-                     CMoneySizeOptimized();
+                     CMoneySizeOptimized(void);
+                    ~CMoneySizeOptimized(void);
    //---
    void              DecreaseFactor(double decrease_factor) { m_decrease_factor=decrease_factor; }
-   virtual bool      ValidationSettings();
+   virtual bool      ValidationSettings(void);
    //---
    virtual double    CheckOpenLong(double price,double sl);
    virtual double    CheckOpenShort(double price,double sl);
@@ -41,25 +41,24 @@ protected:
    double            Optimize(double lots);
   };
 //+------------------------------------------------------------------+
-//| Constructor CMoneySizeOptimized.                                 |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CMoneySizeOptimized::CMoneySizeOptimized()
+void CMoneySizeOptimized::CMoneySizeOptimized(void) : m_decrease_factor(3.0)
   {
-//--- set default inputs
-   m_decrease_factor=3.0;
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+void CMoneySizeOptimized::~CMoneySizeOptimized(void)
+  {
   }
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
-//| INPUT:  no.                                                      |
-//| OUTPUT: true-if settings are correct, false otherwise.           |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
-bool CMoneySizeOptimized::ValidationSettings()
+bool CMoneySizeOptimized::ValidationSettings(void)
   {
-   if(!CExpertMoney::ValidationSettings()) return(false);
+   if(!CExpertMoney::ValidationSettings())
+      return(false);
 //--- initial data checks
    if(m_decrease_factor<=0.0)
      {
@@ -71,13 +70,11 @@ bool CMoneySizeOptimized::ValidationSettings()
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open long position.                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneySizeOptimized::CheckOpenLong(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    if(price==0.0)
@@ -89,13 +86,11 @@ double CMoneySizeOptimized::CheckOpenLong(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Getting lot size for open short position.                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneySizeOptimized::CheckOpenShort(double price,double sl)
   {
-   if(m_symbol==NULL) return(0.0);
+   if(m_symbol==NULL)
+      return(0.0);
 //--- select lot size
    double lot;
    if(price==0.0)
@@ -107,9 +102,6 @@ double CMoneySizeOptimized::CheckOpenShort(double price,double sl)
   }
 //+------------------------------------------------------------------+
 //| Optimizing lot size for open.                                    |
-//| INPUT:  no.                                                      |
-//| OUTPUT: lot-if successful, 0.0 otherwise.                        |
-//| REMARK: no.                                                      |
 //+------------------------------------------------------------------+
 double CMoneySizeOptimized::Optimize(double lots)
   {
@@ -120,8 +112,8 @@ double CMoneySizeOptimized::Optimize(double lots)
       //--- select history for access
       HistorySelect(0,TimeCurrent());
       //---
-      int    orders=HistoryDealsTotal();  // total history deals
-      int    losses=0;                    // number of consequent losing orders
+      int       orders=HistoryDealsTotal();  // total history deals
+      int       losses=0;                    // number of consequent losing orders
       CDealInfo deal;
       //---
       for(int i=orders-1;i>=0;i--)
@@ -133,24 +125,30 @@ double CMoneySizeOptimized::Optimize(double lots)
             break;
            }
          //--- check symbol
-         if(deal.Symbol()!=m_symbol.Name()) continue;
+         if(deal.Symbol()!=m_symbol.Name())
+            continue;
          //--- check profit
          double profit=deal.Profit();
-         if(profit>0.0) break;
-         if(profit<0.0) losses++;
+         if(profit>0.0)
+            break;
+         if(profit<0.0)
+            losses++;
         }
       //---
-      if(losses>1) lot=NormalizeDouble(lot-lot*losses/m_decrease_factor,2);
+      if(losses>1)
+         lot=NormalizeDouble(lot-lot*losses/m_decrease_factor,2);
      }
 //--- normalize and check limits
    double stepvol=m_symbol.LotsStep();
    lot=stepvol*NormalizeDouble(lot/stepvol,0);
 //---
    double minvol=m_symbol.LotsMin();
-   if(lot<minvol) lot=minvol;
+   if(lot<minvol)
+      lot=minvol;
 //---
    double maxvol=m_symbol.LotsMax();
-   if(lot>maxvol) lot=maxvol;
+   if(lot>maxvol)
+      lot=maxvol;
 //---
    return(lot);
   }

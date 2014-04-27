@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                            ChartObjectsLines.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2010.02.22 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 //| All lines.                                                       |
 //+------------------------------------------------------------------+
@@ -15,26 +14,36 @@
 class CChartObjectVLine : public CChartObject
   {
 public:
+                     CChartObjectVLine(void);
+                    ~CChartObjectVLine(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time);
+   bool              Create(long chart_id,const string name,const int window,const datetime time);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_VLINE); }
+   virtual int       Type(void) const { return(OBJ_VLINE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Vertical line".                                   |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time     - time coordinate.                              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectVLine::Create(long chart_id,string name,int window,datetime time)
+CChartObjectVLine::CChartObjectVLine(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_VLINE,window,time,0.0);
-   if(result) result&=Attach(chart_id,name,window,1);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectVLine::~CChartObjectVLine(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Vertical line"                                    |
+//+------------------------------------------------------------------+
+bool CChartObjectVLine::Create(long chart_id,const string name,const int window,const datetime time)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_VLINE,window,time,0.0))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectHLine.                                         |
@@ -44,26 +53,36 @@ bool CChartObjectVLine::Create(long chart_id,string name,int window,datetime tim
 class CChartObjectHLine : public CChartObject
   {
 public:
+                     CChartObjectHLine(void);
+                    ~CChartObjectHLine(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,double price);
+   bool              Create(long chart_id,const string name,const int window,const double price);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_HLINE); }
+   virtual int       Type(void) const { return(OBJ_HLINE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Horizontal line".                                 |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         price    - price coordinate.                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectHLine::Create(long chart_id,string name,int window,double price)
+CChartObjectHLine::CChartObjectHLine(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_HLINE,window,0,price);
-   if(result) result&=Attach(chart_id,name,window,1);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectHLine::~CChartObjectHLine(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Horizontal line"                                  |
+//+------------------------------------------------------------------+
+bool CChartObjectHLine::Create(long chart_id,const string name,const int window,const double price)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_HLINE,window,0,price))
+      return(false);
+   if(!Attach(chart_id,name,window,1))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectTrend.                                         |
@@ -75,139 +94,132 @@ bool CChartObjectHLine::Create(long chart_id,string name,int window,double price
 class CChartObjectTrend : public CChartObject
   {
 public:
+                     CChartObjectTrend(void);
+                    ~CChartObjectTrend(void);
    //--- methods of access to properties of the object
-   bool              RayLeft() const;
-   bool              RayLeft(bool new_sel);
-   bool              RayRight() const;
-   bool              RayRight(bool new_sel);
+   bool              RayLeft(void) const;
+   bool              RayLeft(const bool new_sel) const;
+   bool              RayRight(void) const;
+   bool              RayRight(const bool new_sel) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_TREND); }
+   virtual int       Type(void) const { return(OBJ_TREND); }
    //--- methods for working with files
-   virtual bool      Save(int file_handle);
-   virtual bool      Load(int file_handle);
+   virtual bool      Save(const int file_handle);
+   virtual bool      Load(const int file_handle);
   };
 //+------------------------------------------------------------------+
-//| Create object "Trendline".                                       |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2)
+CChartObjectTrend::CChartObjectTrend(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_TREND,window,time1,price1,time2,price2);
-   if(result) result&=Attach(chart_id,name,window,2);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get the "Ray left" flag.                                         |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Ray left" flag.                                     |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::RayLeft() const
+CChartObjectTrend::~CChartObjectTrend(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+  }
+//+------------------------------------------------------------------+
+//| Create object "Trendline"                                        |
+//+------------------------------------------------------------------+
+bool CChartObjectTrend::Create(long chart_id,const string name,const int window,
+                               const datetime time1,const double price1,
+                               const datetime time2,const double price2)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_TREND,window,time1,price1,time2,price2))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get the "Ray left" flag                                          |
+//+------------------------------------------------------------------+
+bool CChartObjectTrend::RayLeft(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT));
   }
 //+------------------------------------------------------------------+
-//| Set the "Ray left" flag.                                         |
-//| INPUT:  new_ray - new flag "Ray left".                           |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Ray left" flag                                          |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::RayLeft(bool new_ray)
+bool CChartObjectTrend::RayLeft(const bool new_ray) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT,new_ray));
   }
 //+------------------------------------------------------------------+
-//| Get the "Ray right" flag.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Ray right" flag.                                    |
-//| REMARK: no.                                                      |
+//| Get the "Ray right" flag                                         |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::RayRight() const
+bool CChartObjectTrend::RayRight(void) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT));
   }
 //+------------------------------------------------------------------+
-//| Set the "Ray right" flag.                                        |
-//| INPUT:  new_ray - new flag "Ray right".                          |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Ray right" flag                                         |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::RayRight(bool new_ray)
+bool CChartObjectTrend::RayRight(const bool new_ray) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT,new_ray));
   }
 //+------------------------------------------------------------------+
-//| Writing parameters of objject to file.                           |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for writing.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Writing parameters of objject to file                            |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::Save(int file_handle)
+bool CChartObjectTrend::Save(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- writing
-   resutl=CChartObject::Save(file_handle);
-   if(resutl)
-     {
-      //--- writing value of the "Ray left" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT),CHAR_VALUE)!=sizeof(char)) return(false);
-      //--- writing value of the "Ray right" property
-      if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT),CHAR_VALUE)!=sizeof(char)) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- write
+   if(!CChartObject::Save(file_handle))
+      return(false);
+//--- write value of the "Ray left" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- write value of the "Ray right" property
+   if(FileWriteInteger(file_handle,(int)ObjectGetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT),CHAR_VALUE)!=sizeof(char))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
-//| Reading parameters of object from file.                          |
-//| INPUT:  file_handle - handle of file previously opened           |
-//|         for reading.                                             |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Reading parameters of object from file                           |
 //+------------------------------------------------------------------+
-bool CChartObjectTrend::Load(int file_handle)
+bool CChartObjectTrend::Load(const int file_handle)
   {
-   bool resutl;
-//--- checking
-   if(file_handle<=0) return(false);
-   if(m_chart_id==-1) return(false);
-//--- reading
-   resutl=CChartObject::Load(file_handle);
-   if(resutl)
-     {
-      //--- reading value of the "Ray left" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-      //--- reading value of the "Ray right" property
-      if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT,FileReadInteger(file_handle,CHAR_VALUE))) return(false);
-     }
-//---
-   return(resutl);
+//--- check
+   if(file_handle==INVALID_HANDLE || m_chart_id==-1)
+      return(false);
+//--- read
+   if(!CChartObject::Load(file_handle))
+      return(false);
+//--- read value of the "Ray left" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_LEFT,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- read value of the "Ray right" property
+   if(!ObjectSetInteger(m_chart_id,m_name,OBJPROP_RAY_RIGHT,FileReadInteger(file_handle,CHAR_VALUE)))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+
 //| Class CChartObjectTrendByAngle.                                  |
@@ -217,58 +229,64 @@ bool CChartObjectTrend::Load(int file_handle)
 class CChartObjectTrendByAngle : public CChartObjectTrend
   {
 public:
+                     CChartObjectTrendByAngle(void);
+                    ~CChartObjectTrendByAngle(void);
    //--- methods of access to properties of the object
-   double            Angle() const;
-   bool              Angle(double angle);
+   double            Angle(void) const;
+   bool              Angle(const double angle) const;
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2);
    //--- method of identifying the object
-   virtual int       Type() { return(OBJ_TRENDBYANGLE); }
+   virtual int       Type(void) const { return(OBJ_TRENDBYANGLE); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Trendline by angle".                              |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectTrendByAngle::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2)
+CChartObjectTrendByAngle::CChartObjectTrendByAngle(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_TRENDBYANGLE,window,time1,price1,time2,price2);
-//---
-   if(result) result&=Attach(chart_id,name,window,2);
-//---
-   return(result);
   }
 //+------------------------------------------------------------------+
-//| Get the "Angle" property.                                        |
-//| INPUT:  no.                                                      |
-//| OUTPUT: the "Angle" property.                                    |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-double CChartObjectTrendByAngle::Angle() const
+CChartObjectTrendByAngle::~CChartObjectTrendByAngle(void)
   {
-//--- checking
-   if(m_chart_id==-1) return(EMPTY_VALUE);
+  }
+//+------------------------------------------------------------------+
+//| Create object "Trendline by angle"                               |
+//+------------------------------------------------------------------+
+bool CChartObjectTrendByAngle::Create(long chart_id,const string name,const int window,
+                                      const datetime time1,const double price1,
+                                      const datetime time2,const double price2)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_TRENDBYANGLE,window,time1,price1,time2,price2))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+//--- successful
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Get the "Angle" property                                         |
+//+------------------------------------------------------------------+
+double CChartObjectTrendByAngle::Angle(void) const
+  {
+//--- check
+   if(m_chart_id==-1)
+      return(EMPTY_VALUE);
 //---
    return(ObjectGetDouble(m_chart_id,m_name,OBJPROP_ANGLE));
   }
 //+------------------------------------------------------------------+
-//| Set the "Angle" property.                                        |
-//| INPUT:  angle - new value of the "Angle" property.               |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Set the "Angle" property                                         |
 //+------------------------------------------------------------------+
-bool CChartObjectTrendByAngle::Angle(double angle)
+bool CChartObjectTrendByAngle::Angle(const double angle) const
   {
-//--- checking
-   if(m_chart_id==-1) return(false);
-//---
+//--- check
+   if(m_chart_id==-1)
+      return(false);
+//--- result
    return(ObjectSetDouble(m_chart_id,m_name,OBJPROP_ANGLE,angle));
   }
 //+------------------------------------------------------------------+
@@ -279,29 +297,39 @@ bool CChartObjectTrendByAngle::Angle(double angle)
 class CChartObjectCycles : public CChartObject
   {
 public:
+                     CChartObjectCycles(void);
+                    ~CChartObjectCycles(void);
    //--- method of creating the object
-   bool              Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2);
+   bool              Create(long chart_id,const string name,const int window,
+                            const datetime time1,const double price1,
+                            const datetime time2,const double price2);
    //--- method of identifying the object
-   virtual int       Type() const { return(OBJ_TREND); }
+   virtual int       Type(void) const { return(OBJ_TREND); }
   };
 //+------------------------------------------------------------------+
-//| Create object "Cycle lines".                                     |
-//| INPUT:  chart_id - chart identifier,                             |
-//|         name     - object name,                                  |
-//|         window   - subwindow number,                             |
-//|         time1    - first time coordinate,                        |
-//|         price1   - first price coordinate,                       |
-//|         time2    - second time coordinate,                       |
-//|         price2   - second price coordinate.                      |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-bool CChartObjectCycles::Create(long chart_id,string name,int window,datetime time1,double price1,datetime time2,double price2)
+CChartObjectCycles::CChartObjectCycles(void)
   {
-   bool result=ObjectCreate(chart_id,name,OBJ_CYCLES,window,time1,price1,time2,price2);
-//---
-   if(result) result&=Attach(chart_id,name,window,2);
-//---
-   return(result);
+  }
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CChartObjectCycles::~CChartObjectCycles(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create object "Cycle lines"                                      |
+//+------------------------------------------------------------------+
+bool CChartObjectCycles::Create(long chart_id,const string name,const int window,
+                                const datetime time1,const double price1,
+                                const datetime time2,const double price2)
+  {
+   if(!ObjectCreate(chart_id,name,OBJ_CYCLES,window,time1,price1,time2,price2))
+      return(false);
+   if(!Attach(chart_id,name,window,2))
+      return(false);
+//--- successful
+   return(true);
   }
 //+------------------------------------------------------------------+

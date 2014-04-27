@@ -149,48 +149,49 @@ void MqlNet::Close()
 	if (hConnect>0) { InternetCloseHandle(hConnect); hConnect=-1; Print("-Close Connect..."); }
 }
 //------------------------------------------------------------------ Request
+//------------------------------------------------------------------ Request
 bool MqlNet::Request(tagRequest &req)
 {
-	if(!TerminalInfoInteger(TERMINAL_DLLS_ALLOWED)) { Print("-DLL not allowed"); return(false); } // проверка разрешенни DLL в терминале
-	if(!MQL5InfoInteger(MQL5_DLLS_ALLOWED)) { Print("-DLL not allowed"); return(false); } // проверка разрешенни DLL в терминале
-	if (req.toFile && req.stOut=="") { Print("-File not specified "); return(false); }
-	uchar data[]; int hRequest, hSend; 
-	string Vers="HTTP/1.1"; string nill="";
-	if (req.fromFile) { if (FileToArray(req.stData, data)<0) { Print("-Err reading file "+req.stData); return(false); } }// прочитали файл в массив
-	else StringToCharArray(req.stData, data);
-
-	if (hSession<=0 || hConnect<=0) { Close(); if (!Open(Host, Port, User, Pass, Service)) { Print("-Err Connect"); Close(); return(false); } }
-	// создаем дескриптор запроса
-	hRequest=HttpOpenRequestW(hConnect, req.stVerb, req.stObject, Vers, nill, 0, INTERNET_FLAG_KEEP_CONNECTION|INTERNET_FLAG_RELOAD|INTERNET_FLAG_PRAGMA_NOCACHE, 0); 
-	if (hRequest<=0) { Print("-Err OpenRequest"); InternetCloseHandle(hConnect); return(false); }
-
-
-	// отправляем запрос
-	int n=0;
-	while (n<3)
-	{
-		n++;
-		hSend=HttpSendRequestW(hRequest, req.stHead, StringLen(req.stHead), data, ArraySize(data)); // отправили файл
-		if (hSend<=0) 
-		{ 	
-			int err=0; err=GetLastError(err); Print("-Err SendRequest= ", err); 
-			if (err!=ERROR_INTERNET_INVALID_CA)
-			{
-				int dwFlags;
-				int dwBuffLen = sizeof(dwFlags);
-				InternetQueryOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, dwBuffLen);
-				dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;
-				int rez=InternetSetOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, sizeof (dwFlags));
-				if (!rez) { Print("-Err InternetSetOptionW= ", GetLastError(err)); break; }
-			}
-			else break;
-		} 
-		else break;
-	}
-	if (hSend>0) ReadPage(hRequest, req.stOut, req.toFile); // читаем страницу
-	InternetCloseHandle(hRequest); InternetCloseHandle(hSend); // закрыли все хендлы
-	if (hSend<=0) Close();
-	return(true);
+  if(!TerminalInfoInteger(TERMINAL_DLLS_ALLOWED)) { Print("-DLL not allowed"); return(false); } // проверка разрешенни DLL в терминале
+  if(!MQL5InfoInteger(MQL5_DLLS_ALLOWED)) { Print("-DLL not allowed"); return(false); } // проверка разрешенни DLL в терминале
+  if (req.toFile && req.stOut=="") { Print("-File not specified "); return(false); }
+  uchar data[]; int hRequest, hSend; 
+  string Vers="HTTP/1.1"; string nill="";
+  if (req.fromFile) { if (FileToArray(req.stData, data)<0) { Print("-Err reading file "+req.stData); return(false); } }// прочитали файл в массив
+  else StringToCharArray(req.stData, data);
+  
+  if (hSession<=0 || hConnect<=0) { Close(); if (!Open(Host, Port, User, Pass, Service)) { Print("-Err Connect"); Close(); return(false); } }
+  // создаем дескриптор запроса
+  hRequest=HttpOpenRequestW(hConnect, req.stVerb, req.stObject, Vers, nill, 0, INTERNET_FLAG_KEEP_CONNECTION|INTERNET_FLAG_RELOAD|INTERNET_FLAG_PRAGMA_NOCACHE, 0); 
+  if (hRequest<=0) { Print("-Err OpenRequest ",GetLastError()); InternetCloseHandle(hConnect); return(false); }
+  
+  
+  // отправляем запрос
+  int n=0;
+  while (n<3) // делаем две попытки отправки. первая обычная, вторая если требуется SSL
+  {
+    n++;
+    hSend=HttpSendRequestW(hRequest, req.stHead, StringLen(req.stHead), data, ArraySize(data)); // отправили файл
+    if (hSend<=0) // если отправка неудачна, то проверим SSL
+    {       
+      int err=0; err=GetLastError(); Print("-Err SendRequest= ", err); 
+      if (err!=ERROR_INTERNET_INVALID_CA) // если ошибка действительно связана с запросом SSL
+      {
+        int dwFlags;
+        int dwBuffLen = sizeof(dwFlags); // ставим дополнительные флаги
+        InternetQueryOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, dwBuffLen);
+        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;
+        int rez=InternetSetOptionW(hRequest, INTERNET_OPTION_SECURITY_FLAGS, dwFlags, sizeof (dwFlags));
+        if (!rez) { Print("-Err InternetSetOptionW= ", GetLastError()); break; }
+      }
+      else break;
+    } 
+    else break;
+  }
+  if (hSend>0) ReadPage(hRequest, req.stOut, req.toFile); // читаем страницу, если отправили
+  InternetCloseHandle(hRequest); InternetCloseHandle(hSend); // закрыли все хендлы
+  if (hSend<=0) Close(); // закрываем при ошибке
+  return(true);
 }
 //------------------------------------------------------------------ OpenURL
 bool MqlNet::OpenURL(string aURL, string &Out, bool toFile)
@@ -244,3 +245,4 @@ int MqlNet::FileToArray(string aFileName, uchar& data[])
 	for (i=0; i<size; i++) data[i]=(uchar)FileReadInteger(h, CHAR_VALUE); 
 	FileClose(h); return(size);
 }
+//------------------------------------------------------------------ SendData

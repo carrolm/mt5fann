@@ -44,15 +44,16 @@ void OnInit()
 //+------------------------------------------------------------------+
 //| DeMarker                                                         |
 //+------------------------------------------------------------------+
-int OnCalculate(const int rates_total,const int prev_calculated,
-                const datetime &Time[],
-                const double &Open[],
-                const double &High[],
-                const double &Low[],
-                const double &Close[],
-                const long &TickVolume[],
-                const long &Volume[],
-                const int &Spread[])
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
   {
    int    i,limit;
    double dNum;
@@ -67,10 +68,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       //--- filling out the array of True Range values for each period
       for(i=1;i<InpDeMarkerPeriod;i++)
         {
-         if(High[i]>High[i-1]) ExtDeMaxBuffer[i]=High[i]-High[i-1];
+         if(high[i]>high[i-1]) ExtDeMaxBuffer[i]=high[i]-high[i-1];
          else ExtDeMaxBuffer[i]=0.0;
 
-         if(Low[i-1]>Low[i]) ExtDeMinBuffer[i]=Low[i-1]-Low[i];
+         if(low[i-1]>low[i]) ExtDeMinBuffer[i]=low[i-1]-low[i];
          else ExtDeMinBuffer[i]=0.0;
         }
       for(i=0;i<InpDeMarkerPeriod;i++) ExtDeMarkerBuffer[i]=0.0;
@@ -80,10 +81,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //--- the main loop of calculations
    for(i=limit;i<rates_total && !IsStopped();i++)
      {
-      if(High[i]>High[i-1]) ExtDeMaxBuffer[i]=High[i]-High[i-1];
+      if(high[i]>high[i-1]) ExtDeMaxBuffer[i]=high[i]-high[i-1];
       else ExtDeMaxBuffer[i]=0.0;
 
-      if(Low[i-1]>Low[i]) ExtDeMinBuffer[i]=Low[i-1]-Low[i];
+      if(low[i-1]>low[i]) ExtDeMinBuffer[i]=low[i-1]-low[i];
       else ExtDeMinBuffer[i]=0.0;
 
       ExtAvgDeMaxBuffer[i]=SimpleMA(i,InpDeMarkerPeriod,ExtDeMaxBuffer);

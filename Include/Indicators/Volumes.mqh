@@ -1,8 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                      Volumes.mqh |
-//|                        Copyright 2011, MetaQuotes Software Corp. |
-//|                                        http://www.metaquotes.net |
-//|                                              Revision 2011.06.09 |
+//|                   Copyright 2009-2013, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #include "Indicator.mqh"
 //+------------------------------------------------------------------+
@@ -16,54 +15,69 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;        // applied volume
 
 public:
-                     CiAD();
+                     CiAD(void);
+                    ~CiAD(void);
    //--- methods of access to protected data
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied); }
+   ENUM_APPLIED_VOLUME Applied(void) const { return(m_applied); }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_AD);    }
+   virtual int       Type(void) const { return(IND_AD); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiAD.                                                |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiAD::CiAD()
+CiAD::CiAD(void) : m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_applied=WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiAD::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiAD::~CiAD(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Accumulation/Distribution" indicator                 |
+//+------------------------------------------------------------------+
+bool CiAD::Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iAD(symbol,period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiAD::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(ENUM_APPLIED_VOLUME)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiAD::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
+bool CiAD::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -81,43 +95,14 @@ bool CiAD::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME a
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Accumulation/Distribution" indicator.                |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Accumulation/Distribution"                  |
 //+------------------------------------------------------------------+
-bool CiAD::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iAD(symbol,period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Accumulation/Distribution".                 |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiAD::Main(int index) const
+double CiAD::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -133,92 +118,52 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiMFI();
+                     CiMFI(void);
+                    ~CiMFI(void);
    //--- methods of access to protected data
-   int               MaPeriod()      const { return(m_ma_period); }
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied);   }
+   int               MaPeriod(void)        const { return(m_ma_period); }
+   ENUM_APPLIED_VOLUME Applied(void)       const { return(m_applied);   }
    //--- method of creation
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const int ma_period,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_MFI);     }
+   virtual int       Type(void) const { return(IND_MFI); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                                const int ma_period,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiMFI.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiMFI::CiMFI()
+CiMFI::CiMFI(void) : m_ma_period(-1),
+                     m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_ma_period=-1;
-   m_applied  =WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiMFI::~CiMFI(void)
   {
-   return(Initialize(symbol,period,(int)params[0].integer_value,(ENUM_APPLIED_VOLUME)params[1].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Create the "Money Flow Index" indicator                          |
 //+------------------------------------------------------------------+
-bool CiMFI::Initialize(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLIED_VOLUME applied)
-  {
-   if(CreateBuffers(symbol,period,1))
-     {
-      //--- string of status of drawing
-      m_name  ="MFI";
-      m_status="("+symbol+","+PeriodDescription()+","+
-                IntegerToString(ma_period)+","+VolumeDescription(applied)+","+") H="+IntegerToString(m_handle);
-      //--- save settings
-      m_ma_period=ma_period;
-      m_applied  =applied;
-      //--- create buffers
-      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
-      //--- ok
-      return(true);
-     }
-//--- error
-   return(false);
-  }
-//+------------------------------------------------------------------+
-//| Create the "Money Flow Index" indicator.                         |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         ma_period - period of MA,                                |
-//|         applied   - what to apply the indicator to.              |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-bool CiMFI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLIED_VOLUME applied)
+bool CiMFI::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                   const int ma_period,const ENUM_APPLIED_VOLUME applied)
   {
 //--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
 //--- create
    m_handle=iMFI(symbol,period,ma_period,applied);
 //--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
+   if(m_handle==INVALID_HANDLE)
+      return(false);
 //--- indicator successfully created
    if(!Initialize(symbol,period,ma_period,applied))
      {
@@ -231,16 +176,44 @@ bool CiMFI::Create(string symbol,ENUM_TIMEFRAMES period,int ma_period,ENUM_APPLI
    return(true);
   }
 //+------------------------------------------------------------------+
-//| Access to buffer of "Money Flow Index".                          |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with universal parameters               |
 //+------------------------------------------------------------------+
-double CiMFI::Main(int index) const
+bool CiMFI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
+  {
+   return(Initialize(symbol,period,(int)params[0].integer_value,(ENUM_APPLIED_VOLUME)params[1].integer_value));
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with special parameters                 |
+//+------------------------------------------------------------------+
+bool CiMFI::Initialize(const string symbol,const ENUM_TIMEFRAMES period,
+                       const int ma_period,const ENUM_APPLIED_VOLUME applied)
+  {
+   if(CreateBuffers(symbol,period,1))
+     {
+      //--- string of status of drawing
+      m_name  ="MFI";
+      m_status="("+symbol+","+PeriodDescription()+","+
+               IntegerToString(ma_period)+","+VolumeDescription(applied)+","+") H="+IntegerToString(m_handle);
+      //--- save settings
+      m_ma_period=ma_period;
+      m_applied  =applied;
+      //--- create buffers
+      ((CIndicatorBuffer*)At(0)).Name("MAIN_LINE");
+      //--- ok
+      return(true);
+     }
+//--- error
+   return(false);
+  }
+//+------------------------------------------------------------------+
+//| Access to buffer of "Money Flow Index"                           |
+//+------------------------------------------------------------------+
+double CiMFI::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -255,54 +228,69 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiOBV();
+                     CiOBV(void);
+                    ~CiOBV(void);
    //--- methods of access to protected data
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied); }
+   ENUM_APPLIED_VOLUME Applied(void) const { return(m_applied); }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const  { return(IND_OBV);   }
+   virtual int       Type(void) const  { return(IND_OBV); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiOBV.                                               |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiOBV::CiOBV()
+CiOBV::CiOBV(void) : m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_applied=WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiOBV::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiOBV::~CiOBV(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "On Balance Volume" indicator                         |
+//+------------------------------------------------------------------+
+bool CiOBV::Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iOBV(symbol,period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiOBV::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(ENUM_APPLIED_VOLUME)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiOBV::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
+bool CiOBV::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -320,43 +308,14 @@ bool CiOBV::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME 
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "On Balance Volume" indicator.                        |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "On Balance Volume"                          |
 //+------------------------------------------------------------------+
-bool CiOBV::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iOBV(symbol,period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "On Balance Volume".                         |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiOBV::Main(int index) const
+double CiOBV::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
@@ -371,54 +330,69 @@ protected:
    ENUM_APPLIED_VOLUME m_applied;
 
 public:
-                     CiVolumes();
+                     CiVolumes(void);
+                    ~CiVolumes(void);
    //--- methods of access to protected data
-   ENUM_APPLIED_VOLUME Applied()     const { return(m_applied);   }
+   ENUM_APPLIED_VOLUME Applied(void) const { return(m_applied); }
    //--- method create
-   bool              Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   bool              Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
    //--- methods of access to indicator data
-   double            Main(int index) const;
+   double            Main(const int index) const;
    //--- method of identifying
-   virtual int       Type()          const { return(IND_VOLUMES); }
+   virtual int       Type(void) const { return(IND_VOLUMES); }
 
 protected:
    //--- methods of tuning
-   virtual bool      Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[]);
-   bool              Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied);
+   virtual bool      Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[]);
+   bool              Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied);
   };
 //+------------------------------------------------------------------+
-//| Constructor CiVolumes.                                           |
-//| INPUT:  no.                                                      |
-//| OUTPUT: no.                                                      |
-//| REMARK: no.                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiVolumes::CiVolumes()
+CiVolumes::CiVolumes(void) : m_applied(WRONG_VALUE)
   {
-//--- initialize protected data
-   m_applied=WRONG_VALUE;
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with universal parameters.              |
-//| INPUT:  symbol    - indicator symbol,                            |
-//|         period    - indicator period,                            |
-//|         num_param - number of parameters,                        |
-//|         params    - array of parameters.                         |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Destructor                                                       |
 //+------------------------------------------------------------------+
-bool CiVolumes::Initialize(string symbol,ENUM_TIMEFRAMES period,int num_params,MqlParam &params[])
+CiVolumes::~CiVolumes(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//| Create the "Volumes" indicator                                   |
+//+------------------------------------------------------------------+
+bool CiVolumes::Create(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
+  {
+//--- check history
+   if(!SetSymbolPeriod(symbol,period))
+      return(false);
+//--- create
+   m_handle=iVolumes(symbol,period,applied);
+//--- check result
+   if(m_handle==INVALID_HANDLE)
+      return(false);
+//--- indicator successfully created
+   if(!Initialize(symbol,period,applied))
+     {
+      //--- initialization failed
+      IndicatorRelease(m_handle);
+      m_handle=INVALID_HANDLE;
+      return(false);
+     }
+//--- ok
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialize the indicator with universal parameters               |
+//+------------------------------------------------------------------+
+bool CiVolumes::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const int num_params,const MqlParam &params[])
   {
    return(Initialize(symbol,period,(ENUM_APPLIED_VOLUME)params[0].integer_value));
   }
 //+------------------------------------------------------------------+
-//| Initialize the indicator with special parameters.                |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Initialize the indicator with special parameters                 |
 //+------------------------------------------------------------------+
-bool CiVolumes::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
+bool CiVolumes::Initialize(const string symbol,const ENUM_TIMEFRAMES period,const ENUM_APPLIED_VOLUME applied)
   {
    if(CreateBuffers(symbol,period,1))
      {
@@ -436,43 +410,14 @@ bool CiVolumes::Initialize(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOL
    return(false);
   }
 //+------------------------------------------------------------------+
-//| Create the "Volumes" indicator.                                  |
-//| INPUT:  symbol  - indicator symbol,                              |
-//|         period  - indicator period,                              |
-//|         applied - what to apply the indicator to.                |
-//| OUTPUT: true if successful, false if not.                        |
-//| REMARK: no.                                                      |
+//| Access to buffer of "Volumes"                                    |
 //+------------------------------------------------------------------+
-bool CiVolumes::Create(string symbol,ENUM_TIMEFRAMES period,ENUM_APPLIED_VOLUME applied)
-  {
-//--- check history
-   if(!SetSymbolPeriod(symbol,period)) return(false);
-//--- create
-   m_handle=iVolumes(symbol,period,applied);
-//--- check result
-   if(m_handle==INVALID_HANDLE)        return(false);
-//--- indicator successfully created
-   if(!Initialize(symbol,period,applied))
-     {
-      //--- initialization failed
-      IndicatorRelease(m_handle);
-      m_handle=INVALID_HANDLE;
-      return(false);
-     }
-//--- ok
-   return(true);
-  }
-//+------------------------------------------------------------------+
-//| Access to buffer of "Volumes".                                   |
-//| INPUT:  index - buffer index.                                    |
-//| OUTPUT: value of buffer.                                         |
-//| REMARK: no.                                                      |
-//+------------------------------------------------------------------+
-double CiVolumes::Main(int index) const
+double CiVolumes::Main(const int index) const
   {
    CIndicatorBuffer *buffer=At(0);
-//--- checking
-   if(buffer==NULL) return(EMPTY_VALUE);
+//--- check
+   if(buffer==NULL)
+      return(EMPTY_VALUE);
 //---
    return(buffer.At(index));
   }
