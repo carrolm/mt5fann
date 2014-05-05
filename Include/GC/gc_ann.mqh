@@ -238,7 +238,7 @@ void CGCANNNeuronList::Init(double &v1[],double &v2[])
 //+------------------------------------------------------------------+
 CGCANNNeuron *CGCANNNeuronList::Find(int uid)
   {
-   if(!GetFirstNode()) return(NULL);
+   if(NULL==GetFirstNode()) return(NULL);
    do
      {
       if(((CGCANNNeuron *)m_curr_node).uid==uid)
@@ -916,7 +916,7 @@ bool CGCANN::Draw(int window,datetime &time[],int w,int h)
      {
       tmp.Weights(weights);
 
-      ObjectCreate(0,"Neuron_"+(string)tmp.uid,OBJ_ARROW,window,time[weights[0]*w/2.1+w/2.05],weights[1]*h/2.1+h/2);
+      ObjectCreate(0,"Neuron_"+(string)tmp.uid,OBJ_ARROW,window,time[(int)(weights[0]*w/2.1+w/2.05)],weights[1]*h/2.1+h/2);
       ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_ARROWCODE,158);
 
       ObjectSetInteger(0,"Neuron_"+(string)tmp.uid,OBJPROP_COLOR,Blue);
