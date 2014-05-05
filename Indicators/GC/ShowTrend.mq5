@@ -3,7 +3,7 @@
 //|                        Copyright 2011, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2011, MetaQuotes Software Corp."
+#property copyright "Copyright 2014, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #include <GC\GetVectors.mqh>
@@ -17,15 +17,15 @@
 #property indicator_buffers 2
 #property indicator_plots   1
 #property indicator_type1   DRAW_COLOR_HISTOGRAM
-#property indicator_color1  clrRed,clrYellow,,clrBlack,clrBlue,clrLime
+#property indicator_color1  clrBlack,clrRed,clrYellow,clrPurple,clrBlue,clrLime
 #property indicator_style1  0
 #property indicator_width1  1
 //--- indicator buffers
 double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
-input int _TREND_=15;// на сколько смотреть вперед
+input int _TREND_=120;// на сколько смотреть вперед
 input int  _limit_=5000;// на сколько баров уходить назад
-input int _ts_ = 3;// сколько тейкпрофитов берем
+
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
@@ -80,19 +80,19 @@ int OnCalculate(const int rates_total,
    DelTrash();
    for(i=1;i<_limit_;i++)
      {
-      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true)/5);
+      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true));
       ExtVolumesBuffer[i+_TREND_]=res;
-      ExtColorsBuffer[i+_TREND_]=2.0;
+      ExtColorsBuffer[i+_TREND_]=3.0;
       if(res<-0.66)
-         ExtColorsBuffer[i+_TREND_]=0.0;
-      else if(res<-0.33)
          ExtColorsBuffer[i+_TREND_]=1.0;
-      else if(res<0.33)
+      else if(res<-0.33)
          ExtColorsBuffer[i+_TREND_]=2.0;
-      else if(res<0.66)
+      else if(res<0.33)
          ExtColorsBuffer[i+_TREND_]=3.0;
-       else   
+      else if(res<0.66)
          ExtColorsBuffer[i+_TREND_]=4.0;
+       else   
+         ExtColorsBuffer[i+_TREND_]=5.0;
      }
      //if (res>0)  Label1Buffer[i+_TREND_]=res;
       //else Label2Buffer[i+_TREND_]=res;

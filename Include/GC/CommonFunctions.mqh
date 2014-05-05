@@ -12,6 +12,7 @@ input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 input bool _Carefull_=true;//Быть осторожным
 input int _NumTS_=3;//Сколько спредов до стоплоса
+input int _NumTP_ = 5;// сколько тейкпрофитов берем
 input string spamfilename="notify.txt";
 //+------------------------------------------------------------------+
 //|                                                                  |

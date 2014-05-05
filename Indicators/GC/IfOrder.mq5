@@ -102,7 +102,7 @@ int OnCalculate(const int rates_total,
    for(i=1;i<limit;i++)
      {
       res=GetTrend(20,_Symbol,_Period,i);
-      if(0!=res)Print(res);
+      if(0!=res) Print(res);
      }
 //--- OnCalculate done. Return new prev_calculated.
    return(rates_total);
