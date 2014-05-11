@@ -562,12 +562,12 @@ double GetTrend(int shift_history,string smb,ENUM_TIMEFRAMES tf,int shift,bool d
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(_NumTP_*SymbolSpread<-res && draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[is],S);
+            res=-mS;if(_NumTP_*SymbolSpread<-res && draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history]-SymbolSpread,Time[is],S);
            }
          else
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB;if(_NumTP_*SymbolSpread<res && draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history],Time[ib],B);
+            res=mB;if(_NumTP_*SymbolSpread<res && draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;

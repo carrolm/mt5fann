@@ -193,10 +193,10 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool COracleTemplate::loadSettings(string filename)
+bool COracleTemplate::loadSettings(string _filename)
   {
-   if(""==filename) filename=Name()+".ini";
-   int FileHandle=FileOpen(filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
+   if(""==_filename) _filename=Name()+".ini";
+   int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
    string fr;
    if(FileHandle!=INVALID_HANDLE)
      {
@@ -235,10 +235,10 @@ bool COracleTemplate::loadSettings(string filename)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool COracleTemplate::saveSettings(string filename)
+bool COracleTemplate::saveSettings(string _filename)
   {
-   if(""==filename) filename=Name()+".ini";
-   int FileHandle=FileOpen(filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
+   if(""==_filename) _filename=Name()+".ini";
+   int FileHandle=FileOpen(_filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
 //string fr;
    if(FileHandle!=INVALID_HANDLE)
      {

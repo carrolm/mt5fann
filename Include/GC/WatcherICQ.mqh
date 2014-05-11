@@ -6,8 +6,8 @@
 #property copyright "Copyright 2011, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <gc\Watcher.mqh>
-#include <gc\icq_mql5.mqh>
-#include <gc\icq_power.mqh>
+#include <gc_other\icq_mql5.mqh>
+#include <gc_other\icq_power.mqh>
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -71,7 +71,7 @@ bool   CWatcherICQ::SendNotify(string UIN)
   {
    bool ret=true;
    if(changing==0) return(true);
-   if(""==UIN) UIN=ICQ_Master;
+  // if(""==UIN) UIN=ICQ_Master;
 //--- если изменения есть то пишем файл notify.txt
    ResetLastError();
    for(int i=0;i<changing;i++)

@@ -10,7 +10,8 @@
 #include <GC\GetVectors.mqh>
 #include <GC\CurrPairs.mqh> // пары
 input int _CNT_=50000;//Сколько сигналов
-input int _SHIFT_=1000;//Сколько сдвиг
+input int _SHIFT_=100;//Сколько сдвиг
+input int _TREND_=120;// на сколько смотреть вперед
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -48,11 +49,11 @@ int Write_File(int qty)
            {
             TimeToStruct(rates[i].time,tm);
             if(tm.mon!=cm) break;
-            res=GetTrend(15,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
+            res=GetTrend(_TREND_,SymbolsArray[SymbolIdx],PERIOD_M1,i+_SHIFT_,false);
             if(res!=0)
               {
                //   restanh=OV[0];
-               res=tanh(res/5);
+               res=tanh(res/2);
                //if(res<4 && res>-4) continue;
                //if(res>4) res=0.7;
                //else if(res>1) res=0.35;
