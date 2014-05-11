@@ -153,8 +153,8 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
      }
 
-   MqlTradeRequest trReq;
-   MqlTradeResult trRez;
+   MqlTradeRequest trReq={0};
+   MqlTradeResult trRez={0};
    trReq.action=TRADE_ACTION_PENDING;
    trReq.magic=magic;
    trReq.symbol=smb;                 // Trade symbol
@@ -180,7 +180,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
      }
-   OrderSend(trReq,trRez);
+   int os=OrderSend(trReq,trRez);
    if(10009!=trRez.retcode)
      {
       Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
@@ -204,8 +204,8 @@ bool Order_Send(MqlTradeRequest &trReq,MqlTradeResult &trRez)
 //+------------------------------------------------------------------+
 int DeleteOrder(ulong ticket)
   {
-   MqlTradeRequest   trReq;
-   MqlTradeResult    trRez;
+   MqlTradeRequest   trReq={0};
+   MqlTradeResult    trRez={0};
    trReq.action    =TRADE_ACTION_REMOVE;
    trReq.order     =ticket;
    if(!Order_Send(trReq,trRez)){Print("Error delete!");};
@@ -271,8 +271,8 @@ bool Trailing()
    int OrdTotal=OrdersTotal();   // ордеров
    int i,TrailingStop;
    MqlTick lasttick;
-   MqlTradeRequest BigDogModif;
-   MqlTradeResult BigDogModifResult;
+   MqlTradeRequest BigDogModif={0};
+   MqlTradeResult BigDogModifResult={0};
    double BufferO[],BufferC[],BufferL[],BufferH[];
    datetime dt[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
@@ -280,12 +280,12 @@ bool Trailing()
    ArraySetAsSeries(dt,true);
    int needcopy=5;
    string smb;
-   MqlTradeRequest   trReq;
-   MqlTradeResult    trRez;
+   MqlTradeRequest   trReq={0};
+   MqlTradeResult    trRez={0};
 
    ENUM_TIMEFRAMES per=PERIOD_M1;
    ulong  ticket;
-// Удаляем отложенные ордера без предела времени -паника, если нет открытых позиций -мусор в общем
+// Удаляем отложенные ордера без предела времени  = паника, если нет открытых позиций -мусор в общем
    for(i=OrdTotal;i>0;i--)
      {
       ticket=OrderGetTicket(i-1);
@@ -545,8 +545,14 @@ bool Trailing()
       trReq.action=TRADE_ACTION_MODIFY;
       trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
       trReq.order=ticket;
-      trReq.expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
-      trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+      datetime expiration=(datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+       if(0==expiration) { expiration=TimeCurrent()+3*PeriodSeconds(_Period);
+      trReq.expiration = expiration;
+      trReq.type_time  = ORDER_TIME_SPECIFIED;//(ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+       Order_Send(trReq,trRez);
+       }
+       trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+       trReq.expiration = expiration;
       trReq.sl=0;
 
       if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
