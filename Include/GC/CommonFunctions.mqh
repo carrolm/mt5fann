@@ -11,8 +11,8 @@ input bool __Debug__=false;//Показывать отладочную информацию
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
 input bool _Carefull_=true;//Быть осторожным
-input int _NumTS_=3;//Сколько спредов до стоплоса
-input int _NumTP_ = 5;// сколько тейкпрофитов берем
+input int _NumTS_=2;//Сколько спредов до стоплоса
+input int _NumTP_ = 4;// сколько тейкпрофитов берем
 input string spamfilename="notify.txt";
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -194,6 +194,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 //+------------------------------------------------------------------+
 bool Order_Send(MqlTradeRequest &trReq,MqlTradeResult &trRez)
   {
+   if(trReq.price==0) return(false);
    int Error=OrderSend(trReq,trRez);
    if(10009!=trRez.retcode) Fun_Error(trRez.retcode);
 
@@ -325,6 +326,7 @@ bool Trailing()
          ); else { GlobalVariableSet(gvn,0); return(false);}
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      int OTE = OrderGetInteger(ORDER_TIME_EXPIRATION);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -409,14 +411,15 @@ bool Trailing()
                      trReq.type_time=ORDER_TIME_GTC;
                      trReq.action=TRADE_ACTION_MODIFY;
                      Order_Send(trReq,trRez);
-                     //if(10009!=trRez.retcode) Print(__FUNCTION__," buy sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
+                     if(10009!=trRez.retcode) Print(__FUNCTION__," buy sl:",trRez.comment," ",smb," код ответа",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                     }
                  }
               }
            }
         }
-      else if(OrderGetInteger(ORDER_TIME_EXPIRATION)!=0)// открытых нет
+      else if(OTE!=0)// открытых нет
         {
+         ticket=OrderGetTicket(i);
          trReq.price=0;
          if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT
             && (
@@ -478,11 +481,11 @@ bool Trailing()
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
-         if(0==PositionGetDouble(POSITION_SL))
+         if(0==PositionGetDouble(POSITION_SL)||0==PositionGetDouble(POSITION_TP))
            {
             trReq.action=TRADE_ACTION_SLTP;
             trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=0;
+            trReq.tp=lasttick.bid-3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);;
             Order_Send(trReq,BigDogModifResult);
            }
          else
@@ -491,8 +494,8 @@ bool Trailing()
             if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
+               trReq.tp=PositionGetDouble(POSITION_TP)-(PositionGetDouble(POSITION_SL)-newsl);
                trReq.sl=newsl;
-               trReq.tp=0;
                Order_Send(trReq,BigDogModifResult);
               }
            }
@@ -506,11 +509,11 @@ bool Trailing()
         }
       else
         {
-         if(0==PositionGetDouble(POSITION_SL))
+         if((0==PositionGetDouble(POSITION_SL))||(0==PositionGetDouble(POSITION_TP)))
            {
             trReq.action=TRADE_ACTION_SLTP;
             trReq.sl= lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=0;
+            trReq.tp=lasttick.ask+3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
             Order_Send(trReq,BigDogModifResult);
            }
          else
@@ -520,7 +523,7 @@ bool Trailing()
               {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl= newsl;
-               trReq.tp=0;
+               trReq.tp=lasttick.ask+3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
                Order_Send(trReq,BigDogModifResult);
               }
            }
