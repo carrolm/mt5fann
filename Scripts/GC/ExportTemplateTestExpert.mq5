@@ -53,7 +53,7 @@ int Write_File(int qty)
             if(res!=0)
               {
                //   restanh=OV[0];
-               res=tanh(res/2);
+               res=tanh(res);
                //if(res<4 && res>-4) continue;
                //if(res>4) res=0.7;
                //else if(res>1) res=0.35;
