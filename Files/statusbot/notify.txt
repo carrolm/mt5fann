@@ -1,2 +1,2 @@
 Starting watcher...
-Balance = 10004.00 USD
+Balance = 10048.96 USD
