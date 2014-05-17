@@ -1,5 +1,9 @@
 double od_forecast(datetime time,string smb)  
  {
+  if(smb=="EURUSD" && time==StringToTime("2014.05.06 10:06:00")) return(0.8121570079614794);
+    if(smb=="EURUSD" && time==StringToTime("2014.05.06 12:39:00")) return(0.8121570079614794);
+  return(0);
+ 
   if(smb=="EURUSD" && time==StringToTime("2014.05.07 17:06:00")) return(-0.6043677771171615);
   if(smb=="EURUSD" && time==StringToTime("2014.05.07 13:07:00")) return(-0.4355021139154983);
   if(smb=="EURUSD" && time==StringToTime("2014.05.07 12:57:00")) return(-0.4621171572600247);
@@ -53,7 +57,7 @@ double od_forecast(datetime time,string smb)
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 11:29:00")) return(0.7752417813172869);
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 11:17:00")) return(0.7882020755281913);
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 10:59:00")) return(0.8004990217606541);
-  if(smb=="EURUSD" && time==StringToTime("2014.05.06 10:55:00")) return(0.8121570079614794);
+  if(smb=="EURUSD" && time==StringToTime("2014.05.06 10:06:00")) return(0.8121570079614794);
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 09:24:00")) return(-0.2913126124515607);
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 02:30:00")) return(-0.2913126124515607);
   if(smb=="EURUSD" && time==StringToTime("2014.05.06 02:17:00")) return(-0.2913126124515607);

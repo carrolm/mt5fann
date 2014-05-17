@@ -10,7 +10,7 @@ input bool __Debug__=false;//Показывать отладочную информацию
 
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
-input bool _Carefull_=true;//Быть осторожным
+input bool _Carefull_=false;//Быть осторожным
 input int _NumTS_=2;//Сколько спредов до стоплоса
 input int _NumTP_ = 4;// сколько тейкпрофитов берем
 input string spamfilename="notify.txt";
@@ -49,6 +49,7 @@ enum NewOrder_Type
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,datetime expiration=0)
   {
+   //  Print("New order double "+way);
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
 // пока выключим -кажется что глючит if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
@@ -61,19 +62,21 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
+  
    if(""==smb)
      {
 //      Print("empty symbol");
       return(false);
      }
    if(NewOrderWait==type || !_OpenNewPosition_) return(false);
+ 
    string gvn="gc_NewOrder";
    // check what run once
-   if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
-   double gvv;
-   if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
-   if(gvv>0) return(false);// startin
-   GlobalVariableSet(gvn,1);
+  // if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
+  // double gvv;
+  // if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
+ ////  if(gvv>0) return(false);// startin
+ //  GlobalVariableSet(gvn,1);
    
    StringToUpper(smb);
    if(""==comment) comment=smb;
@@ -109,7 +112,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
      }
 // если нет паники, а есть слабые сигналы -их пинаем...
-   if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell)){ GlobalVariableSet(gvn,0); return(false);}
+   if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell)){  return(false);}
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) { GlobalVariableSet(gvn,0); return(false);}
    if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
@@ -175,18 +178,21 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
 
-   else//  if(type==NewOrderSell||type==NewOrderWaitSell)
+   else if(type==NewOrderSell||type==NewOrderWaitSell)
      {
       trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
      }
+   //if(NewOrderWait==trReq.type) return (false);  
    int os=OrderSend(trReq,trRez);
-   if(10009!=trRez.retcode)
-     {
-      Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
-      if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
-     }
-   GlobalVariableSet(gvn,0);
+ //  if(10009!=trRez.retcode)
+ //    {
+ //     Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
+ //     if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
+ //    }
+ //   else
+ //     Print("New order failed  "+type+" = "+trReq.type); 
+ //  GlobalVariableSet(gvn,0);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -194,7 +200,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 //+------------------------------------------------------------------+
 bool Order_Send(MqlTradeRequest &trReq,MqlTradeResult &trRez)
   {
-   if(trReq.price==0) return(false);
+   //if(trReq.price==0) return(false);
    int Error=OrderSend(trReq,trRez);
    if(10009!=trRez.retcode) Fun_Error(trRez.retcode);
 
@@ -207,9 +213,9 @@ int DeleteOrder(ulong ticket)
   {
    MqlTradeRequest   trReq={0};
    MqlTradeResult    trRez={0};
-   trReq.action    =TRADE_ACTION_REMOVE;
-   trReq.order     =ticket;
-   if(!Order_Send(trReq,trRez)){Print("Error delete!");};
+   trReq.action      = TRADE_ACTION_REMOVE;
+   trReq.order       = ticket;
+   if(!Order_Send(trReq,trRez)){Print("Error delete! ticket="+ticket);};
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -299,7 +305,7 @@ bool Trailing()
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
             (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
-            DeleteOrder(ticket);
+            DeleteOrder(ticket); 
         }
       else// отложеный
         {
@@ -310,6 +316,7 @@ bool Trailing()
             DeleteOrder(ticket);
         }
      }
+   OrdTotal=OrdersTotal();
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
      {// есть "заказы" и открытие разрешено
@@ -528,9 +535,9 @@ bool Trailing()
               }
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if((lasttick.ask>
+         if(_Carefull_ && ((lasttick.ask>
             (PositionGetDouble(POSITION_PRICE_OPEN)+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
-            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300))))
            {
             NewOrder(smb,NewOrderSell,"Panic");
            }
