@@ -10,9 +10,10 @@ input bool __Debug__=false;//Показывать отладочную информацию
 
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
-input bool _Carefull_=false;//Быть осторожным
+input int _Carefull_= 0;//Быть осторожным. Сколько минут до паники. 0 = выкл
 input int _NumTS_=2;//Сколько спредов до стоплоса
 input int _NumTP_ = 4;// сколько тейкпрофитов берем
+input int _Expiration_=5; // сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -115,7 +116,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell)){  return(false);}
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) { GlobalVariableSet(gvn,0); return(false);}
-   if(0==expiration) expiration=TimeCurrent()+3*PeriodSeconds(_Period);
+   if(0==expiration) expiration=TimeCurrent()+_Expiration_*PeriodSeconds(_Period);
    if(price==0)
      {
       if(ticket!=0)
@@ -130,6 +131,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                //   price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                //else// иначе ставим на мин прибыль
                price=PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+               if(price>(lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT))) price = lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
               }
             else return(false);
            }
@@ -142,6 +144,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                //   price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                //else// иначе ставим на мин прибыль
                price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               if(price<(lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT))) price=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
               }
             else return(false);
            }
@@ -215,7 +218,7 @@ int DeleteOrder(ulong ticket)
    MqlTradeResult    trRez={0};
    trReq.action      = TRADE_ACTION_REMOVE;
    trReq.order       = ticket;
-   if(!Order_Send(trReq,trRez)){Print("Error delete! ticket="+ticket);};
+   if(!Order_Send(trReq,trRez)){Print("Error delete! ticket="+(string)ticket);};
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -333,7 +336,7 @@ bool Trailing()
          ); else { GlobalVariableSet(gvn,0); return(false);}
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-      int OTE = OrderGetInteger(ORDER_TIME_EXPIRATION);
+      datetime OTE = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -507,9 +510,9 @@ bool Trailing()
               }
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if(_Carefull_ && (lasttick.bid<
+         if(_Carefull_>0 && ((lasttick.bid<
             (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
-            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300)))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-_Carefull_*60))))
            {
             NewOrder(smb,NewOrderBuy,"Panic");
            }
@@ -535,9 +538,9 @@ bool Trailing()
               }
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if(_Carefull_ && ((lasttick.ask>
+         if(_Carefull_>0 && ((lasttick.ask>
             (PositionGetDouble(POSITION_PRICE_OPEN)+_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
-            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-300))))
+            || (PositionGetInteger(POSITION_TIME)<(TimeCurrent()-_Carefull_*60))))
            {
             NewOrder(smb,NewOrderSell,"Panic");
            }
