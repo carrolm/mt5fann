@@ -306,13 +306,15 @@ bool COracleTemplate::saveSettings(string _filename)
 //string fr;
    if(FileHandle!=INVALID_HANDLE)
      {
-      string AS;
+      string AS,BS;
       for(int i=0;i<ArraySize(VectorFunctions);i++) AS=AS+" "+VectorFunctions[i];
+      for(int i=0;i<ArraySize(BadVectorFunctions);i++) BS=BS+" "+BadVectorFunctions[i];
       FileWrite(FileHandle,"//How to use"," fill string separate space. Format TT-functionName_Paramm1_ParamX");
       FileWrite(FileHandle,"//Where TT"," shift on timeframe");
       FileWrite(FileHandle,"//example","ROC 5-ROC 10-ROC_13");
       FileWrite(FileHandle,"///Num_repeat","3 eqv ROC 1-ROC 2-ROC");
 
+      FileWrite(FileHandle,"//Bad Signals",BS);
       FileWrite(FileHandle,"//Available Signals",AS);
       FileWrite(FileHandle,"inputSignals",templateInputSignals);
       FileWrite(FileHandle,"Num_repeat",num_repeat);

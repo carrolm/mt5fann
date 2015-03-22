@@ -9,6 +9,8 @@
 
 ///string VectorFunctions[21]={"DayOfWeek","Hour","Minute","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","ADX","ADXWilder","RSI","IMA","StochasticK","StochasticD","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC","BearsPower","BullsPower"};
+string BadVectorFunctions[]={"IMA","CCI","AO","Envelopes","BearsPower","BullsPower"};
+
 string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","StochasticK","StochasticD","WPR","IMA","MACD","AMA"};
 
@@ -314,7 +316,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
 //+------------------------------------------------------------------+
 double GetVector_ROC(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
-   if(0==ind_h.hid)
+   if(0==ind_h.hid) 
      {
       ind_h.hid=iCustom(smb,tf,"GC\ROC");
       if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
