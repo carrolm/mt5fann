@@ -122,7 +122,6 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
       return(false);
      }
-   Print("in week, start "+(string)Start_Date+" orders "+total+" proffit "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
 
    string gvn="gc_NewOrder";
 // check what run once
