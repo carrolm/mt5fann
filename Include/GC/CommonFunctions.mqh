@@ -6,15 +6,21 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //#include <icq_mql5.mqh>
-input bool __Debug__=false;//Показывать отладочную информацию
-
+input bool __Debug__=true;//Показывать отладочную информацию
+bool _debug_time=false;
 input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Разрешить входить в рынок
-input int _Carefull_= 0;//Быть осторожным. Сколько минут до паники. 0 = выкл
+input int _LostInWeekInPercent_=1;// Максимальный процент потерь за неделю
+input int _Carefull_=0;//Сколько минут до паники. 0 = выкл
+input int _TREND_=30;// на сколько смотреть вперед
+input int _GetMaximum_=30;//Сколько минут до снятия сливок. 0 = выкл
 input int _NumTS_=2;//Сколько спредов до стоплоса
-input int _NumTP_ = 4;// сколько тейкпрофитов берем
+input int _NumTP_=4;// сколько тейкпрофитов берем
 input int _Expiration_=5; // сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
+input double _Order_Volume_=1.0;// Объем лота
+input int _Nax_lost_per_Mounth_Percent=10;// Максимальные потери в месяц
+int _Precision_=10;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -50,38 +56,84 @@ enum NewOrder_Type
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,datetime expiration=0)
   {
-   //  Print("New order double "+way);
+//  Print("New order double "+way);
    if(""==comment) comment=(string)way;
-   if(0.66<way) return(NewOrder(smb,NewOrderBuy,comment,price,magic,expiration));
-// пока выключим -кажется что глючит if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,comment,price,magic,expiration));
-   if(-0.66>way) return(NewOrder(smb,NewOrderSell,comment,price,magic,expiration));
-// пока выключим -кажется что глючит if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,comment,price,magic,expiration));
+   if(0.66<way) return(NewOrder(smb,NewOrderBuy,"NO "+comment,price,magic,expiration));
+// пока выключим -кажется что глючит 
+   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,"NO"+comment,price,magic,expiration));
+   if(-0.66>way) return(NewOrder(smb,NewOrderSell,"NO"+comment,price,magic,expiration));
+// пока выключим -кажется что глючит 
+   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,"NO"+comment,price,magic,expiration));
    return(false);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+long WeekStartTime(datetime aTime,bool aStartsOnMonday=false)
+  {
+   long tmp=aTime;
+   long Corrector;
+   if(aStartsOnMonday)
+     {
+      Corrector=259200; // длительность трех дней (86400*3)
+     }
+   else
+     {
+      Corrector=345600; // длительность четырех дней (86400*4)
+     }
+   tmp+=Corrector;
+   tmp=(tmp/604800)*604800;
+   tmp-=Corrector;
+   return(tmp);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
-  
    if(""==smb)
      {
-//      Print("empty symbol");
+      //      Print("empty symbol");
       return(false);
      }
    if(NewOrderWait==type || !_OpenNewPosition_) return(false);
- 
+
+// проверяем что баланс не упал ниже % чем на начало недели  
+   double curr_balance=AccountInfoDouble(ACCOUNT_BALANCE);
+//---
+   double result=0;//,profit=0,loss=0;
+   ulong ticket=0;//,trades=0;
+   datetime Start_Date=(datetime)WeekStartTime(TimeCurrent());
+   HistorySelect(Start_Date,TimeCurrent());
+   uint total=HistoryDealsTotal();
+   for(uint i=0;i<total;i++)
+     {
+      if((bool)(ticket=HistoryDealGetTicket(i)))
+//      if((ticket=HistoryDealGetTicket(i))>0)
+        {
+         if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BALANCE)
+           {
+            result+=HistoryDealGetDouble(ticket,DEAL_PROFIT);
+           }
+        }
+     }
+   if(-_LostInWeekInPercent_*curr_balance/100>result&&expiration==0)
+     {
+      Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
+      return(false);
+     }
+   Print("in week, start "+(string)Start_Date+" orders "+total+" proffit "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
+
    string gvn="gc_NewOrder";
-   // check what run once
-  // if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
-  // double gvv;
-  // if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
- ////  if(gvv>0) return(false);// startin
- //  GlobalVariableSet(gvn,1);
-   
+// check what run once
+// if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
+// double gvv;
+// if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
+////  if(gvv>0) return(false);// startin
+//  GlobalVariableSet(gvn,1);
+
    StringToUpper(smb);
    if(""==comment) comment=smb;
-   ulong    ticket;
    ticket=0;
    int i;
 // есть такой-же отложенный ордер
@@ -130,8 +182,8 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                //if(PositionGetDouble(POSITION_PROFIT)>1)
                //   price=PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                //else// иначе ставим на мин прибыль
-               price=PositionGetDouble(POSITION_PRICE_OPEN)-1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
-               if(price>(lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT))) price = lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
+               price=PositionGetDouble(POSITION_PRICE_OPEN)-1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);//BufferC[1];
+               if(price>(lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT))) price=lasttick.ask+5*SymbolInfoDouble(smb,SYMBOL_POINT);
               }
             else return(false);
            }
@@ -143,7 +195,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
                //if(PositionGetDouble(POSITION_PROFIT)>1)
                //   price=PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)*1.1;
                //else// иначе ставим на мин прибыль
-               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.5*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
+               price=PositionGetDouble(POSITION_PRICE_OPEN)+1.1*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT);
                if(price<(lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT))) price=lasttick.bid-5*SymbolInfoDouble(smb,SYMBOL_POINT);
               }
             else return(false);
@@ -164,7 +216,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.action=TRADE_ACTION_PENDING;
    trReq.magic=magic;
    trReq.symbol=smb;                 // Trade symbol
-   trReq.volume=0.1;      // Requested volume for a deal in lots
+   trReq.volume=_Order_Volume_;      // Requested volume for a deal in lots
    trReq.deviation=3;                                    // Maximal possible deviation from the requested price
    trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
    trReq.tp=price;
@@ -181,21 +233,22 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
 
-   else if(type==NewOrderSell||type==NewOrderWaitSell)
+   else if(type==NewOrderSell || type==NewOrderWaitSell)
      {
       trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_SELL_LIMIT;
      }
-   //if(NewOrderWait==trReq.type) return (false);  
-   int os=OrderSend(trReq,trRez);
- //  if(10009!=trRez.retcode)
- //    {
- //     Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
- //     if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
- //    }
- //   else
- //     Print("New order failed  "+type+" = "+trReq.type); 
- //  GlobalVariableSet(gvn,0);
+//if(NewOrderWait==trReq.type) return (false);  
+   if(!OrderSend(trReq,trRez))
+      //  if(10009!=trRez.retcode)
+      //    {
+      Print(ResultRetcodeDescription(trRez.retcode));
+//     Print(__FUNCTION__," : ",trRez.comment," код ответа ",trRez.retcode," trReq.price=",trReq.price," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl," trReq.type=",trReq.type);
+//     if(ORDER_TYPE_BUY_LIMIT==trReq.type) Print("ORDER_TYPE_BUY_LIMIT");
+//    }
+//   else
+//     Print("New order failed  "+type+" = "+trReq.type); 
+//  GlobalVariableSet(gvn,0);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -203,7 +256,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 //+------------------------------------------------------------------+
 bool Order_Send(MqlTradeRequest &trReq,MqlTradeResult &trRez)
   {
-   //if(trReq.price==0) return(false);
+//if(trReq.price==0) return(false);
    int Error=OrderSend(trReq,trRez);
    if(10009!=trRez.retcode) Fun_Error(trRez.retcode);
 
@@ -236,7 +289,9 @@ bool ExportHistory(string fname,int from=0,int to=0)
         {
          if((bool)(ticket=HistoryDealGetTicket(idt)))
            {
-            FileWrite(FileHandle,HistoryDealGetString(ticket,DEAL_SYMBOL),HistoryDealGetDouble(ticket,DEAL_PROFIT));
+            datetime dt=(datetime)HistoryDealGetInteger(ticket,DEAL_TIME);
+            ENUM_DEAL_TYPE deal_type=(ENUM_DEAL_TYPE)HistoryDealGetInteger(ticket,DEAL_TYPE);
+            FileWrite(FileHandle,dt,HistoryDealGetString(ticket,DEAL_SYMBOL),deal_type,HistoryDealGetDouble(ticket,DEAL_PROFIT),HistoryDealGetString(ticket,DEAL_COMMENT));
            }
         }
       FileClose(FileHandle);
@@ -270,13 +325,13 @@ bool Trailing()
   {
    if(!_TrailingPosition_) return(false);
    string gvn="gc_Trailing";
-   // check what run once
-   if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
+// check what run once
+   if(TimeCurrent()>(GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
    double gvv;
    if(!GlobalVariableGet(gvn,gvv)) {GlobalVariableTemp(gvn); gvv=0;}
    if(gvv>0) return(false);// startin
    GlobalVariableSet(gvn,1);
-   
+
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
    int i,TrailingStop;
@@ -308,7 +363,7 @@ bool Trailing()
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT) || 
             (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && 
             OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)))
-            DeleteOrder(ticket); 
+            DeleteOrder(ticket);
         }
       else// отложеный
         {
@@ -336,7 +391,7 @@ bool Trailing()
          ); else { GlobalVariableSet(gvn,0); return(false);}
       SymbolInfoTick(smb,lasttick);
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
-      datetime OTE = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+      datetime OTE=(datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
       if(PositionSelect(smb))
         {// есть открытые
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
@@ -401,12 +456,14 @@ bool Trailing()
                   trReq.price=lasttick.ask;                   // SymbolInfoDouble(NULL,SYMBOL_ASK);
                   trReq.type=ORDER_TYPE_BUY;              // Order type
                   trReq.comment=OrderGetString(ORDER_COMMENT);
+                  string comm=OrderGetString(ORDER_COMMENT);
                   Order_Send(trReq,trRez);
                   if(10009!=trRez.retcode) Print(__FUNCTION__," buy:",trRez.comment," ",smb," код ответа ",trRez.retcode," trReq.tp=",trReq.tp," trReq.sl=",trReq.sl);
                   else
                     {
                      DeleteOrder(ticket);
                     }
+                  if(StringFind(comm,"NewOrder")==0){NewOrder(smb,NewOrderBuy,"");}
                  }
                else
                  { // закрыть не смогли или не захотели -посмотрим может его двинуть "получше"?
@@ -491,7 +548,7 @@ bool Trailing()
       TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
-         if(0==PositionGetDouble(POSITION_SL)||0==PositionGetDouble(POSITION_TP))
+         if(0==PositionGetDouble(POSITION_SL) || 0==PositionGetDouble(POSITION_TP))
            {
             trReq.action=TRADE_ACTION_SLTP;
             trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
@@ -516,10 +573,17 @@ bool Trailing()
            {
             NewOrder(smb,NewOrderBuy,"Panic");
            }
+         // если можно снять сливки -то двигаем стоплост ближе
+         if(_GetMaximum_>0 && ((lasttick.bid<
+            (PositionGetDouble(POSITION_PRICE_OPEN)-2*_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60))))
+           {
+            NewOrder(smb,NewOrderBuy,"Slivki");
+           }
         }
       else
         {
-         if((0==PositionGetDouble(POSITION_SL))||(0==PositionGetDouble(POSITION_TP)))
+         if((0==PositionGetDouble(POSITION_SL)) || (0==PositionGetDouble(POSITION_TP)))
            {
             trReq.action=TRADE_ACTION_SLTP;
             trReq.sl= lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
@@ -544,7 +608,13 @@ bool Trailing()
            {
             NewOrder(smb,NewOrderSell,"Panic");
            }
-
+         // если можно снять сливки -то двигаем стоплост ближе
+         if(_GetMaximum_>0 && ((lasttick.ask>
+            (PositionGetDouble(POSITION_PRICE_OPEN)+2*_NumTS_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
+            && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60))))
+           {
+            NewOrder(smb,NewOrderSell,"Slivki");
+           }
         }
      }
 // Двигаем отложенные ордера "на получше"
@@ -559,13 +629,15 @@ bool Trailing()
       trReq.price=OrderGetDouble(ORDER_PRICE_OPEN);
       trReq.order=ticket;
       datetime expiration=(datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
-       if(0==expiration) { expiration=TimeCurrent()+3*PeriodSeconds(_Period);
+      if(0==expiration)
+        {
+         expiration=TimeCurrent()+3*PeriodSeconds(_Period);
+         trReq.expiration=expiration;
+         trReq.type_time=ORDER_TIME_SPECIFIED;//(ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
+         Order_Send(trReq,trRez);
+        }
+      trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
       trReq.expiration = expiration;
-      trReq.type_time  = ORDER_TIME_SPECIFIED;//(ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
-       Order_Send(trReq,trRez);
-       }
-       trReq.type_time  = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
-       trReq.expiration = expiration;
       trReq.sl=0;
 
       if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_BUY_LIMIT)
@@ -632,7 +704,68 @@ int Fun_Error(int Error)
       case 10032: Print("Операция разрешена только для реальных счетов");return(0);
       case 10033: Print("Достигнут лимит на количество отложенных ордеров");return(2);
       case 10034: Print("Достигнут лимит на объем ордеров и позиций для данного символа");return(2);
+
+      // Индикаторы
+      case 4806: Print("Запрошенные данные не найдены");return(Error);
       default:    Print("Ошибка № - ",Error);return(0);
      }
+  }
+//+------------------------------------------------------------------+
+
+string TimeFrameName(ENUM_TIMEFRAMES tf)
+  {
+   switch(Period())
+     {
+      case PERIOD_M1: return("M1");
+      case PERIOD_M20: return("M20");
+      case PERIOD_M30: return("M30");
+      case PERIOD_M4: return("M4");
+      case PERIOD_M5: return("M5");
+      case PERIOD_M6: return("M6");
+      default:    return("");
+     }
+  }
+//+------------------------------------------------------------------+
+
+string ResultRetcodeDescription(int retcode)
+  {
+   string str;
+//----
+   switch(retcode)
+     {
+      case TRADE_RETCODE_REQUOTE: str="Реквота"; break;
+      case TRADE_RETCODE_REJECT: str="Запрос отвергнут"; break;
+      case TRADE_RETCODE_CANCEL: str="Запрос отменен трейдером"; break;
+      case TRADE_RETCODE_PLACED: str="Ордер размещен"; break;
+      case TRADE_RETCODE_DONE: str="Заявка выполнена"; break;
+      case TRADE_RETCODE_DONE_PARTIAL: str="Заявка выполнена частично"; break;
+      case TRADE_RETCODE_ERROR: str="Ошибка обработки запроса"; break;
+      case TRADE_RETCODE_TIMEOUT: str="Запрос отменен по истечению времени";break;
+      case TRADE_RETCODE_INVALID: str="Неправильный запрос"; break;
+      case TRADE_RETCODE_INVALID_VOLUME: str="Неправильный объем в запросе"; break;
+      case TRADE_RETCODE_INVALID_PRICE: str="Неправильная цена в запросе"; break;
+      case TRADE_RETCODE_INVALID_STOPS: str="Неправильные стопы в запросе"; break;
+      case TRADE_RETCODE_TRADE_DISABLED: str="Торговля запрещена"; break;
+      case TRADE_RETCODE_MARKET_CLOSED: str="Рынок закрыт"; break;
+      case TRADE_RETCODE_NO_MONEY: str="Нет достаточных денежных средств для выполнения запроса"; break;
+      case TRADE_RETCODE_PRICE_CHANGED: str="Цены изменились"; break;
+      case TRADE_RETCODE_PRICE_OFF: str="Отсутствуют котировки для обработки запроса"; break;
+      case TRADE_RETCODE_INVALID_EXPIRATION: str="Неверная дата истечения ордера в запросе"; break;
+      case TRADE_RETCODE_ORDER_CHANGED: str="Состояние ордера изменилось"; break;
+      case TRADE_RETCODE_TOO_MANY_REQUESTS: str="Слишком частые запросы"; break;
+      case TRADE_RETCODE_NO_CHANGES: str="В запросе нет изменений"; break;
+      case TRADE_RETCODE_SERVER_DISABLES_AT: str="Автотрейдинг запрещен сервером"; break;
+      case TRADE_RETCODE_CLIENT_DISABLES_AT: str="Автотрейдинг запрещен клиентским терминалом"; break;
+      case TRADE_RETCODE_LOCKED: str="Запрос заблокирован для обработки"; break;
+      case TRADE_RETCODE_FROZEN: str="Ордер или позиция заморожены"; break;
+      case TRADE_RETCODE_INVALID_FILL: str="Указан неподдерживаемый тип исполнения ордера по остатку "; break;
+      case TRADE_RETCODE_CONNECTION: str="Нет соединения с торговым сервером"; break;
+      case TRADE_RETCODE_ONLY_REAL: str="Операция разрешена только для реальных счетов"; break;
+      case TRADE_RETCODE_LIMIT_ORDERS: str="Достигнут лимит на количество отложенных ордеров"; break;
+      case TRADE_RETCODE_LIMIT_VOLUME: str="Достигнут лимит на объем ордеров и позиций для данного символа"; break;
+      default: str="Неизвестный результат";
+     }
+//----
+   return(str);
   }
 //+------------------------------------------------------------------+

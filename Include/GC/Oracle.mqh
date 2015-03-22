@@ -6,57 +6,94 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <GC\GetVectors.mqh>
+bool _ResultAsString_=false;
+int _HistorySignals_=10;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 class COracleTemplate
   {
 private:
-   bool              IsInit;
-public:
-   double            InputVector[];
-   bool              debug;
-   string            inputSignals;
-   int               num_input_signals;
+   //  bool              IsInit;
    string            filename;
-                     COracleTemplate(){IsInit=false;/*Init();*/};
+
+public:
+   int               errorFile;
+   int               AgeHistory;
+   double            HistoryInputVector[];
+   double            InputVector[];
+   double            OutputVector[];
+   bool              debug;
+   string            InputSignals;
+   string            InputSignal[];
+   string            templateInputSignals;
+   int               num_repeat;
+   int               num_input_signals;
+                     COracleTemplate(){};//{Init();};
                     ~COracleTemplate(){DeInit();};
-   virtual void      Init(){if(!IsInit) {IsInit=true;debug=false;filename=Name()+".ini";loadSettings(filename);ArrayResize(InputVector,num_input_signals);}};
-   virtual void      DeInit(){saveSettings(filename);};
+   virtual void      Init(string FileName="",bool ip_debug=false);
+   void              DeInit();
    virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
-   virtual string    Name(){return("Prpototype");};
-   bool              ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid,int num_work);
+   virtual string    Name(){return(filename);/*return("Prpototype");*/};
+   bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
    bool              saveSettings(string filename);
    string            GetInputAsString(string smbl,int shift);
+
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
+  {
+   debug=ip_debug; AgeHistory=0;errorFile=INVALID_HANDLE;
+   if(""!=FileName) filename=FileName;
+   else  filename="Prototype";
+
+   loadSettings(filename+".ini");
+   ArrayResize(InputVector,num_input_signals);
+   ArrayResize(InputSignal,num_input_signals);
+   ArrayResize(HistoryInputVector,_HistorySignals_*num_input_signals);
+   ArrayInitialize(HistoryInputVector,0);
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void  COracleTemplate::DeInit()
+  {
+   saveSettings(filename+".ini");
+   for(int i=0;i<ArraySize(IndHandles);i++)
+     {
+      IndicatorRelease(IndHandles[i].hid);
+     }
+   if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 string COracleTemplate::GetInputAsString(string smbl,int shift)
   {
-   int export_precision=5;
-   double Result=GetVectors(InputVector,inputSignals,smbl,0,shift);
+   
+   double Result=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(-100==Result) return("");
    string outstr=""+smbl+",M1,";
    for(int j=0;j<num_input_signals;j++)
      {
-      outstr+=DoubleToString(InputVector[j],export_precision)+",";
+      outstr+=DoubleToString(InputVector[j],_Precision_)+",";
      }
    return(StringSubstr(outstr,0,StringLen(outstr)-1));
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,int num_test,int num_valid,int num_work)
+bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test=0,int num_valid=0,int num_work=0)
   {
-   int export_precision=5;
    if(num_train==0 && 0==num_test && 0==num_valid && 0==num_work) return(false);
    if(""==smbl) smbl=_Symbol;
    if(""==fname) fname=Name();
    int FileHandle=-1;
-   int i,j,shift=15;
+   int i,j,shift=_TREND_;
    string outstr;
    double Result=0;
    int num_vals,prev_prg=0;
@@ -94,7 +131,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
         {
          case 0: num_vals=num_test;fnm=fname+"_"+smbl+"_M1_test_data.csv";  break;
          case 1: num_vals=num_valid;fnm=fname+"_"+smbl+"_M1_valid_data.csv";  break;
-         case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_M1_train_data.csv";  break;
+         case 2: num_vals=num_train;fnm=fname+"_"+smbl+"_"+TimeFrameName(tf)+".csv";  break;
          case 3: num_vals=num_work;fnm=fname+"_"+smbl+"_M1_prediction_data.csv";  break;
          default: num_vals=0;
         }
@@ -105,11 +142,13 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
            {
             // Header
             outstr="";
-            outstr=inputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
-            outstr+=",Result";
+
+            outstr=InputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
+            outstr="prediction,"+outstr;            //outstr+=",Result";
+            if(_debug_time) outstr="NormalTime,"+outstr;
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
-            int copied=CopyRates(_Symbol,PERIOD_M1,0,shift+num_vals,rates);
+            int copied=CopyRates(_Symbol,tf,0,shift+num_vals,rates);
             if(num_train>0)
               {
                FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
@@ -119,33 +158,33 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,int num_train,
 
             for(i=shift;i<(shift+num_vals);i++)
               {
-               Result=GetVectors(InputVector,inputSignals,smbl,0,i);
+               Result=GetVectors(InputVector,InputSignals,smbl,0,i);
                if(__Debug__) Comment(fnm+" "+(string)i);
-               if(Result==-100 || Result==-200) Result=0;
-               //отнормируем
-//               Result=Result2Neuro(Result,smbl);
-               // отнормируем
-               //if(Result==0) continue;
-               outstr="";need_exp=true;
+               if(Result>1 || Result<-1) continue;
+
+               outstr="";
+               if(_debug_time) outstr+=(string)rates[i].time+",";
+               need_exp=true; string ss="";
+               if(_ResultAsString_)
+                 {
+                  if(Result>0.66) outstr+="""Buy""";
+                  else if(Result>0.33) outstr+="""CloseSell""";
+                  else if(Result>-0.33) outstr+="""Wait""";
+                  else if(Result>-0.66) outstr+="""CloseBuy""";
+                  else outstr+="""Sell""";
+                 }
+               else    outstr+=DoubleToString(Result,_Precision_);
                for(j=0;j<num_input_signals;j++)
                  {
-                  outstr+=DoubleToString(InputVector[j],export_precision)+",";
-                  if(InputVector[j]>1 || InputVector[j]<-1) need_exp=false;
+                  ss=DoubleToString(InputVector[j],_Precision_);
+                  outstr+=","+ss;
                  }
-               
-               //if(Result>0.66) outstr+="""Buy""";
-               //else if(Result>0.33) outstr+="""CloseSell""";
-               //else if(Result>-0.33) outstr+="""Wait""";
-               //else if(Result>-0.66) outstr+="""CloseBuy""";
-               //else outstr+="""Sell""";
 
-               outstr+=DoubleToString(Result2Neuro(Result,smbl),export_precision);
-               //if(need_exp && -1==StringFind(outstr,"#IND0")) 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
                if(2==ring)
                  {
-                  if(Result>-2 && (Result>0.66 || Result<-0.66))
+                  if(Result>=-1 && (Result>0.4 || Result<-0.4))
                     {
                      FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                     }
@@ -204,20 +243,45 @@ bool COracleTemplate::loadSettings(string _filename)
         {
          if("inputSignals"==fr)
            {
-            inputSignals=FileReadString(FileHandle);
-            int start_pos=0,end_pos=0,shift_pos=0;
-            end_pos=StringFind(inputSignals," ",start_pos);
-            do //while(end_pos>0)
-              {
-               num_input_signals++;
-               start_pos=end_pos+1;    end_pos=StringFind(inputSignals," ",start_pos);
-              }
-            while(start_pos>0);
-
-            //Print(Name()," inputSignals=",inputSignals," ",num_input_signals);
+            templateInputSignals=FileReadString(FileHandle);
+           }
+         if("Num_repeat"==fr)
+           {
+            num_repeat=(int)StringToInteger(FileReadString(FileHandle));
            }
         }
       FileClose(FileHandle);
+      StringReplace(templateInputSignals,"  "," ");
+      StringReplace(templateInputSignals,"  "," ");
+      StringReplace(templateInputSignals,"  "," ");
+      if(0==num_repeat) num_repeat=1;
+      int start_pos=0,end_pos=0,shift_pos=0;
+      end_pos=StringFind(templateInputSignals," ",start_pos);
+      string fn_name;InputSignals="";
+      do //while(end_pos>0)
+        {
+         fn_name=StringSubstr(templateInputSignals,start_pos,end_pos-start_pos);
+         for(int i=0;i<num_repeat;i++)
+           {
+            num_input_signals++; ArrayResize(InputSignal,num_input_signals);
+            if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
+              {
+               InputSignals+=fn_name+" "; InputSignal[num_input_signals-1]=fn_name;
+               break;
+              }
+            else
+              {
+               InputSignals+=(string)i+"-"+fn_name+" ";
+               InputSignal[num_input_signals-1]=(string)i+"-"+fn_name;
+              }
+           }
+         start_pos=end_pos+1;    end_pos=StringFind(templateInputSignals," ",start_pos);
+         if(start_pos==0 || start_pos==-1) break;
+        }
+      while(true);
+      InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
+      //Print(Name()," inputSignals=",inputSignals," ",num_input_signals);
+      //      if(0!=num_repeat) num_input_signals*=num_repeat;     
      }
    else
      {
@@ -229,7 +293,7 @@ bool COracleTemplate::loadSettings(string _filename)
       //         FileClose(FileHandle);
       //        }
      }
-   Print(Name()," ready!");
+   Print(Name()," ready! IS: (",num_input_signals,")",InputSignals);
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -242,13 +306,539 @@ bool COracleTemplate::saveSettings(string _filename)
 //string fr;
    if(FileHandle!=INVALID_HANDLE)
      {
-      FileWrite(FileHandle,"inputSignals",inputSignals);
+      string AS;
+      for(int i=0;i<ArraySize(VectorFunctions);i++) AS=AS+" "+VectorFunctions[i];
+      FileWrite(FileHandle,"//How to use"," fill string separate space. Format TT-functionName_Paramm1_ParamX");
+      FileWrite(FileHandle,"//Where TT"," shift on timeframe");
+      FileWrite(FileHandle,"//example","ROC 5-ROC 10-ROC_13");
+      FileWrite(FileHandle,"///Num_repeat","3 eqv ROC 1-ROC 2-ROC");
+
+      FileWrite(FileHandle,"//Available Signals",AS);
+      FileWrite(FileHandle,"inputSignals",templateInputSignals);
+      FileWrite(FileHandle,"Num_repeat",num_repeat);
       FileClose(FileHandle);
      }
    return(true);
   }
 
 COracleTemplate *AllOracles[];
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class COracleENCOG:public COracleTemplate
+  {
+private:
+   string            smb;
+   string            Functions_Array[50];
+   int               Functions_Count[50];
+   //int               Max_Functions;
+   ENUM_TIMEFRAMES   TimeFrame;
+   string            File_Name;
+   // begin Encog main config
+   string            _FILENAME;
+   int               _neuronCount;
+   int               _layerCount;
+   int               _contextTargetOffset[];
+   int               _contextTargetSize[];
+   bool              _hasContext;
+   int               _inputCount;
+   int               _layerContextCount[];
+   int               _layerCounts[];
+   int               _layerFeedCounts[];
+   int               _layerIndex[];
+   double            _layerOutput[];
+   double            _layerSums[];
+   int               _outputCount;
+   int               _weightIndex[];
+   double            _weights[];
+   int               _activation[];
+   double            _p[];
+   // end Encog main config
+
+   void              ActivationTANH(double &x[],int start,int size);
+   void              ActivationSigmoid(double &x[],int start,int size);
+   void              ActivationElliottSymmetric(double &x[],int start,int size);
+   void              ActivationElliott(double &x[],int start,int size);
+
+   //  void              Compute(double &_input[],double &_output[]);
+   double Norm(double x,double normalizedHigh,double normalizedLow,double dataHigh,double dataLow)
+     {
+      return (((x - dataLow)
+              /(dataHigh-dataLow))
+              *(normalizedHigh-normalizedLow)+normalizedLow);
+     }
+
+   double DeNorm(double x,double normalizedHigh,double normalizedLow,double dataHigh,double dataLow)
+     {
+      return (((dataLow - dataHigh) * x - normalizedHigh
+              *dataLow+dataHigh*normalizedLow)
+              /(normalizedLow-normalizedHigh));
+     }
+
+public:
+   void              Compute(double &_input[],double &_output[]);
+   void              ComputeLayer(int currentLayer);
+   virtual string    Name(){return("Encog");};
+   bool              ClearTraning;
+   //   double            InputVector[];
+
+                     COracleENCOG(string FileName=""){Init(FileName);}
+   //                 ~COracleENCOG(){DeInit();}
+   bool              GetVector(string smbl="",int shift=0,bool train=false);
+   //  bool              debug;
+   void              Init(string FileName="",bool ip_debug=false);
+   virtual void      DeInit();
+   //   virtual double    forecast(string smbl="",int shift=0,bool train=false);
+   bool              Load(string file_name);
+   bool              Save(string file_name="");
+
+   int               ExportDataWithTest(int train_qty,int test_qty,string &Symbols_Array[],string FileName="");
+   int               ExportData(int qty,int shift,string &Symbols_Array[],string FileName,bool test=false);
+   virtual bool      CustomLoad(int file_handle){return(false);};
+   virtual bool      CustomSave(int file_handle){return(false);};
+   virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
+   int               num_input();
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::Init(string FileName="",bool ip_debug=false)
+  {
+//TimeFrame=PERIOD_M1;
+   smb=Symbol();
+   COracleTemplate::Init(FileName,ip_debug);
+   if(""!=FileName) _FILENAME=FileName;
+   else  _FILENAME=Name();
+
+   string _filename=_FILENAME+"_"+smb+"_"+TimeFrameName(TimeFrame)+".eg";
+   string inputString;
+   ArrayResize(OutputVector,1);
+   _layerCount=0; //int tempar
+   _neuronCount=0;
+   int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
+   string fr;
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      while(""!=(fr=FileReadString(FileHandle)))
+        {
+         _layerCount=0;
+         if("contextTargetOffset"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_contextTargetOffset,_layerCount);
+               _contextTargetOffset[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("contextTargetSize"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_contextTargetSize,_layerCount);
+               _contextTargetSize[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("layerContextCount"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerContextCount,_layerCount);
+               _layerContextCount[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("layerCounts"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerCounts,_layerCount);
+               _layerCounts[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               _neuronCount+=_layerCounts[_layerCount-1];
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("layerFeedCounts"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerFeedCounts,_layerCount);
+               _layerFeedCounts[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("layerContextCount"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerContextCount,_layerCount);
+               _layerContextCount[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("layerIndex"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerIndex,_layerCount);
+               _layerIndex[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("inputCount"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            _inputCount=(int)StringToInteger(inputString);
+           }
+         else if("outputCount"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            _outputCount=(int)StringToInteger(inputString);
+           }
+         else if("hasContext"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+
+            _hasContext=("t"==inputString);
+           }
+         else if("output"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_layerOutput,_layerCount);
+               _layerOutput[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if("weightIndex"==fr)
+           {
+            inputString=FileReadString(FileHandle);
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; ArrayResize(_weightIndex,_layerCount);
+               _weightIndex[_layerCount-1]=(int)StringToInteger(StringSubstr(inputString,start_pos,end_pos-start_pos));
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+
+         else if(StringFind(fr,"weights")!=-1)
+           {
+            int _weightsSize=_weightIndex[ArraySize(_weightIndex)-1];
+            ArrayResize(_weights,_weightsSize,100);
+            inputString=FileReadString(FileHandle);
+            if("##0"==inputString) continue;
+            int start_pos=0,end_pos=0,shift_pos=0;
+            end_pos=StringFind(inputString,",",start_pos);
+            do
+              {
+               _layerCount++; string ss=StringSubstr(inputString,start_pos,end_pos-start_pos);StringTrimLeft(ss);
+               _weights[_layerCount-1]=(double)StringToDouble(ss);
+               start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+              }
+            while(start_pos>0);
+           }
+         else if(StringFind(fr,"##double")!=-1)
+           {
+            int _weightsSize=ArraySize(_weights);
+            //           ArrayResize(_weights,_weightsSize,100);
+            do
+              {
+               inputString=FileReadString(FileHandle);
+               int start_pos=0,end_pos=0,shift_pos=0;
+               end_pos=StringFind(inputString,",",start_pos);
+               do
+                 {
+                  _layerCount++; string ss=StringSubstr(inputString,start_pos,end_pos-start_pos);StringTrimLeft(ss);
+                  _weights[_layerCount-1]=(double)StringToDouble(ss);
+                  start_pos=end_pos+1;    end_pos=StringFind(inputString,",",start_pos);
+                 }
+               while(start_pos>0);
+              }
+            while(_weightsSize>_layerCount);
+            inputString=FileReadString(FileHandle);
+           }
+         else if(StringFind(fr,"[BASIC:ACTIVATION]")!=-1)
+           {
+
+            _layerCount=ArraySize(_weightIndex);
+            ArrayResize(_activation,_layerCount); ArrayResize(_p,_layerCount);
+            for(int i=0;i<_layerCount;i++)
+              {
+               inputString=FileReadString(FileHandle);
+               _activation[i]=0;_p[i]=1;
+               if(StringFind(inputString,"ActivationTANH")>0)_activation[i]=1;
+              }
+           }
+         else if(StringFind(fr,"]")==-1) FileReadString(FileHandle);
+        }
+      FileClose(FileHandle);
+      if(num_input_signals!=_inputCount)
+        {
+         Print("ini not eg!");_layerCount=0;
+        }
+      //num_input_signals=_inputCount;
+      ArrayResize(InputVector,num_input_signals);
+
+     }
+   else
+      Print("not found ",_filename);
+//_layerCount=ArraySize(_weightIndex);
+   ArrayResize(_layerSums,_neuronCount);
+   ClearTraning=false;
+
+   int i;
+   for(i=0;i<ArraySize(VectorFunctions) && VectorFunctions[i]!=NULL && VectorFunctions[i]!="";i++)
+     {
+      Functions_Array[i]=VectorFunctions[i];
+      Functions_Count[i]=0;
+     }
+   TimeFrame=_Period;
+   GetVectors(InputVector,templateInputSignals,smb,0,-1);
+//for(i=0;i<ArraySize(IndHandles);i++)
+//  {
+//   int pops=1000;
+//   while(pops>0)
+//     {
+//      if(BarsCalculated(IndHandles[i].hid)>0) break;
+//      pops--;
+//     }
+//   if(pops==0) 
+//   {
+//   Print("Not calculate ",IndHandles[i].hname);
+//   }
+//  }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::ActivationTANH(double &x[],int start,int size)
+  {
+   for(int i=start; i<start+size; i++)
+     {
+      x[i]=2.0/(1.0+MathExp(-2.0*x[i]))-1.0;
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::ActivationSigmoid(double &x[],int start,int size)
+  {
+   for(int i=start; i<start+size; i++)
+     {
+      x[i]=1.0/(1.0+MathExp(-1*x[i]));
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::ActivationElliottSymmetric(double &x[],int start,int size)
+  {
+   for(int i=start; i<start+size; i++)
+     {
+      double s=_p[0];
+      x[i]=(x[i]*s)/(1+MathAbs(x[i]*s));
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::ActivationElliott(double &x[],int start,int size)
+  {
+   for(int i=start; i<start+size; i++)
+     {
+      double s=_p[0];
+      x[i]=((x[i]*s)/2)/(1+MathAbs(x[i]*s))+0.5;
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::ComputeLayer(int currentLayer)
+  {
+   int x,y;
+   int inputIndex=_layerIndex[currentLayer];
+   int outputIndex=_layerIndex[currentLayer-1];
+   int inputSize=_layerCounts[currentLayer];
+   int outputSize=_layerFeedCounts[currentLayer-1];
+
+   int index=_weightIndex[currentLayer-1];
+
+   int limitX = outputIndex + outputSize;
+   int limitY = inputIndex + inputSize;
+
+// weight values
+   for(x=outputIndex; x<limitX; x++)
+     {
+      double sum=0;
+      for(y=inputIndex; y<limitY; y++)
+        {
+         sum+=_weights[index]*_layerOutput[y];
+         index++;
+        }
+
+      _layerOutput[x]=sum;
+      _layerSums[x]=sum;
+     }
+
+   switch(_activation[currentLayer-1])
+     {
+      case 0: // linear
+         break;
+      case 1:
+         ActivationTANH(_layerOutput,outputIndex,outputSize);
+         break;
+      case 2:
+         ActivationSigmoid(_layerOutput,outputIndex,outputSize);
+         break;
+      case 3:
+         ActivationElliottSymmetric(_layerOutput,outputIndex,outputSize);
+         break;
+      case 4:
+         ActivationElliott(_layerOutput,outputIndex,outputSize);
+         break;
+     }
+
+// update context values
+   int offset=_contextTargetOffset[currentLayer];
+
+   for(x=0; x<_contextTargetSize[currentLayer]; x++)
+     {
+      _layerOutput[offset+x]=_layerOutput[outputIndex+x];
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleENCOG::Compute(double &_input[],double &_output[])
+  {
+   int i,x;
+   int sourceIndex=_neuronCount
+                   -_layerCounts[_layerCount-1];
+
+   ArrayCopy(_layerOutput,_input,sourceIndex,0,_inputCount);
+
+   for(i=_layerCount-1; i>0; i--)
+     {
+      ComputeLayer(i);
+     }
+
+// update context values
+   int offset=_contextTargetOffset[0];
+
+   for(x=0; x<_contextTargetSize[0]; x++)
+     {
+      _layerOutput[offset+x]=_layerOutput[x];
+     }
+
+   ArrayCopy(_output,_layerOutput,0,0,_outputCount);
+  }
+//+------------------------------------------------------------------+
+double COracleENCOG::forecast(string smbl,int shift,bool train)
+  {
+   if(0==_layerCount) return(0);
+   if(""==smbl) smbl=_Symbol;
+   double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
+   if(sig<-1||sig>1) return 0;
+   Compute(InputVector,OutputVector);
+   sig=OutputVector[0];
+   int i,j;
+   if(INVALID_HANDLE==errorFile)
+     {
+      errorFile=FileOpen("errors.txt",FILE_WRITE|FILE_ANSI|FILE_CSV,' ');
+      FileWrite(errorFile,"debug info ");
+     }
+
+   if(AgeHistory<_HistorySignals_) AgeHistory++;
+   for(i=AgeHistory;i>1;i--)
+     {
+      for(j=0;j<num_input_signals;j++) HistoryInputVector[j+(i-1)*num_input_signals]=HistoryInputVector[j+(i-2)*num_input_signals];
+     }
+   for(j=0;j<num_input_signals;j++)
+      HistoryInputVector[j]=InputVector[j];
+
+   for(i=1;i<AgeHistory;i++)
+     {
+      GetVectors(InputVector,InputSignals,smbl,0,i+shift);
+      for(j=0;j<num_input_signals;j++)
+        {
+         if(HistoryInputVector[j+(i)*num_input_signals]!=InputVector[j])
+           {
+            FileWrite(errorFile,"not compare! ",InputSignal[j]," shift=",i," old= ",HistoryInputVector[j+(i)*num_input_signals]," new=",InputVector[j]);
+            Print("not compare! ",InputSignal[j]," shift=",i);
+           }
+         //HistoryInputVector[j+(i-1)*num_input_signals]=InputVector[j];
+        }
+     }
+
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+
+double COracleENCOG::forecast(string smbl,datetime startdt,bool train)
+  {
+   double sig=0;
+//   double ind1_buffer[];
+//   double ind2_buffer[];
+//   int   h_ind1=iMA(smbl,PERIOD_M1,8,0,MODE_SMA,PRICE_CLOSE);
+//   if(CopyBuffer(h_ind1,0,startdt,3,ind1_buffer)<3) return(0);
+//   if(!ArraySetAsSeries(ind1_buffer,true)) return(0);
+//   int   h_ind2=iMA(smbl,PERIOD_M1,16,0,MODE_SMA,PRICE_CLOSE);
+//   if(CopyBuffer(h_ind2,0,startdt,2,ind2_buffer)<2) return(0);
+//   if(!ArraySetAsSeries(ind2_buffer,true))return(0);
+//
+////--- проводим проверку условия и устанавливаем значение для sig
+//   if(ind1_buffer[2]<ind2_buffer[1] && ind1_buffer[1]>ind2_buffer[1])
+//      sig=1;
+//   else if(ind1_buffer[2]>ind2_buffer[1] && ind1_buffer[1]<ind2_buffer[1])
+//      sig=-1;
+//   else sig=0;
+//   IndicatorRelease(h_ind1);   IndicatorRelease(h_ind2);
+////--- возвращаем торговый сигнал
+   return(sig);
+  }
+//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -1186,12 +1776,12 @@ private:
 
 public:
    bool              ClearTraning;
-   double            InputVector[];
-   double            OutputVector[];
+   //   double            InputVector[];
+
                      COracleANN(){Init();}
                     ~COracleANN(){DeInit();}
    bool              GetVector(string smbl="",int shift=0,bool train=false);
-   bool              debug;
+   //  bool              debug;
    virtual void      Init();
    //   virtual void              DeInit();
    //   virtual double    forecast(string smbl="",int shift=0,bool train=false);
@@ -1199,7 +1789,7 @@ public:
    bool              Save(string file_name="");
    //   int               ExportFANNDataWithTest(int train_qty,int test_qty,string &SymbolsArray[],string FileName="");
    //   int               ExportFANNData(int qty,int shift,string &SymbolsArray[],string FileName,bool test=false);
-   int               ExportDataWithTest(int train_qty,int test_qty,string &SymbolsArray[],string FileName="");
+   int               ExportDataWithTest(int train_qty,int test_qty,string &Symbols_Array[],string FileName="");
    int               ExportData(int qty,int shift,string &SymbolsArray[],string FileName,bool test=false);
    virtual bool      CustomLoad(int file_handle){return(false);};
    virtual bool      CustomSave(int file_handle){return(false);};
@@ -1245,7 +1835,9 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
 //GNGAlgorithm.forecast(SymbolsArray[ma],i,true);
    MqlRates rates[];
    ArraySetAsSeries(rates,true);
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(FileHandle!=INVALID_HANDLE && FileHandleFANN!=INVALID_HANDLE)
      {// записываем в файл шапку
       FileWrite(FileHandleFANN,Max_Symbols*needcopy*((test)?1:2),num_input(),1);
@@ -1302,58 +1894,58 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
 //+------------------------------------------------------------------+
 bool COracleANN::GetVector(string smbl="",int shift=0,bool train=false)
   {// пара, период, смещение назад (для индикатора полезно)
-   double IB[],OB[];
-   ArrayResize(IB,num_input()+2);
-   ArrayResize(OB,1+2);
-   ArrayResize(InputVector,num_input());
-   ArrayResize(OutputVector,3);
-   int FunctionsIdx;
-//int n_vectors=num_input();
-   int n_o_vectors=1;
-   int pos_in=0,pos_out=0,i;
-   if(""==smbl) smbl=_Symbol;
-   if(WithHours || WithDayOfWeek)
-     {
-      MqlRates rates[];
-      ArraySetAsSeries(rates,true);
-      MqlDateTime tm;
-      CopyRates(smbl,PERIOD_M1,shift,3,rates);
-      TimeToStruct(rates[1].time,tm);
-      if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
-      if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
-     }
-   if(!train)n_o_vectors=0;
-
-//n_vectors=(n_vectors-pos_in);
-   for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
-     {
-      if(Get_Vectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
-        {
-         // приведем к общему знаменателю
-         double si=1;
-         //            for(i=0;i<Functions_Count[FunctionsIdx];i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
-         for(i=0;i<Functions_Count[FunctionsIdx];i++) InputVector[pos_in++]=IB[i]/si;
-
-         // for(i=0;i<n_o_vectors;i++)
-         //   {
-         //    OutputVector[i]=OB[i];
-         //    if(OB[i]<-3) OutputVector[i]=-0.5;
-         //    if(OB[i]>3) OutputVector[i]=0.5;
-         //    //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
-         //   }
-        }
-     }
-   if(train && Get_Vectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
-     {
-      for(i=0;i<n_o_vectors;i++)
-        {
-         OutputVector[i]=OB[i];
-         //if(OB[i]<-3) OutputVector[i]=-0.5;
-         //if(OB[i]>3) OutputVector[i]=0.5;
-         //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
-        }
-
-     }
+//   double IB[],OB[];
+//   ArrayResize(IB,num_input()+2);
+//   ArrayResize(OB,1+2);
+//   ArrayResize(InputVector,num_input());
+//   ArrayResize(OutputVector,3);
+//   int FunctionsIdx;
+////int n_vectors=num_input();
+//   int n_o_vectors=1;
+//   int pos_in=0,pos_out=0,i;
+//   if(""==smbl) smbl=_Symbol;
+//   if(WithHours || WithDayOfWeek)
+//     {
+//      MqlRates rates[];
+//      ArraySetAsSeries(rates,true);
+//      MqlDateTime tm;
+//      CopyRates(smbl,PERIOD_M1,shift,3,rates);
+//      TimeToStruct(rates[1].time,tm);
+//      if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.day_of_week/7);
+//      if(WithDayOfWeek) InputVector[pos_in++]=((double)tm.hour/24);
+//     }
+//   if(!train)n_o_vectors=0;
+//
+////n_vectors=(n_vectors-pos_in);
+//   for(FunctionsIdx=0; FunctionsIdx<10;FunctionsIdx++)
+//     {
+//      if(Get_Vectors(IB,OB,Functions_Count[FunctionsIdx],0,Functions_Array[FunctionsIdx],smbl,PERIOD_M1,shift))
+//        {
+//         // приведем к общему знаменателю
+//         double si=1;
+//         //            for(i=0;i<Functions_Count[FunctionsIdx];i++) si+=IB[i]*IB[i]; si=MathSqrt(si);
+//         for(i=0;i<Functions_Count[FunctionsIdx];i++) InputVector[pos_in++]=IB[i]/si;
+//
+//         // for(i=0;i<n_o_vectors;i++)
+//         //   {
+//         //    OutputVector[i]=OB[i];
+//         //    if(OB[i]<-3) OutputVector[i]=-0.5;
+//         //    if(OB[i]>3) OutputVector[i]=0.5;
+//         //    //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
+//         //   }
+//        }
+//     }
+//   if(train && Get_Vectors(IB,OB,0,n_o_vectors,"",smbl,PERIOD_M1,shift))
+//     {
+//      for(i=0;i<n_o_vectors;i++)
+//        {
+//         OutputVector[i]=OB[i];
+//         //if(OB[i]<-3) OutputVector[i]=-0.5;
+//         //if(OB[i]>3) OutputVector[i]=0.5;
+//         //OutputVector[i]=1*(1/(1+MathExp(-1*OB[i]/5))-0.5);
+//        }
+//
+//     }
    return(true);
   }
 //+------------------------------------------------------------------+
@@ -1403,7 +1995,9 @@ bool COracleANN::Load(string file_name)
    int file_handle;  string outstr="";   int i=0,sp;
    File_Name=file_name;
    file_handle=FileOpen(file_name+".gc_oracle",FILE_READ|FILE_ANSI|FILE_TXT,"= ");
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(file_handle!=INVALID_HANDLE)
      {
       outstr=FileReadString(file_handle);//   [Common]
@@ -1423,6 +2017,9 @@ bool COracleANN::Load(string file_name)
       FileClose(file_handle);
       return(true);
      }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    else
      {
       Print("Файл не найден в папке "+TerminalInfoString(TERMINAL_DATA_PATH));
@@ -1441,6 +2038,9 @@ void COracleANN::Init()
    WithDayOfWeek=false;
    int i;
    for(i=0;i<ArraySize(VectorFunctions) && VectorFunctions[i]!=NULL && VectorFunctions[i]!="";i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       Functions_Array[i]=VectorFunctions[i];
       Functions_Count[i]=0;

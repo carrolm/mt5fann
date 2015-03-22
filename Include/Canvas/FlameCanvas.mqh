@@ -12,6 +12,9 @@ struct GRADIENT_COLOR
    uint              clr;      // color in ARGB format
    uint              pos;      // position of color in percentage of gradient range
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 struct GRADIENT_SIZE
   {
    uint              size;     // width of gradient fill in percentage of base fill
@@ -39,8 +42,8 @@ private:
    uchar             m_flame[];                 // buffer for calculation of flame
    uint              m_time_redraw;
    uint              m_delay;
-//   bool              m_resize_flag;
-//   int               m_tick_cnt;
+   //   bool              m_resize_flag;
+   //   int               m_tick_cnt;
    //--- flame parameters
    datetime          m_tb1;
    double            m_pb1;
@@ -364,9 +367,9 @@ void CFlameCanvas::FlameSet(void)
 //| Sets parameters of the flame and starts to draw                  |
 //+------------------------------------------------------------------+
 void CFlameCanvas::FlameSet(datetime tb1,double pb1,
-                           datetime te1,double pe1,
-                           datetime tb2,double pb2,
-                           datetime te2,double pe2)
+                            datetime te1,double pe1,
+                            datetime tb2,double pb2,
+                            datetime te2,double pe2)
   {
    datetime obj_time =(datetime)ObjectGetInteger(0,m_objname,OBJPROP_TIME);
    double   obj_price=ObjectGetDouble(0,m_objname,OBJPROP_PRICE);
@@ -383,24 +386,23 @@ void CFlameCanvas::FlameSet(datetime tb1,double pb1,
 //--- resize
    Resize();
 //--- convert
-   if(!ChartTimePriceToXY(0,0,obj_time,obj_price,dx,dy))
-      Print("Error0=",GetLastError());
-   dy=m_yb1;
-   if(!ChartTimePriceToXY(0,0,tb1,pb1,m_xb1,m_yb1))
-      Print("Error1=",GetLastError());
-   if(!ChartTimePriceToXY(0,0,te1,pe1,m_xe1,m_ye1))
-      Print("Error2=",GetLastError());
-   if(!ChartTimePriceToXY(0,0,tb2,pb2,m_xb2,m_yb2))
-      Print("Error3=",GetLastError());
-   if(!ChartTimePriceToXY(0,0,te2,pe2,m_xe2,m_ye2))
-      Print("Error4=",GetLastError());
-//--- convert to canvas coordinates
-   m_xb1-=dx;
-   m_xe1-=dx;
-   m_xb2-=dx;
-   m_xe2-=dx;
-//--- 
-   FlameSet();
+   if(ChartTimePriceToXY(0,0,obj_time,obj_price,dx,dy))
+     {
+      dy=m_yb1;
+      if(ChartTimePriceToXY(0,0,tb1,pb1,m_xb1,m_yb1))
+         if(ChartTimePriceToXY(0,0,te1,pe1,m_xe1,m_ye1))
+            if(ChartTimePriceToXY(0,0,tb2,pb2,m_xb2,m_yb2))
+               if(ChartTimePriceToXY(0,0,te2,pe2,m_xe2,m_ye2))
+                 {
+                  //--- convert to canvas coordinates
+                  m_xb1-=dx;
+                  m_xe1-=dx;
+                  m_xb2-=dx;
+                  m_xe2-=dx;
+                  //--- 
+                  FlameSet();
+                 }
+     }
 //--- start timer
    EventChartCustom(-1,1302,0,0,NULL);
   }
@@ -662,7 +664,7 @@ void CFlameCanvas::GradientVerticalLineMonochrome(int x,int y1,int y2,uint clr1,
       if(x>=0 && x<m_width && y1>=0 && y1<m_height)
          if(m_flame[idx]<(uchar)(clr+dc*i))
             m_flame[idx]=(uchar)(clr+dc*i);
-      }
+     }
   }
 //+------------------------------------------------------------------+
 //| Draws vertical line with specified gradient                      |
