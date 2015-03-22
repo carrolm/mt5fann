@@ -9,7 +9,7 @@ input bool _GBPUSD_=true;//Great Britain Pound vs US Dollar
 input bool _USDCHF_=false;//US Dollar vs Swiss Franc
 input bool _USDJPY_=false;//US Dollar vs Japanese Yen
 input bool _USDCAD_=false;//US Dollar vs Canadian Dollar
-input bool _AUDUSD_=true;//Australian Dollar vs US Dollar
+input bool _AUDUSD_=false;//Australian Dollar vs US Dollar
 //input bool _NZDUSD_=false;//New Zealand Dollar vs US Dollar
                           //input bool _USDSEK_=false;//US Dollar vs Sweden Kronor
 // crosses

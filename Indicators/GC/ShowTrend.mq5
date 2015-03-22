@@ -23,8 +23,8 @@
 //--- indicator buffers
 double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
-input int _TREND_=120;// на сколько смотреть вперед
-input int  _limit_=5000;// на сколько баров уходить назад
+
+input int  _limit_=10000;// на сколько баров уходить назад
 input bool _SaveToFile_=false;
 int FileHandleOD=INVALID_HANDLE;
 //+------------------------------------------------------------------+
@@ -36,7 +36,7 @@ int OnInit()
    SetIndexBuffer(0,ExtVolumesBuffer,INDICATOR_DATA);
    SetIndexBuffer(1,ExtColorsBuffer,INDICATOR_COLOR_INDEX);
 //---- name for DataWindow and indicator subwindow label
-   IndicatorSetString(INDICATOR_SHORTNAME,"GC Oracle trend");
+   IndicatorSetString(INDICATOR_SHORTNAME,"GC Show Ideal trend");
 //---- indicator digits
    IndicatorSetInteger(INDICATOR_DIGITS,3);
    ArraySetAsSeries(ExtVolumesBuffer,true);
@@ -51,6 +51,7 @@ int OnInit()
          FileWrite(FileHandleOD," {");
         }
      }
+     DelTrash();
 //---
    return(0);
   }
@@ -65,6 +66,7 @@ void  OnDeinit(const int reason)
       FileWrite(FileHandleOD," }");
      }
    FileClose(FileHandleOD);
+   DelTrash();
   }
 
 //+------------------------------------------------------------------+
@@ -98,33 +100,42 @@ int OnCalculate(const int rates_total,
      // ArrayInitialize(Label1Buffer,EMPTY_VALUE);
      // ArrayInitialize(Label2Buffer,EMPTY_VALUE);
      }
-   else limit=100;
+   else limit=150;
    double res;
 
-   DelTrash();
-   for(i=1;i<_limit_;i++)
+   
+   for(i=0;i<limit;i++)
      {
-      res=tanh(GetTrend(_TREND_,_Symbol,0,i,true));
-      ExtVolumesBuffer[i+_TREND_]=res;
-      ExtColorsBuffer[i+_TREND_]=3.0;
+     ExtVolumesBuffer[i]=0;
+     ExtColorsBuffer[i]=3.0;
+     if(_TREND_>i) continue;
+      res=GetTrend(_Symbol,0,i-_TREND_,true);
+      ExtVolumesBuffer[i]=res;
+      ExtColorsBuffer[i]=3.0;
       if(res<-0.66)
-         ExtColorsBuffer[i+_TREND_]=1.0;
+         ExtColorsBuffer[i]=1.0;
       else if(res<-0.33)
-         ExtColorsBuffer[i+_TREND_]=2.0;
+         ExtColorsBuffer[i]=2.0;
       else if(res<0.33)
-         ExtColorsBuffer[i+_TREND_]=3.0;
+         ExtColorsBuffer[i]=3.0;
       else if(res<0.66)
-         ExtColorsBuffer[i+_TREND_]=4.0;
+         ExtColorsBuffer[i]=4.0;
        else
-         ExtColorsBuffer[i+_TREND_]=5.0;
-         if(FileHandleOD!=INVALID_HANDLE &&( (ExtColorsBuffer[i+_TREND_]==1.0) || (ExtColorsBuffer[i+_TREND_]==5.0))){
-                        FileWrite(FileHandleOD,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)time[i+_TREND_]+"\")) return("+(string)res+");");
+         ExtColorsBuffer[i]=5.0;
+         if(FileHandleOD!=INVALID_HANDLE &&( (ExtColorsBuffer[i]!=3.0))){
+                        FileWrite(FileHandleOD,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)time[i]+"\")) return("+(string)res+");");
 }
      }
      //if (res>0)  Label1Buffer[i+_TREND_]=res;
       //else Label2Buffer[i+_TREND_]=res;
    // }
 //--- OnCalculate done. Return new prev_calculated.
+   if(FileHandleOD!=INVALID_HANDLE)
+     {
+      FileWrite(FileHandleOD,"  return(0);");
+      FileWrite(FileHandleOD," }");
+     }
+   FileClose(FileHandleOD);
    return(rates_total);
   }
 //+------------------------------------------------------------------+
