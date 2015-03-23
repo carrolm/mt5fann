@@ -805,7 +805,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train)
          if(HistoryInputVector[j+(i)*num_input_signals]!=InputVector[j])
            {
             FileWrite(errorFile,"not compare! ",InputSignal[j]," shift=",i," old= ",HistoryInputVector[j+(i)*num_input_signals]," new=",InputVector[j]);
-            Print("not compare! ",InputSignal[j]," shift=",i);
+            //Print("not compare! ",InputSignal[j]," shift=",i);
            }
          //HistoryInputVector[j+(i-1)*num_input_signals]=InputVector[j];
         }

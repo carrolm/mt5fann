@@ -18,7 +18,7 @@ input int _NumTS_=2;//Сколько спредов до стоплоса
 input int _NumTP_=4;// сколько тейкпрофитов берем
 input int _Expiration_=5; // сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
-input double _Order_Volume_=1.0;// Объем лота
+input double _Order_Volume_=0.1;// Объем лота
 input int _Nax_lost_per_Mounth_Percent=10;// Максимальные потери в месяц
 int _Precision_=10;
 datetime StartOpenPosition=0;
@@ -118,7 +118,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            }
         }
      }
-   if(-_LostInWeekInPercent_*curr_balance/100>result&&expiration==0)
+   if((-result)>(_LostInWeekInPercent_*curr_balance/100)&&expiration==0)
      {
       Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
       StartOpenPosition = Start_Date+24*7*3600;
