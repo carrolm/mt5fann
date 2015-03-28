@@ -7,7 +7,7 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 #include <GC\Oracle.mqh>
-#include <GC\OracleDummy_fc.mqh>
+//#include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
 //#include <GC\Watcher.mqh>
 //CWatcher          Watcher;
@@ -22,7 +22,14 @@ COracleENCOG *MyExpert;
 int OnInit()
   {
    MyExpert=new COracleENCOG("Encog");
-   MyExpert.debug=true;
+
+//   if(_NEDATA_>_ShiftNEDATA_)
+//     {
+//      MyExpert.ExportHistoryENCOG(_Symbol,"",0,_NEDATA_,_ShiftNEDATA_,0,0);
+//
+//      Print("Indicator data exported.");
+//     }
+
    CPInit();
    return(0);
   }
@@ -42,20 +49,25 @@ void OnTick()
 //   static double lastf=0;
    int SymbolIdx;
    double f;
-   //Watcher.Run();//
+//Watcher.Run();//
    if(_TrailingPosition_) Trailing();
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(isNewBar())
-     {   datetime Time[]; ArraySetAsSeries(Time,true);
+     {
+      datetime Time[]; ArraySetAsSeries(Time,true);
 
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
-        {   CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
+        {
+         CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
          f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false);
          MqlDateTime tm;
 
          TimeToStruct(Time[0],tm);
          NewOrder(SymbolsArray[SymbolIdx],f,DoubleToString(f,3)+" "+(string)tm.hour+":"+(string)tm.min+":"+(string)tm.sec);
         }
-        
+
      }
   }
 //+------------------------------------------------------------------+

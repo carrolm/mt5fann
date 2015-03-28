@@ -249,9 +249,6 @@ double Sigmoid(double x)// вычисление логистической функции активации
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    double output_vector=0;
@@ -262,7 +259,12 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
    double Low[]; ArraySetAsSeries(Low,true);
    datetime Time[]; ArraySetAsSeries(Time,true);
    int RatioTP_SL=5;
-// копируем историю
+   if(shift<0)
+   {
+   Print(shift);
+   return -100;
+   }
+//копируем историю
    if(((1+3)>CopyHigh(smbl,tf,shift+1,1+3,High))
       || ((1+3)>CopyClose(smbl,tf,shift+1,1+3,Close))
       || ((1+3)>CopyLow(smbl,tf,shift+1,1+3,Low))
@@ -302,7 +304,7 @@ double GetVectors(double &InputVector[],string fn_names,string smbl,ENUM_TIMEFRA
       string ss=DoubleToString(InputVector[ni-1],5);
       if(InputVector[ni-1]>1.0 || InputVector[ni-1]<-1.0 || StringLen(ss)>10)
         {
-         Print(fn_name,"(",shift,") return value : ",InputVector[ni-1]," ",Fun_Error(GetLastError()));
+         Print(fn_name,"(",shift,"+",add_shift,") return value : ",InputVector[ni-1]," ",Fun_Error(GetLastError()));
 
          return(-100);
         }
