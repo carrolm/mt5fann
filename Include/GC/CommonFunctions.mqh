@@ -6,21 +6,23 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //#include <icq_mql5.mqh>
-input bool __Debug__=true;//Показывать отладочную информацию
+input bool __Debug__=true;//Enable debug Показывать отладочную информацию
 bool _debug_time=false;
-input bool _TrailingPosition_=true;//Разрешить следить за ордерами
-input bool _OpenNewPosition_=true;//Разрешить входить в рынок
-input int _LostInWeekInPercent_=1;// Максимальный процент потерь за неделю
-input int _Carefull_=0;//Сколько минут до паники. 0 = выкл
+input bool _TrailingPosition_=true;//Enable trailing Разрешить следить за ордерами
+input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в рынок
+input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потерь за неделю
+input int _Carefull_=0;//How minutes for panic Сколько минут до паники. 0 = выкл
 input int _TREND_=30;// на сколько смотреть вперед
-input int _GetMaximum_=30;//Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=2;//Сколько спредов до стоплоса
-input int _NumTP_=4;// сколько тейкпрофитов берем
-input int _Expiration_=5; // сколько минут живет предварительный ордер 
+input int _GetMaximum_=30;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
+input int _NumTS_=2;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=4;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
-input double _Order_Volume_=0.1;// Объем лота
-input int _Nax_lost_per_Mounth_Percent=10;// Максимальные потери в месяц
-int _Precision_=10;
+input double _Order_Volume_=0.1;// Order volume Объем лота
+input int _Nax_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
+input int _NEDATA_=15000;// How deep bars history for export cколько выгрузить
+input int _ShiftNEDATA_=10000;// How shift for start export cколько выгрузить
+input int _Precision_=10; // Precissin data
 datetime StartOpenPosition=0;
 //+------------------------------------------------------------------+
 //|                                                                  |

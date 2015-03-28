@@ -104,28 +104,9 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
 //double IV[50],OV[10];
    ArraySetAsSeries(rates,true);
    TimeToStruct(TimeCurrent(),tm);
-   int cm=tm.mon;int FileHandleOC=-1;int FileHandleStat=-1;
+   int cm=tm.mon;int FileHandleOC=INVALID_HANDLE;//int FileHandleStat=-1;
    int QPRF=0,QS=0,QCB=0,QZ=0,QCS=0,QB=0,Q=0;
-   if(num_train>0)
-     {
-      FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
-      if(FileHandleOC==INVALID_HANDLE)
-        {
-         Print("Error open file for write OracleDummy_fc.mqh");
-         return(false);
-        }
-      FileHandleStat=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
-      if(FileHandleStat==INVALID_HANDLE)
-        {
-         Print("Error open file for write stat.csv");
-         return(false);
-        }
-      FileWrite(FileHandleStat,// записываем в файл шапку
-                //                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
-                "Symbol","SumTotalInSpread","QPRF","QS","QCB","QZ","QCS","QB","Q","MQS","MQCB","MQZ","MQCS","MQB");
-
-     }
-   for(int ring=0;ring<4;ring++)
+     for(int ring=0;ring<4;ring++)
      {
       switch(ring)
         {
@@ -137,7 +118,26 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
         }
       if(num_vals>0)
         {
-         FileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
+  if(num_train>0&&ring==2)
+     {
+      FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+      if(FileHandleOC==INVALID_HANDLE)
+        {
+         Print("Error open file for write OracleDummy_fc.mqh");
+         return(false);
+        }
+      //FileHandleStat=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+      //if(FileHandleStat==INVALID_HANDLE)
+      //  {
+      //   Print("Error open file for write stat.csv");
+      //   return(false);
+      //  }
+      //FileWrite(FileHandleStat,// записываем в файл шапку
+      //          //                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
+      //          "Symbol","SumTotalInSpread","QPRF","QS","QCB","QZ","QCS","QB","Q","MQS","MQCB","MQZ","MQCS","MQB");
+
+     }
+        FileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
          if(FileHandle!=INVALID_HANDLE)
            {
             // Header
@@ -149,7 +149,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
             int copied=CopyRates(_Symbol,tf,0,shift+num_vals,rates);
-            if(num_train>0)
+            if(num_train>0&&FileHandleOC!=INVALID_HANDLE)
               {
                FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
                FileWrite(FileHandleOC," {");
@@ -184,7 +184,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
                if(2==ring)
                  {
-                  if(Result>=-1 && (Result>0.4 || Result<-0.4))
+                  if(Result>=-1 &&FileHandleOC!=INVALID_HANDLE && (Result>0.4 || Result<-0.4))
                     {
                      FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                     }
@@ -199,21 +199,21 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                  }
               }
             FileClose(FileHandle);
-            if(num_train>0)
+            if(FileHandleOC!=INVALID_HANDLE)
               {
                FileWrite(FileHandleOC,"  return(0);");
                FileWrite(FileHandleOC," }");
                FileClose(FileHandleOC);
-               Q=QS+QCB+QZ+QCS+QB;
-               FileWrite(FileHandleStat,
-                         smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
-                         -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
-                         //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
-                         ,0
-                         //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
-                         ,1-2*(double)QB/Q-(double)QCS/Q,
-                         1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
-               FileClose(FileHandleStat);
+               //Q=QS+QCB+QZ+QCS+QB;
+               //FileWrite(FileHandleStat,
+               //          smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
+               //          -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
+               //          //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
+               //          ,0
+               //          //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
+               //          ,1-2*(double)QB/Q-(double)QCS/Q,
+               //          1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
+               //FileClose(FileHandleStat);
               }
             if(ring==3 && Result!=0)
               {
@@ -634,7 +634,7 @@ void COracleENCOG::Init(string FileName="",bool ip_debug=false)
       Functions_Count[i]=0;
      }
    TimeFrame=_Period;
-   GetVectors(InputVector,templateInputSignals,smb,0,-1);
+   GetVectors(InputVector,templateInputSignals,smb,0,1);
 //for(i=0;i<ArraySize(IndHandles);i++)
 //  {
 //   int pops=1000;
