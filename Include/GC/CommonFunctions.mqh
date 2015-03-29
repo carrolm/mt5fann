@@ -14,13 +14,13 @@ input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потер
 input int _Carefull_=0;//How minutes for panic Сколько минут до паники. 0 = выкл
 input int _TREND_=30;// на сколько смотреть вперед
 input int _GetMaximum_=30;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=2;// How spreads for stoploss Сколько спредов до стоплоса
-input int _NumTP_=4;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
 input double _Order_Volume_=0.1;// Order volume Объем лота
 input int _Nax_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
-input int _NEDATA_=15000;// How deep bars history for export cколько выгрузить
+input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=10000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 datetime StartOpenPosition=0;
@@ -29,16 +29,57 @@ datetime StartOpenPosition=0;
 //+------------------------------------------------------------------+
 bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
   {
-   static datetime lastTime=0;
+   static MqlDateTime  prevT;
+   MqlDateTime curT;
+   bool result = false;
    if(""==smbl)smbl=_Symbol;
    datetime lastbarTime=(datetime)SeriesInfoInteger(smbl,tf,SERIES_LASTBAR_DATE);
-   if(lastTime==0 || lastTime!=lastbarTime)
-     {
-      lastTime=lastbarTime;
-      //if(__Debug__) Print("New bar");
-      return(true);
-     }
-   return(false);
+   //if(lastTime==0 || lastTime!=lastbarTime)
+   //  {
+   //   lastTime=lastbarTime;
+   //   return(true);
+   //  }
+   TimeToStruct(lastbarTime,curT);
+   if(tf==PERIOD_M1||
+      tf==PERIOD_M2||
+      tf==PERIOD_M3||
+      tf==PERIOD_M4||
+      tf==PERIOD_M5||
+      tf==PERIOD_M6||
+      tf==PERIOD_M10||
+      tf==PERIOD_M12||
+      tf==PERIOD_M15||
+      tf==PERIOD_M20||
+      tf==PERIOD_M30)
+      if(curT.min!=prevT.min)
+        {
+         result = true;
+        };
+   if(tf==PERIOD_H1||
+      tf==PERIOD_H2||
+      tf==PERIOD_H3||
+      tf==PERIOD_H4||
+      tf==PERIOD_H6||
+      tf==PERIOD_H8||
+      tf==PERIOD_M12)
+      if(curT.hour!=prevT.hour)
+        {
+         result = true;
+        };
+   if(tf==PERIOD_D1||
+      tf==PERIOD_W1)
+      if(curT.day!=prevT.day)
+        {
+         result = true;
+        };
+   if(tf==PERIOD_MN1)
+      if(curT.mon!=prevT.mon)
+        {
+         result = true;
+        };
+   
+   TimeToStruct(lastbarTime,prevT);
+   return(result);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
