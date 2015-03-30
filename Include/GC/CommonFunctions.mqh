@@ -39,6 +39,7 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
    //   lastTime=lastbarTime;
    //   return(true);
    //  }
+   if(tf==0) tf=Period();
    TimeToStruct(lastbarTime,curT);
    if(tf==PERIOD_M1||
       tf==PERIOD_M2||
