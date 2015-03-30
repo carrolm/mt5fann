@@ -417,7 +417,7 @@ double GetVector_Momentum(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int s
      }
    if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(3)) return(-200);
 //IndicatorRelease(h_ind);
-   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer0[2])*0.01);
+   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer0[2])*1);
 
   }
 //+------------------------------------------------------------------+
