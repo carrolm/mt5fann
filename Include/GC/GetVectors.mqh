@@ -68,15 +68,15 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
 
    if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
      {
-     }
+     }   
    else
      {
       for(idx_ind=0;idx_ind<ArraySize(IndHandles);idx_ind++)
-         if(IndHandles[idx_ind].hname==sfn_name) break;
+         if(IndHandles[idx_ind].hname==smbl+"_"+sfn_name) break;
       if(idx_ind==ArraySize(IndHandles))
         {
          ArrayResize(IndHandles,idx_ind+1);
-         IndHandles[idx_ind].hname=sfn_name;
+         IndHandles[idx_ind].hname=smbl+"_"+sfn_name;
          IndHandles[idx_ind].hid=0;
          if(!ArraySetAsSeries(IndHandles[idx_ind].ind_buffer0,true)) return(-400);
          if(!ArraySetAsSeries(IndHandles[idx_ind].ind_buffer1,true)) return(-400);
