@@ -3,9 +3,9 @@
 //|                                      Copyright 2010, CompanyName |
 //|                                       http://www.companyname.net |
 //+------------------------------------------------------------------+
-input bool MultiplayCurr=true;// Много пар
+input bool MultiplayCurr=false;// MultiPair Много пар
 input bool _EURUSD_=true;//Euro vs US Dollar
-input bool _GBPUSD_=true;//Great Britain Pound vs US Dollar
+input bool _GBPUSD_=false;//Great Britain Pound vs US Dollar
 input bool _USDCHF_=false;//US Dollar vs Swiss Franc
 input bool _USDJPY_=false;//US Dollar vs Japanese Yen
 input bool _USDCAD_=false;//US Dollar vs Canadian Dollar
