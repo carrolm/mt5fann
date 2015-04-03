@@ -65,6 +65,7 @@ void OnTick()
          MqlDateTime tm;
 
          TimeToStruct(Time[0],tm);
+         if(__Debug__) Print("Oracle Encog say: "+DoubleToString(f,3));
          NewOrder(SymbolsArray[SymbolIdx],f,DoubleToString(f,3)+" "+(string)tm.hour+":"+(string)tm.min+":"+(string)tm.sec);
         }
 
