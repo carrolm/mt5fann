@@ -26,7 +26,7 @@
 
 // Major
 input bool _ShowInAllChart_=true;//Показать данные на всех окнах
-input bool _Wather_=true;//Запустить слежение (трейлинг и прочее)
+input bool _Wather_=false;//Запустить слежение (трейлинг и прочее)
                          //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 //input bool _OpenNewPosition_=false;//Разрешить входить в рынок
 //int TrailingStop=3;
@@ -50,8 +50,8 @@ input string _ValueName_ = "Результат";//"Value";
 input string _CurrentName_ = "Текущий";//"Value";
 input string _TotalName_="Всего";//"Total";
 
-input string InpPathFirstSound="alert.wav"; // Первый сигнал / First signal
-input string InpPathSecondSound="news.wav"; // Второй сигнал / Second signal
+string InpPathFirstSound="alert.wav"; // Первый сигнал / First signal
+string InpPathSecondSound="news.wav"; // Второй сигнал / Second signal
 
 ENUM_TIMEFRAMES PeriodNumber[21]=
   {
