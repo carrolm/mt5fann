@@ -15,14 +15,14 @@ input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потер
 input int _Carefull_=20;//How minutes for panic Сколько минут до паники. 0 = выкл
 input int _TREND_=30;// на сколько смотреть вперед
 input int _GetMaximum_=20;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=3;// How spreads for stoploss Сколько спредов до стоплоса
-input int _NumTP_=9;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
 input double _Order_Volume_=0.1;// Order volume Объем лота
 input int _Nax_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
-input int _ShiftNEDATA_=10000;// How shift for start export cколько выгрузить
+input int _ShiftNEDATA_=1;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_ = 5; // Deviation 
 datetime StartOpenPosition=0;
@@ -252,10 +252,10 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
         }
       else
         {
-         if(type==NewOrderBuy) price=lasttick.ask+3*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderWaitBuy) price=lasttick.ask+3*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderWaitSell) price=lasttick.bid-3*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
-         if(type==NewOrderSell) price=lasttick.bid-3*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderBuy) price=lasttick.ask+10*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitBuy) price=lasttick.ask+10*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderWaitSell) price=lasttick.bid-10*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
+         if(type==NewOrderSell) price=lasttick.bid-10*_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT);
         }
      }
 
@@ -382,7 +382,7 @@ bool Trailing()
 
    int PosTotal=PositionsTotal();// открытых позицый
    int OrdTotal=OrdersTotal();   // ордеров
-   int i,TrailingStop;
+   int i;//,TrailingStop;
    MqlTick lasttick;
    MqlTradeRequest BigDogModif={0};
    MqlTradeResult BigDogModifResult={0};
@@ -423,6 +423,8 @@ bool Trailing()
         }
      }
    OrdTotal=OrdersTotal();
+   double  TS=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTS_;
+   double  TP=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTP_;
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
      {// есть "заказы" и открытие разрешено
@@ -438,7 +440,7 @@ bool Trailing()
          && (CopyTime(smb,per,0,needcopy,dt)==needcopy)
          ); else { GlobalVariableSet(gvn,0); return(false);}
       SymbolInfoTick(smb,lasttick);
-      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       datetime OTE=(datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
       if(PositionSelect(smb))
         {// есть открытые
@@ -595,19 +597,22 @@ bool Trailing()
       trReq.symbol=smb;
       trReq.deviation=_deviation_;
       trReq.order=ticket;
-      TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      TS=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTS_;
+      TP=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTP_;
+
+      //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL) || 0==PositionGetDouble(POSITION_TP))
            {
             trReq.action=TRADE_ACTION_SLTP;
-            trReq.sl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=lasttick.bid-3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);;
+            trReq.sl=lasttick.ask+TS;
+            trReq.tp=lasttick.bid-TP;;
             Order_Send(trReq,BigDogModifResult);
            }
          else
            {
-            newsl=lasttick.ask+TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            newsl=lasttick.ask+TS;
             if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
@@ -645,18 +650,18 @@ bool Trailing()
          if((0==PositionGetDouble(POSITION_SL)) || (0==PositionGetDouble(POSITION_TP)))
            {
             trReq.action=TRADE_ACTION_SLTP;
-            trReq.sl= lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
-            trReq.tp=lasttick.ask+3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            trReq.sl= lasttick.bid-TS;
+            trReq.tp=lasttick.ask+TP;
             Order_Send(trReq,BigDogModifResult);
            }
          else
            {
-            newsl=lasttick.bid-TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+            newsl=lasttick.bid-TS;
             if((PositionGetDouble(POSITION_SL)<newsl) && ((newsl-PositionGetDouble(POSITION_SL))>5*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
                trReq.sl= newsl;
-               trReq.tp=lasttick.ask+3*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
+               trReq.tp=lasttick.ask+TP;
                Order_Send(trReq,BigDogModifResult);
               }
            }
