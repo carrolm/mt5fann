@@ -24,7 +24,7 @@ input int _Nax_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные по
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
-input int _deviation_ = 5; // Deviation 
+input int _deviation_= 5; // Deviation 
 datetime StartOpenPosition=0;
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -33,14 +33,14 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
   {
    static MqlDateTime  prevT;
    MqlDateTime curT;
-   bool result = false;
+   bool result=false;
    if(""==smbl)smbl=_Symbol;
    datetime lastbarTime=(datetime)SeriesInfoInteger(smbl,tf,SERIES_LASTBAR_DATE);
-   //if(lastTime==0 || lastTime!=lastbarTime)
-   //  {
-   //   lastTime=lastbarTime;
-   //   return(true);
-   //  }
+//if(lastTime==0 || lastTime!=lastbarTime)
+//  {
+//   lastTime=lastbarTime;
+//   return(true);
+//  }
    if(tf==0) tf=Period();
    TimeToStruct(lastbarTime,curT);
    if(tf==PERIOD_M1||
@@ -56,7 +56,7 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
       tf==PERIOD_M30)
       if(curT.min!=prevT.min)
         {
-         result = true;
+         result=true;
         };
    if(tf==PERIOD_H1||
       tf==PERIOD_H2||
@@ -67,20 +67,20 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
       tf==PERIOD_M12)
       if(curT.hour!=prevT.hour)
         {
-         result = true;
+         result=true;
         };
    if(tf==PERIOD_D1||
       tf==PERIOD_W1)
       if(curT.day!=prevT.day)
         {
-         result = true;
+         result=true;
         };
    if(tf==PERIOD_MN1)
       if(curT.mon!=prevT.mon)
         {
-         result = true;
+         result=true;
         };
-   
+
    TimeToStruct(lastbarTime,prevT);
    return(result);
   }
@@ -152,11 +152,14 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    ulong ticket=0;//,trades=0;
    datetime Start_Date=(datetime)WeekStartTime(TimeCurrent());
    HistorySelect(Start_Date,TimeCurrent());
+   MqlDateTime str_timeCurrent;
+   TimeToStruct(TimeCurrent(),str_timeCurrent);
+
    uint total=HistoryDealsTotal();
    for(uint i=0;i<total;i++)
      {
       if((bool)(ticket=HistoryDealGetTicket(i)))
-//      if((ticket=HistoryDealGetTicket(i))>0)
+         //      if((ticket=HistoryDealGetTicket(i))>0)
         {
          if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BALANCE)
            {
@@ -164,10 +167,16 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            }
         }
      }
-   if((-result)>(_LostInWeekInPercent_*curr_balance/100)&&expiration==0)
+   if((-result)>(_LostInWeekInPercent_*curr_balance/100) && expiration==0)
      {
       Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
-      StartOpenPosition = Start_Date+24*7*3600;
+      StartOpenPosition=Start_Date+24*7*3600;
+      return(false);
+     }
+   if(str_timeCurrent.day_of_week==5 && str_timeCurrent.hour==23 && str_timeCurrent.min>0)
+     {
+      Print("End of week ");
+      StartOpenPosition=Start_Date+24*7*3600;
       return(false);
      }
 
@@ -215,13 +224,13 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if((0==ticket) && (type==NewOrderWaitBuy || type==NewOrderWaitSell)){  return(false);}
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) { GlobalVariableSet(gvn,0); return(false);}
-   if(0==expiration&&magic!=789) expiration=TimeCurrent()+_Expiration_*PeriodSeconds(_Period);
+   if(0==expiration && magic!=789) expiration=TimeCurrent()+_Expiration_*PeriodSeconds(_Period);
    if(price==0)
      {
       if(ticket!=0)
         {// есть открытая и она выбрана то паника - ставим на цену с мин прибылью -лишь бы закрыть
          //magic=666;
-         if(type==NewOrderBuy || type==NewOrderSell) magic=999; 
+         if(type==NewOrderBuy || type==NewOrderSell) magic=999;
          if(type==NewOrderWaitBuy || type==NewOrderBuy)
            {
             if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
@@ -444,8 +453,8 @@ bool Trailing()
       datetime OTE=(datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
       if(PositionSelect(smb))
         {// есть открытые
-        int v_rate=1;
-        if(OrderGetInteger(ORDER_MAGIC)==999) v_rate=2; 
+         int v_rate=1;
+         if(OrderGetInteger(ORDER_MAGIC)==999) v_rate=2;
          if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
            { // смотрим есть ли заказ на закрытие
             if(OrderGetInteger(ORDER_TYPE)==ORDER_TYPE_SELL_LIMIT)
@@ -624,21 +633,21 @@ bool Trailing()
          // если можно снять сливки -то двигаем стоплост ближе
          if(_Carefull_>0 && ((lasttick.bid>
             (PositionGetDouble(POSITION_PRICE_OPEN)-2*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
-           && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_Carefull_*60))))
+            && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_Carefull_*60))))
            {
             NewOrder(smb,NewOrderWaitBuy,"Panic sell",0,789);
            }
          // если можно снять сливки -то двигаем стоплост ближе
          if(_IamChicken_
-         && (lasttick.bid<
+            && (lasttick.bid<
             (PositionGetDouble(POSITION_PRICE_OPEN)-2*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             )
            {
             NewOrder(smb,NewOrderWaitBuy,"Chicken sell",0,789);
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if(( (_GetMaximum_>0 && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60))))
-         && (lasttick.bid<
+         if(((_GetMaximum_>0 && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60))))
+            && (lasttick.bid<
             (PositionGetDouble(POSITION_PRICE_OPEN)-_NumTP_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             )
            {
@@ -668,21 +677,21 @@ bool Trailing()
          // если можно снять сливки -то двигаем стоплост ближе
          if(_Carefull_>0 && ((lasttick.ask<
             (PositionGetDouble(POSITION_PRICE_OPEN)+2*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
-          && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_Carefull_*60))))
+            && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_Carefull_*60))))
            {
             NewOrder(smb,NewOrderWaitSell,"Panic buy",0,789);
            }
          // Трусливый
-         if(_IamChicken_ 
-         && (lasttick.ask>
+         if(_IamChicken_
+            && (lasttick.ask>
             (PositionGetDouble(POSITION_PRICE_OPEN)+2*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             )
            {
             NewOrder(smb,NewOrderWaitSell,"Chicken buy",0,789);
            }
          // если можно снять сливки -то двигаем стоплост ближе
-         if(((_GetMaximum_>0&& (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60)))) 
-         && (lasttick.ask>
+         if(((_GetMaximum_>0 && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_GetMaximum_*60))))
+            && (lasttick.ask>
             (PositionGetDouble(POSITION_PRICE_OPEN)+1*_NumTP_*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             )
            {

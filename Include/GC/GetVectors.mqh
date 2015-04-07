@@ -968,15 +968,17 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
          //         res=_NumTS_*res/TS;
          res=tanh(res/(_NumTP_*SymbolSpread));
          // ׃בונול פכ‎ע
-         if(res>0.5)
+         if(res>0.7)
            {
-
+            res=1;
            }
-         else if(res<-0.5)
+         else if(res<-0.7)
            {
+           res=-1;
            }
          else
            {
+            res=0;
             if(closeSell&&!closeBuy) res=0.5;
             if(closeBuy&&!closeSell) res=-0.5;
            }
