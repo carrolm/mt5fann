@@ -5,6 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
+#include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
 bool _ResultAsString_=false;
 int _HistorySignals_=10;
@@ -74,7 +75,7 @@ void  COracleTemplate::DeInit()
 //+------------------------------------------------------------------+
 string COracleTemplate::GetInputAsString(string smbl,int shift)
   {
-   
+
    double Result=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(-100==Result) return("");
    string outstr=""+smbl+",M1,";
@@ -106,7 +107,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
    TimeToStruct(TimeCurrent(),tm);
    int cm=tm.mon;int FileHandleOC=INVALID_HANDLE;int FileHandleStat=INVALID_HANDLE;
    int QPRF=0,QS=0,QCB=0,QZ=0,QCS=0,QB=0,Q=0;
-     for(int ring=0;ring<4;ring++)
+   for(int ring=0;ring<4;ring++)
      {
       switch(ring)
         {
@@ -118,26 +119,26 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
         }
       if(num_vals>0)
         {
-  if(num_train>0&&ring==2)
-     {
-      FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
-      if(FileHandleOC==INVALID_HANDLE)
-        {
-         Print("Error open file for write OracleDummy_fc.mqh");
-         return(false);
-        }
-      FileHandleStat=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
-      if(FileHandleStat==INVALID_HANDLE)
-        {
-         Print("Error open file for write stat.csv");
-         return(false);
-        }
-      FileWrite(FileHandleStat,// записываем в файл шапку
-                //                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
-                "Symbol","SumTotalInSpread","QPRF","QS","QCB","QZ","QCS","QB","Q","MQS","MQCB","MQZ","MQCS","MQB");
+         if(num_train>0 && ring==2)
+           {
+            FileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+            if(FileHandleOC==INVALID_HANDLE)
+              {
+               Print("Error open file for write OracleDummy_fc.mqh");
+               return(false);
+              }
+            FileHandleStat=FileOpen("stat.csv",FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+            if(FileHandleStat==INVALID_HANDLE)
+              {
+               Print("Error open file for write stat.csv");
+               return(false);
+              }
+            FileWrite(FileHandleStat,// записываем в файл шапку
+                      //                "Symbol","DayOfWeek","Hours","Minuta","Signal","QS","QWS","QW","QWB","QB");
+                      "Symbol","SumTotalInSpread","QPRF","QS","QCB","QZ","QCS","QB","Q","MQS","MQCB","MQZ","MQCS","MQB");
 
-     }
-        FileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
+           }
+         FileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
          if(FileHandle!=INVALID_HANDLE)
            {
             // Header
@@ -149,7 +150,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
             int copied=CopyRates(_Symbol,tf,0,shift+num_vals,rates);
-            if(num_train>0&&FileHandleOC!=INVALID_HANDLE)
+            if(num_train>0 && FileHandleOC!=INVALID_HANDLE)
               {
                FileWrite(FileHandleOC,"double od_forecast(datetime time,string smb)  ");
                FileWrite(FileHandleOC," {");
@@ -184,7 +185,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
                if(2==ring)
                  {
-                  if(Result>=-1 &&FileHandleOC!=INVALID_HANDLE && (Result>0.4 || Result<-0.4))
+                  if(Result>=-1 && FileHandleOC!=INVALID_HANDLE && (Result>0.4 || Result<-0.4))
                     {
                      FileWrite(FileHandleOC,"  if(smb==\""+smbl+"\" && time==StringToTime(\""+(string)rates[i].time+"\")) return("+(string)Result+");");
                     }
@@ -206,14 +207,14 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                FileClose(FileHandleOC);
                Q=QS+QCB+QZ+QCS+QB;
                if(Q>0)
-               FileWrite(FileHandleStat,
-                         smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
-                         -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
-                         //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
-                         ,0
-                         //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
-                         ,1-2*(double)QB/Q-(double)QCS/Q,
-                         1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
+                  FileWrite(FileHandleStat,
+                            smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
+                            -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
+                            //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
+                            ,0
+                            //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
+                            ,1-2*(double)QB/Q-(double)QCS/Q,
+                            1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
                FileClose(FileHandleStat);
               }
             if(ring==3 && Result!=0)
@@ -920,10 +921,106 @@ double CiMA::forecast(string smbl,datetime startdt,bool train)
 
 class CiMACD:public COracleTemplate
   {
+protected:
+   double            m_adjusted_point;             // point value adjusted for 3 or 5 points
+                                                   //CTrade            m_trade;                      // trading object
+   //CSymbolInfo       m_symbol;                     // symbol info object
+   //CPositionInfo     m_position;                   // trade position object
+   //CAccountInfo      m_account;                    // account info wrapper
+   string            symbol;
+   //--- indicators
+   int               m_handle_macd;                // MACD indicator handle
+   int               m_handle_ema;                 // moving average indicator handle
+   //--- indicator buffers
+   double            m_buff_MACD_main[];           // MACD indicator main buffer
+   double            m_buff_MACD_signal[];         // MACD indicator signal buffer
+   double            m_buff_EMA[];                 // EMA indicator buffer
+   int               pMACD1;
+   int               pMACD2;
+   int               pMACD3;
+   int               pMATrendPeriod;
+   //--- indicator data for processing
+   double            m_macd_current;
+   double            m_macd_previous;
+   double            m_signal_current;
+   double            m_signal_previous;
+   double            m_ema_current;
+   double            m_ema_previous;
+   double            m_macd_open_level;
+   double            m_macd_close_level;
+  public: 
    virtual double    forecast(string smbl,int shift,bool train);
    virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMACD");};
+bool Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
+                  int i_MACD2=36,
+                  int i_MACD3=19,
+                  int i_MATrendPeriod=160);
+protected:
+   bool              InitCheckParameters(const int digits_adjust);
+   bool              InitIndicators(void);
+
   };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CiMACD::Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
+                  int i_MACD2=36,
+                  int i_MACD3=19,
+                  int i_MATrendPeriod=160)
+  {
+   symbol=i_smbl;
+   pMACD1=i_MACD1;
+   if(""==symbol)symbol=Symbol();
+   CSymbolInfo       m_symbol;
+//--- initialize common information
+   m_symbol.Name(symbol);              // symbol
+                                       //   m_trade.SetExpertMagicNumber(12345);  // magic
+//--- tuning for 3 or 5 digits
+   int digits_adjust=1;
+   if(m_symbol.Digits()==3 || m_symbol.Digits()==5)
+      digits_adjust=10;
+   m_adjusted_point=m_symbol.Point()*digits_adjust;
+//--- set default deviation for trading in adjusted points
+   m_macd_open_level =5*m_adjusted_point;
+   m_macd_close_level=5*m_adjusted_point;
+   //m_traling_stop    =i_TrailingStop*m_adjusted_point;
+   //m_take_profit     =i_TakeProfit*m_adjusted_point;
+//--- set default deviation for trading in adjusted points
+//  m_trade.SetDeviationInPoints(3*digits_adjust);
+//---
+//  if(!InitCheckParameters(digits_adjust))
+//    return(false);
+   ArraySetAsSeries(m_buff_MACD_main,true);
+   ArraySetAsSeries(m_buff_MACD_signal,true);
+   ArraySetAsSeries(m_buff_EMA,true);
+   if(!InitIndicators())
+      return(false);
+//--- succeed
+   return(true);
+  }
+//+------------------------------------------------------------------+
+//| Initialization of the indicators                                 |
+//+------------------------------------------------------------------+
+bool CiMACD::InitIndicators(void)
+  {
+//--- create MACD indicator
+   if(m_handle_macd==INVALID_HANDLE)
+      if((m_handle_macd=iMACD(NULL,0,pMACD1,pMACD2,pMACD3,PRICE_CLOSE))==INVALID_HANDLE)
+        {
+         printf("Error creating MACD indicator");
+         return(false);
+        }
+//--- create EMA indicator and add it to collection
+   if(m_handle_ema==INVALID_HANDLE)
+      if((m_handle_ema=iMA(NULL,0,pMATrendPeriod,0,MODE_EMA,PRICE_CLOSE))==INVALID_HANDLE)
+        {
+         printf("Error creating EMA indicator");
+         return(false);
+        }
+//--- succeed
+   return(true);
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -933,22 +1030,73 @@ double CiMACD::forecast(string smbl,int shift,bool train)
 
    double sig=0;
    if(""==smbl) smbl=Symbol();
-   double ind1_buffer[];double ind2_buffer[];
-   int   h_ind1=iMACD(smbl,PERIOD_M1,12,26,9,PRICE_CLOSE);
 
-   if(CopyBuffer(h_ind1,0,shift,2,ind1_buffer)<2) return(0);
-   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3) return(0);
-   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
-   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
-
-//--- проводим проверку условия и устанавливаем значение для sig
-   if(ind2_buffer[2]>ind1_buffer[1] && ind2_buffer[1]<ind1_buffer[1])
-      sig=1;
-   else if(ind2_buffer[2]<ind1_buffer[1] && ind2_buffer[1]>ind1_buffer[1])
-      sig=-1;
-   else sig=0;
-
-   IndicatorRelease(h_ind1);
+   if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2)
+      return(false);
+   if(CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main)  !=2 ||
+      CopyBuffer(m_handle_macd,1,0,2,m_buff_MACD_signal)!=2 ||
+      CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA)         !=2)
+      return(false);
+//   m_indicators.Refresh();
+//--- to simplify the coding and speed up access
+//--- data are put into internal variables
+   m_macd_current   =m_buff_MACD_main[0];
+   m_macd_previous  =m_buff_MACD_main[1];
+   m_signal_current =m_buff_MACD_signal[0];
+   m_signal_previous=m_buff_MACD_signal[1];
+   m_ema_current    =m_buff_EMA[0];
+   m_ema_previous   =m_buff_EMA[1];
+//--- it is important to enter the market correctly, 
+//--- but it is more important to exit it correctly...   
+//--- first check if position exists - try to select it
+//   if(m_position.Select(smbl))
+//     {
+//      if(m_position.PositionType()==POSITION_TYPE_BUY)
+//        {
+//         //--- try to close or modify long position
+//         if(LongClosed())
+//            return(true);
+//         if(LongModified())
+//            return(true);
+//        }
+//      else
+//        {
+//         //--- try to close or modify short position
+//         if(ShortClosed())
+//            return(true);
+//         if(ShortModified())
+//            return(true);
+//        }
+//     }
+////--- no opened position identified
+//   else
+//     {
+//      //--- check for long position (BUY) possibility
+//      if(LongOpened())
+//         return(true);
+//      //--- check for short position (SELL) possibility
+//      if(ShortOpened())
+//         return(true);
+//     }
+//--- exit without position processing
+   return(sig);
+ 
+//   double ind1_buffer[];double ind2_buffer[];
+//   int   h_ind1=iMACD(smbl,PERIOD_M1,12,26,9,PRICE_CLOSE);
+//
+//   if(CopyBuffer(h_ind1,0,shift,2,ind1_buffer)<2) return(0);
+//   if(CopyBuffer(h_ind1,1,shift,3,ind2_buffer)<3) return(0);
+//   if(!ArraySetAsSeries(ind1_buffer,true))         return(0);
+//   if(!ArraySetAsSeries(ind2_buffer,true))         return(0);
+//
+////--- проводим проверку условия и устанавливаем значение для sig
+//   if(ind2_buffer[2]>ind1_buffer[1] && ind2_buffer[1]<ind1_buffer[1])
+//      sig=1;
+//   else if(ind2_buffer[2]<ind1_buffer[1] && ind2_buffer[1]>ind1_buffer[1])
+//      sig=-1;
+//   else sig=0;
+//
+//   IndicatorRelease(h_ind1);
 //--- возвращаем торговый сигнал
    return(sig);
   }
