@@ -13,16 +13,16 @@
 #include <Trade\PositionInfo.mqh> //подключаем библиотеку для получения информации о позициях
 
 //--- значения весовых коэффициентов
-input double w0=0.5;
-input double w1=0.5;
-input double w2=0.5;
-input double w3=0.5;
-input double w4=0.5;
-input double w5=0.5;
-input double w6=0.5;
-input double w7=0.5;
-input double w8=0.5;
-input double w9=0.5;
+input double w0=0.1;
+input double w1=0.1;
+input double w2=0.1;
+input double w3=0.1;
+input double w4=0.1;
+input double w5=0.1;
+input double w6=0.1;
+input double w7=0.1;
+input double w8=0.1;
+input double w9=0.1;
 
 int               iRSI_handle;  // переменная для хранения хендла индикатора
 double            iRSI_buf[];   // динамический массив для хранения значений индикатора
