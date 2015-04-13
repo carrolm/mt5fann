@@ -60,7 +60,7 @@ int OnInit()
 //--- сохраним минимальный объем совершаемой сделки
    lot_size=SymbolInfoDouble(my_symbol,SYMBOL_VOLUME_MIN);
 //--- подключаем индикатор и получаем его хендл
-   iMACD_handle=iMACD(my_symbol,my_timeframe,12,26,9,PRICE_CLOSE);
+   iMACD_handle=iMACD(my_symbol,my_timeframe,48,36,19,PRICE_CLOSE);
 //--- проверяем наличие хендла индикатора
    if(iMACD_handle==INVALID_HANDLE)
      {

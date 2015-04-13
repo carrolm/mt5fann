@@ -15,10 +15,11 @@ int _HistorySignals_=10;
 class COracleTemplate
   {
 private:
-   //  bool              IsInit;
+
    string            filename;
 
-public:
+public:  
+ bool              IsInit;
    int               errorFile;
    int               AgeHistory;
    double            HistoryInputVector[];
@@ -30,7 +31,7 @@ public:
    string            templateInputSignals;
    int               num_repeat;
    int               num_input_signals;
-                     COracleTemplate(){};//{Init();};
+                     COracleTemplate(){IsInit=false;};
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
    void              DeInit();
@@ -48,6 +49,7 @@ public:
 //+------------------------------------------------------------------+
 void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
   {
+  IsInit=true;
    debug=ip_debug; AgeHistory=0;errorFile=INVALID_HANDLE;
    if(""!=FileName) filename=FileName;
    else  filename="Prototype";
@@ -948,14 +950,15 @@ protected:
    double            m_ema_previous;
    double            m_macd_open_level;
    double            m_macd_close_level;
-  public: 
+public:
+                   CiMACD(string FileName=""){Init();}
    virtual double    forecast(string smbl,int shift,bool train);
    virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMACD");};
-bool Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
-                  int i_MACD2=36,
-                  int i_MACD3=19,
-                  int i_MATrendPeriod=160);
+   bool              Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
+                          int i_MACD2=36,
+                          int i_MACD3=19,
+                          int i_MATrendPeriod=160);
 protected:
    bool              InitCheckParameters(const int digits_adjust);
    bool              InitIndicators(void);
@@ -969,6 +972,7 @@ bool CiMACD::Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int
                   int i_MACD3=19,
                   int i_MATrendPeriod=160)
   {
+   IsInit=true;
    symbol=i_smbl;
    pMACD1=i_MACD1;
    if(""==symbol)symbol=Symbol();
@@ -984,8 +988,8 @@ bool CiMACD::Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int
 //--- set default deviation for trading in adjusted points
    m_macd_open_level =5*m_adjusted_point;
    m_macd_close_level=5*m_adjusted_point;
-   //m_traling_stop    =i_TrailingStop*m_adjusted_point;
-   //m_take_profit     =i_TakeProfit*m_adjusted_point;
+//m_traling_stop    =i_TrailingStop*m_adjusted_point;
+//m_take_profit     =i_TakeProfit*m_adjusted_point;
 //--- set default deviation for trading in adjusted points
 //  m_trade.SetDeviationInPoints(3*digits_adjust);
 //---
@@ -1029,14 +1033,18 @@ double CiMACD::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
+   if(!IsInit) {
+   Print("Not Init!");
+   return(0);
+   }
    if(""==smbl) smbl=Symbol();
-
+   
    if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2)
-      return(false);
+      return(sig);
    if(CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main)  !=2 ||
       CopyBuffer(m_handle_macd,1,0,2,m_buff_MACD_signal)!=2 ||
       CopyBuffer(m_handle_ema,0,0,2,m_buff_EMA)         !=2)
-      return(false);
+      return(sig);
 //   m_indicators.Refresh();
 //--- to simplify the coding and speed up access
 //--- data are put into internal variables
@@ -1046,6 +1054,20 @@ double CiMACD::forecast(string smbl,int shift,bool train)
    m_signal_previous=m_buff_MACD_signal[1];
    m_ema_current    =m_buff_EMA[0];
    m_ema_previous   =m_buff_EMA[1];
+//--- check for long position (BUY) possibility
+   if(m_macd_current<0)
+      if(m_macd_current>m_signal_current && m_macd_previous<m_signal_previous)
+         if(MathAbs(m_macd_current)>(m_macd_open_level) && m_ema_current>m_ema_previous)
+           {
+            sig=1;
+           }
+//--- check for short position (SELL) possibility
+   if(m_macd_current>0)
+      if(m_macd_current<m_signal_current && m_macd_previous>m_signal_previous)
+         if(m_macd_current>(m_macd_open_level) && m_ema_current<m_ema_previous)
+           {
+            sig=-1;
+           }
 //--- it is important to enter the market correctly, 
 //--- but it is more important to exit it correctly...   
 //--- first check if position exists - try to select it
@@ -1080,7 +1102,7 @@ double CiMACD::forecast(string smbl,int shift,bool train)
 //     }
 //--- exit without position processing
    return(sig);
- 
+
 //   double ind1_buffer[];double ind2_buffer[];
 //   int   h_ind1=iMACD(smbl,PERIOD_M1,12,26,9,PRICE_CLOSE);
 //
@@ -1997,6 +2019,9 @@ int COracleANN::ExportData(int qty,int shift,string &Symbols_Array[],string File
         {
          Comment("Export ..."+FileName+" "+(string)((int)(100*((double)(1+ma)/Max_Symbols)))+"%");
          for(i=0;i<needcopy;shift++)
+            //+------------------------------------------------------------------+
+            //|                                                                  |
+            //+------------------------------------------------------------------+
            {
             if(GetVector(Symbols_Array[ma],shift,true))
               {
@@ -2159,6 +2184,9 @@ bool COracleANN::Load(string file_name)
         {
          sp=1+StringFind(outstr,"=");
          for(i=0;i<50;i++)
+            //+------------------------------------------------------------------+
+            //|                                                                  |
+            //+------------------------------------------------------------------+
            {
             if(Functions_Array[i]==StringSubstr(outstr,0,sp-1)) Functions_Count[i]=(int)StringToInteger(StringSubstr(outstr,sp));;
            }
