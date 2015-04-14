@@ -22,7 +22,7 @@ CiMACD *MyExpert;
 int OnInit()
   {
    MyExpert=new CiMACD();
-MyExpert.Init();
+   MyExpert.Init();
 //   if(_NEDATA_>_ShiftNEDATA_)
 //     {
 //      MyExpert.ExportHistoryENCOG(_Symbol,"",0,_NEDATA_,_ShiftNEDATA_,0,0);
