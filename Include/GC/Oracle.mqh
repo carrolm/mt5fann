@@ -955,10 +955,10 @@ public:
    virtual double    forecast(string smbl,int shift,bool train);
    virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMACD");};
-   bool              Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
-                          int i_MACD2=36,
-                          int i_MACD3=19,
-                          int i_MATrendPeriod=160);
+   bool              Init(string i_smbl="",int i_MACD1=0,
+                          int i_MACD2=0,
+                          int i_MACD3=0,
+                          int i_MATrendPeriod=0);
 protected:
    bool              InitCheckParameters(const int digits_adjust);
    bool              InitIndicators(void);
@@ -967,15 +967,25 @@ protected:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool CiMACD::Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int i_MACD1=48,
-                  int i_MACD2=36,
-                  int i_MACD3=19,
-                  int i_MATrendPeriod=160)
+bool CiMACD::Init(string i_smbl="",int i_MACD1=0,
+                  int i_MACD2=0,
+                  int i_MACD3=0,
+                  int i_MATrendPeriod=0)
   {
+   m_handle_macd=INVALID_HANDLE;
+   m_handle_ema=INVALID_HANDLE;
    IsInit=true;
    symbol=i_smbl;
    pMACD1=i_MACD1;
+   pMACD2=i_MACD2;
+   pMACD3=i_MACD3;
+   pMATrendPeriod =i_MATrendPeriod;
    if(""==symbol)symbol=Symbol();
+   if(0==pMACD1) pMACD1 = 48; 
+   if(0==pMACD2) pMACD2 = 36;
+   if(0==pMACD3) pMACD3 = 19;
+   if(0==pMATrendPeriod) pMATrendPeriod = 160;
+   
    CSymbolInfo       m_symbol;
 //--- initialize common information
    m_symbol.Name(symbol);              // symbol
@@ -986,8 +996,8 @@ bool CiMACD::Init(string i_smbl="",int i_TrailingStop=40,int i_TakeProfit=50,int
       digits_adjust=10;
    m_adjusted_point=m_symbol.Point()*digits_adjust;
 //--- set default deviation for trading in adjusted points
-   m_macd_open_level =5*m_adjusted_point;
-   m_macd_close_level=5*m_adjusted_point;
+   m_macd_open_level =3*m_adjusted_point;
+   m_macd_close_level=2*m_adjusted_point;
 //m_traling_stop    =i_TrailingStop*m_adjusted_point;
 //m_take_profit     =i_TakeProfit*m_adjusted_point;
 //--- set default deviation for trading in adjusted points
