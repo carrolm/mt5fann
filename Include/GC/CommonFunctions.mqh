@@ -11,16 +11,17 @@ bool _debug_time=false;
 input bool _IamChicken_=false; // I am chicken If openprofit >0 then sl move
 input bool _TrailingPosition_=true;//Enable trailing Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в рынок
+input int _Nax_lost_per_Mounth_Percent=5;// Max lost per mounth Максимальные потери в месяц
 input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потерь за неделю
-input int _Carefull_=20;//How minutes for panic Сколько минут до паники. 0 = выкл
+input int _Carefull_=30;//How minutes for panic Сколько минут до паники. 0 = выкл
 input int _TREND_=30;// на сколько смотреть вперед
-input int _GetMaximum_=20;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
-input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _GetMaximum_=30;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
+input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=25;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input string spamfilename="notify.txt";
 input double _Order_Volume_=0.1;// Order volume Объем лота
-input int _Nax_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
+
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data

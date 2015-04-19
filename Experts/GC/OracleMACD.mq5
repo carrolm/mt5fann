@@ -6,6 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
+input int inp_MACD1=160,inp_MACD2=70,inp_MACD3=80,int_MATrendPeriod=110; // for EURUSD
 #include <GC\Oracle.mqh>
 //#include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
@@ -22,7 +23,7 @@ CiMACD *MyExpert;
 int OnInit()
   {
    MyExpert=new CiMACD();
-   MyExpert.Init();
+   MyExpert.Init("",inp_MACD1,inp_MACD2,inp_MACD3,int_MATrendPeriod);
 //   if(_NEDATA_>_ShiftNEDATA_)
 //     {
 //      MyExpert.ExportHistoryENCOG(_Symbol,"",0,_NEDATA_,_ShiftNEDATA_,0,0);
