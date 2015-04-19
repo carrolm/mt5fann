@@ -13,9 +13,10 @@ input bool _TrailingPosition_=true;//Enable trailing Разрешить следить за ордера
 input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в рынок
 input int _Nax_lost_per_Mounth_Percent=5;// Max lost per mounth Максимальные потери в месяц
 input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потерь за неделю
-input int _Carefull_=30;//How minutes for panic Сколько минут до паники. 0 = выкл
+input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
+input int _LovelyProfit_=50;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
 input int _TREND_=30;// на сколько смотреть вперед
-input int _GetMaximum_=30;//How minutes for get profit Сколько минут до снятия сливок. 0 = выкл
+input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
 input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
 input int _NumTP_=25;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
@@ -610,7 +611,10 @@ bool Trailing()
       TS=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTS_;
       TP=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTP_;
 
-      //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+             if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT) >_LovelyProfit_*_Order_Volume_)
+            {
+            TS=TS/2;
+            }        //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL) || 0==PositionGetDouble(POSITION_TP))
@@ -622,7 +626,8 @@ bool Trailing()
            }
          else
            {
-            newsl=lasttick.ask+TS;
+           
+              newsl=lasttick.ask+TS; 
             if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
@@ -631,7 +636,7 @@ bool Trailing()
                Order_Send(trReq,BigDogModifResult);
               }
            }
-         // если можно снять сливки -то двигаем стоплост ближе
+         // если паника -то двигаем стоплост ближе
          if(_Carefull_>0 && ((lasttick.bid>
             (PositionGetDouble(POSITION_PRICE_OPEN)-2*SymbolInfoInteger(smb,SYMBOL_SPREAD)*SymbolInfoDouble(smb,SYMBOL_POINT)))
             && (TimeCurrent()>(PositionGetInteger(POSITION_TIME)+_Carefull_*60))))

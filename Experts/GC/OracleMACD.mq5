@@ -6,7 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #property version   "1.00"
-input int inp_MACD1=160,inp_MACD2=70,inp_MACD3=80,int_MATrendPeriod=110; // for EURUSD
+input int inp_MACD1=300,inp_MACD2=30,inp_MACD3=120,int_MATrendPeriod=280; // for EURUSD
 #include <GC\Oracle.mqh>
 //#include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
