@@ -19,7 +19,7 @@ private:
    string            filename;
 
 public:  
- bool              IsInit;
+   bool              IsInit;
    int               errorFile;
    int               AgeHistory;
    double            HistoryInputVector[];
