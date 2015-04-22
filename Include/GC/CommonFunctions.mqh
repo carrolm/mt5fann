@@ -6,6 +6,7 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //#include <icq_mql5.mqh>
+input bool _ShowInAllChart_=true;//Показать данные на всех окнах
 input bool __Debug__=true;//Enable debug Показывать отладочную информацию
 bool _debug_time=false;
 input bool _IamChicken_=false; // I am chicken If openprofit >0 then sl move
@@ -27,6 +28,9 @@ input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 5; // Deviation 
+input int FontSize=7;
+input color Bg_Color=Gray;
+input color Btn_Color=Gold;
 datetime StartOpenPosition=0;
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -138,6 +142,81 @@ long WeekStartTime(datetime aTime,bool aStartsOnMonday=false)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool RefreshView(void)
+  {  
+  if(!_ShowInAllChart_&&false==MQLInfoInteger(MQL_TESTER)&&false== MQLInfoInteger(MQL_OPTIMIZATION)&&false==  MQLInfoInteger(MQL_PROFILER)) return false;
+//if(_Wather_) Watcher.Run();
+//Trailing();
+   string prefix="gc_";
+   string name; //int SymbolIdx,RowPos;
+   double BufferO[],BufferC[],BufferL[],BufferH[];
+   ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
+   ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
+   int window=ChartWindowOnDropped();
+   if(window==0 && ChartGetInteger(0,CHART_WINDOWS_TOTAL)>1) window=1;
+   int i;//,ColPos;
+   //ulong ticket;
+   double   profit;
+   long currChart,prevChart=0;//ChartFirst();
+   int limit=10;i=0;
+//Print("ChartFirst =",ChartSymbol(prevChart)," ID =",prevChart);
+   //MqlDateTime str1,str2;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+ 
+      while(i<limit)// у нас наверняка не больше 10 открытых графиков
+        {
+         currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
+         if(currChart<0) break;          // достигли конца списка графиков
+                                         //       if(_Symbol!=ChartSymbol(currChart)|!ShowDashBoard)
+         //        ChartSetInteger(currChart,CHART_SHIFT,true);
+         ChartSetInteger(currChart,CHART_SHOW_ASK_LINE,true);
+         ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
+         //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
+         //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
+         // выведем спред на график
+         name=prefix+"chart_SI";
+         if(ObjectFind(currChart,name)==-1)
+           {
+            ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
+            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
+            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
+            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+           }
+         profit=0;
+         if(PositionSelect(ChartSymbol(currChart)))
+           {
+            profit=PositionGetDouble(POSITION_PROFIT);
+            name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
+            if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+            else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+           }
+         else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
+
+         if(0==profit)
+           {
+            ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
+            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
+           }
+         else
+           {
+            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Пока="+(string)((int)profit));
+            if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
+            else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
+           }
+
+         prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
+         i++;// не забудем увеличить счетчик
+        }
+        return true;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int magic=777,datetime expiration=0)
   {
    if(""==smb)
@@ -159,6 +238,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
 
    uint total=HistoryDealsTotal();
    for(uint i=0;i<total;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       if((bool)(ticket=HistoryDealGetTicket(i)))
          //      if((ticket=HistoryDealGetTicket(i))>0)
@@ -169,12 +251,18 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            }
         }
      }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if((-result)>(_LostInWeekInPercent_*curr_balance/100) && expiration==0)
      {
       Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
       StartOpenPosition=Start_Date+24*7*3600;
       return(false);
      }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(str_timeCurrent.day_of_week==5 && str_timeCurrent.hour==23 && str_timeCurrent.min>0)
      {
       Print("End of week ");
@@ -196,6 +284,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    int i;
 // есть такой-же отложенный ордер
    for(i=0;i<OrdersTotal();i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       OrderGetTicket(i);
       if(OrderGetString(ORDER_SYMBOL)==smb)
@@ -208,6 +299,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
      }
 // есть открытая позиция
    for(i=0;i<PositionsTotal();i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       if(smb==PositionGetSymbol(i))
         {
@@ -227,6 +321,9 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    MqlTick lasttick;
    if(!SymbolInfoTick(smb,lasttick)) { GlobalVariableSet(gvn,0); return(false);}
    if(0==expiration && magic!=789) expiration=TimeCurrent()+_Expiration_*PeriodSeconds(_Period);
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(price==0)
      {
       if(ticket!=0)
@@ -285,13 +382,17 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       trReq.type_time=ORDER_TIME_GTC;
    else
       trReq.type_time=ORDER_TIME_SPECIFIED;
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(type==NewOrderBuy || type==NewOrderWaitBuy)
      {
       trReq.price=0.001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
       trReq.type=ORDER_TYPE_BUY_LIMIT;
      }
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    else if(type==NewOrderSell || type==NewOrderWaitSell)
      {
       trReq.price=10000.00001;                             // SymbolInfoDouble(NULL,SYMBOL_ASK);
@@ -342,6 +443,9 @@ bool ExportHistory(string fname,int from=0,int to=0)
    int deals=HistoryDealsTotal();
    ulong ticket;
    int FileHandle=FileOpen(fname,FILE_WRITE|FILE_ANSI|FILE_CSV,';');
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(FileHandle!=INVALID_HANDLE)
      {
       for(int idt=0;idt<deals;idt++)
@@ -364,6 +468,9 @@ bool ExportRates(string smb)
   {
    if(!isNewBar()) return(false);
    int FileHandle=FileOpen("statusbot\\"+smb+".csv",FILE_WRITE|FILE_ANSI|FILE_CSV,',');
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
    if(FileHandle!=INVALID_HANDLE)
      {
       //for(int idt=0;idt<deals;idt++)
@@ -382,6 +489,7 @@ bool ExportRates(string smb)
 //+------------------------------------------------------------------+
 bool Trailing()
   {
+  RefreshView();
    if(!_TrailingPosition_) return(false);
    string gvn="gc_Trailing";
 // check what run once
@@ -411,6 +519,9 @@ bool Trailing()
    ulong  ticket;
 // Удаляем отложенные ордера без предела времени  = паника, если нет открытых позиций -мусор в общем
    for(i=OrdTotal;i>0;i--)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       ticket=OrderGetTicket(i-1);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -438,6 +549,9 @@ bool Trailing()
    double  TP=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTP_;
 // проверяем -стоит ли открыть новую позицию, или закрыть старую
    for(i=0;i<OrdTotal && _OpenNewPosition_;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {// есть "заказы" и открытие разрешено
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);
@@ -593,6 +707,9 @@ bool Trailing()
 /// traling open           
    double newsl=0;
    for(i=0;i<PositionsTotal() && _TrailingPosition_;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       smb=PositionGetSymbol(i);
       ticket=PositionGetInteger(POSITION_IDENTIFIER);
@@ -611,10 +728,10 @@ bool Trailing()
       TS=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTS_;
       TP=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD)*_NumTP_;
 
-             if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT) >_LovelyProfit_*_Order_Volume_)
-            {
-            TS=TS/2;
-            }        //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
+      if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT)>_LovelyProfit_*_Order_Volume_)
+        {
+         TS=TS/2;
+        }        //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
         {
          if(0==PositionGetDouble(POSITION_SL) || 0==PositionGetDouble(POSITION_TP))
@@ -626,8 +743,8 @@ bool Trailing()
            }
          else
            {
-           
-              newsl=lasttick.ask+TS; 
+
+            newsl=lasttick.ask+TS;
             if((PositionGetDouble(POSITION_SL)>newsl) && ((PositionGetDouble(POSITION_SL)-newsl)>_deviation_*SymbolInfoDouble(smb,SYMBOL_POINT)))
               {
                trReq.action=TRADE_ACTION_SLTP;
@@ -708,6 +825,9 @@ bool Trailing()
 // Двигаем отложенные ордера "на получше"
    OrdTotal=OrdersTotal();   // ордеров
    for(i=0;i<OrdTotal;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
      {
       ticket=OrderGetTicket(i);
       smb=OrderGetString(ORDER_SYMBOL);

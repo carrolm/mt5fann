@@ -25,7 +25,7 @@
 
 
 // Major
-input bool _ShowInAllChart_=true;//Показать данные на всех окнах
+
 input bool _Wather_=false;//Запустить слежение (трейлинг и прочее)
                          //input bool _TrailingPosition_=true;//Разрешить следить за ордерами
 //input bool _OpenNewPosition_=false;//Разрешить входить в рынок
@@ -40,9 +40,8 @@ input color _Data=CadetBlue;
 input color _DataPlus=Lime;
 input color _DataMinus = Pink;
 input color _Separator = MediumPurple;
-input color Bg_Color=Gray;
-input color Btn_Color=Gold;
-input int FontSize=7;
+
+
 input string _DashBoard_="ДашБорда";
 input string FontName="Tahoma";
 input string _Symbol_="Пара";//"Symbol";
@@ -153,7 +152,7 @@ bool CDashBoard::Calc(int SymbolIdx,int PeriodIdx,int shift_seconds=0)
 //+------------------------------------------------------------------+
 CDashBoard::CDashBoard()
   {
-   prefix="db_";
+   prefix="gc_db_";
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
