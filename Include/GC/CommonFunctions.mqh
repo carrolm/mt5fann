@@ -6,31 +6,35 @@
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 //#include <icq_mql5.mqh>
-input bool _ShowInAllChart_=true;//Показать данные на всех окнах
+input bool _ShowInAllChart_=true;//Show info on all charts Показать данные на всех окнах
 input bool __Debug__=true;//Enable debug Показывать отладочную информацию
 bool _debug_time=false;
 input bool _IamChicken_=false; // I am chicken If openprofit >0 then sl move
 input bool _TrailingPosition_=true;//Enable trailing Разрешить следить за ордерами
 input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в рынок
-input int _Nax_lost_per_Mounth_Percent=5;// Max lost per mounth Максимальные потери в месяц
-input int _LostInWeekInPercent_=1;// Max lost in week Максимальный процент потерь за неделю
+input int _Max_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
+input int _Max_lost_per_Week_Percent=5;// Max lost in week Максимальный процент потерь за неделю
+input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент потерь за день
 input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=50;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
-input int _TREND_=30;// на сколько смотреть вперед
 input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
 input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
 input int _NumTP_=25;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
-input string spamfilename="notify.txt";
 input double _Order_Volume_=0.1;// Order volume Объем лота
 
+input int FontSize=7;
+input color Bg_Color=Gray;
+input color Btn_Color=Gold;
+
+input int _TREND_=30;// на сколько смотреть вперед
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 5; // Deviation 
-input int FontSize=7;
-input color Bg_Color=Gray;
-input color Btn_Color=Gold;
+
+input string spamfilename="notify.txt";
+
 datetime StartOpenPosition=0;
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -143,11 +147,11 @@ long WeekStartTime(datetime aTime,bool aStartsOnMonday=false)
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool RefreshView(void)
-  {  
-  if(!_ShowInAllChart_&&false==MQLInfoInteger(MQL_TESTER)&&false== MQLInfoInteger(MQL_OPTIMIZATION)&&false==  MQLInfoInteger(MQL_PROFILER)) return false;
+  {
+   if(!_ShowInAllChart_&&false==MQLInfoInteger(MQL_TESTER)&&false== MQLInfoInteger(MQL_OPTIMIZATION)&&false==  MQLInfoInteger(MQL_PROFILER)) return false;
 //if(_Wather_) Watcher.Run();
 //Trailing();
-   string prefix="gc_";
+   string prefix="GC_";
    string name; //int SymbolIdx,RowPos;
    double BufferO[],BufferC[],BufferL[],BufferH[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
@@ -155,64 +159,160 @@ bool RefreshView(void)
    int window=ChartWindowOnDropped();
    if(window==0 && ChartGetInteger(0,CHART_WINDOWS_TOTAL)>1) window=1;
    int i;//,ColPos;
-   //ulong ticket;
+         //ulong ticket;
    double   profit;
    long currChart,prevChart=0;//ChartFirst();
    int limit=10;i=0;
+//   double result=0;//,profit=0,loss=0;
+   ulong ticket=0;//,trades=0; 
+   MqlDateTime str_timeCurrent;
+   datetime Start_Date;
+   uint total;
 //Print("ChartFirst =",ChartSymbol(prevChart)," ID =",prevChart);
-   //MqlDateTime str1,str2;
+//MqlDateTime str1,str2;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
- 
-      while(i<limit)// у нас наверняка не больше 10 открытых графиков
+
+   while(i<limit)// у нас наверняка не больше 10 открытых графиков
+     {
+      currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
+      if(currChart<0) break;          // достигли конца списка графиков
+                                      //       if(_Symbol!=ChartSymbol(currChart)|!ShowDashBoard)
+      //        ChartSetInteger(currChart,CHART_SHIFT,true);
+      ChartSetInteger(currChart,CHART_SHOW_ASK_LINE,true);
+      ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
+      //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
+      //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
+      // выведем спред на график
+      name=prefix+"chart_SI";
+      if(ObjectFind(currChart,name)==-1)
         {
-         currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
-         if(currChart<0) break;          // достигли конца списка графиков
-                                         //       if(_Symbol!=ChartSymbol(currChart)|!ShowDashBoard)
-         //        ChartSetInteger(currChart,CHART_SHIFT,true);
-         ChartSetInteger(currChart,CHART_SHOW_ASK_LINE,true);
-         ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
-         //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
-         //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
-         // выведем спред на график
-         name=prefix+"chart_SI";
-         if(ObjectFind(currChart,name)==-1)
-           {
-            ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
-            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
-            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-           }
-         profit=0;
-         if(PositionSelect(ChartSymbol(currChart)))
-           {
-            profit=PositionGetDouble(POSITION_PROFIT);
-            name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
-            if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-            else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-           }
-         else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
-
-         if(0==profit)
-           {
-            ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
-            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
-           }
-         else
-           {
-            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Пока="+(string)((int)profit));
-            if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
-            else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
-           }
-
-         prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
-         i++;// не забудем увеличить счетчик
+         ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*3);
+         ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
+         ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
         }
-        return true;
+      profit=0;
+      if(PositionSelect(ChartSymbol(currChart)))
+        {
+         profit=PositionGetDouble(POSITION_PROFIT);
+         name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
+         if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+         else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
+        }
+      else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
+
+      if(0==profit)
+        {
+         ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
+         ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Spread="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
+        }
+      else
+        {
+         ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Curr="+(string)((int)profit));
+         if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
+         else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
+        }
+
+      TimeToStruct(TimeCurrent(),str_timeCurrent);
+      str_timeCurrent.hour=0;
+      str_timeCurrent.min=0;
+      str_timeCurrent.sec=0;
+      Start_Date=StructToTime(str_timeCurrent);
+      HistorySelect(Start_Date,TimeCurrent());
+      HistorySelect(Start_Date,TimeCurrent());
+
+      TimeToStruct(TimeCurrent(),str_timeCurrent);
+
+      total=HistoryDealsTotal();
+      profit=0;
+      for(uint ihd=0;ihd<total;ihd++)
+         //+------------------------------------------------------------------+
+         //|                                                                  |
+         //+------------------------------------------------------------------+
+        {
+         if((bool)(ticket=HistoryDealGetTicket(ihd)))
+            //      if((ticket=HistoryDealGetTicket(i))>0)
+           {
+            if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BALANCE && HistoryDealGetString(ticket,DEAL_SYMBOL)==ChartSymbol(currChart))
+              {
+               profit+=HistoryDealGetDouble(ticket,DEAL_PROFIT);
+              }
+           }
+        }
+      name=prefix+"chart_DP";
+      if(ObjectFind(currChart,name)==-1)
+        {
+         ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*5);
+         ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
+         ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+        }
+      if(0==profit)
+        {
+         ObjectSetInteger(currChart,name,OBJPROP_COLOR,Bg_Color);
+        }
+      else
+        {
+         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
+         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
+        }
+      ObjectSetString(currChart,name,OBJPROP_TEXT,"In day  ="+(string)((int)profit));
+
+      Start_Date=(datetime)WeekStartTime(TimeCurrent());
+      HistorySelect(Start_Date,TimeCurrent());
+
+      TimeToStruct(TimeCurrent(),str_timeCurrent);
+
+      total=HistoryDealsTotal();
+      profit=0;
+      for(uint ihd=0;ihd<total;ihd++)
+         //+------------------------------------------------------------------+
+         //|                                                                  |
+         //+------------------------------------------------------------------+
+        {
+         if((bool)(ticket=HistoryDealGetTicket(ihd)))
+            //      if((ticket=HistoryDealGetTicket(i))>0)
+           {
+            if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BALANCE && HistoryDealGetString(ticket,DEAL_SYMBOL)==ChartSymbol(currChart))
+              {
+               profit+=HistoryDealGetDouble(ticket,DEAL_PROFIT);
+              }
+           }
+        }
+      name=prefix+"chart_WP";
+      if(ObjectFind(currChart,name)==-1)
+        {
+         ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*7);
+         ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
+         ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*1);
+         ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+        }
+      if(0==profit)
+        {
+         ObjectSetInteger(currChart,name,OBJPROP_COLOR,Bg_Color);
+        }
+      else
+        {
+         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
+         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
+        }
+      ObjectSetString(currChart,name,OBJPROP_TEXT,"In week="+(string)((int)profit));
+
+      prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
+      i++;// не забудем увеличить счетчик
+     }
+   return true;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -230,13 +330,16 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    double curr_balance=AccountInfoDouble(ACCOUNT_BALANCE);
 //---
    double result=0;//,profit=0,loss=0;
-   ulong ticket=0;//,trades=0;
-   datetime Start_Date=(datetime)WeekStartTime(TimeCurrent());
-   HistorySelect(Start_Date,TimeCurrent());
+   ulong ticket=0;//,trades=0; 
    MqlDateTime str_timeCurrent;
+   datetime Start_Date;
+   uint total;
+   Start_Date=(datetime)WeekStartTime(TimeCurrent());
+   HistorySelect(Start_Date,TimeCurrent());
+
    TimeToStruct(TimeCurrent(),str_timeCurrent);
 
-   uint total=HistoryDealsTotal();
+   total=HistoryDealsTotal();
    for(uint i=0;i<total;i++)
       //+------------------------------------------------------------------+
       //|                                                                  |
@@ -251,12 +354,41 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
            }
         }
      }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-   if((-result)>(_LostInWeekInPercent_*curr_balance/100) && expiration==0)
+   if((-result)>(_Max_lost_per_Week_Percent*curr_balance/100) && expiration==0)
      {
-      Print("in week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_LostInWeekInPercent_*curr_balance/100));
+      Print("In week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_Max_lost_per_Week_Percent*curr_balance/100));
+      StartOpenPosition=Start_Date+24*7*3600;
+      return(false);
+     }
+   result=0;
+//Start_Date=(datetime)WeekStartTime(TimeCurrent());
+   TimeToStruct(TimeCurrent(),str_timeCurrent);
+   str_timeCurrent.hour=0;
+   str_timeCurrent.min=0;
+   str_timeCurrent.sec=0;
+   Start_Date=StructToTime(str_timeCurrent);
+   HistorySelect(Start_Date,TimeCurrent());
+
+   TimeToStruct(TimeCurrent(),str_timeCurrent);
+
+   total=HistoryDealsTotal();
+   for(uint i=0;i<total;i++)
+      //+------------------------------------------------------------------+
+      //|                                                                  |
+      //+------------------------------------------------------------------+
+     {
+      if((bool)(ticket=HistoryDealGetTicket(i)))
+         //      if((ticket=HistoryDealGetTicket(i))>0)
+        {
+         if(HistoryDealGetInteger(ticket,DEAL_TYPE)!=DEAL_TYPE_BALANCE)
+           {
+            result+=HistoryDealGetDouble(ticket,DEAL_PROFIT);
+           }
+        }
+     }
+   if((-result)>(_Max_lost_per_Day_Percent*curr_balance/100) && expiration==0)
+     {
+      Print("In day, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_Max_lost_per_Day_Percent*curr_balance/100));
       StartOpenPosition=Start_Date+24*7*3600;
       return(false);
      }
@@ -270,7 +402,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       return(false);
      }
 
-   string gvn="gc_NewOrder";
+   string gvn="GC_NewOrder";
 // check what run once
 // if(TimeCurrent() > (GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
 // double gvv;
@@ -489,9 +621,9 @@ bool ExportRates(string smb)
 //+------------------------------------------------------------------+
 bool Trailing()
   {
-  RefreshView();
+   RefreshView();
    if(!_TrailingPosition_) return(false);
-   string gvn="gc_Trailing";
+   string gvn="GC_Trailing";
 // check what run once
    if(TimeCurrent()>(GlobalVariableTime(gvn)+5)) GlobalVariableDel(gvn);
    double gvv;

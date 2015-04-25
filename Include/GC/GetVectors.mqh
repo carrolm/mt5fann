@@ -851,7 +851,7 @@ double GetVector_ATR(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 void DelTrash()
   {
    for(int i=ObjectsTotal(0);i>=0;i--)
-      if(StringSubstr(ObjectName(0,i),0,3)=="GV_") ObjectDelete(0,ObjectName(0,i));
+      if(StringSubstr(ObjectName(0,i),0,3)=="GV_"||StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
 
   }
 //+------------------------------------------------------------------+
@@ -957,12 +957,12 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(draw)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
+            res=-mS;if(draw&&tanh(mS/(_NumTP_*SymbolSpread))>0.6)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB;if(draw)ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
+            res=mB;if(draw&&tanh(res/(_NumTP_*SymbolSpread)>0.6))ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;
