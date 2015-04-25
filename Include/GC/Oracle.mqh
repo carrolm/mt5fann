@@ -162,7 +162,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
             for(i=shift;i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,InputSignals,smbl,0,i);
-               if(__Debug__) Comment(fnm+" "+(string)i);
+               //if(__Debug__) Comment(fnm+" "+(string)i);
                if(Result>1 || Result<-1) continue;
 
                outstr="";

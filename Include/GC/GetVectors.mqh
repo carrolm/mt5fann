@@ -121,11 +121,11 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("Chaikin"==fn_name) return GetVector_Chaikin(IndHandles[idx_ind],smbl,tf,shift,param1,param2);
    if("ROC"==fn_name) return GetVector_ROC(IndHandles[idx_ind],smbl,tf,shift);
 
-//   if("IMA"==fn_name) return GetVector_IMA(IndHandles[idx_ind],smbl,tf,shift,param1);
-//   if("CCI"==fn_name) return GetVector_CCI(IndHandles[idx_ind],smbl,tf,shift,param1);
-//   if("BearsPower"==fn_name) return GetVector_BearsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
-//   if("BullsPower"==fn_name) return GetVector_BullsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
-//   if("AO"==fn_name) return GetVector_AO(IndHandles[idx_ind],smbl,tf,shift);
+   if("IMA"==fn_name) return GetVector_IMA(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("CCI"==fn_name) return GetVector_CCI(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("BearsPower"==fn_name) return GetVector_BearsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("BullsPower"==fn_name) return GetVector_BullsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("AO"==fn_name) return GetVector_AO(IndHandles[idx_ind],smbl,tf,shift);
 
    Print("Not found fn='",fn_name,"'");
    return( -100);
@@ -957,16 +957,16 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(draw&&tanh(mS/(_NumTP_*SymbolSpread))>0.6)ObjectCreate(0,"GV_S_"+(string)shift+"_"+(string)(int)(mS/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
+            res=-mS;if(draw&&tanh(mS/(TP))>0.6)   ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB;if(draw&&tanh(res/(_NumTP_*SymbolSpread)>0.6))ObjectCreate(0,"GV_B_"+(string)shift+"_"+(string)(int)(mB/(SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL)*SymbolInfoDouble(smb,SYMBOL_POINT))/_NumTS_),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
+            res=mB; if(draw&&tanh(res/(TP)>0.6))  ObjectCreate(0,"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;
-         res=tanh(res/(_NumTP_*SymbolSpread));
+         res=tanh(res/(TP));
          // ׃בונול פכ‎ע
          if(res>0.7)
            {

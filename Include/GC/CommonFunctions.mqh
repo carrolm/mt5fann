@@ -18,8 +18,8 @@ input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент по
 input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=50;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
 input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
-input int _NumTP_=25;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _NumTS_=3;//9;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=15;//25;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input double _Order_Volume_=0.1;// Order volume Объем лота
 
