@@ -33,7 +33,7 @@ int OnInit()
 
    CPInit();
    if(_TrailingPosition_) Trailing();
-   return(0);
+   return(0); 
   }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
