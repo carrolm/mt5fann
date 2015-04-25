@@ -32,6 +32,7 @@ int OnInit()
 //     }
 
    CPInit();
+   if(_TrailingPosition_) Trailing();
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -40,6 +41,7 @@ int OnInit()
 void OnDeinit(const int reason)
   {
    ExportHistory("res_oracle.csv");
+   DelTrash();
    delete MyExpert;
   }
 //+------------------------------------------------------------------+
