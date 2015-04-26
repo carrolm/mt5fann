@@ -9,7 +9,7 @@
 #include <GC\GetVectors.mqh>
 bool _ResultAsString_=true;
 int _HistorySignals_=10;
-int _OutputVectors_=4;
+int _OutputVectors_=2;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -19,7 +19,7 @@ private:
 
    string            filename;
 
-public:  
+public:
    bool              IsInit;
    int               errorFile;
    int               AgeHistory;
@@ -50,7 +50,7 @@ public:
 //+------------------------------------------------------------------+
 void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
   {
-  IsInit=true;
+   IsInit=true;
    debug=ip_debug; AgeHistory=0;errorFile=INVALID_HANDLE;
    if(""!=FileName) filename=FileName;
    else  filename="Prototype";
@@ -148,9 +148,11 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
             outstr="";
 
             outstr=InputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
-            if(_OutputVectors_==4&&!_ResultAsString_) 
+            if(_OutputVectors_==4 && !_ResultAsString_)
                outstr="IsBuy,IsCloseSell,IsCloseBuy,IsSell,"+outstr;            //outstr+=",Result";
-            else outstr="prediction,"+outstr;            //outstr+=",Result";
+            else if(_OutputVectors_==2 && !_ResultAsString_)
+               outstr="IsBuy,IsSell,"+outstr;            //outstr+=",Result";
+           else outstr="prediction,"+outstr;            //outstr+=",Result";
             if(_debug_time) outstr="NormalTime,"+outstr;
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
@@ -171,7 +173,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                outstr="";
                if(_debug_time) outstr+=(string)rates[i].time+",";
                need_exp=true; string ss="";
-               if(_ResultAsString_)
+               if(_ResultAsString_&&_OutputVectors_==4)
                  {
                   if(Result>0.66) outstr+="""Buy""";
                   else if(Result>0.33) outstr+="""CloseSell""";
@@ -179,14 +181,32 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                   else if(Result>-0.66) outstr+="""CloseBuy""";
                   else outstr+="""Sell""";
                  }
-               else 
-               if(_OutputVectors_==4){
+               else
+               if(_ResultAsString_&&_OutputVectors_==2)
+                 {
+                  if(Result>0.66) outstr+="""Buy""";
+                  else if(Result>0.33) outstr+="""Wait""";
+                  else if(Result>-0.33) outstr+="""Wait""";
+                  else if(Result>-0.66) outstr+="""Wait""";
+                  else outstr+="""Sell""";
+                 }
+               else
+               if(_OutputVectors_==4)
+                 {
                   if(Result>0.66) outstr+="1,0,-1,-1";
                   else if(Result>0.33) outstr+="0,1,-1,-1";
                   else if(Result>-0.33) outstr+="-1,0,0,-1";
                   else if(Result>-0.66) outstr+="-1,0,1,0";
                   else outstr+="-1,-1,0,1";
-               }
+                 }
+               else  if(_OutputVectors_==2)
+                 {
+                  if(Result>0.66) outstr+="1,-1";
+                  else if(Result>0.33) outstr+="0,0";
+                  else if(Result>-0.33) outstr+="0,0";
+                  else if(Result>-0.66) outstr+="0,0";
+                  else outstr+="-1,1";
+                 }
                else
                   outstr+=DoubleToString(Result,_Precision_);
                for(j=0;j<num_input_signals;j++)
@@ -797,7 +817,23 @@ double COracleENCOG::forecast(string smbl,int shift,bool train)
    double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(sig<-1||sig>1) return 0;
    Compute(InputVector,OutputVector);
-   sig=OutputVector[0];
+    if(_outputCount==2)
+     {
+      if(OutputVector[0]>OutputVector[1])
+         sig=OutputVector[0];
+      if(OutputVector[0]<OutputVector[1])
+         sig=-OutputVector[1];
+
+     }
+   else   if(_outputCount==4)
+     {
+      if(OutputVector[0]>OutputVector[3])
+         sig=OutputVector[0];
+      if(OutputVector[0]<OutputVector[3])
+         sig=-OutputVector[3];
+
+     }
+   else sig=OutputVector[0];
    int i,j;
    if(INVALID_HANDLE==errorFile)
      {
@@ -963,7 +999,7 @@ protected:
    double            m_macd_open_level;
    double            m_macd_close_level;
 public:
-                   CiMACD(string FileName=""){Init();}
+                     CiMACD(string FileName=""){Init();}
    virtual double    forecast(string smbl,int shift,bool train);
    virtual double    forecast(string smbl,datetime startdt,bool train);
    virtual string    Name(){return("iMACD");};
@@ -991,13 +1027,13 @@ bool CiMACD::Init(string i_smbl="",int i_MACD1=0,
    pMACD1=i_MACD1;
    pMACD2=i_MACD2;
    pMACD3=i_MACD3;
-   pMATrendPeriod =i_MATrendPeriod;
+   pMATrendPeriod=i_MATrendPeriod;
    if(""==symbol)symbol=Symbol();
-   if(0==pMACD1) pMACD1 = 48; 
+   if(0==pMACD1) pMACD1 = 48;
    if(0==pMACD2) pMACD2 = 36;
    if(0==pMACD3) pMACD3 = 19;
    if(0==pMATrendPeriod) pMATrendPeriod = 160;
-   
+
    CSymbolInfo       m_symbol;
 //--- initialize common information
    m_symbol.Name(symbol);              // symbol
@@ -1055,12 +1091,13 @@ double CiMACD::forecast(string smbl,int shift,bool train)
   {
 
    double sig=0;
-   if(!IsInit) {
-   Print("Not Init!");
-   return(0);
-   }
+   if(!IsInit)
+     {
+      Print("Not Init!");
+      return(0);
+     }
    if(""==smbl) smbl=Symbol();
-   
+
    if(BarsCalculated(m_handle_macd)<2 || BarsCalculated(m_handle_ema)<2)
       return(sig);
    if(CopyBuffer(m_handle_macd,0,0,2,m_buff_MACD_main)  !=2 ||
