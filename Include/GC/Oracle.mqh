@@ -1,14 +1,15 @@
 //+------------------------------------------------------------------+
 //|                                                       Oracle.mqh |
-//|                        Copyright 2010, MetaQuotes Software Corp. |
+//|                        Copyright 2010-2015, GreyCardinal .       |
 //|                                              http://www.mql5.com |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2010, MetaQuotes Software Corp."
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=false;
+bool _ResultAsString_=true;
 int _HistorySignals_=10;
+int _OutputVectors_=4;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -147,7 +148,9 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
             outstr="";
 
             outstr=InputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
-            outstr="prediction,"+outstr;            //outstr+=",Result";
+            if(_OutputVectors_==4&&!_ResultAsString_) 
+               outstr="IsBuy,IsCloseSell,IsCloseBuy,IsSell,"+outstr;            //outstr+=",Result";
+            else outstr="prediction,"+outstr;            //outstr+=",Result";
             if(_debug_time) outstr="NormalTime,"+outstr;
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
@@ -176,7 +179,16 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                   else if(Result>-0.66) outstr+="""CloseBuy""";
                   else outstr+="""Sell""";
                  }
-               else    outstr+=DoubleToString(Result,_Precision_);
+               else 
+               if(_OutputVectors_==4){
+                  if(Result>0.66) outstr+="1,0,-1,-1";
+                  else if(Result>0.33) outstr+="0,1,-1,-1";
+                  else if(Result>-0.33) outstr+="-1,0,0,-1";
+                  else if(Result>-0.66) outstr+="-1,0,1,0";
+                  else outstr+="-1,-1,0,1";
+               }
+               else
+                  outstr+=DoubleToString(Result,_Precision_);
                for(j=0;j<num_input_signals;j++)
                  {
                   ss=DoubleToString(InputVector[j],_Precision_);

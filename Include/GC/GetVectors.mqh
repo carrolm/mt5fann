@@ -327,7 +327,7 @@ double GetVector_ROC(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift)
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
      {
-      ind_h.hid=iCustom(smb,tf,"GC\ROC");
+      ind_h.hid=iCustom(smb,tf,"GC\\ROC");
       if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
       return 0;
      }
