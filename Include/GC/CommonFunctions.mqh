@@ -18,8 +18,8 @@ input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент по
 input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=50;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
 input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=3;//9;// How spreads for stoploss Сколько спредов до стоплоса
-input int _NumTP_=15;//25;// How spreads for takeprofit сколько тейкпрофитов берем
+input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTP_=20;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input double _Order_Volume_=0.1;// Order volume Объем лота
 
@@ -28,7 +28,7 @@ input color Bg_Color=Gray;
 input color Btn_Color=Gold;
 
 input int _TREND_=30;// на сколько смотреть вперед
-input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
+input int _NEDATA_=15000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 5; // Deviation 
@@ -117,10 +117,10 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,"NO"+comment,price,magic,expiration));
-   if(-0.66>way) return(NewOrder(smb,NewOrderSell,"NO"+comment,price,magic,expiration));
+   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,"NO "+comment,price,magic,expiration));
+   if(-0.66>way) return(NewOrder(smb,NewOrderSell,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,"NO"+comment,price,magic,expiration));
+   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,"NO "+comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
@@ -156,8 +156,8 @@ bool RefreshView(void)
    double BufferO[],BufferC[],BufferL[],BufferH[];
    ArraySetAsSeries(BufferO,true); ArraySetAsSeries(BufferC,true);
    ArraySetAsSeries(BufferL,true); ArraySetAsSeries(BufferH,true);
-   int window=ChartWindowOnDropped();
-   if(window==0 && ChartGetInteger(0,CHART_WINDOWS_TOTAL)>1) window=1;
+   int window=0;//ChartWindowOnDropped();
+                //if(window==0 && ChartGetInteger(0,CHART_WINDOWS_TOTAL)>1) window=1;
    int i;//,ColPos;
          //ulong ticket;
    double   profit;
@@ -173,7 +173,7 @@ bool RefreshView(void)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-
+   bool OpenPos=false;
    while(i<limit)// у нас наверняка не больше 10 открытых графиков
      {
       currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
@@ -184,12 +184,13 @@ bool RefreshView(void)
       ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
       //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
       //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
+      OpenPos=false;
       // выведем спред на график
       name=prefix+"chart_SI";
       if(ObjectFind(currChart,name)==-1)
         {
          ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*30);
          ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*3);
          ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
          ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
@@ -200,6 +201,7 @@ bool RefreshView(void)
       if(PositionSelect(ChartSymbol(currChart)))
         {
          profit=PositionGetDouble(POSITION_PROFIT);
+         OpenPos=true;
          name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
          if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
          else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
@@ -213,7 +215,7 @@ bool RefreshView(void)
         }
       else
         {
-         ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Curr="+(string)((int)profit));
+         ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Current ="+(string)((int)profit));
          if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
          else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
         }
@@ -248,7 +250,7 @@ bool RefreshView(void)
       if(ObjectFind(currChart,name)==-1)
         {
          ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*30);
          ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*5);
          ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
          ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
@@ -291,7 +293,7 @@ bool RefreshView(void)
       if(ObjectFind(currChart,name)==-1)
         {
          ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*10);
+         ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*30);
          ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*7);
          ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*5);
          ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*1);
@@ -308,7 +310,51 @@ bool RefreshView(void)
          else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
         }
       ObjectSetString(currChart,name,OBJPROP_TEXT,"In week="+(string)((int)profit));
+      if(_OpenNewPosition_) 
+        {
+         name=prefix+"_buy_in_chart";
+         if(ObjectFind(currChart,name)==-1)
+           {
+            ObjectCreate(currChart,name,OBJ_BUTTON,window,0,0);
+            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
+            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*3);
+            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
+            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
+            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize);
+            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+            
 
+           }
+             ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?"CloseSell":"Buy");   
+                  if(ObjectGetInteger(currChart,name,OBJPROP_STATE))
+           {
+            Print("Buy "+ChartSymbol(currChart));//if(_Symbol!=SymbolsArray[SymbolIdx])ChartSetSymbolPeriod(0,SymbolsArray[SymbolIdx],_Period);
+            NewOrder(ChartSymbol(currChart),(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?NewOrderWaitSell:NewOrderBuy,"handMade");
+            ObjectSetInteger(currChart,name,OBJPROP_STATE,false);
+           }
+
+         name=prefix+"_sell_in_chart";
+         if(ObjectFind(currChart,name)==-1)
+           {
+            ObjectCreate(currChart,name,OBJ_BUTTON,window,0,0);
+            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
+            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*7);
+            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
+            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
+            ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
+            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize);
+            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+
+           }   
+                    ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?"CloseBuy":"Sell");
+         if(ObjectGetInteger(currChart,name,OBJPROP_STATE))
+           {
+            Print("Sell "+ChartSymbol(currChart));//if(_Symbol!=SymbolsArray[SymbolIdx])ChartSetSymbolPeriod(0,SymbolsArray[SymbolIdx],_Period);
+            NewOrder(ChartSymbol(currChart),(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?NewOrderWaitBuy:NewOrderSell,"handMade");
+            ObjectSetInteger(currChart,name,OBJPROP_STATE,false);
+           }
+        }
       prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
       i++;// не забудем увеличить счетчик
      }
@@ -321,7 +367,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
   {
    if(""==smb)
      {
-      //      Print("empty symbol");
+           Print("empty symbol");
       return(false);
      }
    if(NewOrderWait==type || !_OpenNewPosition_||StartOpenPosition>TimeCurrent()) return(false);
@@ -508,7 +554,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    trReq.deviation=_deviation_;                                    // Maximal possible deviation from the requested price
    trReq.sl=0;//lasttick.bid + 1.5*TrailingStop*SymbolInfoDouble(smb,SYMBOL_POINT);
    trReq.tp=price;
-   trReq.comment=comment+" "+(string)(lasttick.ask-lasttick.bid);
+   trReq.comment=comment;//+" "+(string)(lasttick.ask-lasttick.bid);
    trReq.expiration=expiration;
    if(expiration==0)
       trReq.type_time=ORDER_TIME_GTC;

@@ -175,7 +175,7 @@ int OnInit()
 void OnDeinit(const int reason)
   {
 //---
-//DashBoard.DeInit();
+DashBoard.DeInit();
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |

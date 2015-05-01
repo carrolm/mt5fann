@@ -925,7 +925,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
                   S=Low[i]+TS; is=i;
                  }
                if((S+TP<=High[i])//((Close[shift_history]-SymbolSpread)<=(Close[i]-SymbolSpread))
-                  || (Close[shift_history]<Close[i])
+               //   || (Close[shift_history]<Close[i])
                   || (High[shift_history]<High[i])
                   )//&& (shift_history-1)<_Expiration_)
                  {
@@ -941,7 +941,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
                   ib=i; B=(High[i]-TS);//mB=B-Close[shift_history];                               //B=0;
                  }
                if((B-TP>=Low[i])
-                  || (Close[shift_history]>Close[i])
+            //      || (Close[shift_history]>Close[i])
                   || (Low[shift_history]>Low[i])
                   )//&& (shift_history-i)<_Expiration_))
                  {
