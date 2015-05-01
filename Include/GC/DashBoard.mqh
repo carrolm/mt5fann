@@ -8,7 +8,7 @@
 #include <GC\CurrPairs.mqh>
 #include <GC\GetVectors.mqh>
 #include <GC\CommonFunctions.mqh>
-//#include <GC\Watcher.mqh>
+#include <GC\Watcher.mqh>
 
 #define KEY_NUMPAD_5       12
 #define KEY_LEFT           37
@@ -240,7 +240,7 @@ bool CDashBoard::DeInit(void)
       if(currChart<0) break;          // достигли конца списка графиков
                                       //Print(ChartSymbol(currChart),ObjectsTotal(currChart));
       for(i=ObjectsTotal(currChart);i>=0;i--)
-         if(StringSubstr(ObjectName(currChart,i),0,3)==prefix) ObjectDelete(currChart,ObjectName(currChart,i));
+         if(StringSubstr(ObjectName(currChart,i),0,6)==prefix) ObjectDelete(currChart,ObjectName(currChart,i));
       prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
       j++;// не забудем увеличить счетчик
      }
@@ -265,142 +265,11 @@ bool CDashBoard::Refresh(void)
    int i,ColPos;
    ulong ticket;
    double   profit;
-   long currChart,prevChart=0;//ChartFirst();
+   //long currChart,prevChart=0;//ChartFirst();
    int limit=10;i=0;
 //Print("ChartFirst =",ChartSymbol(prevChart)," ID =",prevChart);
    MqlDateTime str1,str2;
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-   if(_ShowInAllChart_)
-      while(i<limit)// у нас наверняка не больше 10 открытых графиков
-        {
-         currChart=ChartNext(prevChart); // на основании предыдущего получим новый график
-         if(currChart<0) break;          // достигли конца списка графиков
-                                         //       if(_Symbol!=ChartSymbol(currChart)|!ShowDashBoard)
-         //        ChartSetInteger(currChart,CHART_SHIFT,true);
-         ChartSetInteger(currChart,CHART_SHOW_ASK_LINE,true);
-         ChartSetInteger(currChart,CHART_SHOW_BID_LINE,true);
-         //        ChartSetInteger(currChart,CHART_SHOW_VOLUMES,CHART_VOLUME_TICK);
-         //        ChartSetDouble(currChart,CHART_SHIFT_SIZE,10);
-         // выведем спред на график
-         name=prefix+"chart_SI";
-         if(ObjectFind(currChart,name)==-1)
-           {
-            ObjectCreate(currChart,name,OBJ_LABEL,window,0,0);
-            ObjectSetInteger(currChart,name,OBJPROP_XDISTANCE,FontSize*15);
-            ObjectSetInteger(currChart,name,OBJPROP_YDISTANCE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_XSIZE,FontSize*10);
-            ObjectSetInteger(currChart,name,OBJPROP_YSIZE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize*2);
-            ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-           }
-         profit=0;
-         if(PositionSelect(ChartSymbol(currChart)))
-           {
-            profit=PositionGetDouble(POSITION_PROFIT);
-            name=prefix+"chart_pos_"+ChartSymbol(currChart);ObjectDelete(currChart,name);
-            if(profit>0) ObjectCreate(currChart,name,OBJ_ARROW_THUMB_UP,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-            else ObjectCreate(currChart,name,OBJ_ARROW_THUMB_DOWN,0,PositionGetInteger(POSITION_TIME),PositionGetDouble(POSITION_PRICE_OPEN));
-           }
-         else ObjectDelete(currChart,prefix+"closepos_"+ChartSymbol(currChart));
 
-         if(0==profit)
-           {
-            ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
-            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Спред="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
-           }
-         else
-           {
-            ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Пока="+(string)((int)profit));
-            if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
-            else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
-           }
-         for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
-           {
-            if(SymbolsArray[SymbolIdx]==ChartSymbol(currChart))
-              {
-               //name=prefix+"sl_sell_"+SymbolsArray[SymbolIdx];
-               //if(sell_price[SymbolIdx]>0)
-               //  {
-               //   if(ObjectFind(currChart,name)==-1)
-               //     {// создаём линию
-               //      ObjectCreate(currChart,name,OBJ_HLINE,0,0,sell_price[SymbolIdx]);
-               //      ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
-               //      //              ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
-               //      ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
-               //      ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
-               //     }
-               //   if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-               //   else
-               //     {
-               //      if(PositionSelect(SymbolsArray[SymbolIdx]))
-               //        {// есть открытая позиция
-               //         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
-               //           {// допродажа
-               //           }
-               //         else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
-               //           {// Закрытие покупки - паника или снятие сливок
-               //            if(PositionGetDouble(POSITION_PRICE_OPEN)>(PositionGetDouble(POSITION_PRICE_CURRENT)-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
-               //               // паника
-               //               sell_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.0;
-               //            else
-               //            // снятие сливок
-               //               if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-               //           }
-               //        }
-               //      else
-               //        {  // нет открытой позиции
-               //         if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) sell_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-               //         else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) sell_price[SymbolIdx]=BufferC[1]-SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-               //        }
-               //     }
-               //   ObjectSetDouble(currChart,name,OBJPROP_PRICE,sell_price[SymbolIdx]);
-               //  }
-               //else ObjectDelete(currChart,name);
-               //name=prefix+"sl_buy_"+SymbolsArray[SymbolIdx];
-               //if(buy_price[SymbolIdx]>0)
-               //  {
-               //   if(ObjectFind(currChart,name)==-1)
-               //     {
-               //      ObjectCreate(currChart,name,OBJ_HLINE,0,0,buy_price[SymbolIdx]);
-               //      ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,true);
-               //      //             ObjectSetInteger(currChart,name,OBJPROP_SELECTED,true);
-               //      ObjectSetInteger(currChart,name,OBJPROP_STYLE,STYLE_DASHDOTDOT);
-               //      ObjectSetInteger(currChart,name,OBJPROP_COLOR,Yellow);
-               //     }
-               //   if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-               //   else
-               //     {
-               //      if(PositionSelect(SymbolsArray[SymbolIdx]))
-               //        { // есть отрытые позиции
-               //         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
-               //           {// допокупка
-               //           }
-               //         else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
-               //           {// Закрытие продажи
-               //            if(PositionGetDouble(POSITION_PRICE_OPEN)<(PositionGetDouble(POSITION_PRICE_CURRENT)+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1))
-               //               // паника
-               //               buy_price[SymbolIdx]=PositionGetDouble(POSITION_PRICE_OPEN)-+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1;
-               //            else // снятие сливок
-               //            if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-               //           }
-               //        }
-               //      else
-               //        {
-               //         if(ObjectGetInteger(currChart,name,OBJPROP_SELECTED)) buy_price[SymbolIdx]=ObjectGetDouble(currChart,name,OBJPROP_PRICE);
-               //         else if(CopyClose(SymbolsArray[SymbolIdx],_Period,0,2,BufferC)==2) buy_price[SymbolIdx]=BufferC[1]+SymbolInfoInteger(SymbolsArray[SymbolIdx],SYMBOL_SPREAD)*SymbolInfoDouble(SymbolsArray[SymbolIdx],SYMBOL_POINT)*1.1;
-               //        }
-               //     }
-               //   ObjectSetDouble(currChart,name,OBJPROP_PRICE,buy_price[SymbolIdx]);
-               //  }
-               //else ObjectDelete(currChart,name);
-              }
-           }
-
-         prevChart=currChart;// запомним идентификатор текущего графика для ChartNext()
-         i++;// не забудем увеличить счетчик
-        }
    TimeToStruct(LastRefresh,str1);
    TimeToStruct(TimeCurrent(),str2);
    for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
@@ -570,7 +439,7 @@ bool CDashBoard::Refresh(void)
               {
                if((bool)(ticket=HistoryDealGetTicket(idt)))
                  {
-                  if(HistoryDealGetString(ticket,DEAL_SYMBOL)==SymbolsArray[SymbolIdx]&HistoryDealGetInteger(ticket,DEAL_TIME)>dtstart)
+                  if(HistoryDealGetString(ticket,DEAL_SYMBOL)==SymbolsArray[SymbolIdx]&&HistoryDealGetInteger(ticket,DEAL_TIME)>dtstart)
                     {
                      profit+=HistoryDealGetDouble(ticket,DEAL_PROFIT);
                     }

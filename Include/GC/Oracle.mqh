@@ -149,10 +149,10 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
 
             outstr=InputSignals;StringReplace(outstr," ",",");StringReplace(outstr,"-","_");
             if(_OutputVectors_==4 && !_ResultAsString_)
-               outstr="IsBuy,IsCloseSell,IsCloseBuy,IsSell,"+outstr;            //outstr+=",Result";
+               outstr+=",IsBuy,IsCloseSell,IsCloseBuy,IsSell";//,"+outstr;            //outstr+=",Result";
             else if(_OutputVectors_==2 && !_ResultAsString_)
-               outstr="IsBuy,IsSell,"+outstr;            //outstr+=",Result";
-           else outstr="prediction,"+outstr;            //outstr+=",Result";
+               outstr+=",IsBuy,IsSell";//,"+outstr;            //outstr+=",Result";
+           else outstr+=",prediction";//,"+outstr;            //outstr+=",Result";
             if(_debug_time) outstr="NormalTime,"+outstr;
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
@@ -173,6 +173,11 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                outstr="";
                if(_debug_time) outstr+=(string)rates[i].time+",";
                need_exp=true; string ss="";
+               for(j=0;j<num_input_signals;j++)
+                 {
+                  ss=DoubleToString(InputVector[j],_Precision_);
+                  outstr+=ss+",";
+                 }
                if(_ResultAsString_&&_OutputVectors_==4)
                  {
                   if(Result>0.66) outstr+="""Buy""";
@@ -209,11 +214,6 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                  }
                else
                   outstr+=DoubleToString(Result,_Precision_);
-               for(j=0;j<num_input_signals;j++)
-                 {
-                  ss=DoubleToString(InputVector[j],_Precision_);
-                  outstr+=","+ss;
-                 }
 
                FileWrite(FileHandle,outstr);
                //if(Result>-2&&(Result>0.33 || Result<-0.33))
