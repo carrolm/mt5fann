@@ -28,8 +28,8 @@ input color Bg_Color=Gray;
 input color Btn_Color=Gold;
 
 input int _TREND_=30;// на сколько смотреть вперед
-input int _NEDATA_=1500;// How deep bars history for export cколько выгрузить
-input int _ShiftNEDATA_=500;// How shift for start export cколько выгрузить
+input int _NEDATA_=15000;// How deep bars history for export cколько выгрузить
+input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 5; // Deviation 
 

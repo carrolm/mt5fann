@@ -10,6 +10,7 @@
 bool _ResultAsString_=true;
 int _HistorySignals_=10;
 int _OutputVectors_=4;
+int _PercentNormalization=5; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -202,13 +203,13 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
 
 
                // repeat for normalization
-                  if(Result>0.66) maxRepeat=10*QZ/QB;
-                  else if(Result>.33) maxRepeat=10*QZ/QCS;
+                  if(Result>0.66) maxRepeat=_PercentNormalization*QZ/QB;
+                  else if(Result>.33) maxRepeat=_PercentNormalization*QZ/QCS;
                   //else if(res>0.1) QWCS++;
-                  else if(Result>-0.33) maxRepeat=10*QZ/QZ;
+                  else if(Result>-0.33) maxRepeat=_PercentNormalization*QZ/QZ;
                   //else if(res>-.33) QWCB++;
-                  else if(Result>-.66) maxRepeat=10*QZ/QCB;
-                  else maxRepeat=10*QZ/QS;
+                  else if(Result>-.66) maxRepeat=_PercentNormalization*QZ/QCB;
+                  else maxRepeat=_PercentNormalization*QZ/QS;
 
                for(nr=0;nr<maxRepeat;nr++)
                FileWrite(FileHandle,outstr);
@@ -372,10 +373,13 @@ bool COracleTemplate::saveSettings(string _filename)
       FileWrite(FileHandle,"//How to use"," fill string separate space. Format TT-functionName_Paramm1_ParamX");
       FileWrite(FileHandle,"//Where TT"," shift on timeframe");
       FileWrite(FileHandle,"//example","ROC 5-ROC 10-ROC_13");
-      FileWrite(FileHandle,"///Num_repeat","3 eqv ROC 1-ROC 2-ROC");
+      FileWrite(FileHandle,"//Num_repeat","3 eqv ROC 1-ROC 2-ROC");
 
       FileWrite(FileHandle,"//Bad Signals",BS);
       FileWrite(FileHandle,"//Available Signals",AS);
+      FileWrite(FileHandle,"//inputSignals=DayOfWeek Hour Minute MomentumS_5 MomentumS_8 MomentumS_13 MomentumS_21 MomentumS_34 MomentumS_55 MomentumS_89 CCIS_5 CCIS_8 CCIS_13 CCIS_21 CCIS_34 CCIS_55 CCIS_89 StochasticS StochasticS_13_8_8 StochasticS_21_13_13 StochasticS_34_21_21 StochasticS_55_34_34 StochasticK StochasticK_13_8_8 StochasticK_21_13_13 StochasticK_34_21_21 StochasticK_55_34_34 StochasticD StochasticD_21_13_13 StochasticD_34_21_21 StochasticD_55_34_34 WPR_5 WPR_8 WPR_13 WPR_21 WPR_34 WPR_55 WPR_89 DeMarkerS_5 DeMarkerS_8 DeMarkerS_13 DeMarkerS_21 DeMarkerS_34 DeMarkerS_55 DeMarkerS_89");
+
+
       FileWrite(FileHandle,"inputSignals",templateInputSignals);
       FileWrite(FileHandle,"Num_repeat",num_repeat);
       FileClose(FileHandle);
