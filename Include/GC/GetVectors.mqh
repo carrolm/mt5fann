@@ -11,7 +11,7 @@
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","ADX","ADXWilder","RSI","IMA","StochasticK","StochasticD","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC","BearsPower","BullsPower"};
 string BadVectorFunctions[]={"IMA","CCI","AO","Envelopes","BearsPower","BullsPower","Force"};
 
-string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","TriX","RVI","ATR","DeMarker","OsMA","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticS","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
+string VectorFunctions[]={"DayOfWeek","Hour","CCIS","Minute","OpenClose","MFIS","MFI","TriX","RVI","ATR","DeMarker","DeMarkerS","OsMA","MomentumS","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticS","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","StochasticK","StochasticD","WPR","IMA","MACD","AMA"};
 
 //+------------------------------------------------------------------+
@@ -68,7 +68,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
 
    if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
      {
-     }   
+     }
    else
      {
       for(idx_ind=0;idx_ind<ArraySize(IndHandles);idx_ind++)
@@ -104,11 +104,14 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("StochasticD"==fn_name) return GetVector_StochasticD(IndHandles[idx_ind],smbl,tf,shift,param1,param2,param3);
    if("WPR"==fn_name) return GetVector_WPR(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("Momentum"==fn_name) return GetVector_Momentum(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("MomentumS"==fn_name) return GetVector_MomentumS(IndHandles[idx_ind],smbl,tf,shift,param1);
 
    if("OsMA"==fn_name) return GetVector_OsMA(IndHandles[idx_ind],smbl,tf,shift,param1,param2,param3);
    if("RSI"==fn_name) return GetVector_RSI(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("ATR"==fn_name) return GetVector_ATR(IndHandles[idx_ind],smbl,tf,shift,param1);
+
    if("DeMarker"==fn_name) return GetVector_DeMarker(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("DeMarkerS"==fn_name) return GetVector_DeMarkerS(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("Force"==fn_name) return GetVector_Force(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("RVI"==fn_name) return GetVector_RVI(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("TriX"==fn_name) return GetVector_TriX(IndHandles[idx_ind],smbl,tf,shift,param1);
@@ -124,6 +127,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
 
    if("IMA"==fn_name) return GetVector_IMA(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("CCI"==fn_name) return GetVector_CCI(IndHandles[idx_ind],smbl,tf,shift,param1);
+   if("CCIS"==fn_name) return GetVector_CCIS(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("BearsPower"==fn_name) return GetVector_BearsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("BullsPower"==fn_name) return GetVector_BullsPower(IndHandles[idx_ind],smbl,tf,shift,param1);
    if("AO"==fn_name) return GetVector_AO(IndHandles[idx_ind],smbl,tf,shift);
@@ -405,6 +409,23 @@ double GetVector_RVI(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double GetVector_MomentumS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1)
+  {// пара, период, смещение назад (для индикатора полезно)
+   if(0==ind_h.hid)
+     {
+      if(0==param1) param1=14;
+      ind_h.hid=iMomentum(smb,tf,param1,PRICE_WEIGHTED);
+      if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
+      return 0;
+     }
+   if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(3)) return(-200);
+//IndicatorRelease(h_ind);
+   return (ind_h.ind_buffer0[2]<100&&ind_h.ind_buffer0[1]>100)?1:(ind_h.ind_buffer0[2]>100&&ind_h.ind_buffer0[1]<100)?-1:0;
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 double GetVector_Momentum(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1)
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
@@ -495,6 +516,24 @@ double GetVector_DeMarker(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int s
 
 //IndicatorRelease(h_ind);
    return  tanh(2*(ind_h.ind_buffer0[1]/100+0.5));
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetVector_DeMarkerS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1)
+  {// пара, период, смещение назад (для индикатора полезно)
+   if(0==ind_h.hid)
+     {
+      if(0==param1) param1=21;
+      ind_h.hid=iDeMarker(smb,tf,param1);
+      if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
+      return 0;
+     }
+   if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(5)) return(-200);
+
+//IndicatorRelease(h_ind);
+   return  (ind_h.ind_buffer0[1]>0.7)?-1:(ind_h.ind_buffer0[1]<0.3)?1:0;
 
   }
 //+------------------------------------------------------------------+
@@ -703,6 +742,24 @@ double GetVector_BullsPower(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double GetVector_CCIS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1)
+  {// пара, период, смещение назад (для индикатора полезно)
+   if(0==ind_h.hid)
+     {
+      if(0==param1) param1=14;
+      ind_h.hid=iCCI(smb,tf,param1,PRICE_TYPICAL);
+      if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
+      return 0;
+     }
+
+   if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<5) return(-200);
+//
+//IndicatorRelease(h_ind);
+   return (ind_h.ind_buffer0[1]>100)?-1: (ind_h.ind_buffer0[1]<-100)?1:0;
+
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
 //+------------------------------------------------------------------+
 double GetVector_CCI(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1)
   {// пара, период, смещение назад (для индикатора полезно)
@@ -784,10 +841,12 @@ double GetVector_StochasticS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,in
 
    if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(5)) return(-200);
    if(CopyBuffer(ind_h.hid,1,shift,5,ind_h.ind_buffer1)<(5)) return(-200);
-   return (ind_h.ind_buffer0[1]>ind_h.ind_buffer1[1])?1:ind_h.ind_buffer0[1]<ind_h.ind_buffer1[1]?-1:0;
+   return (ind_h.ind_buffer0[1]>ind_h.ind_buffer1[1]&&(ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])>10)?1:ind_h.ind_buffer0[1]<ind_h.ind_buffer1[1]&&(ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])<-10?-1:0;
 
   }
-  
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 double GetVector_StochasticK(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1,int param2,int param3)
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
@@ -870,7 +929,7 @@ double GetVector_ATR(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 void DelTrash()
   {
    for(int i=ObjectsTotal(0);i>=0;i--)
-      if(StringSubstr(ObjectName(0,i),0,3)=="GV_"||StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
+      if(StringSubstr(ObjectName(0,i),0,3)=="GV_" || StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
 
   }
 //+------------------------------------------------------------------+
@@ -944,7 +1003,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
                   S=Low[i]+TS; is=i;
                  }
                if((S+TP<=High[i])//((Close[shift_history]-SymbolSpread)<=(Close[i]-SymbolSpread))
-               //   || (Close[shift_history]<Close[i])
+                  //   || (Close[shift_history]<Close[i])
                   || (High[shift_history]<High[i])
                   )//&& (shift_history-1)<_Expiration_)
                  {
@@ -960,7 +1019,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
                   ib=i; B=(High[i]-TS);//mB=B-Close[shift_history];                               //B=0;
                  }
                if((B-TP>=Low[i])
-            //      || (Close[shift_history]>Close[i])
+                  //      || (Close[shift_history]>Close[i])
                   || (Low[shift_history]>Low[i])
                   )//&& (shift_history-i)<_Expiration_))
                  {
@@ -976,12 +1035,12 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(draw&&tanh(mS/(TP))>0.6)   ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
+            res=-mS;if(draw && tanh(mS/(TP))>0.6) ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB; if(draw&&tanh(res/(TP)>0.6))  ObjectCreate(0,"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
+            res=mB; if(draw && tanh(res/(TP)>0.6)) ObjectCreate(0,"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS),OBJ_ARROWED_LINE,0,Time[shift_history-1],Close[shift_history]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;
@@ -993,7 +1052,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
            }
          else if(res<-0.7)
            {
-           res=-1;
+            res=-1;
            }
          else
            {

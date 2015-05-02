@@ -152,7 +152,7 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                outstr+=",IsBuy,IsCloseSell,IsCloseBuy,IsSell";//,"+outstr;            //outstr+=",Result";
             else if(_OutputVectors_==2 && !_ResultAsString_)
                outstr+=",IsBuy,IsSell";//,"+outstr;            //outstr+=",Result";
-           else outstr+=",prediction";//,"+outstr;            //outstr+=",Result";
+            else outstr+=",prediction";//,"+outstr;            //outstr+=",Result";
             if(_debug_time) outstr="NormalTime,"+outstr;
             FileWrite(FileHandle,outstr);
             bool need_exp=true;
@@ -163,60 +163,12 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                FileWrite(FileHandleOC," {");
 
               }
-
+            //calc statistic
             for(i=shift;i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,InputSignals,smbl,0,i);
-               //if(__Debug__) Comment(fnm+" "+(string)i);
                if(Result>1 || Result<-1) continue;
-
-               outstr="";
-               if(_debug_time) outstr+=(string)rates[i].time+",";
-               need_exp=true; string ss="";
-               for(j=0;j<num_input_signals;j++)
-                 {
-                  ss=DoubleToString(InputVector[j],_Precision_);
-                  outstr+=ss+",";
-                 }
-               if(_ResultAsString_&&_OutputVectors_==4)
-                 {
-                  if(Result>0.66) outstr+="""Buy""";
-                  else if(Result>0.33) outstr+="""CloseSell""";
-                  else if(Result>-0.33) outstr+="""Wait""";
-                  else if(Result>-0.66) outstr+="""CloseBuy""";
-                  else outstr+="""Sell""";
-                 }
-               else
-               if(_ResultAsString_&&_OutputVectors_==2)
-                 {
-                  if(Result>0.66) outstr+="""Buy""";
-                  else if(Result>0.33) outstr+="""Wait""";
-                  else if(Result>-0.33) outstr+="""Wait""";
-                  else if(Result>-0.66) outstr+="""Wait""";
-                  else outstr+="""Sell""";
-                 }
-               else
-               if(_OutputVectors_==4)
-                 {
-                  if(Result>0.66) outstr+="1,0,-1,-1";
-                  else if(Result>0.33) outstr+="0,1,-1,-1";
-                  else if(Result>-0.33) outstr+="-1,0,0,-1";
-                  else if(Result>-0.66) outstr+="-1,0,1,0";
-                  else outstr+="-1,-1,0,1";
-                 }
-               else  if(_OutputVectors_==2)
-                 {
-                  if(Result>0.66) outstr+="1,-1";
-                  else if(Result>0.33) outstr+="0,0";
-                  else if(Result>-0.33) outstr+="0,0";
-                  else if(Result>-0.66) outstr+="0,0";
-                  else outstr+="-1,1";
-                 }
-               else
-                  outstr+=DoubleToString(Result,_Precision_);
-
-               FileWrite(FileHandle,outstr);
-               //if(Result>-2&&(Result>0.33 || Result<-0.33))
+               need_exp=true;
                if(2==ring)
                  {
                   if(Result>=-1 && FileHandleOC!=INVALID_HANDLE && (Result>0.4 || Result<-0.4))
@@ -233,6 +185,34 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                   else QS++;
                  }
               }
+             
+             int maxRepeat=0,nr;
+             for(i=shift;QZ>0&&i<(shift+num_vals);i++)
+              {
+               Result=GetVectors(InputVector,InputSignals,smbl,0,i);
+               if(Result>1 || Result<-1) continue;
+
+               outstr="";
+               if(_debug_time) outstr+=(string)rates[i].time+",";
+               for(j=0;j<num_input_signals;j++)
+                 {
+                  outstr+=DoubleToString(InputVector[j],_Precision_)+",";
+                 }
+               outstr=FormOut(outstr,Result);
+
+
+               // repeat for normalization
+                  if(Result>0.66) maxRepeat=10*QZ/QB;
+                  else if(Result>.33) maxRepeat=10*QZ/QCS;
+                  //else if(res>0.1) QWCS++;
+                  else if(Result>-0.33) maxRepeat=10*QZ/QZ;
+                  //else if(res>-.33) QWCB++;
+                  else if(Result>-.66) maxRepeat=10*QZ/QCB;
+                  else maxRepeat=10*QZ/QS;
+
+               for(nr=0;nr<maxRepeat;nr++)
+               FileWrite(FileHandle,outstr);
+              }  
             FileClose(FileHandle);
             if(FileHandleOC!=INVALID_HANDLE)
               {
@@ -264,6 +244,50 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
      }
 
    return(true);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+string FormOut(string outstr,double Result)
+  {
+   if(_ResultAsString_ && _OutputVectors_==4)
+     {
+      if(Result>0.66) outstr+="""Buy""";
+      else if(Result>0.33) outstr+="""CloseSell""";
+      else if(Result>-0.33) outstr+="""Wait""";
+      else if(Result>-0.66) outstr+="""CloseBuy""";
+      else outstr+="""Sell""";
+     }
+   else
+   if(_ResultAsString_ && _OutputVectors_==2)
+     {
+      if(Result>0.66) outstr+="""Buy""";
+      else if(Result>0.33) outstr+="""Wait""";
+      else if(Result>-0.33) outstr+="""Wait""";
+      else if(Result>-0.66) outstr+="""Wait""";
+      else outstr+="""Sell""";
+     }
+   else
+   if(_OutputVectors_==4)
+     {
+      if(Result>0.66) outstr+="1,0,-1,-1";
+      else if(Result>0.33) outstr+="0,1,-1,-1";
+      else if(Result>-0.33) outstr+="-1,0,0,-1";
+      else if(Result>-0.66) outstr+="-1,0,1,0";
+      else outstr+="-1,-1,0,1";
+     }
+   else  if(_OutputVectors_==2)
+     {
+      if(Result>0.66) outstr+="1,-1";
+      else if(Result>0.33) outstr+="0,0";
+      else if(Result>-0.33) outstr+="0,0";
+      else if(Result>-0.66) outstr+="0,0";
+      else outstr+="-1,1";
+     }
+   else
+      outstr+=DoubleToString(Result,_Precision_);
+
+   return outstr;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -817,7 +841,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train)
    double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(sig<-1||sig>1) return 0;
    Compute(InputVector,OutputVector);
-    if(_outputCount==2)
+   if(_outputCount==2)
      {
       if(OutputVector[0]>OutputVector[1])
          sig=OutputVector[0];
