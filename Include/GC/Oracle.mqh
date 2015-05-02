@@ -9,7 +9,7 @@
 #include <GC\GetVectors.mqh>
 bool _ResultAsString_=true;
 int _HistorySignals_=10;
-int _OutputVectors_=2;
+int _OutputVectors_=4;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
