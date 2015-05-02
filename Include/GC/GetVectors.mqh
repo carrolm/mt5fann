@@ -11,7 +11,7 @@
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","ADX","ADXWilder","RSI","IMA","StochasticK","StochasticD","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC","BearsPower","BullsPower"};
 string BadVectorFunctions[]={"IMA","CCI","AO","Envelopes","BearsPower","BullsPower","Force"};
 
-string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","TriX","RVI","ATR","DeMarker","OsMA","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
+string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","TriX","RVI","ATR","DeMarker","OsMA","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticS","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","StochasticK","StochasticD","WPR","IMA","MACD","AMA"};
 
 //+------------------------------------------------------------------+
@@ -99,6 +99,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    if("OHLCClose"==fn_name) return GetVector_OHLCClose(smbl,tf,shift,param1,param2,param3,param4);
    if("HighLow"==fn_name) return GetVector_HighLow(smbl,tf,shift,param1,param2,param3,param4);
 
+   if("StochasticS"==fn_name) return GetVector_StochasticS(IndHandles[idx_ind],smbl,tf,shift,param1,param2,param3);
    if("StochasticK"==fn_name) return GetVector_StochasticK(IndHandles[idx_ind],smbl,tf,shift,param1,param2,param3);
    if("StochasticD"==fn_name) return GetVector_StochasticD(IndHandles[idx_ind],smbl,tf,shift,param1,param2,param3);
    if("WPR"==fn_name) return GetVector_WPR(IndHandles[idx_ind],smbl,tf,shift,param1);
@@ -762,13 +763,31 @@ double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
    MqlDateTime tm;
 
    TimeToStruct(Time[0],tm);
-//if(__Debug__)return((double)tm.min);
+//if(__Debug__)return((double)tm.min/60);
 //else  
-   return((double)(tm.min-30)/30);
+   return(((double)tm.min-29)/30);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double GetVector_StochasticS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1,int param2,int param3)
+  {// пара, период, смещение назад (для индикатора полезно)
+   if(0==ind_h.hid)
+     {
+      if(0==param1) param1=5;
+      if(0==param2) param2=3;
+      if(0==param3) param3=3;
+      ind_h.hid=iStochastic(smb,tf,param1,param2,param3,MODE_SMA,STO_LOWHIGH);
+      if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
+      return 0;
+     }
+
+   if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(5)) return(-200);
+   if(CopyBuffer(ind_h.hid,1,shift,5,ind_h.ind_buffer1)<(5)) return(-200);
+   return (ind_h.ind_buffer0[1]>ind_h.ind_buffer1[1])?1:ind_h.ind_buffer0[1]<ind_h.ind_buffer1[1]?-1:0;
+
+  }
+  
 double GetVector_StochasticK(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1,int param2,int param3)
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
