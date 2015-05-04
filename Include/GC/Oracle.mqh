@@ -7,10 +7,10 @@
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=true;
+bool _ResultAsString_=false;
 int _HistorySignals_=10;
-int _OutputVectors_=4;
-int _PercentNormalization=5; // 100/5 = 20%, but data *5
+int _OutputVectors_=1;
+int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -37,8 +37,8 @@ public:
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
    void              DeInit();
-   virtual double    forecast(string smbl,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
-   virtual double    forecast(string smbl,datetime startdt,bool train){Print("Please overwrite (datetime) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,int shift,bool train, string comment){Print("Please overwrite (int) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,datetime startdt,bool train, string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
    bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
@@ -464,8 +464,8 @@ public:
    virtual bool      CustomSave(int file_handle){return(false);};
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
    int               num_input();
-   virtual double    forecast(string smbl,int shift,bool train);
-   virtual double    forecast(string smbl,datetime startdt,bool train);
+   virtual double    forecast(string smbl,int shift,bool train,string coment);
+   virtual double    forecast(string smbl,datetime startdt,bool train,string coment);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -838,14 +838,14 @@ void COracleENCOG::Compute(double &_input[],double &_output[])
    ArrayCopy(_output,_layerOutput,0,0,_outputCount);
   }
 //+------------------------------------------------------------------+
-double COracleENCOG::forecast(string smbl,int shift,bool train)
+double COracleENCOG::forecast(string smbl,int shift,bool train, string comment)
   {
    if(0==_layerCount) return(0);
    if(""==smbl) smbl=_Symbol;
    double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(sig<-1||sig>1) return 0;
    Compute(InputVector,OutputVector);
-   if(_outputCount==2)
+   if(_ResultAsString_&&_outputCount==2)
      {
       if(OutputVector[0]>OutputVector[1])
          sig=OutputVector[0];
@@ -853,13 +853,19 @@ double COracleENCOG::forecast(string smbl,int shift,bool train)
          sig=-OutputVector[1];
 
      }
-   else   if(_outputCount==4)
-     {
-      if(OutputVector[0]>OutputVector[3])
-         sig=OutputVector[0];
-      if(OutputVector[0]<OutputVector[3])
-         sig=-OutputVector[3];
-
+   else if(_ResultAsString_&&_outputCount==4)
+     {//"prediction","Buy","Buy",10998
+      //"prediction","CloseBuy","CloseBuy",10335
+      //"prediction","CloseSell","CloseSell",9990
+      //"prediction","Sell","Sell",11050
+      //"prediction","Wait","Wait",11142
+      double MSig=MathMax(OutputVector[0],MathMax(OutputVector[1],MathMax(OutputVector[2],OutputVector[3])));
+      if(OutputVector[0]==MSig)         sig=MSig;
+      if(OutputVector[1]==MSig)         sig=MSig/2;
+      if(OutputVector[2]==MSig)         sig=-MSig/2;
+      if(OutputVector[3]==MSig)         sig=-MSig;
+      if(MSig<0) sig=0;
+      comment = ""+OutputVector[0]+" "+OutputVector[1]+" "+OutputVector[2]+" "+OutputVector[3];
      }
    else sig=OutputVector[0];
    int i,j;
@@ -897,7 +903,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-double COracleENCOG::forecast(string smbl,datetime startdt,bool train)
+double COracleENCOG::forecast(string smbl,datetime startdt,bool train, string comment)
   {
    double sig=0;
 //   double ind1_buffer[];

@@ -23,12 +23,12 @@ input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input double _Order_Volume_=0.1;// Order volume Объем лота
 
-input int FontSize=7;
+input int FontSize=10;
 input color Bg_Color=Gray;
 input color Btn_Color=Gold;
 
 input int _TREND_=30;// на сколько смотреть вперед
-input int _NEDATA_=15000;// How deep bars history for export cколько выгрузить
+input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=5000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 5; // Deviation 
@@ -217,7 +217,7 @@ bool RefreshView(void)
         {
          ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Current ="+(string)((int)profit));
          if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
-         else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Green);
+         else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0x008000);
         }
 
       TimeToStruct(TimeCurrent(),str_timeCurrent);
