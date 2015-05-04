@@ -61,12 +61,15 @@ void OnTick()
       for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
         {
          CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
-         f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false);
+         string comment="";
+         f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false,comment);
          MqlDateTime tm;
 
          TimeToStruct(Time[0],tm);
          if(__Debug__&&false==MQLInfoInteger(MQL_TESTER)) Print("Oracle Encog say: "+DoubleToString(f,3));
-         NewOrder(SymbolsArray[SymbolIdx],f,DoubleToString(f,3)+" "+(string)tm.hour+":"+(string)tm.min+":"+(string)tm.sec);
+         NewOrder(SymbolsArray[SymbolIdx],f,comment);
+         
+//         NewOrder(SymbolsArray[SymbolIdx],f,DoubleToString(f,3)+" "+(string)tm.hour+":"+(string)tm.min+":"+(string)tm.sec);
         }
 
      }
