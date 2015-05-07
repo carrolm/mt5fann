@@ -8,8 +8,8 @@
 //#property version   "000.001"
 
 #include <GC\DashBoard.mqh>
-#include <GC\Watcher.mqh>
-CWatcher watcher;
+//#include <GC\Watcher.mqh>
+//CWatcher watcher;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -192,7 +192,7 @@ void OnTick()
 void OnTimer()
   {
    DashBoard.Refresh();
-   watcher.Run();
+   //watcher.Run();
    Trailing();
 
   }
