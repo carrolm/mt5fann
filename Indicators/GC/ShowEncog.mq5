@@ -91,7 +91,7 @@ int OnCalculate(const int rates_total,
    for(i=1;i<_limit_;i++)
      {
      //if(_TREND_>i) continue;
-      res=MyOracles.forecast(_Symbol,i,true);
+      res=MyOracles.forecast(_Symbol,i,true,"");
       ExtVolumesBuffer[i]=res;
       ExtColorsBuffer[i]=3.0;
       if(res<-0.66)
