@@ -5169,18 +5169,5 @@ double od_forecast(datetime time,string smb)
   if(smb=="EURUSD" && time==StringToTime("2015.04.29 23:10:00")) return(0.5);
   if(smb=="EURUSD" && time==StringToTime("2015.04.29 23:09:00")) return(0.5);
   if(smb=="EURUSD" && time==StringToTime("2015.04.29 23:08:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 23:07:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 23:06:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:20:00")) return(-0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:19:00")) return(-0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:14:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:07:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:06:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:05:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:04:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:03:00")) return(0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:01:00")) return(-0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 22:00:00")) return(-0.5);
-  if(smb=="EURUSD" && time==StringToTime("2015.04.29 21:59:00")) return(-0.5);
   return(0);
  }
