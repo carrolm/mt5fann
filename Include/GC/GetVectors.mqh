@@ -9,9 +9,10 @@
 
 ///string VectorFunctions[21]={"DayOfWeek","Hour","Minute","Fractals","RSI","IMA","StochasticK","StochasticD","HL","High","Low","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","ADX","ADXWilder","RSI","IMA","StochasticK","StochasticD","MACD","CCI","WPR","AMA","AO","Ichimoku","Envelopes","Chaikin","ROC","BearsPower","BullsPower"};
-string BadVectorFunctions[]={"IMA","CCI","AO","Envelopes","BearsPower","BullsPower","Force"};
+string BadVectorFunctions[]={"IMA","CCI","AO","Envelopes","BearsPower","BullsPower","Force","DeMarkerS","MomentumS"};
+//inputSignals=DayOfWeek Hour Minute CCIS_5 CCIS_8 CCIS_13 CCIS_21 CCIS_34 CCIS_55 CCIS_89 StochasticS StochasticS_13_8_8 StochasticS_21_13_13 StochasticS_34_21_21 StochasticS_55_34_34 StochasticS_89_55_55 StochasticK StochasticK_13_8_8 StochasticK_21_13_13 StochasticK_34_21_21 StochasticK_55_34_34 StochasticK_89_55_55 StochasticD StochasticD_21_13_13 StochasticD_34_21_21 StochasticD_55_34_34 StochasticD_89_55_55 WPR_5 WPR_8 WPR_13 WPR_21 WPR_34 WPR_55 WPR_89 DeMarkerS_5 DeMarkerS_8 DeMarkerS_13 DeMarkerS_21 DeMarkerS_34 DeMarkerS_55 DeMarkerS_89
 
-string VectorFunctions[]={"DayOfWeek","Hour","CCIS","Minute","OpenClose","MFIS","MFI","TriX","RVI","ATR","DeMarker","DeMarkerS","OsMA","MomentumS","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticS","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
+string VectorFunctions[]={"DayOfWeek","Hour","CCIS","Minute","OpenClose","TriX","RVI","ATR","DeMarker","OsMA","Momentum","OHLCClose","HighLow","ADX","ADXWilder","RSI","StochasticS","StochasticK","StochasticD","MACD","WPR","AMA","Ichimoku","Chaikin","ROC"};
 //string VectorFunctions[]={"DayOfWeek","Hour","Minute","OpenClose","OHLCClose","HighLow","StochasticK","StochasticD","WPR","IMA","MACD","AMA"};
 
 //+------------------------------------------------------------------+

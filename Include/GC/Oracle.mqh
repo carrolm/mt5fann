@@ -7,9 +7,9 @@
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=false;
+bool _ResultAsString_=true;
 int _HistorySignals_=10;
-int _OutputVectors_=1;
+int _OutputVectors_=4;
 int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -37,8 +37,8 @@ public:
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
    void              DeInit();
-   virtual double    forecast(string smbl,int shift,bool train, string comment){Print("Please overwrite (int) in ",Name()); return(0);};
-   virtual double    forecast(string smbl,datetime startdt,bool train, string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,int shift,bool train,string comment){Print("Please overwrite (int) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
    bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
@@ -186,9 +186,9 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                   else QS++;
                  }
               }
-             
-             int maxRepeat=0,nr;
-             for(i=shift;QZ>0&&i<(shift+num_vals);i++)
+
+            int maxRepeat=0,nr;
+            for(i=shift;QZ>0 && i<(shift+num_vals);i++)
               {
                Result=GetVectors(InputVector,InputSignals,smbl,0,i);
                if(Result>1 || Result<-1) continue;
@@ -201,19 +201,18 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                  }
                outstr=FormOut(outstr,Result);
 
-
                // repeat for normalization
-                  if(Result>0.66) maxRepeat=_PercentNormalization*QZ/QB;
-                  else if(Result>.33) maxRepeat=_PercentNormalization*QZ/QCS;
-                  //else if(res>0.1) QWCS++;
-                  else if(Result>-0.33) maxRepeat=_PercentNormalization*QZ/QZ;
-                  //else if(res>-.33) QWCB++;
-                  else if(Result>-.66) maxRepeat=_PercentNormalization*QZ/QCB;
-                  else maxRepeat=_PercentNormalization*QZ/QS;
+               if(Result>0.66) maxRepeat=_PercentNormalization*QZ/QB;
+               else if(Result>.33) maxRepeat=_PercentNormalization*QZ/QCS;
+               //else if(res>0.1) QWCS++;
+               else if(Result>-0.33) maxRepeat=_PercentNormalization*QZ/QZ;
+               //else if(res>-.33) QWCB++;
+               else if(Result>-.66) maxRepeat=_PercentNormalization*QZ/QCB;
+               else maxRepeat=_PercentNormalization*QZ/QS;
 
                for(nr=0;nr<maxRepeat;nr++)
-               FileWrite(FileHandle,outstr);
-              }  
+                  FileWrite(FileHandle,outstr);
+              }
             FileClose(FileHandle);
             if(FileHandleOC!=INVALID_HANDLE)
               {
@@ -378,7 +377,6 @@ bool COracleTemplate::saveSettings(string _filename)
       FileWrite(FileHandle,"//Bad Signals",BS);
       FileWrite(FileHandle,"//Available Signals",AS);
       FileWrite(FileHandle,"//inputSignals=DayOfWeek Hour Minute MomentumS_5 MomentumS_8 MomentumS_13 MomentumS_21 MomentumS_34 MomentumS_55 MomentumS_89 CCIS_5 CCIS_8 CCIS_13 CCIS_21 CCIS_34 CCIS_55 CCIS_89 StochasticS StochasticS_13_8_8 StochasticS_21_13_13 StochasticS_34_21_21 StochasticS_55_34_34 StochasticK StochasticK_13_8_8 StochasticK_21_13_13 StochasticK_34_21_21 StochasticK_55_34_34 StochasticD StochasticD_21_13_13 StochasticD_34_21_21 StochasticD_55_34_34 WPR_5 WPR_8 WPR_13 WPR_21 WPR_34 WPR_55 WPR_89 DeMarkerS_5 DeMarkerS_8 DeMarkerS_13 DeMarkerS_21 DeMarkerS_34 DeMarkerS_55 DeMarkerS_89");
-
 
       FileWrite(FileHandle,"inputSignals",templateInputSignals);
       FileWrite(FileHandle,"Num_repeat",num_repeat);
@@ -838,14 +836,14 @@ void COracleENCOG::Compute(double &_input[],double &_output[])
    ArrayCopy(_output,_layerOutput,0,0,_outputCount);
   }
 //+------------------------------------------------------------------+
-double COracleENCOG::forecast(string smbl,int shift,bool train, string comment)
+double COracleENCOG::forecast(string smbl,int shift,bool train,string comment)
   {
    if(0==_layerCount) return(0);
    if(""==smbl) smbl=_Symbol;
    double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
    if(sig<-1||sig>1) return 0;
    Compute(InputVector,OutputVector);
-   if(_ResultAsString_&&_outputCount==2)
+   if(_ResultAsString_ && _outputCount==2)
      {
       if(OutputVector[0]>OutputVector[1])
          sig=OutputVector[0];
@@ -853,7 +851,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train, string comment)
          sig=-OutputVector[1];
 
      }
-   else if(_ResultAsString_&&_outputCount==4)
+   else if(_ResultAsString_ && _outputCount==4)
      {//"prediction","Buy","Buy",10998
       //"prediction","CloseBuy","CloseBuy",10335
       //"prediction","CloseSell","CloseSell",9990
@@ -865,7 +863,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train, string comment)
       if(OutputVector[2]==MSig)         sig=-MSig/2;
       if(OutputVector[3]==MSig)         sig=-MSig;
       if(MSig<0) sig=0;
-      comment = ""+OutputVector[0]+" "+OutputVector[1]+" "+OutputVector[2]+" "+OutputVector[3];
+      //comment=""+OutputVector[0]+" "+OutputVector[1]+" "+OutputVector[2]+" "+OutputVector[3];
      }
    else sig=OutputVector[0];
    int i,j;
@@ -903,7 +901,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train, string comment)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-double COracleENCOG::forecast(string smbl,datetime startdt,bool train, string comment)
+double COracleENCOG::forecast(string smbl,datetime startdt,bool train,string comment)
   {
    double sig=0;
 //   double ind1_buffer[];
@@ -927,6 +925,74 @@ double COracleENCOG::forecast(string smbl,datetime startdt,bool train, string co
   }
 //+------------------------------------------------------------------+
 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class CWekaJ48:public COracleTemplate
+  {
+   virtual double    forecast(string smbl,int shift,bool train);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
+   virtual string    Name(){return("WekaJ48");};
+   virtual void Init(string FileName="",bool ip_debug=false){Init_EURUSD_M1(FileName,ip_debug);};
+   virtual void Init_EURUSD_M1(string FileName="",bool ip_debug=false) {} ;
+
+public:
+   bool              GenerateFromFile(string filename);
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CWekaJ48::GenerateFromFile(string p_filename)
+  {
+   int FileHandleTemplate=FileOpen(p_filename,FILE_READ|FILE_ANSI|FILE_TXT|FILE_SHARE_READ);
+   if(FileHandleTemplate==INVALID_HANDLE)
+     {
+      Print("Error open file for write OracleDummy_fc.mqh");
+      return(false);
+     }
+   string fr;
+   string smbl_AS="",tf_AS=""; string fn_name;
+   int FileHandleOC=INVALID_HANDLE;
+   while(!FileIsEnding(FileHandleTemplate))
+     {
+      fr=FileReadString(FileHandleTemplate);
+      int strl=StringLen(fr);
+      if(StringFind(fr,"Relation:")==0)
+        {
+         int sp1= StringFind(fr,"_");
+         int sp2= StringFind(fr,"_",sp1+1);
+
+         smbl_AS=StringSubstr(fr,sp1+1,sp2-sp1-1);
+         tf_AS=StringSubstr(fr,sp2+1);
+        }
+      if(StringFind(fr,"Attributes:")==0)
+        {
+         FileHandleOC=FileOpen("OracleWekaJ48_"+smbl_AS+"_"+tf_AS+".mqh",FILE_WRITE|FILE_ANSI,' ');
+        FileWrite(FileHandleOC,"void CWekaJ48::Init_"+smbl_AS+"_"+tf_AS+"(string FileName=\"\",bool ip_debug=false)  ");
+         FileWrite(FileHandleOC,"{  ");
+         while(!FileIsEnding(FileHandleTemplate))
+           {
+            fr=FileReadString(FileHandleTemplate);
+            if(StringFind(fr,"Test mode:")==0) break;
+            fn_name = fr; StringTrimLeft(fn_name);
+            if("prediction"==fn_name ) continue;
+            FileWrite(FileHandleOC,"  num_input_signals++; ArrayResize(InputSignal,num_input_signals);InputSignals+=\""+fn_name+" \"; InputSignal[num_input_signals-1]=\""+fn_name+"\";");
+           }
+         FileWrite(FileHandleOC,"StringTrimRight(InputSignals);\n}  \n");
+        }
+     }
+   FileWrite(FileHandleOC,"double CWekaJ48::forecast_"+smbl_AS+"_"+tf_AS+"(string smbl,int shift,bool train)  ");
+   FileWrite(FileHandleOC," {");
+   if(FileHandleOC!=INVALID_HANDLE)
+     {
+      FileWrite(FileHandleOC,"  return(0);");
+      FileWrite(FileHandleOC," }");
+      FileClose(FileHandleOC);
+     }
+   Print("Template generated.");
+   FileClose(FileHandleTemplate);
+   return true;
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
