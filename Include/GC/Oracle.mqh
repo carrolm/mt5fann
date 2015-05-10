@@ -7,9 +7,9 @@
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=true;
+bool _ResultAsString_=false;
+int _OutputVectors_=1;
 int _HistorySignals_=10;
-int _OutputVectors_=4;
 int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -21,6 +21,8 @@ private:
    string            filename;
 
 public:
+   string            smb;
+   ENUM_TIMEFRAMES   TimeFrame;
    bool              IsInit;
    int               errorFile;
    int               AgeHistory;
@@ -33,12 +35,12 @@ public:
    string            templateInputSignals;
    int               num_repeat;
    int               num_input_signals;
-                     COracleTemplate(){IsInit=false;};
+                     COracleTemplate(string ip_smbl="",ENUM_TIMEFRAMES  ip_tf=0){IsInit=false; if(ip_smbl=="") smb=_Symbol; else smb=ip_smbl; if(ip_tf==0) TimeFrame=Period(); else TimeFrame=ip_tf; };
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
    void              DeInit();
-   virtual double    forecast(string smbl,int shift,bool train,string comment){Print("Please overwrite (int) in ",Name()); return(0);};
-   virtual double    forecast(string smbl,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
    bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
@@ -178,10 +180,10 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
                     }
 
                   if(Result>0.66) QB++;
-                  else if(Result>.33) QCS++;
+                  else if(Result>.49) QCS++;
                   //else if(res>0.1) QWCS++;
-                  else if(Result>-0.33) QZ++;
-                  //else if(res>-.33) QWCB++;
+                  else if(Result>-0.49) QZ++;
+                  //else if(res>-.49) QWCB++;
                   else if(Result>-.66) QCB++;
                   else QS++;
                  }
@@ -203,10 +205,10 @@ bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAME
 
                // repeat for normalization
                if(Result>0.66) maxRepeat=_PercentNormalization*QZ/QB;
-               else if(Result>.33) maxRepeat=_PercentNormalization*QZ/QCS;
+               else if(Result>.49) maxRepeat=_PercentNormalization*QZ/QCS;
                //else if(res>0.1) QWCS++;
-               else if(Result>-0.33) maxRepeat=_PercentNormalization*QZ/QZ;
-               //else if(res>-.33) QWCB++;
+               else if(Result>-0.49) maxRepeat=_PercentNormalization*QZ/QZ;
+               //else if(res>-.49) QWCB++;
                else if(Result>-.66) maxRepeat=_PercentNormalization*QZ/QCB;
                else maxRepeat=_PercentNormalization*QZ/QS;
 
@@ -253,8 +255,8 @@ string FormOut(string outstr,double Result)
    if(_ResultAsString_ && _OutputVectors_==4)
      {
       if(Result>0.66) outstr+="""Buy""";
-      else if(Result>0.33) outstr+="""CloseSell""";
-      else if(Result>-0.33) outstr+="""Wait""";
+      else if(Result>0.49) outstr+="""CloseSell""";
+      else if(Result>-0.49) outstr+="""Wait""";
       else if(Result>-0.66) outstr+="""CloseBuy""";
       else outstr+="""Sell""";
      }
@@ -262,8 +264,8 @@ string FormOut(string outstr,double Result)
    if(_ResultAsString_ && _OutputVectors_==2)
      {
       if(Result>0.66) outstr+="""Buy""";
-      else if(Result>0.33) outstr+="""Wait""";
-      else if(Result>-0.33) outstr+="""Wait""";
+      else if(Result>0.49) outstr+="""Wait""";
+      else if(Result>-0.49) outstr+="""Wait""";
       else if(Result>-0.66) outstr+="""Wait""";
       else outstr+="""Sell""";
      }
@@ -271,16 +273,16 @@ string FormOut(string outstr,double Result)
    if(_OutputVectors_==4)
      {
       if(Result>0.66) outstr+="1,0,-1,-1";
-      else if(Result>0.33) outstr+="0,1,-1,-1";
-      else if(Result>-0.33) outstr+="-1,0,0,-1";
+      else if(Result>0.49) outstr+="0,1,-1,-1";
+      else if(Result>-0.49) outstr+="-1,0,0,-1";
       else if(Result>-0.66) outstr+="-1,0,1,0";
       else outstr+="-1,-1,0,1";
      }
    else  if(_OutputVectors_==2)
      {
       if(Result>0.66) outstr+="1,-1";
-      else if(Result>0.33) outstr+="0,0";
-      else if(Result>-0.33) outstr+="0,0";
+      else if(Result>0.49) outstr+="0,0";
+      else if(Result>-0.49) outstr+="0,0";
       else if(Result>-0.66) outstr+="0,0";
       else outstr+="-1,1";
      }
@@ -392,11 +394,9 @@ COracleTemplate *AllOracles[];
 class COracleENCOG:public COracleTemplate
   {
 private:
-   string            smb;
    string            Functions_Array[50];
    int               Functions_Count[50];
-   //int               Max_Functions;
-   ENUM_TIMEFRAMES   TimeFrame;
+
    string            File_Name;
    // begin Encog main config
    string            _FILENAME;
@@ -462,8 +462,8 @@ public:
    virtual bool      CustomSave(int file_handle){return(false);};
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
    int               num_input();
-   virtual double    forecast(string smbl,int shift,bool train,string coment);
-   virtual double    forecast(string smbl,datetime startdt,bool train,string coment);
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES, int shift,bool train,string coment);
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES,datetime startdt,bool train,string coment);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -471,7 +471,6 @@ public:
 void COracleENCOG::Init(string FileName="",bool ip_debug=false)
   {
 //TimeFrame=PERIOD_M1;
-   smb=Symbol();
    COracleTemplate::Init(FileName,ip_debug);
    if(""!=FileName) _FILENAME=FileName;
    else  _FILENAME=Name();
@@ -697,19 +696,7 @@ void COracleENCOG::Init(string FileName="",bool ip_debug=false)
      }
    TimeFrame=_Period;
    GetVectors(InputVector,templateInputSignals,smb,0,1);
-//for(i=0;i<ArraySize(IndHandles);i++)
-//  {
-//   int pops=1000;
-//   while(pops>0)
-//     {
-//      if(BarsCalculated(IndHandles[i].hid)>0) break;
-//      pops--;
-//     }
-//   if(pops==0) 
-//   {
-//   Print("Not calculate ",IndHandles[i].hname);
-//   }
-//  }
+
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -836,7 +823,7 @@ void COracleENCOG::Compute(double &_input[],double &_output[])
    ArrayCopy(_output,_layerOutput,0,0,_outputCount);
   }
 //+------------------------------------------------------------------+
-double COracleENCOG::forecast(string smbl,int shift,bool train,string comment)
+double COracleENCOG::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train,string comment)
   {
    if(0==_layerCount) return(0);
    if(""==smbl) smbl=_Symbol;
@@ -901,7 +888,7 @@ double COracleENCOG::forecast(string smbl,int shift,bool train,string comment)
 //|                                                                  |
 //+------------------------------------------------------------------+
 
-double COracleENCOG::forecast(string smbl,datetime startdt,bool train,string comment)
+double COracleENCOG::forecast(string smbl,ENUM_TIMEFRAMES tf,datetime startdt,bool train,string comment)
   {
    double sig=0;
 //   double ind1_buffer[];
@@ -924,25 +911,152 @@ double COracleENCOG::forecast(string smbl,datetime startdt,bool train,string com
    return(sig);
   }
 //+------------------------------------------------------------------+
-
+//|                                                                  |
+//+------------------------------------------------------------------+
+class WekaJ48Node
+  {
+   string            Variable;
+   double            Value;
+   string            Result;
+   WekaJ48Node      *IfLessOrEq;
+   WekaJ48Node      *IfMore;
+   WekaJ48Node      *Parient;
+  }
+;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CWekaJ48:public COracleTemplate
+class CWekaJ48
   {
-   virtual double    forecast(string smbl,int shift,bool train);
-   virtual double    forecast(string smbl,datetime startdt,bool train);
-   virtual string    Name(){return("WekaJ48");};
-   virtual void Init(string FileName="",bool ip_debug=false){Init_EURUSD_M1(FileName,ip_debug);};
-   virtual void Init_EURUSD_M1(string FileName="",bool ip_debug=false) {} ;
-
 public:
+   string            smbl;
+   ENUM_TIMEFRAMES   tf;
+   string            InputSignals;
+   string            InputSignal[];
+   int               num_input_signals;
+   WekaJ48Node       Nodes[];
+   int               Instances;
+   WekaJ48Node      *rootNode;
+   bool              Init(string FileName="",bool ip_debug=false);
+   double            forecast(int shift,bool train);
+  }
+;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class COracleWeka:public COracleTemplate
+  {
+   // private:
+
+   CWekaJ48          wekaJ48[];
+public:
+   virtual double    forecast(string smbl,int shift,bool train,string comment);
+   virtual double    forecast(string smbl,datetime startdt,bool train);
+   virtual string    Name(){return("Weka");};
+   virtual void      Init(string FileName="",bool ip_debug=false){};
+   virtual void Init_EURUSD_M1(string FileName="",bool ip_debug=false) {};
+
    bool              GenerateFromFile(string filename);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool CWekaJ48::GenerateFromFile(string p_filename)
+double    COracleWeka::forecast(string smbl,int shift,bool train,string comment)
+  {
+   if(""==smbl) smbl=_Symbol;
+// Search 
+//  CWekaJ48 foundedWeka;
+   int i;
+   for(i=0;i<ArraySize(wekaJ48);i++)
+     {
+      if(wekaJ48[i].smbl==smbl) break;//foundedWeka=wekaJ48[i];
+     }
+   if(i==ArraySize(wekaJ48))
+     {
+      ArrayResize(wekaJ48,i+1);
+      //wekaJ48[i]=new CWekaJ48();
+      wekaJ48[i].smbl=smbl;
+      //wekaJ48[i].tf =tv
+      wekaJ48[i].Init();
+     }
+   double sig=GetVectors(InputVector,wekaJ48[i].InputSignals,smbl,0,shift);
+//   if(sig<-1||sig>1) return 0;
+//   Compute(InputVector,OutputVector);
+//   if(_ResultAsString_ && _outputCount==2)
+//     {
+//      if(OutputVector[0]>OutputVector[1])
+//         sig=OutputVector[0];
+//      if(OutputVector[0]<OutputVector[1])
+//         sig=-OutputVector[1];
+//
+//     }
+//   else if(_ResultAsString_ && _outputCount==4)
+//
+   return sig;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CWekaJ48::Init(string FileName="",bool ip_debug=false)
+  {
+   if(FileName=="") FileName="Weka_"+smbl+"_"+TimeFrameName(tf)+".j48";
+   int FileHandleTemplate=FileOpen(FileName,FILE_READ|FILE_ANSI|FILE_TXT|FILE_SHARE_READ);
+   if(FileHandleTemplate==INVALID_HANDLE)
+     {
+      Print("Error open file for read "+FileName);
+      return(false);
+     }
+   string fr;
+   string smbl_AS="",tf_AS=""; string fn_name;
+   while(!FileIsEnding(FileHandleTemplate))
+     {
+      fr=FileReadString(FileHandleTemplate);
+      int strl=StringLen(fr);
+      if(StringFind(fr,"Relation:")==0)
+        {
+         int sp1= StringFind(fr,"_");
+         int sp2= StringFind(fr,"_",sp1+1);
+
+         smbl_AS=StringSubstr(fr,sp1+1,sp2-sp1-1);
+         tf_AS=StringSubstr(fr,sp2+1);
+        }
+      if(StringFind(fr,"Attributes:")==0)
+        {
+         while(!FileIsEnding(FileHandleTemplate))
+           {
+            fr=FileReadString(FileHandleTemplate);
+            if(StringFind(fr,"Test mode:")==0) break;
+            fn_name=fr; StringTrimLeft(fn_name);
+            if("prediction"==fn_name) continue;
+            num_input_signals++; ArrayResize(InputSignal,num_input_signals);InputSignals+=fn_name+" "; InputSignal[num_input_signals-1]=fn_name;
+           }
+         StringTrimRight(InputSignals);
+        }
+      if(StringFind(fr,"Instances:")==0) Instances=(int)StringToInteger(StringSubstr(fr,10));
+      if(StringFind(fr,"J48 pruned tree")==0)
+        {
+         ArrayResize(Nodes,Instances);
+         fr=FileReadString(FileHandleTemplate);
+         fr=FileReadString(FileHandleTemplate);
+         int currNode=0,newNode=0;
+         while(!FileIsEnding(FileHandleTemplate))
+           {
+            fr=FileReadString(FileHandleTemplate);
+            StringTrimLeft(fr);
+            if(fr=="") break;
+
+           }
+         StringTrimRight(InputSignals);
+        }
+
+     }
+   return true;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+
+bool COracleWeka::GenerateFromFile(string p_filename)
   {
    int FileHandleTemplate=FileOpen(p_filename,FILE_READ|FILE_ANSI|FILE_TXT|FILE_SHARE_READ);
    if(FileHandleTemplate==INVALID_HANDLE)
@@ -968,14 +1082,14 @@ bool CWekaJ48::GenerateFromFile(string p_filename)
       if(StringFind(fr,"Attributes:")==0)
         {
          FileHandleOC=FileOpen("OracleWekaJ48_"+smbl_AS+"_"+tf_AS+".mqh",FILE_WRITE|FILE_ANSI,' ');
-        FileWrite(FileHandleOC,"void CWekaJ48::Init_"+smbl_AS+"_"+tf_AS+"(string FileName=\"\",bool ip_debug=false)  ");
+         FileWrite(FileHandleOC,"void CWekaJ48::Init_"+smbl_AS+"_"+tf_AS+"(string FileName=\"\",bool ip_debug=false)  ");
          FileWrite(FileHandleOC,"{  ");
          while(!FileIsEnding(FileHandleTemplate))
            {
             fr=FileReadString(FileHandleTemplate);
             if(StringFind(fr,"Test mode:")==0) break;
-            fn_name = fr; StringTrimLeft(fn_name);
-            if("prediction"==fn_name ) continue;
+            fn_name=fr; StringTrimLeft(fn_name);
+            if("prediction"==fn_name) continue;
             FileWrite(FileHandleOC,"  num_input_signals++; ArrayResize(InputSignal,num_input_signals);InputSignals+=\""+fn_name+" \"; InputSignal[num_input_signals-1]=\""+fn_name+"\";");
            }
          FileWrite(FileHandleOC,"StringTrimRight(InputSignals);\n}  \n");
@@ -2096,11 +2210,9 @@ int AllOracles()
 class COracleANN:public COracleTemplate
   {
 private:
-   string            Symbol;
    string            Functions_Array[50];
    int               Functions_Count[50];
    //int               Max_Functions;
-   ENUM_TIMEFRAMES   TimeFrame;
    string            File_Name;
    bool              WithNews;
    bool              WithHours;

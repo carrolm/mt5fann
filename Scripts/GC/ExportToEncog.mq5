@@ -23,6 +23,6 @@ void OnStart()
 //   MyOracles.Init();
    MyOracles.ExportHistoryENCOG(_Symbol,"",0,_NEDATA_,_ShiftNEDATA_,0,0);
    delete  MyOracles;
-   Print("Indicator data exported."); 
+   Print("Data exported."); 
   }
 //+------------------------------------------------------------------+
