@@ -23,12 +23,6 @@ int OnInit()
   {
    MyExpert=new COracleENCOG("Encog");
 
-//   if(_NEDATA_>_ShiftNEDATA_)
-//     {
-//      MyExpert.ExportHistoryENCOG(_Symbol,"",0,_NEDATA_,_ShiftNEDATA_,0,0);
-//
-//      Print("Indicator data exported.");
-//     }
 
    CPInit();
    return(0);
@@ -62,7 +56,7 @@ void OnTick()
         {
          CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
          string comment="";
-         f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false,comment);
+         f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,0,false,comment);
          MqlDateTime tm;
 
          TimeToStruct(Time[0],tm);

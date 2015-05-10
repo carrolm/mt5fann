@@ -117,10 +117,10 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
    if(""==comment) comment=(string)way;
    if(0.66<way) return(NewOrder(smb,NewOrderBuy,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(0.33<way) return(NewOrder(smb,NewOrderWaitBuy,"NO "+comment,price,magic,expiration));
+   if(0.49<way) return(NewOrder(smb,NewOrderWaitBuy,"NO "+comment,price,magic,expiration));
    if(-0.66>way) return(NewOrder(smb,NewOrderSell,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(-0.33>way) return(NewOrder(smb,NewOrderWaitSell,"NO "+comment,price,magic,expiration));
+   if(-0.49>way) return(NewOrder(smb,NewOrderWaitSell,"NO "+comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
@@ -1101,7 +1101,8 @@ int Fun_Error(int Error)
 
 string TimeFrameName(ENUM_TIMEFRAMES tf)
   {
-   switch(Period())
+  if(tf==0) tf=_Period;
+   switch(tf)
      {
       case PERIOD_M1: return("M1");
       case PERIOD_M20: return("M20");
