@@ -25,7 +25,7 @@ input double _Order_Volume_=0.1;// Order volume Объем лота
 input int _Sec_Betwen_Orders_=300;
 
 input int FontSize=10;
-input color Bg_Color=Gray;
+input color Bg_Color=Gold;
 input color Btn_Color=Gold;
 
 input int _TREND_=30;// на сколько смотреть вперед
@@ -211,14 +211,14 @@ bool RefreshView(void)
 
       if(0==profit)
         {
-         ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Bg_Color);
+         ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0xff1212);
          ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Spread="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
         }
       else
         {
          ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Current ="+(string)((int)profit));
-         if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Red);
-         else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0x008000);
+         if(0>profit) ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0x1212ff);
+         else ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0x12ff12);
         }
 
       TimeToStruct(TimeCurrent(),str_timeCurrent);
@@ -264,8 +264,8 @@ bool RefreshView(void)
         }
       else
         {
-         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
-         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
+         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x80ff);
+         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x12ff12);
         }
       ObjectSetString(currChart,name,OBJPROP_TEXT,"In day  ="+(string)((int)profit));
 
@@ -308,7 +308,7 @@ bool RefreshView(void)
       else
         {
          if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,Red);
-         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
+         else ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x12ff12);
         }
       ObjectSetString(currChart,name,OBJPROP_TEXT,"In week="+(string)((int)profit));
       if(_OpenNewPosition_)
