@@ -18,10 +18,11 @@ input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент по
 input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=50;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
 input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
-input int _NumTS_=9;// How spreads for stoploss Сколько спредов до стоплоса
+input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
 input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
 input double _Order_Volume_=0.1;// Order volume Объем лота
+input int _Sec_Betwen_Orders_=300;
 
 input int FontSize=10;
 input color Bg_Color=Gray;
@@ -310,7 +311,7 @@ bool RefreshView(void)
          else ObjectSetInteger(currChart,name,OBJPROP_COLOR,Green);
         }
       ObjectSetString(currChart,name,OBJPROP_TEXT,"In week="+(string)((int)profit));
-      if(_OpenNewPosition_) 
+      if(_OpenNewPosition_)
         {
          name=prefix+"_buy_in_chart";
          if(ObjectFind(currChart,name)==-1)
@@ -323,14 +324,15 @@ bool RefreshView(void)
             ObjectSetInteger(currChart,name,OBJPROP_SELECTABLE,0);
             ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize);
             ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-            
 
            }
-             ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?"CloseSell":"Buy");   
-                  if(ObjectGetInteger(currChart,name,OBJPROP_STATE))
+         string addinfo=OpenPos?(PositionGetDouble(POSITION_PROFIT)>0?" slivki":" panic"):"";
+         int ordermagic= OpenPos?(PositionGetDouble(POSITION_PROFIT)>0?987:789):0;
+         ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?"CloseSell"+addinfo:"Buy");
+         if(ObjectGetInteger(currChart,name,OBJPROP_STATE))
            {
             Print("Buy "+ChartSymbol(currChart));//if(_Symbol!=SymbolsArray[SymbolIdx])ChartSetSymbolPeriod(0,SymbolsArray[SymbolIdx],_Period);
-            NewOrder(ChartSymbol(currChart),(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?NewOrderWaitSell:NewOrderBuy,"handMade");
+            NewOrder(ChartSymbol(currChart),(OpenPos && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)?NewOrderWaitBuy:NewOrderBuy,"handMade"+addinfo,0,ordermagic);
             ObjectSetInteger(currChart,name,OBJPROP_STATE,false);
            }
 
@@ -346,12 +348,12 @@ bool RefreshView(void)
             ObjectSetInteger(currChart,name,OBJPROP_FONTSIZE,FontSize);
             ObjectSetInteger(currChart,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
 
-           }   
-                    ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?"CloseBuy":"Sell");
+           }
+         ObjectSetString(currChart,name,OBJPROP_TEXT,(OpenPos && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?"CloseBuy"+addinfo:"Sell");
          if(ObjectGetInteger(currChart,name,OBJPROP_STATE))
            {
             Print("Sell "+ChartSymbol(currChart));//if(_Symbol!=SymbolsArray[SymbolIdx])ChartSetSymbolPeriod(0,SymbolsArray[SymbolIdx],_Period);
-            NewOrder(ChartSymbol(currChart),(OpenPos&&PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?NewOrderWaitBuy:NewOrderSell,"handMade");
+            NewOrder(ChartSymbol(currChart),(OpenPos && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)?NewOrderWaitSell:NewOrderSell,"handMade "+addinfo,0,ordermagic);
             ObjectSetInteger(currChart,name,OBJPROP_STATE,false);
            }
         }
@@ -367,7 +369,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
   {
    if(""==smb)
      {
-           Print("empty symbol");
+      Print("empty symbol");
       return(false);
      }
    if(NewOrderWait==type || !_OpenNewPosition_||StartOpenPosition>TimeCurrent()) return(false);
@@ -490,6 +492,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
          if(type==NewOrderSell && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
          if(type==NewOrderWaitSell && PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL) return(false);
          // если открыта позиция - и сигнал против -тогда перейти врежим паники!!
+         if((TimeCurrent()-PositionGetInteger(POSITION_TIME))<_Sec_Betwen_Orders_) return(false);
          ticket=PositionGetInteger(POSITION_IDENTIFIER);
          break;
         }
@@ -1101,7 +1104,7 @@ int Fun_Error(int Error)
 
 string TimeFrameName(ENUM_TIMEFRAMES tf)
   {
-  if(tf==0) tf=_Period;
+   if(tf==0) tf=_Period;
    switch(tf)
      {
       case PERIOD_M1: return("M1");
