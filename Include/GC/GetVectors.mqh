@@ -414,7 +414,7 @@ double GetVector_MomentumS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int 
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
      {
-      if(0==param1) param1=14;
+      if(0==param1) param1=50;
       ind_h.hid=iMomentum(smb,tf,param1,PRICE_WEIGHTED);
       if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
       return 0;

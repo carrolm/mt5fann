@@ -1114,8 +1114,24 @@ string TimeFrameName(ENUM_TIMEFRAMES tf)
       case PERIOD_M4: return("M4");
       case PERIOD_M5: return("M5");
       case PERIOD_M6: return("M6");
+            case PERIOD_H1: return("H1");
       default:    return("");
      }
+  }
+
+ENUM_TIMEFRAMES NameTimeFrame(string tf)
+  {
+   //if(tf==0) tf=_Period;
+   if(tf=="M1") return(PERIOD_M1);
+   if(tf=="M20") return(PERIOD_M20);
+   if(tf=="M30") return(PERIOD_M30);
+   if(tf=="M4") return(PERIOD_M4);
+   if(tf=="M5") return(PERIOD_M5);
+   if(tf=="M10") return(PERIOD_M10);
+   if(tf=="M15") return(PERIOD_M15);
+   if(tf=="H1") return(PERIOD_H1);
+  return(_Period);
+    
   }
 //+------------------------------------------------------------------+
 

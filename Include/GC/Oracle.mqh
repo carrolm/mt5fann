@@ -31,9 +31,11 @@ public:
    double            OutputVector[];
    bool              debug;
    string            InputSignals;
+   string            templateTimeFrames;
    string            InputSignal[];
    string            templateInputSignals;
    int               num_repeat;
+   ENUM_TIMEFRAMES   TimeFrames[];
    int               num_input_signals;
                      COracleTemplate(string ip_smbl="",ENUM_TIMEFRAMES  ip_tf=0){IsInit=false; if(ip_smbl=="") smb=_Symbol; else smb=ip_smbl; if(ip_tf==0) TimeFrame=Period(); else TimeFrame=ip_tf; };
                     ~COracleTemplate(){DeInit();};
@@ -298,7 +300,7 @@ bool COracleTemplate::loadSettings(string _filename)
   {
    if(""==_filename) _filename=Name()+".ini";
    int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
-   string fr;
+   string fr;//,tfs="";
    if(FileHandle!=INVALID_HANDLE)
      {
       while(""!=(fr=FileReadString(FileHandle)))
@@ -311,13 +313,40 @@ bool COracleTemplate::loadSettings(string _filename)
            {
             num_repeat=(int)StringToInteger(FileReadString(FileHandle));
            }
+         if("TimeFrames"==fr)
+           {
+            templateTimeFrames=FileReadString(FileHandle);
+           }
         }
       FileClose(FileHandle);
-      StringReplace(templateInputSignals,"  "," ");
-      StringReplace(templateInputSignals,"  "," ");
-      StringReplace(templateInputSignals,"  "," ");
-      if(0==num_repeat) num_repeat=1;
       int start_pos=0,end_pos=0,shift_pos=0;
+      StringReplace(templateInputSignals,"  "," ");      StringReplace(templateInputSignals,"  "," ");      StringReplace(templateInputSignals,"  "," ");
+      StringReplace(templateTimeFrames,"  "," ");      StringReplace(templateTimeFrames,"  "," ");      StringReplace(templateTimeFrames,"  "," ");
+      start_pos=0;end_pos=0;shift_pos=0;
+      end_pos=StringFind(templateTimeFrames," ",start_pos);
+      string tfn_name;
+      int ntf=0;
+      do //while(end_pos>0)
+        {
+         tfn_name=StringSubstr(templateTimeFrames,start_pos,end_pos-start_pos);
+         ntf++; ArrayResize(TimeFrames,ntf);
+         if("DayOfWeek"==tfn_name || "Hour"==tfn_name || "Minute"==tfn_name)
+           {
+            //InputSignals+=fn_name+" "; InputSignal[num_input_signals-1]=fn_name;
+            break;
+           }
+         else
+           {
+            //               InputSignals+=(string)i+"-"+fn_name+" ";
+            TimeFrames[ntf-1]=NameTimeFrame(tfn_name);
+           }
+
+         start_pos=end_pos+1;    end_pos=StringFind(templateTimeFrames," ",start_pos);
+         if(start_pos==0 || start_pos==-1) break;
+        }
+      while(true);
+      if(0==num_repeat) num_repeat=1;
+      start_pos=0;end_pos=0;shift_pos=0;
       end_pos=StringFind(templateInputSignals," ",start_pos);
       string fn_name;InputSignals="";
       do //while(end_pos>0)
@@ -342,6 +371,7 @@ bool COracleTemplate::loadSettings(string _filename)
         }
       while(true);
       InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
+
       //Print(Name()," inputSignals=",inputSignals," ",num_input_signals);
       //      if(0!=num_repeat) num_input_signals*=num_repeat;     
      }
@@ -382,6 +412,7 @@ bool COracleTemplate::saveSettings(string _filename)
 
       FileWrite(FileHandle,"inputSignals",templateInputSignals);
       FileWrite(FileHandle,"Num_repeat",num_repeat);
+      FileWrite(FileHandle,"TimeFrames",templateTimeFrames);
       FileClose(FileHandle);
      }
    return(true);
@@ -462,7 +493,7 @@ public:
    virtual bool      CustomSave(int file_handle){return(false);};
    virtual bool      Draw(int window,datetime &time[],int w,int h){return(true);};
    int               num_input();
-   virtual double    forecast(string smbl,ENUM_TIMEFRAMES, int shift,bool train,string coment);
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES,int shift,bool train,string coment);
    virtual double    forecast(string smbl,ENUM_TIMEFRAMES,datetime startdt,bool train,string coment);
   };
 //+------------------------------------------------------------------+
