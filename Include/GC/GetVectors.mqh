@@ -41,6 +41,9 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    sp_pos=StringFind(fn_name,"_",start_pos);
    if(sp_pos>0)
      {
+      sp_pos=StringFind(fn_name,"_");
+      tf=NameTimeFrame(StringSubstr(fn_name,0,sp_pos));
+      fn_name=StringSubstr(fn_name,sp_pos+1);
       start_pos=sp_pos+1;
       sp_pos=StringFind(fn_name,"_",start_pos);
       param1=(int)StringToInteger(StringSubstr(fn_name,start_pos,sp_pos-start_pos));
@@ -65,7 +68,7 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
       sp_pos=StringFind(fn_name,"_");
       fn_name=StringSubstr(fn_name,0,sp_pos);
      }
-   string sfn_name=fn_name+"_"+smbl+"_"+(string)tf+"_"+(string)param1+"_"+(string)param2+"_"+(string)param3+"_"+(string)param4;
+   string sfn_name=fn_name+"_"+smbl+"_"+TimeFrameName(tf)+"_"+(string)param1+"_"+(string)param2+"_"+(string)param3+"_"+(string)param4;
 
    if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
      {
@@ -73,11 +76,11 @@ double GetVectorByName(string fn_name,string smbl,ENUM_TIMEFRAMES tf,int shift)
    else
      {
       for(idx_ind=0;idx_ind<ArraySize(IndHandles);idx_ind++)
-         if(IndHandles[idx_ind].hname==smbl+"_"+sfn_name) break;
+         if(IndHandles[idx_ind].hname==sfn_name) break;
       if(idx_ind==ArraySize(IndHandles))
         {
          ArrayResize(IndHandles,idx_ind+1);
-         IndHandles[idx_ind].hname=smbl+"_"+sfn_name;
+         IndHandles[idx_ind].hname=sfn_name;
          IndHandles[idx_ind].hid=0;
          if(!ArraySetAsSeries(IndHandles[idx_ind].ind_buffer0,true)) return(-400);
          if(!ArraySetAsSeries(IndHandles[idx_ind].ind_buffer1,true)) return(-400);

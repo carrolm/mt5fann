@@ -10,7 +10,7 @@
 bool _ResultAsString_=true;
 int _OutputVectors_=4;
 int _HistorySignals_=10;
-int _PercentNormalization=5; // 100/5 = 20%, but data *5
+int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -345,25 +345,31 @@ bool COracleTemplate::loadSettings(string _filename)
          if(start_pos==0 || start_pos==-1) break;
         }
       while(true);
+      if(ntf==0){
+         ntf++; ArrayResize(TimeFrames,ntf);TimeFrames[ntf-1]=NameTimeFrame("");
+      }
       if(0==num_repeat) num_repeat=1;
       start_pos=0;end_pos=0;shift_pos=0;
       end_pos=StringFind(templateInputSignals," ",start_pos);
-      string fn_name;InputSignals="";
+      string fn_name;InputSignals=""; 
       do //while(end_pos>0)
         {
          fn_name=StringSubstr(templateInputSignals,start_pos,end_pos-start_pos);
-         for(int i=0;i<num_repeat;i++)
+         if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
            {
             num_input_signals++; ArrayResize(InputSignal,num_input_signals);
-            if("DayOfWeek"==fn_name || "Hour"==fn_name || "Minute"==fn_name)
+            InputSignals+=fn_name+" "; InputSignal[num_input_signals-1]=fn_name;
+           }
+          else
+           {
+            for(int j=0;j<ntf;j++)
               {
-               InputSignals+=fn_name+" "; InputSignal[num_input_signals-1]=fn_name;
-               break;
-              }
-            else
-              {
-               InputSignals+=(string)i+"-"+fn_name+" ";
-               InputSignal[num_input_signals-1]=(string)i+"-"+fn_name;
+               for(int i=0;i<num_repeat;i++)
+                 {
+                  num_input_signals++; ArrayResize(InputSignal,num_input_signals);
+                  InputSignal[num_input_signals-1]=((i==0)?"":((string)i+"-"))+TimeFrameName(TimeFrames[j])+"_"+fn_name;
+                  InputSignals+=InputSignal[num_input_signals-1]+" ";
+                 }
               }
            }
          start_pos=end_pos+1;    end_pos=StringFind(templateInputSignals," ",start_pos);
@@ -726,7 +732,8 @@ void COracleENCOG::Init(string FileName="",bool ip_debug=false)
       Functions_Count[i]=0;
      }
    TimeFrame=_Period;
-   GetVectors(InputVector,templateInputSignals,smb,0,1);
+   if(_layerCount==0) GetVectors(InputVector,InputSignals,smb,0,1);
+   else GetVectors(InputVector,templateInputSignals,smb,0,1);
 
   }
 //+------------------------------------------------------------------+
