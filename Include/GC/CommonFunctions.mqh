@@ -211,7 +211,7 @@ bool RefreshView(void)
 
       if(0==profit)
         {
-         ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,0xff1212);
+         ObjectSetInteger(currChart,prefix+"chart_SI",OBJPROP_COLOR,Yellow);
          ObjectSetString(currChart,prefix+"chart_SI",OBJPROP_TEXT,"Spread="+(string)SymbolInfoInteger(ChartSymbol(currChart),SYMBOL_SPREAD));
         }
       else
@@ -264,7 +264,7 @@ bool RefreshView(void)
         }
       else
         {
-         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x80ff);
+         if(0>profit) ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x1212ff);
          else ObjectSetInteger(currChart,name,OBJPROP_COLOR,0x12ff12);
         }
       ObjectSetString(currChart,name,OBJPROP_TEXT,"In day  ="+(string)((int)profit));
@@ -372,6 +372,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
       Print("empty symbol");
       return(false);
      }
+   // Print(comment+_OpenNewPosition_+" "+StartOpenPosition+" "+TimeCurrent()); 
    if(NewOrderWait==type || !_OpenNewPosition_||StartOpenPosition>TimeCurrent()) return(false);
 
 // проверяем что баланс не упал ниже % чем на начало недели  

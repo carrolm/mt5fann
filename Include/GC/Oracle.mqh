@@ -7,10 +7,10 @@
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=false;
-int _OutputVectors_=1;
+bool _ResultAsString_=true;
+int _OutputVectors_=4;
 int _HistorySignals_=10;
-int _PercentNormalization=2; // 100/5 = 20%, but data *5
+int _PercentNormalization=5; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

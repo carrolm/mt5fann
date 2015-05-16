@@ -747,7 +747,7 @@ double GetVector_CCIS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
      {
-      if(0==param1) param1=14;
+      if(0==param1) param1=83;
       ind_h.hid=iCCI(smb,tf,param1,PRICE_TYPICAL);
       if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
       return 0;
@@ -831,10 +831,10 @@ double GetVector_Minute(string smb,ENUM_TIMEFRAMES tf,int shift)
 double GetVector_StochasticS(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,int param1,int param2,int param3)
   {// пара, период, смещение назад (для индикатора полезно)
    if(0==ind_h.hid)
-     {
-      if(0==param1) param1=5;
-      if(0==param2) param2=3;
-      if(0==param3) param3=3;
+     {// Found params M1
+      if(0==param1) param1=155;
+      if(0==param2) param2=55;
+      if(0==param3) param3=155;
       ind_h.hid=iStochastic(smb,tf,param1,param2,param3,MODE_SMA,STO_LOWHIGH);
       if(ind_h.hid==INVALID_HANDLE) return(-500);//--- если хэндл невалидный
       return 0;
