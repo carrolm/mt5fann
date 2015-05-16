@@ -1113,7 +1113,8 @@ string TimeFrameName(ENUM_TIMEFRAMES tf)
       case PERIOD_M30: return("M30");
       case PERIOD_M4: return("M4");
       case PERIOD_M5: return("M5");
-      case PERIOD_M6: return("M6");
+      case PERIOD_M15: return("M15");
+            case PERIOD_M6: return("M6");
             case PERIOD_H1: return("H1");
       default:    return("");
      }
