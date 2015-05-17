@@ -45,6 +45,7 @@ public:
    virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
    bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
+   bool              ExportVectorsForANN();//string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
    bool              loadSettings(string filename);
    bool              saveSettings(string filename);
    string            GetInputAsString(string smbl,int shift);
@@ -96,6 +97,7 @@ string COracleTemplate::GetInputAsString(string smbl,int shift)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+
 bool COracleTemplate::ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test=0,int num_valid=0,int num_work=0)
   {
    if(num_train==0 && 0==num_test && 0==num_valid && 0==num_work) return(false);
