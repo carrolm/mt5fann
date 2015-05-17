@@ -9,7 +9,7 @@
 #include <GC\GetVectors.mqh>
 bool _ResultAsString_=false;
 int _OutputVectors_=1;
-int _HistorySignals_=10;
+
 int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -64,7 +64,7 @@ void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
    loadSettings(filename+".ini");
    ArrayResize(InputVector,num_input_signals);
    ArrayResize(InputSignal,num_input_signals);
-   ArrayResize(HistoryInputVector,_HistorySignals_*num_input_signals);
+   ArrayResize(HistoryInputVector,_TREND_*num_input_signals);
    ArrayInitialize(HistoryInputVector,0);
   };
 //+------------------------------------------------------------------+
@@ -906,7 +906,7 @@ double COracleENCOG::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool trai
       FileWrite(errorFile,"debug info ");
      }
 
-   if(AgeHistory<_HistorySignals_) AgeHistory++;
+   if(AgeHistory<_TREND_) AgeHistory++;
    for(i=AgeHistory;i>1;i--)
      {
       for(j=0;j<num_input_signals;j++) HistoryInputVector[j+(i-1)*num_input_signals]=HistoryInputVector[j+(i-2)*num_input_signals];
