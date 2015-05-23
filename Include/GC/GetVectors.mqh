@@ -204,7 +204,7 @@ double GetVector_HighLow(string smb,ENUM_TIMEFRAMES tf,int shift,int param1,int 
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
 //IndicatorRelease(h_ind);
-   return tanh(1-(High[1]-Low[1])/TS/5);
+   return tanh((High[1]-Low[1])/TS/5-0.5);
 
   }
 //+------------------------------------------------------------------+
@@ -366,7 +366,7 @@ double GetVector_ADX(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
    if(CopyBuffer(ind_h.hid,2,shift,5,ind_h.ind_buffer2)<(3)) return(-200);
 
 //IndicatorRelease(h_ind);
-   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])*0.005);
+   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])*0.05);
 
   }
 //+------------------------------------------------------------------+
@@ -407,7 +407,7 @@ double GetVector_RVI(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
    if(CopyBuffer(ind_h.hid,1,shift,5,ind_h.ind_buffer1)<(3)) return(-200);
 
 //IndicatorRelease(h_ind);
-   return tanh((ind_h.ind_buffer0[1])*0.005);
+   return tanh((ind_h.ind_buffer0[1])*1);
 
   }
 //+------------------------------------------------------------------+
@@ -483,7 +483,7 @@ double GetVector_ADXWilder(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int 
    if(CopyBuffer(ind_h.hid,2,shift,5,ind_h.ind_buffer2)<(3)) return(-200);
 
 //IndicatorRelease(h_ind);
-   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])*0.005);
+   return tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer1[1])*0.03-0.15);
 
   }
 //+------------------------------------------------------------------+
@@ -519,7 +519,7 @@ double GetVector_DeMarker(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int s
    if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<(5)) return(-200);
 
 //IndicatorRelease(h_ind);
-   return  tanh(2*(ind_h.ind_buffer0[1]/100+0.5));
+   return  tanh(2*(ind_h.ind_buffer0[1]/1-0.5));
 
   }
 //+------------------------------------------------------------------+
@@ -778,7 +778,7 @@ double GetVector_CCI(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
    if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<5) return(-200);
 //
 //IndicatorRelease(h_ind);
-   return (tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer0[2])*0.001));
+   return (tanh((ind_h.ind_buffer0[1]-ind_h.ind_buffer0[2])*0.01));
 
   }
 //+------------------------------------------------------------------+
@@ -906,7 +906,7 @@ double GetVector_RSI(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 
    if(CopyBuffer(ind_h.hid,0,shift,5,ind_h.ind_buffer0)<3)return(-200);
 //IndicatorRelease(h_ind);
-   return tanh(2*(ind_h.ind_buffer0[1]/100-0.5));
+   return tanh(4*(ind_h.ind_buffer0[1]/100-0.5));
 
   }
 //+------------------------------------------------------------------+
