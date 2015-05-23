@@ -11,10 +11,13 @@
 //string exfname;
 int exFileHandle=INVALID_HANDLE;
 int exFileHandleStat=INVALID_HANDLE;
+int exFileHandleOC=INVALID_HANDLE;
 
 int curr_num_data=0;
 int exQPRF=0,exQS=0,exQCB=0,exQZ=0,exQCS=0,exQB=0,exQ=0,AgeHistory=0;
-double            HistoryInputVector[];
+double   HistoryInputVector[];
+datetime HistoryDateTime[];
+
 COracleTemplate *MyExpert;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -27,7 +30,18 @@ int OnInit()
    exFileHandle=FileOpen(fnm,FILE_CSV|FILE_ANSI|FILE_WRITE|FILE_REWRITE,",");
    ArrayResize(HistoryInputVector,(1+2*_TREND_)*(_OutputVectors_+MyExpert.num_input_signals));
    ArrayInitialize(HistoryInputVector,0);
+   ArrayResize(HistoryDateTime,(1+2*_TREND_));
+   ArrayInitialize(HistoryDateTime,0);
 //---
+   exFileHandleOC=FileOpen("OracleDummy_fc.mqh",FILE_WRITE|FILE_ANSI,' ');
+   if(exFileHandleOC==INVALID_HANDLE)
+     {
+      Print("Error open file for write OracleDummy_fc.mqh");
+      return(INIT_FAILED);
+     }
+   FileWrite(exFileHandleOC,"double od_forecast(datetime time,string smb)  ");
+   FileWrite(exFileHandleOC," {");
+
    if(exFileHandle!=INVALID_HANDLE)
      {
       string outstr="";
@@ -65,28 +79,10 @@ void OnDeinit(const int reason)
 //
 //     }
    FileClose(exFileHandle);
-//if(FileHandleOC!=INVALID_HANDLE)
-//  {
-//   FileWrite(FileHandleOC,"  return(0);");
-//   FileWrite(FileHandleOC," }");
-//   FileClose(FileHandleOC);
-//   Q=QS+QCB+QZ+QCS+QB;
-//   if(Q>0)
-//      FileWrite(FileHandleStat,
-//                smbl,0,_NumTS_,QS,QCB,QZ,QCS,QB,Q,
-//                -1+(double)QS/Q,-1+2*(double)QS/Q+(double)QCB/Q
-//                //,-1+2*(double)(QS+QCB)/Q+(double)QWCB/Q
-//                ,0
-//                //,1-2*(double)(QB+QCS)/Q-(double)QWCS/Q
-//                ,1-2*(double)QB/Q-(double)QCS/Q,
-//                1-(double)QB/Q);//,(string)tm.day+"/"+(string)tm.mon+"/"+(string)tm.year);
-//   FileClose(FileHandleStat);
-//  }
-//if(ring==3 && Result!=0)
-//  {
-//   FileDelete(fnm);
-//  }
-//else
+   FileWrite(exFileHandleOC,"  return(0);");
+   FileWrite(exFileHandleOC," }");
+   FileClose(exFileHandleOC);
+
    Print("Created.");
    delete MyExpert;
   }
@@ -101,42 +97,50 @@ void OnTick()
      }
    if(!isNewBar()||curr_num_data>_NEDATA_) return;
    curr_num_data++;
-   int i,j,shift=_TREND_;
+   int i,j;//,shift=_TREND_;
    string outstr;
-   double Result=0;
+   double Result=0,ResultV=0;
 // int num_vals,prev_prg=0;
    string fnm="";
 
-   Result=GetVectors(MyExpert.InputVector,MyExpert.InputSignals,_Symbol,0,0);
-   if(Result>1 || Result<-1) return;
-//     need_exp=true;
+  // Result=GetTrend(_Symbol,0,0);
 
-   if(Result>0.66) exQB++;
-   else if(Result>.49) exQCS++;
-//else if(res>0.1) QWCS++;
-   else if(Result>-0.49) exQZ++;
-//else if(res>-.49) QWCB++;
-   else if(Result>-.66) exQCB++;
-   else exQS++;
+   ResultV=GetVectors(MyExpert.InputVector,MyExpert.InputSignals,_Symbol,0,0);
+//if(ResultV>1 || ResultV<-1) return;
 
-   if(AgeHistory<_TREND_*2) AgeHistory++;
+   if(AgeHistory<_TREND_+1) AgeHistory++;
    for(i=AgeHistory;i>1;i--)
      {
-      for(j=0;j<MyExpert.num_input_signals+_OutputVectors_;j++)
-         HistoryInputVector[j+(i-1)*(MyExpert.num_input_signals+_OutputVectors_)]=HistoryInputVector[j+(i-2)*(MyExpert.num_input_signals+_OutputVectors_)];
+      HistoryDateTime[i-1]=HistoryDateTime[i-2];
+      if(ResultV<1 && ResultV>-1)
+        {
+         for(j=0;j<MyExpert.num_input_signals+_OutputVectors_;j++)
+            HistoryInputVector[j+(i-1)*(MyExpert.num_input_signals+_OutputVectors_)]=HistoryInputVector[j+(i-2)*(MyExpert.num_input_signals+_OutputVectors_)];
+        }
      }
-   for(j=0;j<MyExpert.num_input_signals;j++)
-      HistoryInputVector[j]=MyExpert.InputVector[j];
-
-   if(AgeHistory==_TREND_*2)
+   if(ResultV<1 && ResultV>-1) for(j=0;j<MyExpert.num_input_signals;j++)
+   HistoryInputVector[j]=MyExpert.InputVector[j];
+   HistoryDateTime[0]=TimeCurrent();
+   if(AgeHistory==_TREND_+1)
      {
-      Result=GetTrend(_Symbol,0,_TREND_*2-1,false);
+      Result=GetTrend(_Symbol,0,0,false);
       if(Result>1 || Result<-1) return;
+      if(Result>0.66) exQB++;
+      else if(Result>.49) exQCS++;
+      //else if(res>0.1) QWCS++;
+      else if(Result>-0.49) exQZ++;
+      //else if(res>-.49) QWCB++;
+      else if(Result>-.66) exQCB++;
+      else exQS++;
+      if(Result>0.6 || Result<-0.6)
+        {
+         FileWrite(exFileHandleOC,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)HistoryDateTime[_TREND_]+"\")) return("+(string)Result+");");
+        }
       outstr="";
 
       for(j=0;j<MyExpert.num_input_signals;j++)
         {
-         outstr+=DoubleToString(HistoryInputVector[(2*_TREND_-1)*(MyExpert.num_input_signals+_OutputVectors_)+j],_Precision_)+",";
+         outstr+=DoubleToString(HistoryInputVector[(_TREND_)*(MyExpert.num_input_signals+_OutputVectors_)+j],_Precision_)+",";
         }
       outstr=FormOut(outstr,Result);
 
