@@ -45,8 +45,9 @@ int OnInit()
    if(exFileHandle!=INVALID_HANDLE)
      {
       string outstr="";
-
-      outstr=MyExpert.InputSignals; StringReplace(outstr," ",","); StringReplace(outstr,"-","_");
+      outstr="_prediction_,";
+      outstr+=MyExpert.InputSignals; StringReplace(outstr," ",","); StringReplace(outstr,"-","_");
+      if(MyExpert.num_input_signals==0) outstr+="TestData";
       if(_OutputVectors_==4 && !_ResultAsString_)
          outstr+=",IsBuy,IsCloseSell,IsCloseBuy,IsSell";//,"+outstr;            //outstr+=",Result";
       else if(_OutputVectors_==2 && !_ResultAsString_)
@@ -69,20 +70,44 @@ void OnDeinit(const int reason)
   {
 //---
 
-//   int maxRepeat=0,nr;
-//   for(i=shift;QZ>0 && i<(shift+num_vals);i++)
-//     {
-//      Result=GetVectors(InputVector,InputSignals,smbl,0,i);
-//      if(Result>1 || Result<-1) continue;
-//
-//
-//
-//     }
    FileClose(exFileHandle);
    FileWrite(exFileHandleOC,"  return(0);");
    FileWrite(exFileHandleOC," }");
    FileClose(exFileHandleOC);
-
+   int maxRepeat=1;
+   string outstr;
+   string fnm="ANN_"+_Symbol+"_"+TimeFrameName(0)+".csv";
+   exFileHandle=FileOpen(fnm,FILE_TXT|FILE_ANSI|FILE_READ);
+   exFileHandleOC=FileOpen("ANN_"+_Symbol+"_"+TimeFrameName(0)+"_norm.csv",FILE_WRITE|FILE_ANSI,' ');
+   double Result=0;
+   int nr=0;
+   int Qmax=0;
+   int pos_s=0;
+   while(""!=(outstr=FileReadString(exFileHandle)))
+     {
+     pos_s = StringFind(outstr,",");
+      if(0==Qmax)
+        {
+         outstr = StringSubstr(outstr,pos_s+1);
+         Qmax=MathMax(exQS,MathMax(exQCB,MathMax(exQZ,MathMax(exQCS,exQB))));
+         FileWrite(exFileHandleOC,outstr);
+         continue;
+        }
+      
+      Result = (double) StringToDouble(StringSubstr(outstr,0,pos_s));
+      if(Result>0.66) maxRepeat=_PercentNormalization*Qmax/exQB;
+      else if(Result>.49) maxRepeat=_PercentNormalization*Qmax/exQCS;
+      //else if(res>0.1) QWCS++;
+      else if(Result>-0.49) maxRepeat=_PercentNormalization*Qmax/exQZ;
+      //else if(res>-.49) QWCB++;
+      else if(Result>-.66) maxRepeat=_PercentNormalization*Qmax/exQCB;
+      else maxRepeat=_PercentNormalization*Qmax/exQS;
+      outstr = StringSubstr(outstr,pos_s+1);
+      for(nr=0;nr<maxRepeat;nr++)
+         FileWrite(exFileHandleOC,outstr);
+     }
+   FileClose(exFileHandle);
+   FileClose(exFileHandleOC);
    Print("Created.");
    delete MyExpert;
   }
@@ -103,7 +128,7 @@ void OnTick()
 // int num_vals,prev_prg=0;
    string fnm="";
 
-  // Result=GetTrend(_Symbol,0,0);
+// Result=GetTrend(_Symbol,0,0);
 
    ResultV=GetVectors(MyExpert.InputVector,MyExpert.InputSignals,_Symbol,0,0);
 //if(ResultV>1 || ResultV<-1) return;
@@ -119,7 +144,7 @@ void OnTick()
         }
      }
    if(ResultV<1 && ResultV>-1) for(j=0;j<MyExpert.num_input_signals;j++)
-   HistoryInputVector[j]=MyExpert.InputVector[j];
+      HistoryInputVector[j]=MyExpert.InputVector[j];
    HistoryDateTime[0]=TimeCurrent();
    if(AgeHistory==_TREND_+1)
      {
@@ -136,12 +161,13 @@ void OnTick()
         {
          FileWrite(exFileHandleOC,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)HistoryDateTime[_TREND_]+"\")) return("+(string)Result+");");
         }
-      outstr="";
+      outstr=(string)Result+",";
 
       for(j=0;j<MyExpert.num_input_signals;j++)
         {
          outstr+=DoubleToString(HistoryInputVector[(_TREND_)*(MyExpert.num_input_signals+_OutputVectors_)+j],_Precision_)+",";
         }
+      if(MyExpert.num_input_signals==0) outstr+=""+(string)Result+",";
       outstr=FormOut(outstr,Result);
 
       FileWrite(exFileHandle,outstr);
