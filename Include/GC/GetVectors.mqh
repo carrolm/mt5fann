@@ -976,8 +976,8 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false)
    double res=0;//,res1=0;
    int is,ib;
    double  SymbolSpread=SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
-   double  TS=SymbolSpread*_NumTS_;
-   double  TP=SymbolSpread*_NumTP_;
+   double  TS=SymbolSpread*(_NumTS_-3);
+   double  TP=SymbolSpread*(_NumTP_-2);
 
    if(0==SymbolSpread) return(0);
    bool mayBeSell=true,mayBeBuy=true,closeSell=false,closeBuy=false;
