@@ -35,18 +35,10 @@ double CDummy::forecast(string smbl,int shift=0,bool train=false)
    int copied=CopyRates(smbl,_Period,shift,3,rates);
    datetime time=rates[0].time;
 //if(debug)Print(time);
-sig = 
-   //return(
-   od_forecast(time,smbl)
-   ;//);
+sig =    od_forecast(time,smbl)  ;//);
    return(sig);
    
-   if(sig<-0.66) return(NewOrderSell);
-   if(sig<-0.33) return(NewOrderWaitSell);
-   if(sig<0.33) return(NewOrderWait);
-   if(sig<0.66) return(NewOrderWaitBuy);
-   //if(sig<1.0) 
-   return(NewOrderBuy);
+
  
  
    
