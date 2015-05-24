@@ -24,7 +24,7 @@ public:
    string            smb;
    ENUM_TIMEFRAMES   TimeFrame;
    bool              IsInit;
-   int               errorFile;
+//   int               errorFile;
    int               AgeHistory;
    double            HistoryInputVector[];
    double            InputVector[];
@@ -57,7 +57,7 @@ public:
 void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
   {
    IsInit=true;
-   debug=ip_debug; AgeHistory=0;errorFile=INVALID_HANDLE;
+   debug=ip_debug; AgeHistory=0;//errorFile=INVALID_HANDLE;
    if(""!=FileName) filename=FileName;
    else  filename="Prototype";
 
@@ -77,7 +77,7 @@ void  COracleTemplate::DeInit()
      {
       IndicatorRelease(IndHandles[i].hid);
      }
-   if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
+  // if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -899,34 +899,34 @@ double COracleENCOG::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool trai
         }
       else sig=OutputVector[0];
      }
-   int i,j;
-   if(INVALID_HANDLE==errorFile)
-     {
-      errorFile=FileOpen("errors.txt",FILE_WRITE|FILE_ANSI|FILE_CSV,' ');
-      FileWrite(errorFile,"debug info ");
-     }
-
-   if(AgeHistory<_TREND_) AgeHistory++;
-   for(i=AgeHistory;i>1;i--)
-     {
-      for(j=0;j<num_input_signals;j++) HistoryInputVector[j+(i-1)*num_input_signals]=HistoryInputVector[j+(i-2)*num_input_signals];
-     }
-   for(j=0;j<num_input_signals;j++)
-      HistoryInputVector[j]=InputVector[j];
-
-   for(i=1;i<AgeHistory;i++)
-     {
-      GetVectors(InputVector,InputSignals,smbl,0,i+shift);
-      for(j=0;j<num_input_signals;j++)
-        {
-         if(HistoryInputVector[j+(i)*num_input_signals]!=InputVector[j])
-           {
-            FileWrite(errorFile,"not compare! ",InputSignal[j]," shift=",i," old= ",HistoryInputVector[j+(i)*num_input_signals]," new=",InputVector[j]);
-            //Print("not compare! ",InputSignal[j]," shift=",i);
-           }
-         //HistoryInputVector[j+(i-1)*num_input_signals]=InputVector[j];
-        }
-     }
+//   int i,j;
+//   //if(INVALID_HANDLE==errorFile)
+//   //  {
+//   //   errorFile=FileOpen("errors.txt",FILE_WRITE|FILE_ANSI|FILE_CSV,' ');
+//   //   FileWrite(errorFile,"debug info ");
+//   //  }
+//
+//   if(AgeHistory<_TREND_) AgeHistory++;
+//   for(i=AgeHistory;i>1;i--)
+//     {
+//      for(j=0;j<num_input_signals;j++) HistoryInputVector[j+(i-1)*num_input_signals]=HistoryInputVector[j+(i-2)*num_input_signals];
+//     }
+//   for(j=0;j<num_input_signals;j++)
+//      HistoryInputVector[j]=InputVector[j];
+//
+//   for(i=1;i<AgeHistory;i++)
+//     {
+//      GetVectors(InputVector,InputSignals,smbl,0,i+shift);
+//      for(j=0;j<num_input_signals;j++)
+//        {
+//         if(HistoryInputVector[j+(i)*num_input_signals]!=InputVector[j])
+//           {
+//            FileWrite(errorFile,"not compare! ",InputSignal[j]," shift=",i," old= ",HistoryInputVector[j+(i)*num_input_signals]," new=",InputVector[j]);
+//            //Print("not compare! ",InputSignal[j]," shift=",i);
+//           }
+//         //HistoryInputVector[j+(i-1)*num_input_signals]=InputVector[j];
+//        }
+//     }
 
    return(sig);
   }
