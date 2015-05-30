@@ -23,7 +23,7 @@ int OnInit()
   {
    MyExpert=new COracleMLP_WEKA();
          string comment="";
-         MyExpert.forecast("",0,0,false,comment);
+         MyExpert.forecast(_Symbol,0,0,false,comment);
 
 
    CPInit();
@@ -52,21 +52,21 @@ void OnTick()
 //+------------------------------------------------------------------+
    if(isNewBar())
      {
-      datetime Time[]; ArraySetAsSeries(Time,true);
+ //     datetime Time[]; ArraySetAsSeries(Time,true);
 
-      for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
-        {
-         CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
+//      for(SymbolIdx=0; SymbolIdx<MaxSymbols;SymbolIdx++)
+  //      {
+  //       CopyTime(SymbolsArray[SymbolIdx],0,0,3,Time);
          string comment="";
-         f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,0,false,comment);
-         MqlDateTime tm;
+         f=MyExpert.forecast(_Symbol,0,0,false,comment);
+  //       MqlDateTime tm;
 
-         TimeToStruct(Time[0],tm);
+  //       TimeToStruct(Time[0],tm);
          if(__Debug__&&false==MQLInfoInteger(MQL_TESTER)) Print("Oracle Encog say: "+DoubleToString(f,3));
-         NewOrder(SymbolsArray[SymbolIdx],f,comment);
+         NewOrder(_Symbol,f,comment);
          
 //         NewOrder(SymbolsArray[SymbolIdx],f,DoubleToString(f,3)+" "+(string)tm.hour+":"+(string)tm.min+":"+(string)tm.sec);
-        }
+  //      }
 
      }
   }
