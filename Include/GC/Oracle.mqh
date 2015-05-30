@@ -495,12 +495,7 @@ double COracleMLP_WEKA::ComputeNeuron(string numNeuron)
            {
             if(weights[j].numNodeFrom==neurons[i].numNode)
               {
-               if(neurons[weights[j].NeuronTo].isCalculated)
-                 {
-                  NSums+=neurons[weights[j].NeuronTo].Value;
-
-                 }
-               else NSums+=ComputeNeuron(weights[j].numNodeTo);
+               NSums+=ComputeNeuron(weights[j].numNodeTo)*weights[j].weight;
               }
             //                          if(weights[j].numNodeTo==neurons[i].numNode) weights[j].numNodeTo=OutputSignal[num_output_signals-1];
            }
@@ -552,6 +547,10 @@ void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
            }
         }
       }
+   //for(i=0;i<neuronCount;i++)
+   //  {
+   //   Print(neurons[i].numNode," ",neurons[i].Value);
+   //  }      
 //   int i,x;
 //   int sourceIndex=_neuronCount
 //                   -_layerCounts[_layerCount-1];
