@@ -43,7 +43,7 @@ public:
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
    void              DeInit();
-   virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train){Print("Please overwrite (int) in ",Name()); return(0);};
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train,string comment){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
    bool              ExportHistoryENCOG(string smbl,string fname,ENUM_TIMEFRAMES tf,int num_train,int num_test,int num_valid,int num_work);
@@ -479,6 +479,7 @@ public:
    virtual string    Name(){return("MLP_WEKA");};
    void              Init(string FileName="",bool ip_debug=false);
    virtual void      DeInit();
+   virtual double    forecast(string smbl,ENUM_TIMEFRAMES,int shift,bool train,string coment);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -513,6 +514,41 @@ double COracleMLP_WEKA::ComputeNeuron(string numNeuron)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double COracleMLP_WEKA::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train,string comment)
+  {
+
+   if(""==smbl) smbl=_Symbol;
+   double sig=GetVectors(InputVector,InputSignals,smbl,0,shift);
+   if(sig<-1||sig>1) return 0;
+   if(0==neuronCount)
+      sig=0;
+   else
+     {
+      Compute(InputVector,OutputVector);
+      
+      string outSignal="";double maxSignal=0;
+      for(int i=0;i<num_output_signals;i++)
+      {
+       if(maxSignal<OutputVector[i]) 
+       {
+         maxSignal=OutputVector[i];
+         outSignal=OutputSignal[i];
+       }
+      }  
+      if(num_output_signals==5)
+        {
+         Print(outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
+        }
+        if("Sell"==outSignal) sig=-1;
+        else if("Buy"==outSignal) sig=1;
+        else if("CloseBuy"==outSignal) sig=-0.5;
+        else if("CloseSell"==outSignal) sig=0.5;
+     }
+   return sig;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
   {
    int i,j;
@@ -537,7 +573,7 @@ void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
       ComputeNeuron(neurons[i].numNode);
      }
    for(i=0;i<num_output_signals;i++)
-      {
+     {
       for(j=0;j<neuronCount;j++)
         {
          if(neurons[j].numNode==OutputSignal[i])
@@ -546,30 +582,7 @@ void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
             //neurons[j].isCalculated=true;
            }
         }
-      }
-   //for(i=0;i<neuronCount;i++)
-   //  {
-   //   Print(neurons[i].numNode," ",neurons[i].Value);
-   //  }      
-//   int i,x;
-//   int sourceIndex=_neuronCount
-//                   -_layerCounts[_layerCount-1];
-//
-//   ArrayCopy(_layerOutput,_input,sourceIndex,0,_inputCount);
-//
-//   for(i=_layerCount-1; i>0; i--)
-//     {
-//      ComputeLayer(i);
-//     }
-//
-//// update context values
-//   int offset=_contextTargetOffset[0];
-//
-//   for(x=0; x<_contextTargetSize[0]; x++)
-//     {
-//      _layerOutput[offset+x]=_layerOutput[x];
-//     }
-//
+     }
    ArrayCopy(_output,OutputVector);
   }
 //+------------------------------------------------------------------+
@@ -590,7 +603,7 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
 //   _layerCount=0; //int tempar
    neuronCount=0;num_input_signals=0;weightCount=0;num_output_signals=0;
    int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_TXT);
-   string fr; int str_pos=0;
+   string fr; int str_pos=0,i;
    if(FileHandle!=INVALID_HANDLE)
      {
       while(!FileIsEnding(FileHandle))
@@ -603,18 +616,18 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
             num_input_signals=(int)StringToInteger(StringSubstr(fr,str_pos))-1;
             ArrayResize(InputSignal,num_input_signals);
             InputSignals="";
-            for(int i=0;i<num_input_signals;i++)
+            for(i=0;i<num_input_signals;i++)
               {
                fr=FileReadString(FileHandle);StringTrimLeft(fr);
+               if(StringFind(fr,"[list of attributes omitted]")==0) break;
                InputSignals+=fr+" ";
                InputSignal[i]=fr;
                neuronCount++; ArrayResize(neurons,neuronCount);
                neurons[neuronCount-1].activationfn="Input";
                StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");
                neurons[neuronCount-1].numNode=fr;
-
               }
-            InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
+            //InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
            }
          if("=== Classifier model (full training set) ==="==fr)
            {
@@ -654,6 +667,12 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
                   //    Attrib XOR1    -4.298279222668175
                   weights[weightCount-1].numNodeTo=StringSubstr(inputString,0,str_pos);
                   weights[weightCount-1].weight=(double)StringToDouble(StringSubstr(inputString,str_pos));
+                  for(i=0;i<num_input_signals && InputSignal[i]!=NULL && InputSignal[i]!=weights[weightCount-1].numNodeTo;i++);
+                  if(InputSignal[i]!=weights[weightCount-1].numNodeTo) 
+                    {
+                     InputSignal[i]=weights[weightCount-1].numNodeTo;
+                     InputSignals+=InputSignal[i]+" ";
+                    }
                  }
                if(StringFind(fr,"Class")==0)
                  {
@@ -665,7 +684,7 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
                   fr=FileReadString(FileHandle);fr=FileReadString(FileHandle);
                   inputString=StringSubstr(fr,StringLen("    Node "));
                   StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");
-                  for(int i=0;i<neuronCount;i++)
+                  for(i=0;i<neuronCount;i++)
                     {
                      if(neurons[i].numNode==inputString)
                        {
@@ -683,14 +702,14 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
            }
         }
       for(int j=0;j<weightCount;j++)
-         for(int i=0;i<neuronCount;i++)
+         for(i=0;i<neuronCount;i++)
            {
             if(weights[j].numNodeFrom==neurons[i].numNode) weights[j].NeuronFrom=i;
             if(weights[j].numNodeTo==neurons[i].numNode)weights[j].NeuronTo=i;
            }
-      if(true)
+      if(false)
         {
-         for(int i=0;i<neuronCount;i++)
+         for(i=0;i<neuronCount;i++)
            {
             for(int j=0;j<weightCount;j++)
               {
@@ -712,6 +731,7 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
       ArrayResize(InputVector,num_input_signals);
       ArrayResize(OutputVector,num_output_signals);
       //
+      StringTrimRight(InputSignals);
       Print(Name()," ",InputSignals);
      }
    else
