@@ -440,7 +440,7 @@ struct Neuron
    double            Threshold;
    string            activationfn;
    bool              isCalculated;
-   bool              isInput;
+   //  bool              isInput;
    double            Value;
 
   };
@@ -451,6 +451,8 @@ struct Weight
   {
    string            numNodeFrom;
    string            numNodeTo;
+   int               NeuronFrom;
+   int               NeuronTo;
    double            weight;
   };
 //+------------------------------------------------------------------+
@@ -466,11 +468,12 @@ private:
    string            _FILENAME;
    int               neuronCount;
    int               weightCount;
-   void              ActivationTANH(int numnode);
-   void              ActivationSigmoid(int numnode);
+   void              ActivationTANH(double val);
+   void              ActivationSigmoid(double val);
    //   void              ActivationElliottSymmetric(int numnode);
    //   void              ActivationElliott(int numnode);
 public:
+   double            ComputeNeuron(string numNeuron);
    void              Compute(double &_input[],double &_output[]);
                      COracleMLP_WEKA(string FileName=""){Init(FileName);}
    virtual string    Name(){return("MLP_WEKA");};
@@ -480,9 +483,75 @@ public:
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+double COracleMLP_WEKA::ComputeNeuron(string numNeuron)
+  {
+   for(int i=0;i<neuronCount;i++)
+     {
+      if(neurons[i].numNode==numNeuron)
+        {
+         if(neurons[i].isCalculated) return neurons[i].Value;
+         double NSums=0;
+         for(int j=0;j<weightCount;j++)
+           {
+            if(weights[j].numNodeFrom==neurons[i].numNode)
+              {
+               if(neurons[weights[j].NeuronTo].isCalculated)
+                 {
+                  NSums+=neurons[weights[j].NeuronTo].Value;
 
+                 }
+               else NSums+=ComputeNeuron(weights[j].numNodeTo);
+              }
+            //                          if(weights[j].numNodeTo==neurons[i].numNode) weights[j].numNodeTo=OutputSignal[num_output_signals-1];
+           }
+         if(neurons[i].activationfn=="Sigmoid")
+           {
+            neurons[i].Value=Sigmoid(NSums+neurons[i].Threshold);
+            neurons[i].isCalculated=true;
+            return neurons[i].Value;
+
+           }
+        }
+     }
+   return 0;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
   {
+   int i,j;
+   for(i=0;i<neuronCount;i++)
+     {
+      neurons[i].isCalculated=false;
+     }
+   ArrayCopy(InputVector,_input);
+   for(i=0;i<num_input_signals;i++)
+     {
+      for(j=0;j<neuronCount;j++)
+        {
+         if(neurons[j].numNode==InputSignal[i])
+           {
+            neurons[j].Value=InputVector[i];
+            neurons[j].isCalculated=true;
+           }
+        }
+     }
+   for(i=0;i<neuronCount;i++)
+     {
+      ComputeNeuron(neurons[i].numNode);
+     }
+   for(i=0;i<num_output_signals;i++)
+      {
+      for(j=0;j<neuronCount;j++)
+        {
+         if(neurons[j].numNode==OutputSignal[i])
+           {
+            OutputVector[i]=neurons[j].Value;
+            //neurons[j].isCalculated=true;
+           }
+        }
+      }
 //   int i,x;
 //   int sourceIndex=_neuronCount
 //                   -_layerCounts[_layerCount-1];
@@ -502,7 +571,7 @@ void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
 //      _layerOutput[offset+x]=_layerOutput[x];
 //     }
 //
-//   ArrayCopy(_output,_layerOutput,0,0,_outputCount);
+   ArrayCopy(_output,OutputVector);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -540,6 +609,11 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
                fr=FileReadString(FileHandle);StringTrimLeft(fr);
                InputSignals+=fr+" ";
                InputSignal[i]=fr;
+               neuronCount++; ArrayResize(neurons,neuronCount);
+               neurons[neuronCount-1].activationfn="Input";
+               StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");
+               neurons[neuronCount-1].numNode=fr;
+
               }
             InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
            }
@@ -599,10 +673,9 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
                         for(int j=0;j<weightCount;j++)
                           {
                            if(weights[j].numNodeFrom==neurons[i].numNode) weights[j].numNodeFrom=OutputSignal[num_output_signals-1];
- //                          if(weights[j].numNodeTo==neurons[i].numNode) weights[j].numNodeTo=OutputSignal[num_output_signals-1];
+                           //                          if(weights[j].numNodeTo==neurons[i].numNode) weights[j].numNodeTo=OutputSignal[num_output_signals-1];
                           }
                         neurons[i].numNode=OutputSignal[num_output_signals-1];
-                        neurons[i].isInput=true;
                         break;
                        }
                     }
@@ -610,19 +683,25 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
               }
            }
         }
-      if(true) 
+      for(int j=0;j<weightCount;j++)
+         for(int i=0;i<neuronCount;i++)
+           {
+            if(weights[j].numNodeFrom==neurons[i].numNode) weights[j].NeuronFrom=i;
+            if(weights[j].numNodeTo==neurons[i].numNode)weights[j].NeuronTo=i;
+           }
+      if(true)
         {
          for(int i=0;i<neuronCount;i++)
            {
             for(int j=0;j<weightCount;j++)
               {
-               if(weights[j].numNodeFrom==neurons[i].numNode) 
-               { 
+               if(weights[j].numNodeFrom==neurons[i].numNode)
+                 {
                   Print("  ",weights[j].numNodeTo," ",weights[j].weight);
-               }
+                 }
               }
-             Print(neurons[i].activationfn," ",neurons[i].numNode," Threshold=",neurons[i].Threshold," Input=",neurons[i].isInput);
-          }
+            Print(neurons[i].activationfn," ",neurons[i].numNode," Threshold=",neurons[i].Threshold);
+           }
 
         }
       FileClose(FileHandle);
