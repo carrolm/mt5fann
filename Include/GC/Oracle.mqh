@@ -7,8 +7,8 @@
 #property link      "http://www.mql5.com"
 #include <Trade\SymbolInfo.mqh>
 #include <GC\GetVectors.mqh>
-bool _ResultAsString_=false;
-int _OutputVectors_=1;
+bool _ResultAsString_=true;
+int _OutputVectors_=4;
 
 int _PercentNormalization=2; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
@@ -24,19 +24,21 @@ public:
    string            smb;
    ENUM_TIMEFRAMES   TimeFrame;
    bool              IsInit;
-//   int               errorFile;
+   //   int               errorFile;
    int               AgeHistory;
    double            HistoryInputVector[];
    double            InputVector[];
    double            OutputVector[];
    bool              debug;
-   string            InputSignals;
    string            templateTimeFrames;
+   string            InputSignals;
+
    string            InputSignal[];
    string            templateInputSignals;
    int               num_repeat;
    ENUM_TIMEFRAMES   TimeFrames[];
    int               num_input_signals;
+   int               num_output_signals;
                      COracleTemplate(string ip_smbl="",ENUM_TIMEFRAMES  ip_tf=0){IsInit=false; if(ip_smbl=="") smb=_Symbol; else smb=ip_smbl; if(ip_tf==0) TimeFrame=Period(); else TimeFrame=ip_tf; };
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
@@ -77,7 +79,7 @@ void  COracleTemplate::DeInit()
      {
       IndicatorRelease(IndHandles[i].hid);
      }
-  // if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
+// if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -428,6 +430,229 @@ bool COracleTemplate::saveSettings(string _filename)
   }
 
 COracleTemplate *AllOracles[];
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+struct Neuron
+  {
+
+   string            numNode;
+   double            Threshold;
+   string            activationfn;
+   bool              isCalculated;
+   bool              isInput;
+   double            Value;
+
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+struct Weight
+  {
+   string            numNodeFrom;
+   string            numNodeTo;
+   double            weight;
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+class COracleMLP_WEKA:public COracleTemplate
+  {
+private:
+   Neuron            neurons[];
+   Weight            weights[];
+   string            OutputSignals;
+   string            OutputSignal[];
+   string            _FILENAME;
+   int               neuronCount;
+   int               weightCount;
+   void              ActivationTANH(int numnode);
+   void              ActivationSigmoid(int numnode);
+   //   void              ActivationElliottSymmetric(int numnode);
+   //   void              ActivationElliott(int numnode);
+public:
+   void              Compute(double &_input[],double &_output[]);
+                     COracleMLP_WEKA(string FileName=""){Init(FileName);}
+   virtual string    Name(){return("MLP_WEKA");};
+   void              Init(string FileName="",bool ip_debug=false);
+   virtual void      DeInit();
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+
+void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
+  {
+//   int i,x;
+//   int sourceIndex=_neuronCount
+//                   -_layerCounts[_layerCount-1];
+//
+//   ArrayCopy(_layerOutput,_input,sourceIndex,0,_inputCount);
+//
+//   for(i=_layerCount-1; i>0; i--)
+//     {
+//      ComputeLayer(i);
+//     }
+//
+//// update context values
+//   int offset=_contextTargetOffset[0];
+//
+//   for(x=0; x<_contextTargetSize[0]; x++)
+//     {
+//      _layerOutput[offset+x]=_layerOutput[x];
+//     }
+//
+//   ArrayCopy(_output,_layerOutput,0,0,_outputCount);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
+  {
+//TimeFrame=PERIOD_M1;
+//   COracleTemplate::Init(FileName,ip_debug);
+   TimeFrame=_Period;
+   if(""!=FileName) _FILENAME=FileName;
+   else  _FILENAME=Name()+"_"+smb+"_"+TimeFrameName(TimeFrame);
+
+   string _filename=_FILENAME+".mlp_weka";
+   string inputString;
+   ArrayResize(neurons,1);
+   ArrayResize(weights,1);
+//   _layerCount=0; //int tempar
+   neuronCount=0;num_input_signals=0;weightCount=0;num_output_signals=0;
+   int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_TXT);
+   string fr; int str_pos=0;
+   if(FileHandle!=INVALID_HANDLE)
+     {
+      while(!FileIsEnding(FileHandle))
+        {
+         fr=FileReadString(FileHandle);
+         if(StringFind(fr,"Attributes:   ")==0)
+           {
+            StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");StringReplace(fr,"  "," "); str_pos=StringFind(fr," ");
+
+            num_input_signals=(int)StringToInteger(StringSubstr(fr,str_pos))-1;
+            ArrayResize(InputSignal,num_input_signals);
+            InputSignals="";
+            for(int i=0;i<num_input_signals;i++)
+              {
+               fr=FileReadString(FileHandle);StringTrimLeft(fr);
+               InputSignals+=fr+" ";
+               InputSignal[i]=fr;
+              }
+            InputSignals=StringSubstr(InputSignals,0,StringLen(InputSignals)-1);
+           }
+         if("=== Classifier model (full training set) ==="==fr)
+           {
+            fr=FileReadString(FileHandle);
+            while(""!=(fr=FileReadString(FileHandle)))
+              {
+               if(StringFind(fr,"Sigmoid Node")==0)
+                 {
+                  neuronCount++; ArrayResize(neurons,neuronCount);
+                  neurons[neuronCount-1].activationfn="Sigmoid";
+                  StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");StringReplace(fr,"  "," ");
+                  neurons[neuronCount-1].numNode=StringSubstr(fr,StringLen("Sigmoid Node "));
+                  fr=FileReadString(FileHandle);fr=FileReadString(FileHandle);
+                  neurons[neuronCount-1].Threshold=(double)StringToDouble(StringSubstr(fr,StringLen("    Threshold    ")));
+                 }
+               if(StringFind(fr,"    Node ")==0)
+                 {
+                  weightCount++; ArrayResize(weights,weightCount);
+                  weights[weightCount-1].numNodeFrom=neurons[neuronCount-1].numNode;
+                  inputString=StringSubstr(fr,StringLen("    Node "));
+                  StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");
+                  str_pos=StringFind(inputString," ");
+
+                  //    Node 3    -7.166206697817879
+                  weights[weightCount-1].numNodeTo=StringSubstr(inputString,0,str_pos);
+                  weights[weightCount-1].weight=(double)StringToDouble(StringSubstr(inputString,str_pos));
+                 }
+               if(StringFind(fr,"    Attrib ")==0)
+                 {
+                  weightCount++; ArrayResize(weights,weightCount);
+                  weights[weightCount-1].numNodeFrom=neurons[neuronCount-1].numNode;
+
+                  inputString=StringSubstr(fr,StringLen("    Attrib "));
+                  StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");
+                  str_pos=StringFind(inputString," ");
+
+                  //    Attrib XOR1    -4.298279222668175
+                  weights[weightCount-1].numNodeTo=StringSubstr(inputString,0,str_pos);
+                  weights[weightCount-1].weight=(double)StringToDouble(StringSubstr(inputString,str_pos));
+                 }
+               if(StringFind(fr,"Class")==0)
+                 {
+                  num_output_signals++; ArrayResize(OutputSignal,num_output_signals);
+                  inputString=StringSubstr(fr,StringLen("Class "));
+                  StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");
+                  OutputSignal[num_output_signals-1]=inputString;
+                  //               str_pos=StringFind(inputString," ");
+                  fr=FileReadString(FileHandle);fr=FileReadString(FileHandle);
+                  inputString=StringSubstr(fr,StringLen("    Node "));
+                  StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");StringReplace(inputString,"  "," ");
+                  for(int i=0;i<neuronCount;i++)
+                    {
+                     if(neurons[i].numNode==inputString)
+                       {
+                        for(int j=0;j<weightCount;j++)
+                          {
+                           if(weights[j].numNodeFrom==neurons[i].numNode) weights[j].numNodeFrom=OutputSignal[num_output_signals-1];
+ //                          if(weights[j].numNodeTo==neurons[i].numNode) weights[j].numNodeTo=OutputSignal[num_output_signals-1];
+                          }
+                        neurons[i].numNode=OutputSignal[num_output_signals-1];
+                        neurons[i].isInput=true;
+                        break;
+                       }
+                    }
+                 }
+              }
+           }
+        }
+      if(true) 
+        {
+         for(int i=0;i<neuronCount;i++)
+           {
+            for(int j=0;j<weightCount;j++)
+              {
+               if(weights[j].numNodeFrom==neurons[i].numNode) 
+               { 
+                  Print("  ",weights[j].numNodeTo," ",weights[j].weight);
+               }
+              }
+             Print(neurons[i].activationfn," ",neurons[i].numNode," Threshold=",neurons[i].Threshold," Input=",neurons[i].isInput);
+          }
+
+        }
+      FileClose(FileHandle);
+      //      if(num_input_signals!=_inputCount)
+      //        {
+      //         Print("ini not for this eg!");_layerCount=0;
+      //        }
+      //      //num_input_signals=_inputCount;
+      ArrayResize(InputVector,num_input_signals);
+      ArrayResize(OutputVector,num_output_signals);
+      //
+      Print(Name()," ",InputSignals);
+     }
+   else
+      Print("not found ",_filename);
+////_layerCount=ArraySize(_weightIndex);
+//   ArrayResize(_layerSums,_neuronCount);
+//   ClearTraning=false;
+//
+//   int i;
+//   for(i=0;i<ArraySize(VectorFunctions) && VectorFunctions[i]!=NULL && VectorFunctions[i]!="";i++)
+//     {
+//      Functions_Array[i]=VectorFunctions[i];
+//      Functions_Count[i]=0;
+//     }
+//
+//   if(_layerCount==0) GetVectors(InputVector,InputSignals,smb,0,1);
+//   else GetVectors(InputVector,templateInputSignals,smb,0,1);
+
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
