@@ -11,26 +11,23 @@
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart()
-  { 
+  {
 //---
-COracleMLP_WEKA* MyOracles;
-  MyOracles =new COracleMLP_WEKA("XOR");
-   double sig;//=GetVectors(InputVector,InputSignals,smbl,0,shift);
-   MyOracles.InputVector[0]=0;MyOracles.InputVector[1]=0;
+   COracleMLP_WEKA *MyOracles;
+   MyOracles=new COracleMLP_WEKA("XOR");
+//   double sig;//=GetVectors(InputVector,InputSignals,smbl,0,shift);
+   MyOracles.InputVector[0]=-1;MyOracles.InputVector[1]=-1;
    MyOracles.Compute(MyOracles.InputVector,MyOracles.OutputVector);
-   sig=MyOracles.OutputVector[0];
-   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]);
-    MyOracles.InputVector[0]=0;MyOracles.InputVector[1]=1;
+//   sig=MyOracles.OutputVector[0];
+   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]," ",MyOracles.OutputVector[1]);
+   MyOracles.InputVector[0]=-1;MyOracles.InputVector[1]=1;
    MyOracles.Compute(MyOracles.InputVector,MyOracles.OutputVector);
-   sig=MyOracles.OutputVector[0];
-   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]);
-      MyOracles.InputVector[0]=1;MyOracles.InputVector[1]=0;
+   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]," ",MyOracles.OutputVector[1]);
+   MyOracles.InputVector[0]=1;MyOracles.InputVector[1]=-1;
    MyOracles.Compute(MyOracles.InputVector,MyOracles.OutputVector);
-   sig=MyOracles.OutputVector[0];
-   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]);
-      MyOracles.InputVector[0]=1;MyOracles.InputVector[1]=1;
+   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]," ",MyOracles.OutputVector[1]);
+   MyOracles.InputVector[0]=1;MyOracles.InputVector[1]=1;
    MyOracles.Compute(MyOracles.InputVector,MyOracles.OutputVector);
-   sig=MyOracles.OutputVector[0];
-   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]);  
+   Print(MyOracles.InputVector[0]," ",MyOracles.InputVector[1]," ",MyOracles.OutputVector[0]," ",MyOracles.OutputVector[1]);
   }
 //+------------------------------------------------------------------+
