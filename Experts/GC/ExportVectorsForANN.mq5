@@ -120,7 +120,9 @@ void OnTick()
      {
       //Print("all done");
      }
-   if(!isNewBar()||curr_num_data>_NEDATA_) return;
+   if(!isNewBar()
+   //||curr_num_data>_NEDATA_
+   ) return;
    curr_num_data++;
    int i,j;//,shift=_TREND_;
    string outstr;
