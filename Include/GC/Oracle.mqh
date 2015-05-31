@@ -42,7 +42,7 @@ public:
                      COracleTemplate(string ip_smbl="",ENUM_TIMEFRAMES  ip_tf=0){IsInit=false; if(ip_smbl=="") smb=_Symbol; else smb=ip_smbl; if(ip_tf==0) TimeFrame=Period(); else TimeFrame=ip_tf; };
                     ~COracleTemplate(){DeInit();};
    virtual void      Init(string FileName="",bool ip_debug=false);
-   void              DeInit();
+   virtual void              DeInit();
    virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool train,string comment){Print("Please overwrite (int) in ",Name()); return(0);};
    virtual double    forecast(string smbl,ENUM_TIMEFRAMES tf,datetime startdt,bool train,string comment){Print("Please overwrite (datetime) in ",Name()); return(0);};
    virtual string    Name(){return(filename);/*return("Prpototype");*/};
@@ -74,12 +74,11 @@ void  COracleTemplate::Init(string FileName="",bool ip_debug=false)
 //+------------------------------------------------------------------+
 void  COracleTemplate::DeInit()
   {
-   saveSettings(filename+".ini");
+   //saveSettings(filename+".ini");
    for(int i=0;i<ArraySize(IndHandles);i++)
      {
       IndicatorRelease(IndHandles[i].hid);
      }
-// if(INVALID_HANDLE!=errorFile) FileClose(errorFile);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -305,7 +304,30 @@ bool COracleTemplate::loadSettings(string _filename)
    if(""==_filename) _filename=Name()+".ini";
    int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
    string fr;//,tfs="";
+   if(FileHandle==INVALID_HANDLE)
+   {
+     FileHandle=FileOpen(_filename,FILE_WRITE|FILE_ANSI|FILE_CSV,'=');
    if(FileHandle!=INVALID_HANDLE)
+     {
+
+      FileWrite(FileHandle,"//How to use"," fill string separate space. Format TT-functionName_Paramm1_ParamX");
+      FileWrite(FileHandle,"//Where TT"," shift on timeframe");
+      FileWrite(FileHandle,"//example","ROC 5-ROC 10-ROC_13");
+      FileWrite(FileHandle,"//Num_repeat","3 eqv ROC 1-ROC 2-ROC");
+
+      FileWrite(FileHandle,"//Bad Signals= IMA CCI AO Envelopes BearsPower BullsPower Force DeMarkerS MomentumS");
+      FileWrite(FileHandle,"//Available Signals= DayOfWeek Hour CCIS Minute OpenClose TriX RVI ATR DeMarker OsMA Momentum OHLCClose HighLow ADX ADXWilder RSI StochasticS StochasticK StochasticD MACD WPR AMA Ichimoku Chaikin ROC");
+      FileWrite(FileHandle,"//inputSignals=DayOfWeek Hour Minute MomentumS_5 MomentumS_8 MomentumS_13 MomentumS_21 MomentumS_34 MomentumS_55 MomentumS_89 CCIS_5 CCIS_8 CCIS_13 CCIS_21 CCIS_34 CCIS_55 CCIS_89 StochasticS StochasticS_13_8_8 StochasticS_21_13_13 StochasticS_34_21_21 StochasticS_55_34_34 StochasticK StochasticK_13_8_8 StochasticK_21_13_13 StochasticK_34_21_21 StochasticK_55_34_34 StochasticD StochasticD_21_13_13 StochasticD_34_21_21 StochasticD_55_34_34 WPR_5 WPR_8 WPR_13 WPR_21 WPR_34 WPR_55 WPR_89 DeMarkerS_5 DeMarkerS_8 DeMarkerS_13 DeMarkerS_21 DeMarkerS_34 DeMarkerS_55 DeMarkerS_89");
+
+      FileWrite(FileHandle,"inputSignals=DayOfWeek Hour CCI CCIS Minute OpenClose TriX RVI ATR DeMarker OsMA Momentum OHLCClose HighLow ADX ADXWilder RSI StochasticS StochasticK StochasticD MACD WPR AMA Ichimoku Chaikin ROC");
+      FileWrite(FileHandle,"Num_repeat=1");
+      FileWrite(FileHandle,"TimeFrames=M1 M5 M15 M30 H1");
+      FileClose(FileHandle);
+     }
+     }
+   FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_CSV,'=');
+   if(FileHandle!=INVALID_HANDLE)
+   
      {
       while(""!=(fr=FileReadString(FileHandle)))
         {
@@ -556,7 +578,7 @@ double COracleMLP_WEKA::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool t
          //if(__Debug__&&false==MQLInfoInteger(MQL_TESTER)) 
          if(maxSignal==-1)
            {
-           // Print(outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
+            // Print(outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
             if(INVALID_HANDLE!=errorFile)
               {
                FileWrite(errorFile,TimeCurrent()," ",outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
@@ -619,6 +641,7 @@ void COracleMLP_WEKA::Compute(double &_input[],double &_output[])
 //+------------------------------------------------------------------+
 void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
   {
+  IsInit=false;
 //TimeFrame=PERIOD_M1;
 //   COracleTemplate::Init(FileName,ip_debug);
    errorFile=INVALID_HANDLE;
@@ -634,7 +657,7 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
    ArrayResize(weights,1);
 //   _layerCount=0; //int tempar
    neuronCount=0;num_input_signals=0;weightCount=0;num_output_signals=0;
-   int FileHandle=FileOpen(_filename,FILE_READ|FILE_ANSI|FILE_TXT);
+   int FileHandle=FileOpen(_filename,FILE_COMMON|FILE_READ|FILE_ANSI|FILE_TXT);
    string fr; int str_pos=0,i,j;
    if(FileHandle!=INVALID_HANDLE)
      {
@@ -786,6 +809,7 @@ void COracleMLP_WEKA::Init(string FileName="",bool ip_debug=false)
       //
       StringTrimRight(InputSignals);
       Print(Name()," ready! IS: (",num_input_signals,")",InputSignals);
+      IsInit=true;
      }
    else
       Print("not found ",_filename);
