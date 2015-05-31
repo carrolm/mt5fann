@@ -43,7 +43,7 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //   static double lastf=0;
-   int SymbolIdx;
+  // int SymbolIdx;
    double f;
 //Watcher.Run();//
    if(_TrailingPosition_) Trailing();

@@ -556,7 +556,7 @@ double COracleMLP_WEKA::forecast(string smbl,ENUM_TIMEFRAMES tf,int shift,bool t
          //if(__Debug__&&false==MQLInfoInteger(MQL_TESTER)) 
          if(maxSignal==-1)
            {
-            Print(outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
+           // Print(outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
             if(INVALID_HANDLE!=errorFile)
               {
                FileWrite(errorFile,TimeCurrent()," ",outSignal,"! ",OutputSignal[0],"=",DoubleToString(OutputVector[0],3),"  ",OutputSignal[1],"=",DoubleToString(OutputVector[1],3),"  ",OutputSignal[2],"=",DoubleToString(OutputVector[2],3),"  ",OutputSignal[3],"=",DoubleToString(OutputVector[3],3),"  ",OutputSignal[4],"=",DoubleToString(OutputVector[4],3),"  ");
