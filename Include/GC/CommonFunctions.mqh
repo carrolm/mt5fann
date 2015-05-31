@@ -45,14 +45,15 @@ bool isNewBar(string smbl="",ENUM_TIMEFRAMES tf=0)
    static MqlDateTime  prevT;
    MqlDateTime curT;
    bool result=false;
-   if(""==smbl)smbl=_Symbol;
+   if(""==smbl)smbl=_Symbol;  
+   if(tf==0) tf=Period();
    datetime lastbarTime=(datetime)SeriesInfoInteger(smbl,tf,SERIES_LASTBAR_DATE);
 //if(lastTime==0 || lastTime!=lastbarTime)
 //  {
 //   lastTime=lastbarTime;
 //   return(true);
 //  }
-   if(tf==0) tf=Period();
+
    TimeToStruct(lastbarTime,curT);
    if(tf==PERIOD_M1||
       tf==PERIOD_M2||
@@ -406,7 +407,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if((-result)>(_Max_lost_per_Week_Percent*curr_balance/100) && expiration==0)
      {
       Print("In week, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_Max_lost_per_Week_Percent*curr_balance/100));
-      StartOpenPosition=Start_Date+24*7*3600;
+      StartOpenPosition=Start_Date+24*1*3600;
       return(false);
      }
    result=0;
@@ -438,7 +439,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if((-result)>(_Max_lost_per_Day_Percent*curr_balance/100) && expiration==0)
      {
       Print("In day, start "+(string)Start_Date+" lost "+DoubleToString(result)+" more then limit "+DoubleToString(_Max_lost_per_Day_Percent*curr_balance/100));
-      StartOpenPosition=Start_Date+24*7*3600;
+      StartOpenPosition=Start_Date+24*1*3600;
       return(false);
      }
 //+------------------------------------------------------------------+
@@ -447,7 +448,7 @@ bool NewOrder(string smb,NewOrder_Type type,string comment,double price=0,int ma
    if(str_timeCurrent.day_of_week==5 && str_timeCurrent.hour==23 && str_timeCurrent.min>0)
      {
       Print("End of week ");
-      StartOpenPosition=Start_Date+24*7*3600;
+      StartOpenPosition=Start_Date+24*1*3600;
       return(false);
      }
 
