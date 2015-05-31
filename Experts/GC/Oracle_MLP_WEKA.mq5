@@ -21,13 +21,14 @@ COracleMLP_WEKA *MyExpert;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   MyExpert=new COracleMLP_WEKA();
+   MyExpert=new COracleMLP_WEKA();  
+    if(!MyExpert.IsInit) return(INIT_FAILED);
          string comment="";
          MyExpert.forecast(_Symbol,0,0,false,comment);
 
 
    CPInit();
-   return(0);
+   return(INIT_SUCCEEDED);
   }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
