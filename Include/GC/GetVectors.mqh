@@ -978,7 +978,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
 //  {
 //   //    return(0);
 //  }
-   if(controlDT>0 && controlDT!=Time[shift_history]) 
+   if(controlDT>0 && controlDT!=Time[shift_history])
      {
       Print("",(string)controlDT,"!=",(string)Time[shift_history]);
      }
@@ -987,6 +987,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
    double  SymbolSpread=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
+
    if(0==SymbolSpread) { Print(smb," ",shift);return(0);}
    bool mayBeSell=true,mayBeBuy=true,closeSell=false,closeBuy=false;
 // Есть пробой 
@@ -1000,11 +1001,14 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
         {
          for(int i=shift_history;i>1;i--)
            {
-
+            TS=SymbolSpread*_NumTS_;
+            mB=B-((Close[shift_history])); if(mB<TP || shift_history-ib<2) mB=0;
+            mS=((Close[shift_history]))-S;if(mS<TP || shift_history-is<2) mS=0;
+            if(MathMax(mB,mS)*SymbolInfoDouble(smb,SYMBOL_POINT)>_LovelyProfit_) TS/=2;
             if(!closeBuy && !closeSell)
               {
-               if((Close[shift_history]<(High[i]-1*TS))) closeSell=true;
-               if((Close[shift_history]>(Low[i]+1*TS))) closeBuy=true;
+               if((Close[shift_history+1]<(High[i]-1*TS))) closeSell=true;
+               if((Close[shift_history+1]>(Low[i]+1*TS))) closeBuy=true;
               }
 
             if(mayBeSell)//&& !closeSell)
@@ -1013,8 +1017,8 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  {
                   S=Low[i]+TS-SymbolSpread; is=i;
                  }
-               if(((S<=High[i])
-                  && (Open[i]<Close[i] || is!=i))
+               if((((S-0*SymbolSpread)<=High[i])
+                  && ((Low[i]+TS)<Close[i] || is!=i))
                   || (Close[shift_history+1]<Close[i])
                   )
                  {
@@ -1028,10 +1032,10 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                   ib=i; B=(High[i]-TS);//mB=B-Close[shift_history];                              
                  }
                if(((B>=Low[i])
-                  && (Open[i]>Close[i] || ib!=i)
+                  && ((High[i]-TS)>Close[i] || ib!=i)
                   )
 
-                 || (Close[shift_history+1]>Close[i])
+                  || (Close[shift_history+1]>Close[i])
                   )//&& (shift_history-i)<_Expiration_))
                  {
                   ib=i;
@@ -1039,21 +1043,19 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  }
               }
            }
-
-         // S=S+SymbolSpread;//if(mayBeBuy) 
          mB=B-((Close[shift_history])); if(mB<TP || shift_history-ib<2) mB=0;
-         //if(mayBeSell) 
          mS=((Close[shift_history]))-S;if(mS<TP || shift_history-is<2) mS=0;
+         // S=S+SymbolSpread;//if(mayBeBuy) 
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
             res=-mS;if(draw && tanh(mS/(TP))>0.6)
-             ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
+            ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB; if(draw && tanh(res/(TP)>0.6)) 
+            res=mB; if(draw && tanh(res/(TP)>0.6))
             ObjectCreate(0,"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));

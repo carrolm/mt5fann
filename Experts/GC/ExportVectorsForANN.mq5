@@ -135,7 +135,7 @@ void OnTick()
    ResultV=GetVectors(MyExpert.InputVector,MyExpert.InputSignals,_Symbol,0,0);
 //if(ResultV>1 || ResultV<-1) return;
 
-   if(AgeHistory<_TREND_+1) AgeHistory++;
+   if(AgeHistory<2*_TREND_+1) AgeHistory++;
    for(i=AgeHistory;i>1;i--)
      {
       HistoryDateTime[i-1]=HistoryDateTime[i-2];
@@ -149,9 +149,9 @@ void OnTick()
    for(j=0;j<MyExpert.num_input_signals;j++)
       HistoryInputVector[j]=MyExpert.InputVector[j];
    HistoryDateTime[0]=TimeCurrent();
-   if(AgeHistory==_TREND_+1)
+   if(AgeHistory==2*_TREND_+1)
      {
-      Result=GetTrend(_Symbol,0,_TREND_,false,HistoryDateTime[_TREND_]);
+      Result=GetTrend(_Symbol,0,2*_TREND_,false,HistoryDateTime[2*_TREND_]);
       if(Result>1 || Result<-1) return;
       if(Result>0.66) exQB++;
       else if(Result>.49) exQCS++;
@@ -160,15 +160,15 @@ void OnTick()
       //else if(res>-.49) QWCB++;
       else if(Result>-.66) exQCB++;
       else exQS++;
-      if(Result>0.6 || Result<-0.6)
+      if(Result>=0.6 || Result<=-0.6)
         {
-         FileWrite(exFileHandleOC,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)HistoryDateTime[_TREND_]+"\")) return("+(string)Result+");");
+         FileWrite(exFileHandleOC,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)HistoryDateTime[2*_TREND_]+"\")) return("+(string)Result+");");
         }
       outstr=(string)Result+",";
 
       for(j=0;j<MyExpert.num_input_signals;j++)
         {
-         outstr+=DoubleToString(HistoryInputVector[(_TREND_)*(MyExpert.num_input_signals+_OutputVectors_)+j],_Precision_)+",";
+         outstr+=DoubleToString(HistoryInputVector[(2*_TREND_)*(MyExpert.num_input_signals+_OutputVectors_)+j],_Precision_)+",";
         }
       if(MyExpert.num_input_signals==0) outstr+=""+(string)Result+",";
       outstr=FormOut(outstr,Result);
