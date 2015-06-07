@@ -15,7 +15,7 @@ input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в
 input int _Max_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
 input int _Max_lost_per_Week_Percent=5;// Max lost in week Максимальный процент потерь за неделю
 input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент потерь за день
-input int _Carefull_=20;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
+input int _Carefull_=30;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=100;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
 input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
 input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
@@ -28,11 +28,11 @@ input int FontSize=10;
 input color Bg_Color=Gold;
 input color Btn_Color=Gold;
 
-input int _TREND_=60;// на сколько смотреть вперед
+input int _TREND_=30;// на сколько смотреть вперед
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=0000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
-input int _deviation_= 5; // Deviation 
+input int _deviation_= 3; // Deviation 
 
 input string spamfilename="notify.txt";
 
