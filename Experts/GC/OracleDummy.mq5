@@ -9,16 +9,16 @@
 #include <GC\Oracle.mqh>
 #include <GC\OracleDummy_fc.mqh>
 #include <GC\CurrPairs.mqh> // пары
-#include <GC\Watcher.mqh>
-CWatcher          Watcher;
+//#include <GC\Watcher.mqh>
+//CWatcher          Watcher;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-                            //#include <GC\GetVectors.mqh>
+//#include <GC\GetVectors.mqh>
 //#include <GC\CommonFunctions.mqh>
 class CDummy:public COracleTemplate
   {
-  
+
 public:
    virtual double    forecast(string smbl="",int shift=0,bool train=false);
    virtual string    Name(){return("iEnvelopes");};
@@ -30,18 +30,21 @@ double CDummy::forecast(string smbl,int shift=0,bool train=false)
   {
 
    double sig=0;
-   MqlRates rates[];
+   MqlRates rates[];   
+   MqlDateTime curT;
    ArraySetAsSeries(rates,true);
    int copied=CopyRates(smbl,_Period,shift,3,rates);
-   datetime time=rates[0].time;
+   datetime time=TimeCurrent();//rates[0].time;
+   TimeToStruct(time,curT);
+   curT.sec=0;
+   time=StructToTime(curT);
 //if(debug)Print(time);
-sig =    od_forecast(time,smbl)  ;//);
+   sig=od_forecast(time,smbl);//);
    return(sig);
-   
 
- 
- 
-   
+
+
+
   }
 //+------------------------------------------------------------------+
 
@@ -72,7 +75,7 @@ void OnTick()
 //   static double lastf=0;
    int SymbolIdx;
    double f;
-   //Watcher.Run();//
+//Watcher.Run();//
    if(_TrailingPosition_) Trailing();
    if(isNewBar())
      {
@@ -81,7 +84,7 @@ void OnTick()
          f=MyExpert.forecast(SymbolsArray[SymbolIdx],0,false);
          NewOrder(SymbolsArray[SymbolIdx],f,(string)f);
         }
-        
+
      }
   }
 //+------------------------------------------------------------------+

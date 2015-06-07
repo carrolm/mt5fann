@@ -25,7 +25,6 @@ double                    ExtVolumesBuffer[];
 double                    ExtColorsBuffer[];
 
 input int  _limit_=10000;// на сколько баров уходить назад
-
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
@@ -40,12 +39,12 @@ int OnInit()
    IndicatorSetInteger(INDICATOR_DIGITS,3);
    ArraySetAsSeries(ExtVolumesBuffer,true);
    ArraySetAsSeries(ExtColorsBuffer,true);
-      DelTrash();
-         double  SymbolSpread=SymbolInfoDouble(_Symbol,SYMBOL_POINT)*SymbolInfoInteger(_Symbol,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
+   DelTrash();
+   double  SymbolSpread=SymbolInfoDouble(_Symbol,SYMBOL_POINT)*SymbolInfoInteger(_Symbol,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
-   Print("SymbolSpread=",SymbolSpread," TS=",TS," TP=",TP);  
-   
+   Print("SymbolSpread=",SymbolSpread," TS=",TS," TP=",TP);
+
 //---
    return(0);
   }
@@ -56,7 +55,6 @@ void  OnDeinit(const int reason)
   {
    DelTrash();
   }
-
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
@@ -79,25 +77,24 @@ int OnCalculate(const int rates_total,
 //---
    if(rates_total<1)
       return(0);
-      if(prev_calculated==rates_total)return(rates_total);
+   if(prev_calculated==rates_total)return(rates_total);
 //---
    if(prev_calculated<1)
      {
       limit=_limit_;
       //--- clean up arrays
-     // ArrayInitialize(Label1Buffer,EMPTY_VALUE);
-     // ArrayInitialize(Label2Buffer,EMPTY_VALUE);
+      // ArrayInitialize(Label1Buffer,EMPTY_VALUE);
+      // ArrayInitialize(Label2Buffer,EMPTY_VALUE);
      }
    else limit=150;
    double res;
 
-   
    for(i=0;i<limit;i++)
      {
-     ExtVolumesBuffer[i]=0;
-     ExtColorsBuffer[i]=3.0;
-     if(_TREND_>i) continue;
-      res=GetTrend(_Symbol,0,i,true);
+      ExtVolumesBuffer[i]=0;
+      ExtColorsBuffer[i]=3.0;
+      if(_TREND_>i) continue;
+      res=GetTrend(_Symbol,0,i,true,time[i]);
       ExtVolumesBuffer[i]=res;
       ExtColorsBuffer[i]=3.0;
       if(res<-0.66)
@@ -108,12 +105,12 @@ int OnCalculate(const int rates_total,
          ExtColorsBuffer[i]=3.0;
       else if(res<0.66)
          ExtColorsBuffer[i]=4.0;
-       else
+      else
          ExtColorsBuffer[i]=5.0;
-      }
-     //if (res>0)  Label1Buffer[i+_TREND_]=res;
-      //else Label2Buffer[i+_TREND_]=res;
-   // }
+     }
+//if (res>0)  Label1Buffer[i+_TREND_]=res;
+//else Label2Buffer[i+_TREND_]=res;
+// }
 //--- OnCalculate done. Return new prev_calculated.
 
    return(rates_total);
