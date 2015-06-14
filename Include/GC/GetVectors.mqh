@@ -936,12 +936,10 @@ void DelTrash()
       if(StringSubstr(ObjectName(0,i),0,3)=="GV_" || StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
 
   }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+//+-------------------------------------------------------------------+
+//| Возвращает число от -1 (продавать) до +1 (покупать)               +
+//| "Идет" вперед и смотрит что будет в будущем если купить и продать +                                                                 |
+//+-------------------------------------------------------------------+
 double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime controlDT=0)
   {
    int shift_history=_TREND_;
@@ -1003,7 +1001,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
            {
             TS=SymbolSpread*_NumTS_;
             mB=B-((Close[shift_history])); if(mB<TP || shift_history-ib<2) mB=0;
-            mS=((Close[shift_history]))-S;if(mS<TP || shift_history-is<2) mS=0;
+            mS=((Close[shift_history]))-S; if(mS<TP || shift_history-is<2) mS=0;
             if(MathMax(mB,mS)*SymbolInfoDouble(smb,SYMBOL_POINT)>_LovelyProfit_) TS/=2;
             if(!closeBuy && !closeSell)
               {
@@ -1019,7 +1017,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  }
                if((((S-0*SymbolSpread)<=High[i])
                   && ((Low[i]+TS)<Close[i] || is!=i))
-                  || (Close[shift_history+1]<Close[i])
+                  || (Close[shift_history+1]<(Close[i]-_deviation_))
                   )
                  {
                   mayBeSell=false; is=i;
@@ -1035,7 +1033,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                   && ((High[i]-TS)>Close[i] || ib!=i)
                   )
 
-                  || (Close[shift_history+1]>Close[i])
+                  || (Close[shift_history+1]>(Close[i]+_deviation_))
                   )//&& (shift_history-i)<_Expiration_))
                  {
                   ib=i;
