@@ -37,6 +37,9 @@ input int _deviation_= 2; // Deviation
 input string spamfilename="notify.txt";
 
 datetime StartOpenPosition=0;
+
+
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
