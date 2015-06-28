@@ -1043,14 +1043,14 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
 //|| (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       //    shift_history++;
-      S=Close[shift_history+1]; B=Close[shift_history+1]+SymbolSpread;
+      S=Close[shift_history+1]+TS; B=Close[shift_history+1]+SymbolSpread-TS;
       is=ib=shift_history+1;
       if(debugdraw)
         {
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ss_"+(string)shift,OBJ_ARROW_SELL,0,Time[0],Close[shift_history+1]-TS);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sb_"+(string)shift,OBJ_ARROW_BUY,0,Time[0],Close[shift_history+1]+TS);
-         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ssd_"+(string)shift,OBJ_ARROW_DOWN,0,Time[0],Close[shift_history+1]-TP);
-         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sbu_"+(string)shift,OBJ_ARROW_UP,0,Time[0],Close[shift_history+1]+TP);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ssd_"+(string)shift,OBJ_ARROW_DOWN,0,Time[0],Close[shift_history+1]-TP-TS);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sbu_"+(string)shift,OBJ_ARROW_UP,0,Time[0],Close[shift_history+1]+TP+TS);
          if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
            {
             Print(__FUNCTION__,
@@ -1075,13 +1075,13 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
 
             if(mayBeSell)//&& !closeSell)
               {
-               if(S>(Low[i]+TS-SymbolSpread))// || S<(High[i]-TS))
+               if(S>(Low[i]+TS))// || S<(High[i]-TS))
                  {
-                  S=Low[i]+TS-SymbolSpread; is=i;
+                  S=Low[i]+TS; is=i;
                  }
-               if((((S-0*SymbolSpread)<=High[i])
+               if((((S)<=High[i])
                   && ((Low[i]+TS)<Close[i] || is!=i))
-                  || (Close[shift_history+1]<(Close[i]-_deviation_))
+                  || (Close[shift_history+1]<(Close[i]-SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_))
                   )
                  {
                   mayBeSell=false; is=i;
@@ -1097,7 +1097,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                   && ((High[i]-TS)>Close[i] || ib!=i)
                   )
 
-                  || (Close[shift_history+1]>(Close[i]+_deviation_))
+                  || (Close[shift_history+1]>(Close[i]+SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_))
                   )//&& (shift_history-i)<_Expiration_))
                  {
                   ib=i;
