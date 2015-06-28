@@ -1043,17 +1043,21 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
 //|| (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       //    shift_history++;
-      S=Close[shift_history+1]+SymbolSpread; B=Close[shift_history+1]-SymbolSpread;
+      S=Close[shift_history+1]; B=Close[shift_history+1]+SymbolSpread;
       is=ib=shift_history+1;
       if(debugdraw)
         {
-        
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ss_"+(string)shift,OBJ_ARROW_SELL,0,Time[0],Close[shift_history+1]-TS);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sb_"+(string)shift,OBJ_ARROW_BUY,0,Time[0],Close[shift_history+1]+TS);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ssd_"+(string)shift,OBJ_ARROW_DOWN,0,Time[0],Close[shift_history+1]-TP);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sbu_"+(string)shift,OBJ_ARROW_UP,0,Time[0],Close[shift_history+1]+TP);
          if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
            {
             Print(__FUNCTION__,
                   ": не удалось создать знак \"Галка\"! Код ошибки = ",GetLastError());
             // return(false);
            }
+           ChartRedraw();
         }
       if(TS>0.0001)
         {
@@ -1101,7 +1105,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  }
               }
            }
-         mB=B-((Close[shift_history])); if(!debugdraw&&(mB<TP || shift_history-ib<2)) mB=0;
+         mB=B-((Close[shift_history]+SymbolSpread)); if(!debugdraw&&(mB<TP || shift_history-ib<2)) mB=0;
          mS=((Close[shift_history]))-S; if(!debugdraw&&(mS<TP || shift_history-is<2)) mS=0;
          // S=S+SymbolSpread;//if(mayBeBuy) 
          if(mS>mB)

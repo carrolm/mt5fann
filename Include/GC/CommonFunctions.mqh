@@ -28,7 +28,7 @@ input int FontSize=10;
 input color Bg_Color=Gold;
 input color Btn_Color=Gold;
 
-input int _TREND_=30;// на сколько смотреть вперед
+input int _TREND_=60;// на сколько смотреть вперед
 input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=0000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data

@@ -54,7 +54,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void  OnDeinit(const int reason)
   {
-   DelTrash();
+   DelTrash(); DelTrash("DD_");
   }
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
