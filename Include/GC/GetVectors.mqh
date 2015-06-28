@@ -933,7 +933,7 @@ double GetVector_ATR(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 void DelTrash(string pref="")
   {
    for(int i=ObjectsTotal(0);i>=0;i--)
-      if(StringSubstr(ObjectName(0,i),0,3)=="GV_" || StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
+      if(StringFind(ObjectName(0,i),pref+"GV_")==0 || StringFind(ObjectName(0,i),pref+"GC_")==0) ObjectDelete(0,ObjectName(0,i));
 
   }
 //---
@@ -954,7 +954,9 @@ void OnChartEvent(const int id,         // идентификатор события
       //--- Получим местоположение курсора
       if(ChartXYToTimePrice(0,x,y,window,time,price))
         {
+         DelTrash("DD_");
          GetTrend(_Symbol,0,time,true,time,true);
+         ChartRedraw();
          //Comment("id: ",CHARTEVENT_MOUSE_MOVE,"\n",
          //        "x: ",x,"\n",
          //        "y: ",y,"\n",
@@ -972,7 +974,7 @@ void OnChartEvent(const int id,         // идентификатор события
 //+------------------------------------------------------------------+
 double GetTrend(string smb,ENUM_TIMEFRAMES tf,datetime shiftdt,bool draw=false,datetime controlDT=0,bool debugdraw=false)
   {
-   MqlDateTime  dtcurrent_struct,dt_s_shift;
+   MqlDateTime  dt_s_shift;
    TimeToStruct(shiftdt,dt_s_shift);
    dt_s_shift.sec=0;
    shiftdt=StructToTime(dt_s_shift);
@@ -981,7 +983,7 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,datetime shiftdt,bool draw=false,d
    datetime dtc=Time[0];//TimeCurrent(dtcurrent_struct);
                         //  dtcurrent_struct.sec=0;
 //   dtc=StructToTime(dtcurrent_struct);     
-   int shift=(dtc-shiftdt)/PeriodSeconds(tf);
+   int shift=(int)((dtc-shiftdt)/PeriodSeconds(tf));
    return GetTrend(smb,tf,shift,draw,shiftdt,debugdraw);
   }
 //+-------------------------------------------------------------------+
@@ -1043,6 +1045,16 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
       //    shift_history++;
       S=Close[shift_history+1]+SymbolSpread; B=Close[shift_history+1]-SymbolSpread;
       is=ib=shift_history+1;
+      if(debugdraw)
+        {
+        
+         if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
+           {
+            Print(__FUNCTION__,
+                  ": не удалось создать знак \"Галка\"! Код ошибки = ",GetLastError());
+            // return(false);
+           }
+        }
       if(TS>0.0001)
         {
          for(int i=shift_history;i>1;i--)
@@ -1089,20 +1101,20 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  }
               }
            }
-         mB=B-((Close[shift_history])); if(mB<TP || shift_history-ib<2) mB=0;
-         mS=((Close[shift_history]))-S;if(mS<TP || shift_history-is<2) mS=0;
+         mB=B-((Close[shift_history])); if(!debugdraw&&(mB<TP || shift_history-ib<2)) mB=0;
+         mS=((Close[shift_history]))-S; if(!debugdraw&&(mS<TP || shift_history-is<2)) mS=0;
          // S=S+SymbolSpread;//if(mayBeBuy) 
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(draw && tanh(mS/(TP))>0.6)
-            ObjectCreate(0,"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
+            res=-mS;if(debugdraw || draw && tanh(mS/(TP))>0.6)
+            ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB; if(draw && tanh(res/(TP)>0.6))
-            ObjectCreate(0,"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]+SymbolSpread,Time[ib],B);
+            res=mB; if(debugdraw || draw && tanh(res/(TP)>0.6))
+            ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;
