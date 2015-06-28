@@ -930,17 +930,65 @@ double GetVector_ATR(ind_handles &ind_h,string smb,ENUM_TIMEFRAMES tf,int shift,
 //+------------------------------------------------------------------+
 //| Удаляет мусорные объекты на графиках                             |
 //+------------------------------------------------------------------+
-void DelTrash()
+void DelTrash(string pref="")
   {
    for(int i=ObjectsTotal(0);i>=0;i--)
       if(StringSubstr(ObjectName(0,i),0,3)=="GV_" || StringSubstr(ObjectName(0,i),0,3)=="GC_") ObjectDelete(0,ObjectName(0,i));
 
   }
+//---
+
+void OnChartEvent(const int id,         // идентификатор события  
+                  const long& lparam,   // параметр события типа long
+                  const double& dparam, // параметр события типа double
+                  const string& sparam  // параметр события типа string
+                  )
+  {
+   if(id==CHARTEVENT_MOUSE_MOVE && (((uint)sparam &4)==4) && (((uint)sparam &8)==8))
+     {
+      int      x=(int)lparam; // Координата по оси X
+      int      y      =(int)dparam; // Координата по оси Y
+      int      window =WRONG_VALUE; // Номер окна, в котором находится курсор
+      datetime time   =NULL;        // Время, соответствующее координате X
+      double   price  =0.0;         // Цена, соответствующая координате Y
+      //--- Получим местоположение курсора
+      if(ChartXYToTimePrice(0,x,y,window,time,price))
+        {
+         GetTrend(_Symbol,0,time,true,time,true);
+         //Comment("id: ",CHARTEVENT_MOUSE_MOVE,"\n",
+         //        "x: ",x,"\n",
+         //        "y: ",y,"\n",
+         //        "sparam (статус кнопок мыши): ",sparam,"\n",
+         //        "окно: ",window,"\n",
+         //        "время: ",time,"\n",
+         //        "цена: ",DoubleToString(price,_Digits)
+         //        );
+        }
+
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double GetTrend(string smb,ENUM_TIMEFRAMES tf,datetime shiftdt,bool draw=false,datetime controlDT=0,bool debugdraw=false)
+  {
+   MqlDateTime  dtcurrent_struct,dt_s_shift;
+   TimeToStruct(shiftdt,dt_s_shift);
+   dt_s_shift.sec=0;
+   shiftdt=StructToTime(dt_s_shift);
+   datetime Time[]; ArraySetAsSeries(Time,true);
+   CopyTime(smb,tf,0,1,Time);
+   datetime dtc=Time[0];//TimeCurrent(dtcurrent_struct);
+                        //  dtcurrent_struct.sec=0;
+//   dtc=StructToTime(dtcurrent_struct);     
+   int shift=(dtc-shiftdt)/PeriodSeconds(tf);
+   return GetTrend(smb,tf,shift,draw,shiftdt,debugdraw);
+  }
 //+-------------------------------------------------------------------+
 //| Возвращает число от -1 (продавать) до +1 (покупать)               +
 //| "Идет" вперед и смотрит что будет в будущем если купить и продать +                                                                 |
 //+-------------------------------------------------------------------+
-double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime controlDT=0)
+double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime controlDT=0,bool debugdraw=false)
   {
    int shift_history=_TREND_;
 

@@ -30,6 +30,7 @@ input int  _limit_=10000;// на сколько баров уходить назад
 //+------------------------------------------------------------------+
 int OnInit()
   {
+  ChartSetInteger(0,CHART_EVENT_MOUSE_MOVE,1);
 //---- buffers   
    SetIndexBuffer(0,ExtVolumesBuffer,INDICATOR_DATA);
    SetIndexBuffer(1,ExtColorsBuffer,INDICATOR_COLOR_INDEX);
@@ -43,7 +44,7 @@ int OnInit()
    double  SymbolSpread=SymbolInfoDouble(_Symbol,SYMBOL_POINT)*SymbolInfoInteger(_Symbol,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
-   Print("SymbolSpread=",SymbolSpread," TS=",TS," TP=",TP);
+   Print("SymbolSpread=",DoubleToString(SymbolSpread,5)," TS=",DoubleToString(TS,5)," TP=",DoubleToString(TP,5));
 
 //---
    return(0);
