@@ -1047,8 +1047,8 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
       is=ib=shift_history+1;
       if(debugdraw)
         {
-         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ss_"+(string)shift,OBJ_ARROW_SELL,0,Time[0],Close[shift_history+1]-TS);
-         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sb_"+(string)shift,OBJ_ARROW_BUY,0,Time[0],Close[shift_history+1]+TS);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ss_"+(string)shift,OBJ_ARROW_SELL,0,Time[0],Close[shift_history+1]-TP);
+         ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sb_"+(string)shift,OBJ_ARROW_BUY,0,Time[0],Close[shift_history+1]+TP);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ssd_"+(string)shift,OBJ_ARROW_DOWN,0,Time[0],Close[shift_history+1]-TP-TS);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sbu_"+(string)shift,OBJ_ARROW_UP,0,Time[0],Close[shift_history+1]+TP+TS);
          if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
@@ -1111,13 +1111,13 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
          if(mS>mB)
            {
             //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(debugdraw || draw && tanh(mS/(TP))>0.6)
+            res=-mS;if(debugdraw ||(draw && tanh(mS/(TP))>0.7))
             ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
            }
          else if(mS<mB)
            {
             //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB; if(debugdraw || draw && tanh(res/(TP)>0.6))
+            res=mB; if(debugdraw || (draw && tanh(res/(TP)>0.7)))
             ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]+SymbolSpread,Time[ib],B);
            }
          //Print(res+"/"+(TS));
