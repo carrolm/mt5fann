@@ -44,7 +44,7 @@ int OnInit()
    double  SymbolSpread=SymbolInfoDouble(_Symbol,SYMBOL_POINT)*SymbolInfoInteger(_Symbol,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
-   Print("SymbolSpread=",DoubleToString(SymbolSpread,5)," TS=",DoubleToString(TS,5)," TP=",DoubleToString(TP,5));
+ //  Print("SymbolSpread=",DoubleToString(SymbolSpread,5)," TS=",DoubleToString(TS,5)," TP=",DoubleToString(TP,5));
 
 //---
    return(0);
