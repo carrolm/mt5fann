@@ -33,7 +33,8 @@ input int _NEDATA_=10000;// How deep bars history for export cколько выгрузить
 input int _ShiftNEDATA_=0000;// How shift for start export cколько выгрузить
 input int _Precision_=10; // Precissin data
 input int _deviation_= 2; // Deviation 
-
+input double _levelEntry = 0.7; // Level for open new order
+input double _levelClose = 0.7; // Level for close order
 input string spamfilename="notify.txt";
 
 datetime StartOpenPosition=0;
@@ -120,12 +121,12 @@ bool NewOrder(string smb,double way,string comment,double price=0,int magic=777,
   {
 //  Print("New order double "+way);
    if(""==comment) comment=(string)way;
-   if(0.66<way) return(NewOrder(smb,NewOrderBuy,"NO "+comment,price,magic,expiration));
+   if(_levelEntry<way) return(NewOrder(smb,NewOrderBuy,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(0.49<way) return(NewOrder(smb,NewOrderWaitBuy,"NO "+comment,price,magic,expiration));
-   if(-0.66>way) return(NewOrder(smb,NewOrderSell,"NO "+comment,price,magic,expiration));
+   if(_levelClose<way) return(NewOrder(smb,NewOrderWaitBuy,"NO "+comment,price,magic,expiration));
+   if(-_levelEntry>way) return(NewOrder(smb,NewOrderSell,"NO "+comment,price,magic,expiration));
 // пока выключим -кажется что глючит 
-   if(-0.49>way) return(NewOrder(smb,NewOrderWaitSell,"NO "+comment,price,magic,expiration));
+   if(-_levelClose>way) return(NewOrder(smb,NewOrderWaitSell,"NO "+comment,price,magic,expiration));
    return(false);
   }
 //+------------------------------------------------------------------+
@@ -916,7 +917,7 @@ bool Trailing()
       TS=SymbolSpread*_NumTS_;
       TP=SymbolSpread*_NumTP_;
 
-      if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT)>_LovelyProfit_*_Order_Volume_)
+      if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT)>1.2*_LovelyProfit_*_Order_Volume_)
         {
          TS=TS/2;
         }        //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));

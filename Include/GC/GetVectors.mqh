@@ -983,8 +983,69 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,datetime shiftdt,bool draw=false,d
    datetime dtc=Time[0];//TimeCurrent(dtcurrent_struct);
                         //  dtcurrent_struct.sec=0;
 //   dtc=StructToTime(dtcurrent_struct);     
-   int shift=(int)((dtc-shiftdt)/PeriodSeconds(tf));
+//  int shift=(int)((dtc-shiftdt)/PeriodSeconds(tf));
+//   CopyTime(smb,tf,shift,1,Time); 
+   int  shift=iBarShiftMQL4(smb,tf,shiftdt);
+   CopyTime(smb,tf,shift,1,Time);
    return GetTrend(smb,tf,shift,draw,shiftdt,debugdraw);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int iBarShiftMQL4(string symbol,
+                  int tf,
+                  datetime time,
+                  bool exact=false)
+  {
+   if(time<0) return(-1);
+   ENUM_TIMEFRAMES timeframe=TFMigrate(tf);
+   datetime Arr[],time1;
+   CopyTime(symbol,timeframe,0,1,Arr);
+   time1=Arr[0];
+   if(CopyTime(symbol,timeframe,time,time1,Arr)>0)
+     {
+      if(ArraySize(Arr)>2) return(ArraySize(Arr)-1);
+      if(time<time1) return(1);
+      else return(0);
+     }
+   else return(-1);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+ENUM_TIMEFRAMES TFMigrate(int tf)
+  {
+   switch(tf)
+     {
+      case 0: return(PERIOD_CURRENT);
+      case 1: return(PERIOD_M1);
+      case 5: return(PERIOD_M5);
+      case 15: return(PERIOD_M15);
+      case 30: return(PERIOD_M30);
+      case 60: return(PERIOD_H1);
+      case 240: return(PERIOD_H4);
+      case 1440: return(PERIOD_D1);
+      case 10080: return(PERIOD_W1);
+      case 43200: return(PERIOD_MN1);
+
+      case 2: return(PERIOD_M2);
+      case 3: return(PERIOD_M3);
+      case 4: return(PERIOD_M4);
+      case 6: return(PERIOD_M6);
+      case 10: return(PERIOD_M10);
+      case 12: return(PERIOD_M12);
+      case 16385: return(PERIOD_H1);
+      case 16386: return(PERIOD_H2);
+      case 16387: return(PERIOD_H3);
+      case 16388: return(PERIOD_H4);
+      case 16390: return(PERIOD_H6);
+      case 16392: return(PERIOD_H8);
+      case 16396: return(PERIOD_H12);
+      case 16408: return(PERIOD_D1);
+      case 32769: return(PERIOD_W1);
+      case 49153: return(PERIOD_MN1);
+      default: return(PERIOD_CURRENT);
+     }
   }
 //+-------------------------------------------------------------------+
 //| Возвращает число от -1 (продавать) до +1 (покупать)               +
@@ -1031,53 +1092,58 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
       Print("",(string)controlDT,"!=",(string)Time[shift_history]);
      }
    double res=0;//,res1=0;
-   int is,ib;
-   double  SymbolSpread=SymbolInfoDouble(smb,SYMBOL_POINT)*SymbolInfoInteger(smb,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
+   int is,ib,turnis,turnib;
+   double  SymbolSpread=SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[0];//SymbolInfoInteger(smb,SYMBOL_SPREAD);//SymbolInfoDouble(smb,SYMBOL_POINT)*Spreads[shift_history];//(SymbolInfoInteger(smb,SYMBOL_SPREAD));
    double  TS=SymbolSpread*_NumTS_;
    double  TP=SymbolSpread*_NumTP_;
+   double StartSellPrice=0,StartBuyPrice=0,TurnBuyPrice=0,TurnSellPrice=0;
 
    if(0==SymbolSpread) { Print(smb," ",shift);return(0);}
-   bool mayBeSell=true,mayBeBuy=true,closeSell=false,closeBuy=false;
+   bool mayBeSell=true,mayBeBuy=true,closeSell=true,closeBuy=true,isFlat=true;
 // Есть пробой 
 //   if((High[shift_history+1]>High[shift_history] && High[shift_history+1]>High[shift_history+2]) 
 //|| (Low[shift_history+1]<Low[shift_history] && Low[shift_history+1]<Low[shift_history+2]))
      {
       //    shift_history++;
-      S=Close[shift_history+1]+TS; B=Close[shift_history+1]+SymbolSpread-TS;
-      is=ib=shift_history+1;
+      StartBuyPrice=Close[shift_history+1]+SymbolSpread+10*SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_;
+
+      StartSellPrice=Close[shift_history+1]-10*SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_;
+      S=Close[shift_history+1]+TS; B=Close[shift_history+1]+SymbolSpread-TS;TurnBuyPrice=StartBuyPrice;TurnSellPrice=StartSellPrice;
+      is=ib=turnib=turnis=shift_history+1;
       if(debugdraw)
         {
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ss_"+(string)shift,OBJ_ARROW_SELL,0,Time[0],Close[shift_history+1]-TP);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sb_"+(string)shift,OBJ_ARROW_BUY,0,Time[0],Close[shift_history+1]+TP);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_ssd_"+(string)shift,OBJ_ARROW_DOWN,0,Time[0],Close[shift_history+1]-TP-TS);
          ObjectCreate(0,(debugdraw?"DD_":"")+"GC_sbu_"+(string)shift,OBJ_ARROW_UP,0,Time[0],Close[shift_history+1]+TP+TS);
-         if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
+         if(!ObjectCreate(0,(debugdraw?"DD_":"")+"GC_start_"+(string)shift+"_"+(string)TS,OBJ_ARROW_CHECK,0,Time[shift_history],Close[shift_history+1]))
            {
             Print(__FUNCTION__,
                   ": не удалось создать знак \"Галка\"! Код ошибки = ",GetLastError());
             // return(false);
            }
-           ChartRedraw();
+         ChartRedraw();
         }
       if(TS>0.0001)
         {
          for(int i=shift_history;i>1;i--)
            {
             TS=SymbolSpread*_NumTS_;
-            mB=B-((Close[shift_history])); if(mB<TP || shift_history-ib<2) mB=0;
-            mS=((Close[shift_history]))-S; if(mS<TP || shift_history-is<2) mS=0;
+            mB=B-StartBuyPrice; if(mB<TP || shift_history-ib<2) mB=0;
+            mS=StartSellPrice-S; if(mS<TP || shift_history-is<2) mS=0;
             if(MathMax(mB,mS)*SymbolInfoDouble(smb,SYMBOL_POINT)>_LovelyProfit_) TS/=2;
-            if(!closeBuy && !closeSell)
-              {
-               if((Close[shift_history+1]<(High[i]-1*TS))) closeSell=true;
-               if((Close[shift_history+1]>(Low[i]+1*TS))) closeBuy=true;
-              }
+            if(closeBuy && Close[shift_history+1]>Close[i]) closeBuy=false;
+            if(closeSell&&Close[shift_history+1]<Close[i]) closeSell=false;
+            //  {
+            //if((Close[shift_history+1]<Close[i]) closeSell=false;
+            //   if((Close[shift_history+1]>(Low[i]+1*TS))) closeBuy=true;
+            //  }
 
             if(mayBeSell)//&& !closeSell)
               {
-               if(S>(Low[i]+TS))// || S<(High[i]-TS))
+               if(S>(Low[i]+TS-SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_))// || S<(High[i]-TS))
                  {
-                  S=Low[i]+TS; is=i;
+                  S=Low[i]+TS-SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_; is=i; TurnSellPrice=Low[i]; turnis=i;
                  }
                if((((S)<=High[i])
                   && ((Low[i]+TS)<Close[i] || is!=i))
@@ -1089,12 +1155,12 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
               }
             if(mayBeBuy)//&& !closeBuy)
               {
-               if(B<(High[i]-TS))// || B>(Low[i]+TS))
+               if(B<(High[i]-TS+SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_))// || B>(Low[i]+TS))
                  {
-                  ib=i; B=(High[i]-TS);//mB=B-Close[shift_history];                              
+                  ib=i; B=(High[i]-TS+SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_);turnib=i;TurnBuyPrice=High[i];//mB=B-Close[shift_history];                              
                  }
                if(((B>=Low[i])
-                  && ((High[i]-TS)>Close[i] || ib!=i)
+                  && ((High[i]-TS-SymbolSpread)>Close[i] || ib!=i)
                   )
 
                   || (Close[shift_history+1]>(Close[i]+SymbolInfoDouble(smb,SYMBOL_POINT)*_deviation_))
@@ -1105,38 +1171,47 @@ double GetTrend(string smb,ENUM_TIMEFRAMES tf,int shift,bool draw=false,datetime
                  }
               }
            }
-         mB=B-((Close[shift_history]+SymbolSpread)); if(!debugdraw&&(mB<TP || shift_history-ib<2)) mB=0;
-         mS=((Close[shift_history]))-S; if(!debugdraw&&(mS<TP || shift_history-is<2)) mS=0;
+         mB=B-((Close[shift_history])); //if(!debugdraw&&(mB<TP || shift_history-ib<2)) mB=0;
+         mS=((Close[shift_history]))-S-SymbolSpread; //if(!debugdraw&&(mS<TP || shift_history-is<2)) mS=0;
+         res=0;
+         //if(mB>TP) res=mB;
+         //else if(mB>0) res=
+         if(!debugdraw&&(shift_history-ib<2)) mB=0;
+         if(!debugdraw&&(shift_history-is<2)) mS=0;
          // S=S+SymbolSpread;//if(mayBeBuy) 
-         if(mS>mB)
+         if((mS>TS || (debugdraw && mS>0)) && mS>mB)
            {
-            //if(Close[shift_history]<Close[shift_history-1]) return(0);
-            res=-mS;if(debugdraw ||(draw && tanh(mS/(TP))>0.7))
-            ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]-SymbolSpread,Time[is],S);
+            res=-mS;if(debugdraw || (draw && tanh(mS/(TP))>_levelEntry)) 
+              {
+               ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Sell_T_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],StartSellPrice,Time[turnis],TurnSellPrice);
+               ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Sell_"+(string)shift+"_"+(string)(int)(mS/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mS/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[turnis],TurnSellPrice,Time[is],S);
+              }
            }
-         else if(mS<mB)
+         else if((mB>TS || (debugdraw && mB>0)) && mS<mB)
            {
-            //if(Close[shift_history]>Close[shift_history-1]) return(0);
-            res=mB; if(debugdraw || (draw && tanh(res/(TP)>0.7)))
-            ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],Close[shift_history+1]+SymbolSpread,Time[ib],B);
+            res=mB; if(debugdraw || (draw && tanh(res/(TP)>_levelEntry)))
+              {
+               ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Buy_T_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[shift_history],StartBuyPrice,Time[turnib],TurnBuyPrice);
+               ObjectCreate(0,(debugdraw?"DD_":"")+"GC_Buy_"+(string)shift+"_"+(string)(int)(mB/TS)+"_Profit_"+(string)(int)(_Order_Volume_*mB/SymbolInfoDouble(smb,SYMBOL_POINT)),OBJ_ARROWED_LINE,0,Time[turnib],TurnBuyPrice,Time[ib],B);
+              }
            }
          //Print(res+"/"+(TS));
          //         res=_NumTS_*res/TS;
          res=tanh(res/(TP));
          // Уберем флэт
-         if(res>0.7)
+         if(res>_levelEntry)
            {
             res=1;
            }
-         else if(res<-0.7)
+         else if(res<-_levelEntry)
            {
             res=-1;
            }
          else
            {
-            res=0;
-            if(closeSell&&!closeBuy) res=0.5;
-            if(closeBuy&&!closeSell) res=-0.5;
+            //res=0;
+            //if(closeSell&&!closeBuy) res=0.5;
+            //if(closeBuy&&!closeSell) res=-0.5;
            }
 
         }
