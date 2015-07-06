@@ -95,12 +95,12 @@ void OnDeinit(const int reason)
         }
       
       Result = (double) StringToDouble(StringSubstr(outstr,0,pos_s));
-      if(Result>0.66) maxRepeat=_PercentNormalization*Qmax/exQB;
-      else if(Result>.49) maxRepeat=_PercentNormalization*Qmax/exQCS;
+      if(Result>_levelEntry) maxRepeat=_PercentNormalization*Qmax/exQB;
+      else if(Result>_levelClose) maxRepeat=_PercentNormalization*Qmax/exQCS;
       //else if(res>0.1) QWCS++;
-      else if(Result>-0.49) maxRepeat=_PercentNormalization*Qmax/exQZ;
+      else if(Result>-_levelClose) maxRepeat=_PercentNormalization*Qmax/exQZ;
       //else if(res>-.49) QWCB++;
-      else if(Result>-.66) maxRepeat=_PercentNormalization*Qmax/exQCB;
+      else if(Result>-_levelEntry) maxRepeat=_PercentNormalization*Qmax/exQCB;
       else maxRepeat=_PercentNormalization*Qmax/exQS;
       outstr = StringSubstr(outstr,pos_s+1);
       for(nr=0;nr<maxRepeat;nr++)
@@ -153,14 +153,14 @@ void OnTick()
      {
       Result=GetTrend(_Symbol,0,2*_TREND_,false,HistoryDateTime[2*_TREND_]);
       if(Result>1 || Result<-1) return;
-      if(Result>0.66) exQB++;
-      else if(Result>.49) exQCS++;
+      if(Result>_levelEntry) exQB++;
+      else if(Result>_levelClose) exQCS++;
       //else if(res>0.1) QWCS++;
-      else if(Result>-0.49) exQZ++;
+      else if(Result>-_levelClose) exQZ++;
       //else if(res>-.49) QWCB++;
-      else if(Result>-.66) exQCB++;
+      else if(Result>-_levelEntry) exQCB++;
       else exQS++;
-      if(Result>=0.6 || Result<=-0.6)
+      if(Result>=_levelEntry || Result<=-_levelEntry)
         {
          FileWrite(exFileHandleOC,"  if(smb==\""+_Symbol+"\" && time==StringToTime(\""+(string)HistoryDateTime[2*_TREND_]+"\")) return("+(string)Result+");");
         }
