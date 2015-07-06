@@ -15,9 +15,9 @@ input bool _OpenNewPosition_=true;//Enable open new position Разрешить входить в
 input int _Max_lost_per_Mounth_Percent=10;// Max lost per mounth Максимальные потери в месяц
 input int _Max_lost_per_Week_Percent=5;// Max lost in week Максимальный процент потерь за неделю
 input int _Max_lost_per_Day_Percent=1;// Max lost in day Максимальный процент потерь за день
-input int _Carefull_=30;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
+input int _Carefull_=45;//How minutes for panic 0=off Сколько минут до паники. 0 = выкл
 input int _LovelyProfit_=100;//How money for good order 0=off Сколько денег для хорошей сделки. 0 = выкл
-input int _GetMaximum_=30;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
+input int _GetMaximum_=0;//How minutes for get profit 0=off Сколько минут до снятия сливок. 0 = выкл
 input int _NumTS_=5;// How spreads for stoploss Сколько спредов до стоплоса
 input int _NumTP_=10;// How spreads for takeprofit сколько тейкпрофитов берем
 input int _Expiration_=5; // How minutes live preorder сколько минут живет предварительный ордер 
@@ -917,7 +917,7 @@ bool Trailing()
       TS=SymbolSpread*_NumTS_;
       TP=SymbolSpread*_NumTP_;
 
-      if(_LovelyProfit_>0 && PositionGetDouble(POSITION_PROFIT)>1.2*_LovelyProfit_*_Order_Volume_)
+      if(_LovelyProfit_>0 && (PositionGetDouble(POSITION_PROFIT)-TS*1000*_Order_Volume_)>1.2*_LovelyProfit_*_Order_Volume_)
         {
          TS=TS/2;
         }        //TrailingStop=(int)(_NumTS_*SymbolInfoInteger(smb,SYMBOL_TRADE_STOPS_LEVEL));

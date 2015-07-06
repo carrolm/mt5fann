@@ -10,7 +10,7 @@
 bool _ResultAsString_=true;
 int _OutputVectors_=4;
 
-int _PercentNormalization=2; // 100/5 = 20%, but data *5
+int _PercentNormalization=1; // 100/5 = 20%, but data *5
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
